@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, GatheringListItem, GatheringDetail, GuestApplicationRequest, UserApplicationRequest } from './types'
+import type { ApiResponse, GatheringListItem, GatheringDetail, GuestApplicationRequest, UserApplicationRequest, CalendarDotsResponse } from './types'
 
 // 날짜별 게더링 목록 조회
 export const fetchGatherings = async (date: string): Promise<GatheringListItem[]> => {
@@ -14,12 +14,6 @@ export const fetchGatheringDetail = async (id: string): Promise<GatheringDetail>
 }
 
 // 달력 dot 표시용 날짜 목록 조회
-interface CalendarDotsResponse {
-  year: number
-  month: number
-  dates: string[]
-}
-
 export const fetchCalendarDots = async (year: number, month: number): Promise<string[]> => {
   const response = await apiClient.get<ApiResponse<CalendarDotsResponse>>('/api/gatherings/calendar', { params: { year, month } })
   return response.data.data?.dates ?? []

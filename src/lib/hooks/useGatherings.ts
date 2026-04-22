@@ -11,8 +11,9 @@ export function useGatherings(date: string) {
 
 export function useCalendarDots(year: number, month: number) {
   return useQuery({
-    queryKey: ['calendar', year, month],
+    queryKey: ['gatherings', 'calendar', year, month],
     queryFn: () => fetchCalendarDots(year, month),
+    staleTime: 1000 * 60 * 5,
   })
 }
 
