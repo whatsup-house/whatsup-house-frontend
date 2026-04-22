@@ -1,0 +1,23 @@
+{
+  "model": "claude-sonnet-4-6",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "WebSearch",
+      "Agent",
+      "Edit",
+      "Write",
+      "Bash",
+      "mcp__*"
+    ],
+    "deny": []
+  },
+  "mcpServers": {
+    "gdrive": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-google-drive"]
+    }
+  }
+}
