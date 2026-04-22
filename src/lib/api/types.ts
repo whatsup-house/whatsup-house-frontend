@@ -83,6 +83,13 @@ export interface UserApplicationRequest {
   referralSource: ReferralSource
 }
 
+// 달력 dot 응답 타입
+export interface CalendarDotsResponse {
+  year: number
+  month: number
+  dates: string[]
+}
+
 export interface UserProfile {
   id: string
   email: string
