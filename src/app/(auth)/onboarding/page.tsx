@@ -22,6 +22,13 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
 
 const INTERESTS = ['감성', '독서', '음악', '자연', '요리', '운동', '여행', '영화', '미술', '사진']
 
+const JOB_OPTIONS: { value: string; label: string }[] = [
+  { value: 'STUDENT', label: '대학생' },
+  { value: 'WORKER', label: '직장인' },
+  { value: 'FREELANCER', label: '프리랜서' },
+  { value: 'OTHER', label: '기타' },
+]
+
 export default function OnboardingPage() {
   const router = useRouter()
   const registerMutation = useRegister()
@@ -32,7 +39,7 @@ export default function OnboardingPage() {
   const [bio, setBio] = useState('')
   const [gender, setGender] = useState<Gender | null>(null)
   const [age, setAge] = useState('')
-  const [job, setJob] = useState('')
+  const [job, setJob] = useState<string>('')
   const [mbti, setMbti] = useState<(string | null)[]>([null, null, null, null])
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [formError, setFormError] = useState<string | null>(null)
@@ -48,7 +55,7 @@ export default function OnboardingPage() {
     setFormError(null)
     try {
       const result = await checkNickname(nickname)
-      setNicknameStatus(result.available ? 'available' : 'taken')
+      setNicknameStatus(result ? 'available' : 'taken')
     } catch {
       setNicknameStatus('idle')
       setFormError('닉네임 확인 중 오류가 발생했습니다.')
@@ -83,12 +90,14 @@ export default function OnboardingPage() {
       router.push('/register')
       return
     }
-    const step1 = JSON.parse(step1Raw) as { name: string; email: string; password: string }
+    const step1 = JSON.parse(step1Raw) as { name: string; phone: string; email: string; password: string }
 
     try {
       await registerMutation.mutateAsync({
         email: step1.email,
         password: step1.password,
+        name: step1.name,
+        phone: step1.phone,
         nickname,
         bio: bio || undefined,
         gender: gender ?? undefined,
@@ -196,24 +205,31 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          {/* 나이 + 직업 */}
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <Input
-                label="나이"
-                type="number"
-                placeholder="나이"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-              />
-            </div>
-            <div className="flex-1">
-              <Input
-                label="직업"
-                placeholder="직업"
-                value={job}
-                onChange={(e) => setJob(e.target.value)}
-              />
+          {/* 나이 */}
+          <Input
+            label="나이"
+            type="number"
+            placeholder="나이를 입력해주세요"
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
+          />
+
+          {/* 직업 */}
+          <div>
+            <label className="text-sm font-medium text-foreground block mb-2">직업</label>
+            <div className="grid grid-cols-2 gap-2">
+              {JOB_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setJob(job === option.value ? '' : option.value)}
+                  className={`py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
+                    job === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           </div>
 
