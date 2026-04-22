@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useHydration } from '@/lib/hooks/useHydration'
+import { IS_MOCK } from '@/lib/api/mockData'
 
 const sidebarItems = [
   { href: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
@@ -21,16 +22,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const hydrated = useHydration()
-  const { isLoggedIn, isAdmin, nickname, logout } = useAuthStore()
+  const { isLoggedIn, isAdmin, nickname: storeNickname, logout } = useAuthStore()
 
-  // hydration 완료 후 비관리자 접근 차단
+  const nickname = IS_MOCK ? '관리자(Mock)' : storeNickname
+
+  // hydration 완료 후 비관리자 접근 차단 (Mock 모드에서는 우회)
   useEffect(() => {
+    if (IS_MOCK) return
     if (!hydrated) return
     if (!isLoggedIn) router.replace('/login?returnUrl=/admin')
     else if (!isAdmin) router.replace('/')
   }, [hydrated, isLoggedIn, isAdmin, router])
 
-  if (!hydrated || !isLoggedIn || !isAdmin) return null
+  if (!IS_MOCK && (!hydrated || !isLoggedIn || !isAdmin)) return null
 
   const handleLogout = () => {
     logout()

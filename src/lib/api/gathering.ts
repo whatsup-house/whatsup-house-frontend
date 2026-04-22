@@ -1,5 +1,6 @@
 import apiClient from './client'
 import type { ApiResponse, GatheringListItem, GatheringDetail, GuestApplicationRequest, UserApplicationRequest } from './types'
+import { IS_MOCK, getMockCalendarDots } from './mockData'
 
 // 날짜별 게더링 목록 조회
 export const fetchGatherings = async (date: string): Promise<GatheringListItem[]> => {
@@ -21,6 +22,7 @@ interface CalendarDotsResponse {
 }
 
 export const fetchCalendarDots = async (year: number, month: number): Promise<string[]> => {
+  if (IS_MOCK) return getMockCalendarDots(year, month)
   const response = await apiClient.get<ApiResponse<CalendarDotsResponse>>('/api/gatherings/calendar', { params: { year, month } })
   return response.data.data?.dates ?? []
 }

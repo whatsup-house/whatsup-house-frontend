@@ -1,5 +1,6 @@
 import apiClient from './client'
 import type { ApiResponse } from './types'
+import { IS_MOCK, MOCK_GATHERINGS } from './mockData'
 
 export type AdminGatheringStatus = 'RECRUITING' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 
@@ -21,6 +22,7 @@ export interface AdminGathering {
 
 // 관리자 게더링 목록 조회
 export const fetchAdminGatherings = async (): Promise<AdminGathering[]> => {
+  if (IS_MOCK) return MOCK_GATHERINGS
   const response = await apiClient.get<ApiResponse<AdminGathering[]>>('/api/admin/gatherings')
   return response.data.data ?? []
 }
