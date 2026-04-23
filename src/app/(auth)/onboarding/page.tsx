@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useRegister } from '@/lib/hooks/useAuth'
 import { useAuthStore } from '@/lib/store/authStore'
-import { checkNickname, login } from '@/lib/api/auth'
+import { login } from '@/lib/api/auth'
 import { getRandomAnimalType } from '@/lib/utils/animalProfile'
 import type { Gender } from '@/lib/api/types'
 
@@ -34,8 +34,6 @@ export default function OnboardingPage() {
   const registerMutation = useRegister()
   const { login: storeLogin } = useAuthStore()
 
-  const [nickname, setNickname] = useState('')
-  const [nicknameStatus, setNicknameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
   const [bio, setBio] = useState('')
   const [gender, setGender] = useState<Gender | null>(null)
   const [age, setAge] = useState('')
@@ -45,22 +43,6 @@ export default function OnboardingPage() {
   const [formError, setFormError] = useState<string | null>(null)
 
   const mbtiString = mbti.every((v) => v !== null) ? mbti.join('') : undefined
-
-  const handleCheckNickname = async () => {
-    if (nickname.length < 2) {
-      setFormError('닉네임은 2자 이상 입력해주세요.')
-      return
-    }
-    setNicknameStatus('checking')
-    setFormError(null)
-    try {
-      const result = await checkNickname(nickname)
-      setNicknameStatus(result ? 'available' : 'taken')
-    } catch {
-      setNicknameStatus('idle')
-      setFormError('닉네임 확인 중 오류가 발생했습니다.')
-    }
-  }
 
   const handleMbtiSelect = (colIndex: number, value: string) => {
     setMbti((prev) => {
@@ -79,18 +61,12 @@ export default function OnboardingPage() {
   const handleSubmit = async () => {
     setFormError(null)
 
-    if (!nickname || nicknameStatus !== 'available') {
-      setFormError('닉네임 중복 확인을 해주세요.')
-      return
-    }
-
-    // Step 1 데이터 복원
     const step1Raw = sessionStorage.getItem('register_step1')
     if (!step1Raw) {
       router.push('/register')
       return
     }
-    const step1 = JSON.parse(step1Raw) as { name: string; phone: string; email: string; password: string }
+    const step1 = JSON.parse(step1Raw) as { name: string; nickname: string; phone: string; email: string; password: string }
 
     try {
       await registerMutation.mutateAsync({
@@ -98,7 +74,7 @@ export default function OnboardingPage() {
         password: step1.password,
         name: step1.name,
         phone: step1.phone,
-        nickname,
+        nickname: step1.nickname,
         bio: bio || undefined,
         gender: gender ?? undefined,
         age: age ? parseInt(age) : undefined,
@@ -145,34 +121,6 @@ export default function OnboardingPage() {
         <p className="text-center text-sm text-tag-text mb-8">어떤 분인지 알려주세요</p>
 
         <div className="flex flex-col gap-6">
-          {/* 닉네임 */}
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1">닉네임 *</label>
-            <div className="flex gap-2">
-              <input
-                value={nickname}
-                onChange={(e) => { setNickname(e.target.value); setNicknameStatus('idle') }}
-                placeholder="닉네임을 입력해주세요"
-                className="flex-1 px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <Button
-                variant="outlined"
-                size="sm"
-                onClick={handleCheckNickname}
-                isLoading={nicknameStatus === 'checking'}
-                className="shrink-0 px-3"
-              >
-                중복확인
-              </Button>
-            </div>
-            {nicknameStatus === 'available' && (
-              <p className="text-xs text-green-600 mt-1">✓ 사용 가능한 닉네임이에요</p>
-            )}
-            {nicknameStatus === 'taken' && (
-              <p className="text-xs text-primary mt-1">이미 사용 중인 닉네임이에요</p>
-            )}
-          </div>
-
           {/* 한 줄 소개 */}
           <div>
             <label className="text-sm font-medium text-foreground block mb-1">

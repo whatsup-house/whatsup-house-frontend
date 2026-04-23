@@ -3,16 +3,31 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 
-interface FormValues {
-  name: string
-  phone: string
-  email: string
-  password: string
-  passwordConfirm: string
-}
+const registerSchema = z.object({
+  name: z.string().min(1, '이름을 입력해주세요'),
+  nickname: z.string()
+    .min(2, '닉네임은 2자 이상 입력해주세요')
+    .max(50, '닉네임은 50자 이하로 입력해주세요'),
+  email: z.string().email('올바른 이메일 형식을 입력해주세요'),
+  phone: z.string().refine(
+    (val) => !val || /^\d{11}$/.test(val),
+    { message: '전화번호는 11자리 숫자여야 합니다' }
+  ),
+  password: z.string()
+    .min(8, '8자 이상 입력해주세요')
+    .regex(/^(?=.*[a-zA-Z])(?=.*\d).+$/, '영문과 숫자를 포함해야 합니다'),
+  passwordConfirm: z.string().min(1, '비밀번호를 다시 입력해주세요'),
+}).refine((data) => data.password === data.passwordConfirm, {
+  message: '비밀번호가 일치하지 않아요',
+  path: ['passwordConfirm'],
+})
+
+type FormValues = z.infer<typeof registerSchema>
 
 const TERMS = [
   { id: 'age', label: '[필수] 만 14세 이상입니다', required: true },
@@ -39,7 +54,13 @@ export default function RegisterPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>()
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormValues>({ resolver: zodResolver(registerSchema) })
+
   const password = watch('password', '')
   const strength = getPasswordStrength(password)
 
@@ -57,11 +78,10 @@ export default function RegisterPage() {
 
   const onSubmit = (data: FormValues) => {
     if (!allRequired) return
-    if (data.password !== data.passwordConfirm) return
 
-    // Step 1 데이터를 sessionStorage에 저장 후 온보딩으로 이동
     sessionStorage.setItem('register_step1', JSON.stringify({
       name: data.name,
+      nickname: data.nickname,
       phone: data.phone,
       email: data.email,
       password: data.password,
@@ -71,7 +91,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 헤더 */}
       <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
@@ -88,38 +107,38 @@ export default function RegisterPage() {
       </header>
 
       <div className="px-6 pt-6 pb-10">
-        {/* 스텝 인디케이터 */}
         <div className="flex justify-center gap-2 mb-8">
           <div className="w-2.5 h-2.5 rounded-full bg-primary" />
           <div className="w-2.5 h-2.5 rounded-full bg-tag-bg" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-          {/* 이름 */}
           <Input
             label="이름 *"
             placeholder="이름을 입력해주세요"
-            {...register('name', { required: '이름을 입력해주세요' })}
+            {...register('name')}
             error={errors.name?.message}
           />
 
-          {/* 연락처 */}
           <Input
-            label="연락처 *"
-            placeholder="010-0000-0000"
-            {...register('phone', { required: '연락처를 입력해주세요' })}
+            label="닉네임 *"
+            placeholder="2자 이상 입력해주세요"
+            {...register('nickname')}
+            error={errors.nickname?.message}
+          />
+
+          <Input
+            label="연락처"
+            placeholder="01012345678"
+            {...register('phone')}
             error={errors.phone?.message}
           />
 
-          {/* 이메일 */}
           <Input
             label="이메일 *"
             type="email"
             placeholder="이메일 주소를 입력해주세요"
-            {...register('email', {
-              required: '이메일을 입력해주세요',
-              pattern: { value: /^\S+@\S+\.\S+$/, message: '올바른 이메일 형식을 입력해주세요' },
-            })}
+            {...register('email')}
             error={errors.email?.message}
           />
 
@@ -129,12 +148,9 @@ export default function RegisterPage() {
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="비밀번호를 입력해주세요"
+                placeholder="영문+숫자 포함 8자 이상"
                 className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${errors.password ? 'border-primary' : 'border-tag-bg'}`}
-                {...register('password', {
-                  required: '비밀번호를 입력해주세요',
-                  minLength: { value: 8, message: '8자 이상 입력해주세요' },
-                })}
+                {...register('password')}
               />
               <button
                 type="button"
@@ -144,7 +160,6 @@ export default function RegisterPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {/* 강도 바 */}
             {password.length > 0 && (
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex gap-1 flex-1">
@@ -171,10 +186,7 @@ export default function RegisterPage() {
                 type={showPasswordConfirm ? 'text' : 'password'}
                 placeholder="비밀번호를 다시 입력해주세요"
                 className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${errors.passwordConfirm ? 'border-primary' : 'border-tag-bg'}`}
-                {...register('passwordConfirm', {
-                  required: '비밀번호를 다시 입력해주세요',
-                  validate: (val) => val === password || '비밀번호가 일치하지 않아요',
-                })}
+                {...register('passwordConfirm')}
               />
               <button
                 type="button"
@@ -193,7 +205,6 @@ export default function RegisterPage() {
 
           {/* 약관 동의 */}
           <div className="bg-card rounded-card p-4 flex flex-col gap-3 border border-tag-bg/50">
-            {/* 전체 동의 */}
             <button
               type="button"
               onClick={toggleAll}
