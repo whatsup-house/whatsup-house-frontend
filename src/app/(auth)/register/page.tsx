@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
+import { useCheckNickname } from '@/lib/hooks/useAuth'
 
 interface FormValues {
   name: string
+  nickname: string
   phone: string
   email: string
   password: string
@@ -38,10 +40,21 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
+  const [debouncedNickname, setDebouncedNickname] = useState('')
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>()
   const password = watch('password', '')
+  const nicknameValue = watch('nickname', '')
   const strength = getPasswordStrength(password)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedNickname(nicknameValue)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [nicknameValue])
+
+  const { data: nicknameAvailable, isFetching: isCheckingNickname } = useCheckNickname(debouncedNickname)
 
   const allRequired = TERMS.filter((t) => t.required).every((t) => checkedTerms[t.id])
   const allChecked = TERMS.every((t) => checkedTerms[t.id])
@@ -58,10 +71,11 @@ export default function RegisterPage() {
   const onSubmit = (data: FormValues) => {
     if (!allRequired) return
     if (data.password !== data.passwordConfirm) return
+    if (nicknameAvailable === false) return
 
-    // Step 1 데이터를 sessionStorage에 저장 후 온보딩으로 이동
     sessionStorage.setItem('register_step1', JSON.stringify({
       name: data.name,
+      nickname: data.nickname,
       phone: data.phone,
       email: data.email,
       password: data.password,
@@ -71,7 +85,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 헤더 */}
       <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
@@ -88,14 +101,12 @@ export default function RegisterPage() {
       </header>
 
       <div className="px-6 pt-6 pb-10">
-        {/* 스텝 인디케이터 */}
         <div className="flex justify-center gap-2 mb-8">
           <div className="w-2.5 h-2.5 rounded-full bg-primary" />
           <div className="w-2.5 h-2.5 rounded-full bg-tag-bg" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-          {/* 이름 */}
           <Input
             label="이름 *"
             placeholder="이름을 입력해주세요"
@@ -103,7 +114,29 @@ export default function RegisterPage() {
             error={errors.name?.message}
           />
 
-          {/* 연락처 */}
+          {/* 닉네임 + 중복 확인 */}
+          <div className="flex flex-col gap-1">
+            <Input
+              label="닉네임 *"
+              placeholder="2자 이상 입력해주세요"
+              {...register('nickname', {
+                required: '닉네임을 입력해주세요',
+                minLength: { value: 2, message: '닉네임은 2자 이상 입력해주세요' },
+                maxLength: { value: 50, message: '닉네임은 50자 이하로 입력해주세요' },
+              })}
+              error={errors.nickname?.message}
+            />
+            {!errors.nickname && debouncedNickname.length >= 2 && (
+              isCheckingNickname ? (
+                <p className="text-xs text-tag-text">확인 중...</p>
+              ) : nicknameAvailable === true ? (
+                <p className="text-xs text-green-600">✓ 사용 가능한 닉네임입니다</p>
+              ) : nicknameAvailable === false ? (
+                <p className="text-xs text-primary">이미 사용 중인 닉네임입니다</p>
+              ) : null
+            )}
+          </div>
+
           <Input
             label="연락처 *"
             placeholder="010-0000-0000"
@@ -111,7 +144,6 @@ export default function RegisterPage() {
             error={errors.phone?.message}
           />
 
-          {/* 이메일 */}
           <Input
             label="이메일 *"
             type="email"
@@ -144,7 +176,6 @@ export default function RegisterPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {/* 강도 바 */}
             {password.length > 0 && (
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex gap-1 flex-1">
@@ -193,7 +224,6 @@ export default function RegisterPage() {
 
           {/* 약관 동의 */}
           <div className="bg-card rounded-card p-4 flex flex-col gap-3 border border-tag-bg/50">
-            {/* 전체 동의 */}
             <button
               type="button"
               onClick={toggleAll}
