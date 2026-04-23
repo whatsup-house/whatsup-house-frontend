@@ -40,7 +40,7 @@ export default function ApplyPage({
     )
   }
 
-  const formattedDate = dayjs(gathering.date).format('YYYY. MM. DD (ddd)')
+  const formattedDate = dayjs(gathering.eventDate).format('YYYY. MM. DD (ddd)')
   const formattedTime = gathering.startTime?.slice(0, 5) ?? ''
 
   return (

@@ -35,7 +35,7 @@ export default function ApplyModal({
 
   if (!isOpen) return null
 
-  const formattedDate = dayjs(gathering.date).format('M월 D일 (ddd)')
+  const formattedDate = dayjs(gathering.eventDate).format('M월 D일 (ddd)')
   const formattedTime = `오후 ${gathering.startTime?.slice(0, 5) ?? ''}`
 
   return (

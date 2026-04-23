@@ -4,8 +4,9 @@ import type { GuestApplicationRequest, UserApplicationRequest } from '@/lib/api/
 
 export function useGatherings(date: string) {
   return useQuery({
-    queryKey: ['gatherings', date],
+    queryKey: ['gatherings', 'date', date],
     queryFn: () => fetchGatherings(date),
+    staleTime: 1000 * 60,
   })
 }
 

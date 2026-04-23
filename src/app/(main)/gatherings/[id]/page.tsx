@@ -38,7 +38,7 @@ export default function GatheringDetailPage({
     )
   }
 
-  const isRecruiting = gathering.status === 'RECRUITING'
+  const isRecruiting = gathering.status === 'OPEN'
 
   const handleApplyClick = () => {
     if (isLoggedIn) {

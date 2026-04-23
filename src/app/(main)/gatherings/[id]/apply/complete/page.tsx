@@ -24,7 +24,7 @@ export default function ApplyCompletePage({
     )
   }
 
-  const formattedDate = dayjs(gathering.date).format('YYYY년 M월 D일 (ddd)')
+  const formattedDate = dayjs(gathering.eventDate).format('YYYY년 M월 D일 (ddd)')
   const formattedTime = gathering.startTime?.slice(0, 5) ?? ''
 
   return (
@@ -68,7 +68,7 @@ export default function ApplyCompletePage({
               <MapPin size={16} className="text-tag-text shrink-0" />
               <div>
                 <p className="text-xs text-tag-text">장소</p>
-                <p className="text-sm font-medium text-foreground">{gathering.locationName}</p>
+                <p className="text-sm font-medium text-foreground">{gathering.location?.name}</p>
               </div>
             </div>
 

@@ -9,27 +9,27 @@ export interface ApiResponse<T> {
 export interface GatheringListItem {
   id: string
   title: string
-  date: string           // yyyy-MM-dd
+  description: string
+  eventDate: string      // YYYY-MM-DD
   startTime: string      // HH:mm:ss
   endTime: string
-  locationName: string
   price: number
-  capacity: number
-  currentApplicants: number
+  maxAttendees: number
+  status: 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
   thumbnailUrl: string | null
-  moodTags: string[] | null
-  activityTags: string[] | null
-  status: 'RECRUITING' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+  location: {
+    id: string
+    name: string
+  } | null
 }
 
 export interface GatheringDetail extends GatheringListItem {
-  description: string
-  howToRun: string[] | null
-  locationAddress: string
-  photoUrls: string[] | null
-  mileageReward: number
-  averageRating: number | null
-  reviewCount: number
+  howToRun?: string[] | null
+  locationAddress?: string
+  photoUrls?: string[] | null
+  mileageReward?: number
+  averageRating?: number | null
+  reviewCount?: number
 }
 
 // 인증 타입
@@ -83,12 +83,6 @@ export interface UserApplicationRequest {
   referralSource: ReferralSource
 }
 
-// 달력 dot 응답 타입
-export interface CalendarDotsResponse {
-  year: number
-  month: number
-  dates: string[]
-}
 
 export interface UserProfile {
   id: string
