@@ -9,9 +9,9 @@ interface GatheringCardProps {
 
 export default function GatheringCard({ gathering }: GatheringCardProps) {
   const {
-    id, title, startTime, locationName, price,
-    capacity, currentApplicants, thumbnailUrl,
-    status, moodTags,
+    id, title, startTime, price,
+    maxAttendees, thumbnailUrl,
+    status, location,
   } = gathering
 
   return (
@@ -42,23 +42,13 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin size={13} />
-              <span>{locationName}</span>
+              <span>{location?.name}</span>
             </div>
           </div>
 
-          {moodTags && moodTags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {moodTags.slice(0, 3).map((tag) => (
-                <span key={tag} className="text-xs bg-tag-bg text-tag-text px-2.5 py-1 rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
           <div className="flex items-center justify-between">
             <span className="font-bold text-foreground">{price.toLocaleString()}원</span>
-            <span className="text-xs text-tag-text">{currentApplicants}/{capacity}명</span>
+            <span className="text-xs text-tag-text">최대 {maxAttendees}명</span>
           </div>
         </div>
       </div>

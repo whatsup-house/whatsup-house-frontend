@@ -14,14 +14,13 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const router = useRouter()
 
   const {
-    title, date, startTime, endTime, locationName,
-    price, capacity, currentApplicants, thumbnailUrl,
-    moodTags, activityTags,
+    title, eventDate, startTime, endTime, location,
+    price, maxAttendees, thumbnailUrl,
     description, howToRun,
     reviewCount,
   } = gathering
 
-  const formattedDate = dayjs(date).format('YYYY년 M월 D일 dddd')
+  const formattedDate = dayjs(eventDate).format('YYYY년 M월 D일 dddd')
   const formattedStartTime = startTime?.slice(0, 5) ?? ''
   const formattedEndTime = endTime?.slice(0, 5) ?? ''
 
@@ -34,8 +33,6 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const durationStr = durationMins > 0
     ? `${durationHours}시간 ${durationMins}분`
     : `${durationHours}시간`
-
-  const allTags = [...(moodTags ?? []), ...(activityTags ?? [])]
 
   return (
     <div className="bg-card">
@@ -80,17 +77,6 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
         {/* 제목 */}
         <h1 className="text-xl font-bold text-foreground leading-tight mb-3">{title}</h1>
 
-        {/* 태그 목록 */}
-        {allTags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-5">
-            {allTags.map((tag) => (
-              <span key={tag} className="text-xs bg-tag-bg text-tag-text px-3 py-1.5 rounded-full">
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-
         {/* 정보 카드 */}
         <Card className="p-4 mb-6 border border-tag-bg/50">
           <div className="flex flex-col gap-3.5">
@@ -120,7 +106,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <div className="flex-1">
                 <p className="text-xs text-tag-text mb-0.5">장소</p>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">{locationName}</p>
+                  <p className="text-sm font-semibold text-foreground">{location?.name}</p>
                   <button className="text-xs text-primary font-medium min-h-[44px] flex items-center">
                     지도 보기
                   </button>
@@ -134,7 +120,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <div className="flex-1">
                 <p className="text-xs text-tag-text mb-0.5">모집인원</p>
                 <p className="text-sm font-semibold text-foreground">
-                  <span className="text-primary">{currentApplicants}</span>/{capacity}명
+                  최대 {maxAttendees}명
                 </p>
               </div>
             </div>
@@ -205,7 +191,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <h2 className="text-base font-bold text-foreground">참가자 후기</h2>
           </div>
 
-          {reviewCount > 0 ? (
+          {(reviewCount ?? 0) > 0 ? (
             <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide">
               {/* 후기 카드 예시 (실제 후기 데이터 연결시 교체) */}
               <Card className="min-w-[200px] max-w-[200px] p-4 shrink-0">
