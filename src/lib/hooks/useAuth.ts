@@ -36,8 +36,6 @@ export function useRegisterAndLogin() {
       return login(data.email, data.password)
     },
     onSuccess: (loginData) => {
-      sessionStorage.removeItem('register_step1')
-      sessionStorage.removeItem('register_step2')
       storeLogin(loginData.accessToken, loginData.user.id, loginData.user.nickname, loginData.user.admin)
       router.push('/')
     },
