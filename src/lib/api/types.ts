@@ -49,16 +49,17 @@ export interface RegisterRequest {
   email: string
   password: string
   name: string
-  phone: string
   nickname: string
-  bio?: string
-  gender?: string
-  age?: number
-  job?: string
-  mbti?: string
-  animalType?: string
-  interests?: string[]
-  avatarUrl?: string
+  gender: Gender   // @NotNull in backend
+  age: number      // @NotNull in backend
+  phone?: string   // nullable, 11 digits
+}
+
+export interface RegisterResponse {
+  id: string
+  email: string
+  nickname: string
+  createdAt: string
 }
 
 // 신청 관련 타입

@@ -1,94 +1,94 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
 import { ArrowLeft } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
-import { useRegister } from '@/lib/hooks/useAuth'
-import { useAuthStore } from '@/lib/store/authStore'
-import { login } from '@/lib/api/auth'
-import { getRandomAnimalType } from '@/lib/utils/animalProfile'
+import { useRegisterAndLogin } from '@/lib/hooks/useAuth'
 import type { Gender } from '@/lib/api/types'
 
-const MBTI_ROWS = [
-  ['E', 'S', 'T', 'J'],
-  ['I', 'N', 'F', 'P'],
-] as const
+interface Step1Data {
+  name: string
+  nickname: string
+  email: string
+  password: string
+  gender: Gender
+  age: number
+}
 
-const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'MALE', label: '남' },
-  { value: 'FEMALE', label: '여' },
-]
+interface FormValues {
+  phone: string
+}
 
-const INTERESTS = ['감성', '독서', '음악', '자연', '요리', '운동', '여행', '영화', '미술', '사진']
-
-const JOB_OPTIONS: { value: string; label: string }[] = [
-  { value: 'STUDENT', label: '대학생' },
-  { value: 'WORKER', label: '직장인' },
-  { value: 'FREELANCER', label: '프리랜서' },
-  { value: 'OTHER', label: '기타' },
-]
+const STEP1_KEY = 'register_step1'
+const STEP2_KEY = 'register_step2'
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const registerMutation = useRegister()
-  const { login: storeLogin } = useAuthStore()
-
-  const [bio, setBio] = useState('')
-  const [gender, setGender] = useState<Gender | null>(null)
-  const [age, setAge] = useState('')
-  const [job, setJob] = useState<string>('')
-  const [mbti, setMbti] = useState<(string | null)[]>([null, null, null, null])
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [formError, setFormError] = useState<string | null>(null)
+  const registerAndLogin = useRegisterAndLogin()
 
-  const mbtiString = mbti.every((v) => v !== null) ? mbti.join('') : undefined
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<FormValues>({ defaultValues: { phone: '' } })
 
-  const handleMbtiSelect = (colIndex: number, value: string) => {
-    setMbti((prev) => {
-      const next = [...prev]
-      next[colIndex] = prev[colIndex] === value ? null : value
-      return next
-    })
-  }
+  // sessionStorage에서 전화번호 복원
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(STEP2_KEY)
+      if (!saved) return
+      const data = JSON.parse(saved) as { phone?: string }
+      if (data.phone) setValue('phone', data.phone)
+    } catch {
+      // ignore
+    }
+  }, [setValue])
 
-  const toggleInterest = (interest: string) => {
-    setSelectedInterests((prev) =>
-      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
-    )
-  }
+  const phoneValue = watch('phone')
 
-  const handleSubmit = async () => {
+  // 전화번호 입력값을 sessionStorage에 저장 (뒤로가기 시 복원용)
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STEP2_KEY, JSON.stringify({ phone: phoneValue ?? '' }))
+    } catch {
+      // ignore
+    }
+  }, [phoneValue])
+
+  const onSubmit = async (data: FormValues) => {
     setFormError(null)
 
-    const step1Raw = sessionStorage.getItem('register_step1')
+    const step1Raw = sessionStorage.getItem(STEP1_KEY)
     if (!step1Raw) {
       router.push('/register')
       return
     }
-    const step1 = JSON.parse(step1Raw) as { name: string; nickname: string; phone: string; email: string; password: string }
+
+    let step1: Step1Data
+    try {
+      step1 = JSON.parse(step1Raw) as Step1Data
+    } catch {
+      router.push('/register')
+      return
+    }
+
+    const phone = data.phone?.trim() || undefined
 
     try {
-      await registerMutation.mutateAsync({
+      await registerAndLogin.mutateAsync({
         email: step1.email,
         password: step1.password,
         name: step1.name,
-        phone: step1.phone,
         nickname: step1.nickname,
-        bio: bio || undefined,
-        gender: gender ?? undefined,
-        age: age ? parseInt(age) : undefined,
-        job: job || undefined,
-        mbti: mbtiString,
-        animalType: getRandomAnimalType(),
-        interests: selectedInterests.length > 0 ? selectedInterests : undefined,
+        gender: step1.gender,
+        age: step1.age,
+        phone,
       })
-
-      // 회원가입은 토큰을 반환하지 않으므로 별도 로그인
-      const loginResponse = await login(step1.email, step1.password)
-      sessionStorage.removeItem('register_step1')
-      storeLogin(loginResponse.accessToken, loginResponse.user.id, loginResponse.user.nickname, loginResponse.user.admin)
-      router.push('/')
     } catch {
       setFormError('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
     }
@@ -96,7 +96,6 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 헤더 */}
       <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
@@ -107,153 +106,45 @@ export default function OnboardingPage() {
             <ArrowLeft size={20} className="text-foreground" />
           </button>
           <h1 className="flex-1 text-center text-base font-bold text-foreground pr-11">
-            프로필 설정
+            회원가입
           </h1>
         </div>
       </header>
 
       <div className="px-6 pt-6 pb-10">
-        {/* 스텝 인디케이터 */}
+        {/* 스텝 인디케이터 — 비활성 점은 opacity-30으로 시인성 확보 */}
         <div className="flex justify-center gap-2 mb-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-tag-bg" />
+          <div className="w-2.5 h-2.5 rounded-full bg-primary opacity-30" />
           <div className="w-2.5 h-2.5 rounded-full bg-primary" />
         </div>
-        <p className="text-center text-sm text-tag-text mb-8">어떤 분인지 알려주세요</p>
+        <p className="text-center text-sm text-tag-text mb-8">연락처를 추가하면 게더링 연락에 도움이 돼요</p>
 
-        <div className="flex flex-col gap-6">
-          {/* 한 줄 소개 */}
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1">
-              한 줄 소개 <span className="text-tag-text font-normal">(선택)</span>
-            </label>
-            <input
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="나를 한 줄로 소개해주세요"
-              className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
-
-          {/* 성별 */}
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-2">성별</label>
-            <div className="flex gap-2">
-              {GENDER_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setGender(option.value)}
-                  className={`flex-1 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
-                    gender === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 나이 */}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           <Input
-            label="나이"
-            type="number"
-            placeholder="나이를 입력해주세요"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
+            label="연락처"
+            type="tel"
+            placeholder="01012345678 (선택, 11자리 숫자)"
+            {...register('phone', {
+              validate: (val) =>
+                !val || /^\d{11}$/.test(val) || '전화번호는 11자리 숫자여야 합니다',
+            })}
+            error={errors.phone?.message}
           />
 
-          {/* 직업 */}
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-2">직업</label>
-            <div className="grid grid-cols-2 gap-2">
-              {JOB_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setJob(job === option.value ? '' : option.value)}
-                  className={`py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
-                    job === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* MBTI */}
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-2">MBTI</label>
-            <div className="grid grid-cols-4 gap-2">
-              {MBTI_ROWS[0].map((letter, colIndex) => (
-                <button
-                  key={`row0-${letter}`}
-                  type="button"
-                  onClick={() => handleMbtiSelect(colIndex, letter)}
-                  className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
-                    mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                  }`}
-                >
-                  {letter}
-                </button>
-              ))}
-              {MBTI_ROWS[1].map((letter, colIndex) => (
-                <button
-                  key={`row1-${letter}`}
-                  type="button"
-                  onClick={() => handleMbtiSelect(colIndex, letter)}
-                  className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
-                    mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                  }`}
-                >
-                  {letter}
-                </button>
-              ))}
-            </div>
-            {mbtiString && (
-              <p className="text-center text-sm text-primary font-medium mt-2">
-                {mbtiString} 유형이군요!
-              </p>
-            )}
-          </div>
-
-          {/* 관심 분야 */}
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-3">관심 분야 우선 순위</label>
-            <div className="flex flex-wrap gap-2">
-              {INTERESTS.map((interest) => (
-                <button
-                  key={interest}
-                  type="button"
-                  onClick={() => toggleInterest(interest)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors min-h-[44px] ${
-                    selectedInterests.includes(interest)
-                      ? 'bg-primary text-white'
-                      : 'bg-tag-bg text-tag-text'
-                  }`}
-                >
-                  {interest}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 에러 메시지 */}
           {formError && (
             <p className="text-sm text-primary text-center">{formError}</p>
           )}
 
-          {/* 시작하기 버튼 */}
           <Button
+            type="submit"
             variant="primary"
             size="lg"
-            className="w-full"
-            onClick={handleSubmit}
-            isLoading={registerMutation.isPending}
+            className="w-full mt-2"
+            isLoading={registerAndLogin.isPending}
           >
             시작하기
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   )

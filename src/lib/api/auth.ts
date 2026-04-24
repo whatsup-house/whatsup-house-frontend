@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, LoginResponse, RegisterRequest, UserProfile } from './types'
+import type { ApiResponse, LoginResponse, RegisterRequest, RegisterResponse, UserProfile } from './types'
 
 // 로그인
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
@@ -16,8 +16,8 @@ export const logout = async (): Promise<void> => {
 }
 
 // 회원가입 (토큰 미반환 — 이후 별도 로그인 필요)
-export const register = async (data: RegisterRequest): Promise<UserProfile> => {
-  const response = await apiClient.post<ApiResponse<UserProfile>>('/api/auth/register', data)
+export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
+  const response = await apiClient.post<ApiResponse<RegisterResponse>>('/api/auth/register', data)
   return response.data.data
 }
 

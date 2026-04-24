@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
+import { useCheckNickname } from '@/lib/hooks/useAuth'
 
 const registerSchema = z.object({
   name: z.string().min(1, '이름을 입력해주세요'),
@@ -14,20 +15,25 @@ const registerSchema = z.object({
     .min(2, '닉네임은 2자 이상 입력해주세요')
     .max(50, '닉네임은 50자 이하로 입력해주세요'),
   email: z.string().email('올바른 이메일 형식을 입력해주세요'),
-  phone: z.string().refine(
-    (val) => !val || /^\d{11}$/.test(val),
-    { message: '전화번호는 11자리 숫자여야 합니다' }
-  ),
   password: z.string()
     .min(8, '8자 이상 입력해주세요')
     .regex(/^(?=.*[a-zA-Z])(?=.*\d).+$/, '영문과 숫자를 포함해야 합니다'),
   passwordConfirm: z.string().min(1, '비밀번호를 다시 입력해주세요'),
+  gender: z.enum(['MALE', 'FEMALE'], '성별을 선택해주세요'),
+  age: z.string()
+    .min(1, '나이를 입력해주세요')
+    .refine((val) => !isNaN(parseInt(val)) && parseInt(val) >= 1, '유효한 나이를 입력해주세요'),
 }).refine((data) => data.password === data.passwordConfirm, {
   message: '비밀번호가 일치하지 않아요',
   path: ['passwordConfirm'],
 })
 
 type FormValues = z.infer<typeof registerSchema>
+
+const GENDER_OPTIONS = [
+  { value: 'MALE' as const, label: '남' },
+  { value: 'FEMALE' as const, label: '여' },
+]
 
 const TERMS = [
   { id: 'age', label: '[필수] 만 14세 이상입니다', required: true },
@@ -48,21 +54,60 @@ function getPasswordStrength(pw: string): number {
 const STRENGTH_LABELS = ['', '취약', '보통', '강함', '안전']
 const STRENGTH_COLORS = ['', 'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500']
 
+const STEP1_KEY = 'register_step1'
+
 export default function RegisterPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
+  const [debouncedNickname, setDebouncedNickname] = useState('')
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(registerSchema) })
 
   const password = watch('password', '')
+  const nicknameValue = watch('nickname', '')
+  const genderValue = watch('gender')
   const strength = getPasswordStrength(password)
+
+  // sessionStorage에서 이전 입력값 복원 (뒤로가기 시 유지)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(STEP1_KEY)
+      if (!saved) return
+      const data = JSON.parse(saved) as {
+        name?: string; nickname?: string; email?: string; password?: string
+        gender?: 'MALE' | 'FEMALE'; age?: number; terms?: Record<string, boolean>
+      }
+      reset({
+        name: data.name ?? '',
+        nickname: data.nickname ?? '',
+        email: data.email ?? '',
+        password: data.password ?? '',
+        passwordConfirm: data.password ?? '',
+        gender: data.gender,
+        age: data.age != null ? String(data.age) : '',
+      })
+      if (data.terms) setCheckedTerms(data.terms)
+    } catch {
+      // ignore parse errors
+    }
+  }, [reset])
+
+  // 닉네임 디바운싱
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedNickname(nicknameValue), 300)
+    return () => clearTimeout(timer)
+  }, [nicknameValue])
+
+  const { data: nicknameAvailable, isFetching: isCheckingNickname } = useCheckNickname(debouncedNickname)
 
   const allRequired = TERMS.filter((t) => t.required).every((t) => checkedTerms[t.id])
   const allChecked = TERMS.every((t) => checkedTerms[t.id])
@@ -78,13 +123,16 @@ export default function RegisterPage() {
 
   const onSubmit = (data: FormValues) => {
     if (!allRequired) return
+    if (nicknameAvailable === false) return
 
-    sessionStorage.setItem('register_step1', JSON.stringify({
+    sessionStorage.setItem(STEP1_KEY, JSON.stringify({
       name: data.name,
       nickname: data.nickname,
-      phone: data.phone,
       email: data.email,
       password: data.password,
+      gender: data.gender,
+      age: parseInt(data.age),
+      terms: checkedTerms,
     }))
     router.push('/onboarding')
   }
@@ -107,9 +155,10 @@ export default function RegisterPage() {
       </header>
 
       <div className="px-6 pt-6 pb-10">
+        {/* 스텝 인디케이터 — 비활성 점은 opacity-30으로 시인성 확보 */}
         <div className="flex justify-center gap-2 mb-8">
           <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-          <div className="w-2.5 h-2.5 rounded-full bg-tag-bg" />
+          <div className="w-2.5 h-2.5 rounded-full bg-primary opacity-30" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
@@ -120,19 +169,24 @@ export default function RegisterPage() {
             error={errors.name?.message}
           />
 
-          <Input
-            label="닉네임 *"
-            placeholder="2자 이상 입력해주세요"
-            {...register('nickname')}
-            error={errors.nickname?.message}
-          />
-
-          <Input
-            label="연락처"
-            placeholder="01012345678"
-            {...register('phone')}
-            error={errors.phone?.message}
-          />
+          {/* 닉네임 + 실시간 중복 확인 */}
+          <div className="flex flex-col gap-1">
+            <Input
+              label="닉네임 *"
+              placeholder="2자 이상 입력해주세요"
+              {...register('nickname')}
+              error={errors.nickname?.message}
+            />
+            {!errors.nickname && debouncedNickname.length >= 2 && (
+              isCheckingNickname ? (
+                <p className="text-xs text-tag-text">확인 중...</p>
+              ) : nicknameAvailable === true ? (
+                <p className="text-xs text-green-600">✓ 사용 가능한 닉네임입니다</p>
+              ) : nicknameAvailable === false ? (
+                <p className="text-xs text-primary">이미 사용 중인 닉네임입니다</p>
+              ) : null
+            )}
+          </div>
 
           <Input
             label="이메일 *"
@@ -203,6 +257,35 @@ export default function RegisterPage() {
             ) : null}
           </div>
 
+          {/* 성별 (NOT NULL) */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-foreground">성별 *</label>
+            <div className="flex gap-2">
+              {GENDER_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setValue('gender', option.value, { shouldValidate: true })}
+                  className={`flex-1 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
+                    genderValue === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {errors.gender && <p className="text-xs text-primary">{errors.gender.message}</p>}
+          </div>
+
+          {/* 나이 (NOT NULL) */}
+          <Input
+            label="나이 *"
+            type="number"
+            placeholder="나이를 입력해주세요"
+            {...register('age')}
+            error={errors.age?.message}
+          />
+
           {/* 약관 동의 */}
           <div className="bg-card rounded-card p-4 flex flex-col gap-3 border border-tag-bg/50">
             <button
@@ -241,7 +324,7 @@ export default function RegisterPage() {
             variant="primary"
             size="lg"
             className="w-full mt-2"
-            disabled={!allRequired}
+            disabled={!allRequired || nicknameAvailable === false}
           >
             다음
           </Button>
