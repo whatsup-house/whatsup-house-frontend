@@ -231,9 +231,8 @@ export default function RegisterPage() {
                       key={option.value}
                       type="button"
                       onClick={() => setValue('gender', option.value, { shouldValidate: true })}
-                      className={`flex-1 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
-                        genderValue === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                      }`}
+                      className={`flex-1 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${genderValue === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+                        }`}
                     >
                       {option.label}
                     </button>
@@ -262,12 +261,12 @@ export default function RegisterPage() {
                 {debouncedNickname.length >= 2 && (
                   isCheckingNickname ? (
                     <p className="text-xs text-tag-text pl-1">확인 중...</p>
+                  ) : isNicknameCheckError ? (
+                    <p className="text-xs text-tag-text pl-1">중복 확인에 실패했습니다</p>
                   ) : nicknameAvailable === true ? (
                     <p className="text-xs text-green-600 pl-1">사용 가능한 닉네임입니다</p>
                   ) : nicknameAvailable === false ? (
                     <p className="text-xs text-primary pl-1">중복된 닉네임입니다</p>
-                  ) : isNicknameCheckError ? (
-                    <p className="text-xs text-tag-text pl-1">중복 확인에 실패했습니다</p>
                   ) : null
                 )}
               </div>
@@ -288,9 +287,8 @@ export default function RegisterPage() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     placeholder="영문+숫자 포함 8자 이상"
-                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      password.length > 0 && !passwordValid ? 'border-primary' : 'border-tag-bg'
-                    }`}
+                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${password.length > 0 && !passwordValid ? 'border-primary' : 'border-tag-bg'
+                      }`}
                     {...register('password')}
                   />
                   <button
@@ -317,9 +315,8 @@ export default function RegisterPage() {
                   <input
                     type={showPasswordConfirm ? 'text' : 'password'}
                     placeholder="비밀번호를 다시 입력해주세요"
-                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      passwordConfirmValue.length > 0 && !confirmMatch ? 'border-primary' : 'border-tag-bg'
-                    }`}
+                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${passwordConfirmValue.length > 0 && !confirmMatch ? 'border-primary' : 'border-tag-bg'
+                      }`}
                     {...register('passwordConfirm')}
                   />
                   <button
@@ -332,7 +329,7 @@ export default function RegisterPage() {
                 </div>
                 {passwordConfirmValue.length > 0 && (
                   confirmMatch ? (
-                    <p className="text-xs text-green-600 pl-1">비밀번호가 일치해요</p>
+                    <p className="text-xs text-green-600 pl-1">비밀번호가 일치합니다</p>
                   ) : (
                     <p className="text-xs text-primary pl-1">비밀번호가 불일치합니다</p>
                   )
@@ -413,9 +410,8 @@ export default function RegisterPage() {
                     key={option.value}
                     type="button"
                     onClick={() => setJob(job === option.value ? '' : option.value)}
-                    className={`py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
-                      job === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                    }`}
+                    className={`py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${job === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -431,9 +427,8 @@ export default function RegisterPage() {
                     key={`row0-${letter}`}
                     type="button"
                     onClick={() => handleMbtiSelect(colIndex, letter)}
-                    className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
-                      mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                    }`}
+                    className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+                      }`}
                   >
                     {letter}
                   </button>
@@ -443,9 +438,8 @@ export default function RegisterPage() {
                     key={`row1-${letter}`}
                     type="button"
                     onClick={() => handleMbtiSelect(colIndex, letter)}
-                    className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
-                      mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                    }`}
+                    className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+                      }`}
                   >
                     {letter}
                   </button>
@@ -466,11 +460,10 @@ export default function RegisterPage() {
                     key={interest}
                     type="button"
                     onClick={() => toggleInterest(interest)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors min-h-[44px] ${
-                      selectedInterests.includes(interest)
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors min-h-[44px] ${selectedInterests.includes(interest)
                         ? 'bg-primary text-white'
                         : 'bg-tag-bg text-tag-text'
-                    }`}
+                      }`}
                   >
                     {interest}
                   </button>
