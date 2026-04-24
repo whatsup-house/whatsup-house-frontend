@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { login, register, checkNickname, fetchMyProfile } from '@/lib/api/auth'
+import { login, logout as logoutApi, register, checkNickname, fetchMyProfile } from '@/lib/api/auth'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useRouter } from 'next/navigation'
 import type { RegisterRequest } from '@/lib/api/types'
@@ -58,5 +58,18 @@ export function useMyProfile() {
     queryFn: fetchMyProfile,
     enabled: isLoggedIn,
     staleTime: 1000 * 60 * 5, // 5분
+  })
+}
+
+export function useLogout() {
+  const { logout: storeLogout } = useAuthStore()
+  const router = useRouter()
+
+  return useMutation({
+    mutationFn: logoutApi,
+    onSettled: () => {
+      storeLogout()
+      router.push('/')
+    },
   })
 }

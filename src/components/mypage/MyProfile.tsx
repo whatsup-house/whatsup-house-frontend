@@ -1,7 +1,8 @@
 'use client'
 
-import { useMyProfile } from '@/lib/hooks/useAuth'
+import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useHydration } from '@/lib/hooks/useHydration'
+import Button from '@/components/ui/Button'
 
 const GENDER_LABELS: Record<string, string> = {
   MALE: '남성',
@@ -21,6 +22,7 @@ function ProfileRow({ label, value }: { label: string; value: string | null | un
 export default function MyProfile() {
   const hydrated = useHydration()
   const { data: profile, isLoading } = useMyProfile()
+  const logout = useLogout()
 
   if (!hydrated || isLoading) {
     return (
@@ -97,6 +99,17 @@ export default function MyProfile() {
             </div>
           </div>
         )}
+
+        {/* 로그아웃 */}
+        <Button
+          variant="outlined"
+          size="lg"
+          className="w-full"
+          onClick={() => logout.mutate()}
+          isLoading={logout.isPending}
+        >
+          로그아웃
+        </Button>
       </div>
     </div>
   )
