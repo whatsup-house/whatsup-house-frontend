@@ -32,6 +32,9 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
           ) : (
             <div className="w-full h-full bg-tag-bg" />
           )}
+          {status !== 'OPEN' && (
+            <div className="absolute inset-0 bg-black/40" />
+          )}
           <div className="absolute top-3 right-3">
             <Badge variant={status} />
           </div>
