@@ -1,6 +1,6 @@
 import LoadingSpinner from './LoadingSpinner'
 
-type ButtonVariant = 'primary' | 'outlined' | 'ghost' | 'kakao'
+type ButtonVariant = 'primary' | 'secondary' | 'outlined' | 'ghost' | 'kakao'
 type ButtonSize = 'sm' | 'default' | 'lg'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -11,10 +11,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantMap: Record<ButtonVariant, string> = {
-  primary:  'bg-primary text-white hover:opacity-90',
-  outlined: 'border border-primary text-primary bg-transparent hover:bg-primary-light',
-  ghost:    'text-tag-text bg-transparent hover:bg-tag-bg',
-  kakao:    'bg-[#FEE500] text-[#191919] hover:opacity-90',
+  primary:   'bg-primary text-white hover:opacity-90',
+  secondary: 'bg-tag-bg text-tag-text hover:opacity-90',
+  outlined:  'border border-primary text-primary bg-transparent hover:bg-primary-light',
+  ghost:     'text-tag-text bg-transparent hover:bg-tag-bg',
+  kakao:     'bg-[#FEE500] text-[#191919] hover:opacity-90',
 }
 
 const sizeMap: Record<ButtonSize, string> = {

@@ -26,6 +26,22 @@ export function useRegister() {
   })
 }
 
+export function useRegisterAndLogin() {
+  const { login: storeLogin } = useAuthStore()
+  const router = useRouter()
+
+  return useMutation({
+    mutationFn: async (data: RegisterRequest) => {
+      await register(data)
+      return login(data.email, data.password)
+    },
+    onSuccess: (loginData) => {
+      storeLogin(loginData.accessToken, loginData.user.id, loginData.user.nickname, loginData.user.admin)
+      router.push('/')
+    },
+  })
+}
+
 export function useCheckNickname(nickname: string) {
   return useQuery({
     queryKey: ['nickname-check', nickname],
