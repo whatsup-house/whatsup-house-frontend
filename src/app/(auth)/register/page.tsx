@@ -138,16 +138,23 @@ export default function RegisterPage() {
       if (diffX > 0 && step === 0) {
         handleSubmit(handleStep1Valid)()
       } else if (diffX < 0 && step === 1) {
-        setStep(0)
+        goToStep(0)
       }
     }
+  }
+
+  const goToStep = (n: number) => {
+    setStep(n)
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   // 1페이지 → 2페이지
   const handleStep1Valid = (data: Step1Values) => {
     if (!allRequired) return
+    if (nicknameAvailable === false) return
+    if (debouncedNickname.length >= 2 && isCheckingNickname) return
     setStep1Data(data)
-    setStep(1)
+    goToStep(1)
   }
 
   // 최종 제출
@@ -192,7 +199,7 @@ export default function RegisterPage() {
       <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
-            onClick={() => (step === 1 ? setStep(0) : router.back())}
+            onClick={() => (step === 1 ? goToStep(0) : router.back())}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="뒤로가기"
           >
@@ -491,13 +498,15 @@ export default function RegisterPage() {
 
             {/* 하단 버튼 2개 */}
             <div className="flex gap-3 mt-2">
-              <button
+              <Button
                 type="button"
-                onClick={() => setStep(0)}
-                className="flex-1 py-3 rounded-input bg-amber-100 text-amber-900 text-sm font-medium min-h-[44px] transition-colors"
+                variant="secondary"
+                size="lg"
+                className="flex-1"
+                onClick={() => goToStep(0)}
               >
                 이전
-              </button>
+              </Button>
               <Button
                 variant="primary"
                 size="lg"
