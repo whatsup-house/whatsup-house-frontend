@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useLogin } from '@/lib/hooks/useAuth'
+import { safeReturnUrl } from '@/lib/utils/url'
 
 const loginSchema = z.object({
   email: z.string().email('올바른 이메일 형식을 입력해주세요'),
@@ -19,7 +20,7 @@ type FormValues = z.infer<typeof loginSchema>
 
 function LoginForm() {
   const searchParams = useSearchParams()
-  const returnUrl = searchParams.get('returnUrl') ?? '/'
+  const returnUrl = safeReturnUrl(searchParams.get('returnUrl'))
   const [showPassword, setShowPassword] = useState(false)
   const loginMutation = useLogin(returnUrl)
 
