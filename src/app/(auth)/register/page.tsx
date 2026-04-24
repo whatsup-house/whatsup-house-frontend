@@ -102,7 +102,11 @@ export default function RegisterPage() {
     return () => clearTimeout(timer)
   }, [nicknameValue])
 
-  const { data: nicknameAvailable, isFetching: isCheckingNickname } = useCheckNickname(debouncedNickname)
+  const {
+    data: nicknameAvailable,
+    isFetching: isCheckingNickname,
+    isError: isNicknameCheckError,
+  } = useCheckNickname(debouncedNickname)
 
   // Step 2 상태
   const [bio, setBio] = useState('')
@@ -241,13 +245,15 @@ export default function RegisterPage() {
                   {...register('nickname')}
                   error={errors.nickname?.message}
                 />
-                {!errors.nickname && debouncedNickname.length >= 2 && (
+                {debouncedNickname.length >= 2 && (
                   isCheckingNickname ? (
                     <p className="text-xs text-tag-text">확인 중...</p>
                   ) : nicknameAvailable === true ? (
-                    <p className="text-xs text-green-600">✓ 사용 가능한 닉네임입니다</p>
+                    <p className="text-xs text-green-600">사용 가능한 닉네임입니다!</p>
                   ) : nicknameAvailable === false ? (
-                    <p className="text-xs text-primary">이미 사용 중인 닉네임입니다</p>
+                    <p className="text-xs text-primary">이미 사용중인 닉네임입니다</p>
+                  ) : isNicknameCheckError ? (
+                    <p className="text-xs text-tag-text">중복 확인에 실패했습니다</p>
                   ) : null
                 )}
               </div>
