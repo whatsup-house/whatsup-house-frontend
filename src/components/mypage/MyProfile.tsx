@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
-import { useHydration } from '@/lib/hooks/useHydration'
+import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import Button from '@/components/ui/Button'
 
 const GENDER_LABELS: Record<string, string> = {
@@ -20,11 +22,18 @@ function ProfileRow({ label, value }: { label: string; value: string | null | un
 }
 
 export default function MyProfile() {
-  const hydrated = useHydration()
+  const router = useRouter()
+  const { isLoggedIn, hydrated } = useRequireAuth()
   const { data: profile, isLoading } = useMyProfile()
   const logout = useLogout()
 
-  if (!hydrated || isLoading) {
+  useEffect(() => {
+    if (hydrated && !isLoggedIn) {
+      router.replace('/login?returnUrl=/mypage')
+    }
+  }, [hydrated, isLoggedIn, router])
+
+  if (!hydrated || !isLoggedIn || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-sm text-tag-text">불러오는 중...</p>
