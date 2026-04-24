@@ -9,6 +9,8 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useCheckNickname, useRegisterAndLogin } from '@/lib/hooks/useAuth'
 
+const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).+$/
+
 const step1Schema = z.object({
   name: z.string().min(1, '이름을 입력해주세요'),
   nickname: z.string()
@@ -20,15 +22,15 @@ const step1Schema = z.object({
   ),
   email: z.string().email('올바른 이메일 형식을 입력해주세요'),
   password: z.string()
-    .min(8, '8자 이상 입력해주세요')
-    .regex(/^(?=.*[a-zA-Z])(?=.*\d).+$/, '영문과 숫자를 포함해야 합니다'),
+    .min(8, '비밀번호는 영문+숫자 포함 8자 이상으로 설정해주세요')
+    .regex(PASSWORD_REGEX, '비밀번호는 영문+숫자 포함 8자 이상으로 설정해주세요'),
   passwordConfirm: z.string().min(1, '비밀번호를 다시 입력해주세요'),
   gender: z.enum(['MALE', 'FEMALE'], '성별을 선택해주세요'),
   age: z.string()
     .min(1, '나이를 입력해주세요')
     .refine((val) => !isNaN(parseInt(val)) && parseInt(val) >= 1, '유효한 나이를 입력해주세요'),
 }).refine((data) => data.password === data.passwordConfirm, {
-  message: '비밀번호가 일치하지 않아요',
+  message: '비밀번호가 불일치합니다',
   path: ['passwordConfirm'],
 })
 
@@ -60,25 +62,12 @@ const JOB_OPTIONS = [
 
 const INTERESTS = ['감성', '독서', '음악', '자연', '요리', '운동', '여행', '영화', '미술', '사진']
 
-function getPasswordStrength(pw: string): number {
-  let s = 0
-  if (pw.length >= 8) s++
-  if (/[A-Z]/.test(pw)) s++
-  if (/[0-9]/.test(pw)) s++
-  if (/[^A-Za-z0-9]/.test(pw)) s++
-  return s
-}
-
-const STRENGTH_LABELS = ['', '취약', '보통', '강함', '안전']
-const STRENGTH_COLORS = ['', 'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500']
-
 export default function RegisterPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [step1Data, setStep1Data] = useState<Step1Values | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
 
-  // Step 1 상태
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
@@ -93,9 +82,12 @@ export default function RegisterPage() {
   } = useForm<Step1Values>({ resolver: zodResolver(step1Schema) })
 
   const password = watch('password', '')
+  const passwordConfirmValue = watch('passwordConfirm', '')
   const nicknameValue = watch('nickname', '')
   const genderValue = watch('gender')
-  const strength = getPasswordStrength(password)
+
+  const passwordValid = password.length >= 8 && PASSWORD_REGEX.test(password)
+  const confirmMatch = passwordConfirmValue.length > 0 && passwordConfirmValue === password
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedNickname(nicknameValue), 300)
@@ -117,7 +109,6 @@ export default function RegisterPage() {
   const mbtiString = mbti.every((v) => v !== null) ? mbti.join('') : undefined
   const registerAndLogin = useRegisterAndLogin()
 
-  // 약관
   const allRequired = TERMS.filter((t) => t.required).every((t) => checkedTerms[t.id])
   const allChecked = TERMS.every((t) => checkedTerms[t.id])
   const toggleAll = () => {
@@ -126,7 +117,6 @@ export default function RegisterPage() {
   }
   const toggleTerm = (id: string) => setCheckedTerms((prev) => ({ ...prev, [id]: !prev[id] }))
 
-  // 스와이프 감지
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
 
@@ -139,11 +129,8 @@ export default function RegisterPage() {
     const diffX = touchStartX.current - e.changedTouches[0].clientX
     const diffY = Math.abs(touchStartY.current - e.changedTouches[0].clientY)
     if (Math.abs(diffX) > 60 && Math.abs(diffX) > diffY) {
-      if (diffX > 0 && step === 0) {
-        handleSubmit(handleStep1Valid)()
-      } else if (diffX < 0 && step === 1) {
-        goToStep(0)
-      }
+      if (diffX > 0 && step === 0) handleSubmit(handleStep1Valid)()
+      else if (diffX < 0 && step === 1) goToStep(0)
     }
   }
 
@@ -152,7 +139,6 @@ export default function RegisterPage() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
-  // 1페이지 → 2페이지
   const handleStep1Valid = (data: Step1Values) => {
     if (!allRequired) return
     if (nicknameAvailable === false) return
@@ -161,7 +147,6 @@ export default function RegisterPage() {
     goToStep(1)
   }
 
-  // 최종 제출
   const handleStep2Submit = async () => {
     if (!step1Data) return
     setFormError(null)
@@ -215,13 +200,11 @@ export default function RegisterPage() {
         </div>
       </header>
 
-      {/* 스텝 인디케이터 */}
       <div className="flex justify-center gap-2 pt-6 pb-2">
         <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-opacity duration-300 ${step === 0 ? '' : 'opacity-30'}`} />
         <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-opacity duration-300 ${step === 1 ? '' : 'opacity-30'}`} />
       </div>
 
-      {/* 슬라이더 */}
       <div className="overflow-x-hidden">
         <div
           className="flex transition-transform duration-300 ease-in-out"
@@ -230,110 +213,14 @@ export default function RegisterPage() {
           {/* ─── 1페이지 ─── */}
           <div className="px-6 pt-4 pb-10 flex flex-col gap-5" style={{ width: '50%' }}>
             <form onSubmit={handleSubmit(handleStep1Valid)} className="flex flex-col gap-5">
+
+              {/* 이름 */}
               <Input
                 label="이름 *"
                 placeholder="이름을 입력해주세요"
                 {...register('name')}
                 error={errors.name?.message}
               />
-
-              {/* 닉네임 + 실시간 중복 확인 */}
-              <div className="flex flex-col gap-1">
-                <Input
-                  label="닉네임 *"
-                  placeholder="2자 이상 입력해주세요"
-                  {...register('nickname')}
-                  error={errors.nickname?.message}
-                />
-                {debouncedNickname.length >= 2 && (
-                  isCheckingNickname ? (
-                    <p className="text-xs text-tag-text">확인 중...</p>
-                  ) : nicknameAvailable === true ? (
-                    <p className="text-xs text-green-600">사용 가능한 닉네임입니다!</p>
-                  ) : nicknameAvailable === false ? (
-                    <p className="text-xs text-primary">이미 사용중인 닉네임입니다</p>
-                  ) : isNicknameCheckError ? (
-                    <p className="text-xs text-tag-text">중복 확인에 실패했습니다</p>
-                  ) : null
-                )}
-              </div>
-
-              <Input
-                label="연락처"
-                type="tel"
-                placeholder="01012345678 (선택, 11자리)"
-                {...register('phone')}
-                error={errors.phone?.message}
-              />
-
-              <Input
-                label="이메일 *"
-                type="email"
-                placeholder="이메일 주소를 입력해주세요"
-                {...register('email')}
-                error={errors.email?.message}
-              />
-
-              {/* 비밀번호 */}
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-foreground">비밀번호 *</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="영문+숫자 포함 8자 이상"
-                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${errors.password ? 'border-primary' : 'border-tag-bg'}`}
-                    {...register('password')}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tag-text"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {password.length > 0 && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex gap-1 flex-1">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div
-                          key={i}
-                          className={`flex-1 h-1 rounded-full transition-colors ${i <= strength ? STRENGTH_COLORS[strength] : 'bg-tag-bg'}`}
-                        />
-                      ))}
-                    </div>
-                    <span className={`text-xs font-medium ${strength <= 1 ? 'text-red-400' : strength <= 2 ? 'text-orange-400' : strength <= 3 ? 'text-yellow-500' : 'text-green-600'}`}>
-                      {STRENGTH_LABELS[strength]}
-                    </span>
-                  </div>
-                )}
-                {errors.password && <p className="text-xs text-primary">{errors.password.message}</p>}
-              </div>
-
-              {/* 비밀번호 확인 */}
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-foreground">비밀번호 확인 *</label>
-                <div className="relative">
-                  <input
-                    type={showPasswordConfirm ? 'text' : 'password'}
-                    placeholder="비밀번호를 다시 입력해주세요"
-                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${errors.passwordConfirm ? 'border-primary' : 'border-tag-bg'}`}
-                    {...register('passwordConfirm')}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tag-text"
-                  >
-                    {showPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {errors.passwordConfirm ? (
-                  <p className="text-xs text-primary">{errors.passwordConfirm.message}</p>
-                ) : watch('passwordConfirm') && watch('passwordConfirm') === password ? (
-                  <p className="text-xs text-green-600">✓ 비밀번호가 일치해요</p>
-                ) : null}
-              </div>
 
               {/* 성별 */}
               <div className="flex flex-col gap-2">
@@ -362,6 +249,103 @@ export default function RegisterPage() {
                 placeholder="나이를 입력해주세요"
                 {...register('age')}
                 error={errors.age?.message}
+              />
+
+              {/* 닉네임 + 실시간 중복 확인 */}
+              <div className="flex flex-col gap-1">
+                <Input
+                  label="닉네임 *"
+                  placeholder="2자 이상 입력해주세요"
+                  {...register('nickname')}
+                  error={errors.nickname?.message}
+                />
+                {debouncedNickname.length >= 2 && (
+                  isCheckingNickname ? (
+                    <p className="text-xs text-tag-text pl-1">확인 중...</p>
+                  ) : nicknameAvailable === true ? (
+                    <p className="text-xs text-green-600 pl-1">사용 가능한 닉네임입니다</p>
+                  ) : nicknameAvailable === false ? (
+                    <p className="text-xs text-primary pl-1">중복된 닉네임입니다</p>
+                  ) : isNicknameCheckError ? (
+                    <p className="text-xs text-tag-text pl-1">중복 확인에 실패했습니다</p>
+                  ) : null
+                )}
+              </div>
+
+              {/* 이메일 */}
+              <Input
+                label="이메일 *"
+                type="email"
+                placeholder="이메일 주소를 입력해주세요"
+                {...register('email')}
+                error={errors.email?.message}
+              />
+
+              {/* 비밀번호 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-foreground">비밀번호 *</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="영문+숫자 포함 8자 이상"
+                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                      password.length > 0 && !passwordValid ? 'border-primary' : 'border-tag-bg'
+                    }`}
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tag-text"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {password.length > 0 && (
+                  passwordValid ? (
+                    <p className="text-xs text-green-600 pl-1">사용 가능한 비밀번호입니다</p>
+                  ) : (
+                    <p className="text-xs text-primary pl-1">비밀번호는 영문+숫자 포함 8자 이상으로 설정해주세요</p>
+                  )
+                )}
+              </div>
+
+              {/* 비밀번호 확인 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-foreground">비밀번호 확인 *</label>
+                <div className="relative">
+                  <input
+                    type={showPasswordConfirm ? 'text' : 'password'}
+                    placeholder="비밀번호를 다시 입력해주세요"
+                    className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                      passwordConfirmValue.length > 0 && !confirmMatch ? 'border-primary' : 'border-tag-bg'
+                    }`}
+                    {...register('passwordConfirm')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tag-text"
+                  >
+                    {showPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {passwordConfirmValue.length > 0 && (
+                  confirmMatch ? (
+                    <p className="text-xs text-green-600 pl-1">비밀번호가 일치해요</p>
+                  ) : (
+                    <p className="text-xs text-primary pl-1">비밀번호가 불일치합니다</p>
+                  )
+                )}
+              </div>
+
+              {/* 연락처 */}
+              <Input
+                label="연락처"
+                type="tel"
+                placeholder="01012345678 (선택, 11자리)"
+                {...register('phone')}
+                error={errors.phone?.message}
               />
 
               {/* 약관 */}
@@ -409,7 +393,6 @@ export default function RegisterPage() {
           <div className="px-6 pt-4 pb-10 flex flex-col gap-6" style={{ width: '50%' }}>
             <p className="text-center text-sm text-tag-text">어떤 분인지 알려주세요 (선택)</p>
 
-            {/* 한 줄 소개 */}
             <div>
               <label className="text-sm font-medium text-foreground block mb-1">
                 한 줄 소개 <span className="text-tag-text font-normal">(선택)</span>
@@ -422,7 +405,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* 직업 */}
             <div>
               <label className="text-sm font-medium text-foreground block mb-2">직업</label>
               <div className="grid grid-cols-2 gap-2">
@@ -441,7 +423,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* MBTI */}
             <div>
               <label className="text-sm font-medium text-foreground block mb-2">MBTI</label>
               <div className="grid grid-cols-4 gap-2">
@@ -477,7 +458,6 @@ export default function RegisterPage() {
               )}
             </div>
 
-            {/* 관심 분야 */}
             <div>
               <label className="text-sm font-medium text-foreground block mb-3">관심 분야</label>
               <div className="flex flex-wrap gap-2">
@@ -502,7 +482,6 @@ export default function RegisterPage() {
               <p className="text-sm text-primary text-center">{formError}</p>
             )}
 
-            {/* 하단 버튼 2개 */}
             <div className="flex gap-3 mt-2">
               <Button
                 type="button"
