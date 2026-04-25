@@ -3,55 +3,51 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { AlertTriangle } from 'lucide-react'
 import { Button, Input, Card } from '@/components/ui'
 import { useSubmitGuestApplication } from '@/lib/hooks/useGatherings'
-import type { GatheringDetail, ReferralSource, Gender } from '@/lib/api/types'
+import type { GatheringDetail, Gender } from '@/lib/api/types'
 
 const MBTI_ROWS = [
   ['E', 'S', 'F', 'J'],
   ['I', 'N', 'T', 'P'],
 ] as const
 
-const REFERRAL_OPTIONS: { value: ReferralSource; label: string }[] = [
-  { value: 'INSTAGRAM', label: '인스타그램' },
-  { value: 'FRIEND', label: '지인 추천' },
-  { value: 'BLOG', label: '블로그/커뮤니티' },
-  { value: 'OTHER', label: '기타' },
-]
-
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: 'MALE', label: '남성' },
   { value: 'FEMALE', label: '여성' },
 ]
 
+const schema = z.object({
+  name: z.string().min(1, '이름을 입력해주세요'),
+  phone: z.string().regex(/^01[0-9]{8,9}$/, '올바른 연락처 형식으로 입력해주세요 (예: 01012345678)'),
+  age: z.number().int().min(1, '올바른 나이를 입력해주세요').max(100, '올바른 나이를 입력해주세요'),
+  instagramId: z.string().optional(),
+  job: z.string().optional(),
+  intro: z.string().optional(),
+  referrerName: z.string().optional(),
+})
+
+type FormValues = z.infer<typeof schema>
+
 interface GuestApplicationFormProps {
   gathering: GatheringDetail
-}
-
-interface FormValues {
-  name: string
-  phone: string
-  age: string
 }
 
 export default function GuestApplicationForm({ gathering }: GuestApplicationFormProps) {
   const router = useRouter()
   const submitMutation = useSubmitGuestApplication()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormValues>({
-    defaultValues: { name: '', phone: '', age: '' },
-  })
-
   const [gender, setGender] = useState<Gender | null>(null)
+  const [genderError, setGenderError] = useState<string | null>(null)
   const [mbti, setMbti] = useState<(string | null)[]>([null, null, null, null])
-  const [referralSource, setReferralSource] = useState<ReferralSource | null>(null)
-  const [formError, setFormError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+  })
 
   const handleMbtiSelect = (colIndex: number, value: string) => {
     setMbti((prev) => {
@@ -64,58 +60,40 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
   const mbtiString = mbti.every((v) => v !== null) ? mbti.join('') : null
 
   const onSubmit = async (formData: FormValues) => {
-    setFormError(null)
-
-    // 추가 유효성 검사
     if (!gender) {
-      setFormError('성별을 선택해주세요.')
+      setGenderError('성별을 선택해주세요.')
       return
     }
-    if (!mbtiString) {
-      setFormError('MBTI를 모두 선택해주세요.')
-      return
-    }
-    if (!referralSource) {
-      setFormError('유입 경로를 선택해주세요.')
-      return
-    }
-
-    const phoneRegex = /^010-\d{4}-\d{4}$/
-    if (!phoneRegex.test(formData.phone)) {
-      setFormError('연락처 형식을 확인해주세요. (010-0000-0000)')
-      return
-    }
-
-    const age = parseInt(formData.age)
-    if (isNaN(age) || age < 1 || age > 100) {
-      setFormError('올바른 나이를 입력해주세요.')
-      return
-    }
+    setGenderError(null)
+    setSubmitError(null)
 
     try {
-      await submitMutation.mutateAsync({
+      const result = await submitMutation.mutateAsync({
         id: gathering.id,
         data: {
-          applicantName: formData.name,
-          applicantPhone: formData.phone,
+          name: formData.name,
+          phone: formData.phone,
           gender,
-          age,
-          mbti: mbtiString,
-          referralSource,
+          age: formData.age,
+          ...(formData.instagramId && { instagramId: formData.instagramId }),
+          ...(formData.job && { job: formData.job }),
+          ...(mbtiString && { mbti: mbtiString }),
+          ...(formData.intro && { intro: formData.intro }),
+          ...(formData.referrerName && { referrerName: formData.referrerName }),
         },
       })
-      router.push(`/gatherings/${gathering.id}/apply/complete`)
+      router.push(`/gatherings/${gathering.id}/apply/complete?bookingNumber=${result.bookingNumber}`)
     } catch {
-      setFormError('신청 중 오류가 발생했습니다. 다시 시도해주세요.')
+      setSubmitError('신청 중 오류가 발생했습니다. 다시 시도해주세요.')
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
       {/* 비로그인 경고 */}
-      <Card className="p-4 bg-[#FFF8F0] border border-[#FFE0B2]">
+      <Card className="p-4 bg-tag-bg border border-tag-bg">
         <div className="flex items-start gap-2.5">
-          <AlertTriangle size={18} className="text-[#E65100] mt-0.5 shrink-0" />
+          <AlertTriangle size={18} className="text-primary mt-0.5 shrink-0" />
           <p className="text-sm text-tag-text">
             비로그인 신청은 마일리지가 적립되지 않아요.{' '}
             <button
@@ -130,7 +108,7 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
         </div>
       </Card>
 
-      {/* 신청자 정보 */}
+      {/* 필수 정보 */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-1 h-5 bg-primary rounded-full" />
@@ -138,19 +116,17 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
         </div>
 
         <div className="flex flex-col gap-4">
-          {/* 이름 */}
           <Input
             label="이름*"
             placeholder="실명을 입력해주세요"
-            {...register('name', { required: '이름을 입력해주세요' })}
+            {...register('name')}
             error={errors.name?.message}
           />
 
-          {/* 연락처 */}
           <Input
             label="연락처*"
-            placeholder="010-0000-0000"
-            {...register('phone', { required: '연락처를 입력해주세요' })}
+            placeholder="01012345678"
+            {...register('phone')}
             error={errors.phone?.message}
           />
 
@@ -162,7 +138,7 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setGender(option.value)}
+                  onClick={() => { setGender(option.value); setGenderError(null) }}
                   className={`flex-1 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
                     gender === option.value
                       ? 'bg-primary text-white'
@@ -173,112 +149,102 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
                 </button>
               ))}
             </div>
+            {genderError && <p className="text-xs text-primary pl-1">{genderError}</p>}
           </div>
 
-          {/* 나이 */}
           <Input
             label="나이*"
             type="number"
             placeholder="나이를 입력해주세요"
-            {...register('age', { required: '나이를 입력해주세요' })}
+            {...register('age', { valueAsNumber: true })}
             error={errors.age?.message}
           />
         </div>
       </div>
 
-      {/* MBTI */}
+      {/* 추가 정보 */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-1 h-5 bg-primary rounded-full" />
-          <h2 className="text-base font-bold text-foreground">MBTI</h2>
+          <div className="w-1 h-5 bg-tag-bg rounded-full" />
+          <h2 className="text-base font-bold text-foreground">추가 정보 <span className="text-sm font-normal text-tag-text">(선택)</span></h2>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
-          {/* 첫 번째 행: E S F J */}
-          {MBTI_ROWS[0].map((letter, colIndex) => (
-            <button
-              key={`row0-${letter}`}
-              type="button"
-              onClick={() => handleMbtiSelect(colIndex, letter)}
-              className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
-                mbti[colIndex] === letter
-                  ? 'bg-primary text-white'
-                  : 'bg-tag-bg text-tag-text'
-              }`}
-            >
-              {letter}
-            </button>
-          ))}
-          {/* 두 번째 행: I N T P */}
-          {MBTI_ROWS[1].map((letter, colIndex) => (
-            <button
-              key={`row1-${letter}`}
-              type="button"
-              onClick={() => handleMbtiSelect(colIndex, letter)}
-              className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
-                mbti[colIndex] === letter
-                  ? 'bg-primary text-white'
-                  : 'bg-tag-bg text-tag-text'
-              }`}
-            >
-              {letter}
-            </button>
-          ))}
-        </div>
+        <div className="flex flex-col gap-4">
+          <Input
+            label="인스타그램 ID"
+            placeholder="@username"
+            {...register('instagramId')}
+          />
 
-        {mbtiString && (
-          <p className="text-center text-sm text-primary font-medium mt-3">
-            당신은 {mbtiString} 유형이군요!
-          </p>
-        )}
-      </div>
+          <Input
+            label="직업"
+            placeholder="예: 디자이너"
+            {...register('job')}
+          />
 
-      {/* 한 줄 자기소개 */}
-      <div>
-        <label className="text-sm font-medium text-foreground block mb-1">한 줄 자기소개</label>
-        <textarea
-          placeholder="당신은 어떤 분인가요? 가볍게 알려주세요."
-          className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground text-sm placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[80px]"
-          rows={3}
-        />
-      </div>
+          {/* MBTI */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-foreground">MBTI</label>
+            <div className="grid grid-cols-4 gap-2">
+              {MBTI_ROWS[0].map((letter, colIndex) => (
+                <button
+                  key={`row0-${letter}`}
+                  type="button"
+                  onClick={() => handleMbtiSelect(colIndex, letter)}
+                  className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
+                    mbti[colIndex] === letter
+                      ? 'bg-primary text-white'
+                      : 'bg-tag-bg text-tag-text'
+                  }`}
+                >
+                  {letter}
+                </button>
+              ))}
+              {MBTI_ROWS[1].map((letter, colIndex) => (
+                <button
+                  key={`row1-${letter}`}
+                  type="button"
+                  onClick={() => handleMbtiSelect(colIndex, letter)}
+                  className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
+                    mbti[colIndex] === letter
+                      ? 'bg-primary text-white'
+                      : 'bg-tag-bg text-tag-text'
+                  }`}
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+            {mbtiString && (
+              <p className="text-center text-sm text-primary font-medium">
+                {mbtiString} 유형이군요!
+              </p>
+            )}
+          </div>
 
-      {/* 유입경로 */}
-      <div>
-        <label className="text-sm font-bold text-foreground block mb-3">유입경로</label>
-        <div className="grid grid-cols-2 gap-2">
-          {REFERRAL_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setReferralSource(option.value)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-input text-sm font-medium transition-colors min-h-[44px] border ${
-                referralSource === option.value
-                  ? 'border-primary bg-primary-light text-primary'
-                  : 'border-tag-bg bg-card text-tag-text'
-              }`}
-            >
-              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                referralSource === option.value
-                  ? 'border-primary'
-                  : 'border-tag-bg'
-              }`}>
-                {referralSource === option.value && (
-                  <div className="w-2 h-2 rounded-full bg-primary" />
-                )}
-              </div>
-              {option.label}
-            </button>
-          ))}
+          {/* 자기소개 */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground">한 줄 자기소개</label>
+            <textarea
+              placeholder="당신은 어떤 분인가요? 가볍게 알려주세요."
+              {...register('intro')}
+              className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground text-sm placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[80px]"
+              rows={3}
+            />
+          </div>
+
+          <Input
+            label="추천인 성함"
+            placeholder="소개해주신 분의 성함을 입력해주세요"
+            {...register('referrerName')}
+          />
         </div>
       </div>
 
-      {/* 에러 메시지 */}
-      {formError && (
-        <p className="text-sm text-primary text-center">{formError}</p>
+      {submitError && (
+        <p className="text-sm text-primary text-center">{submitError}</p>
       )}
 
-      {/* 신청 버튼 */}
       <div className="pt-2 pb-4">
         <Button
           type="submit"

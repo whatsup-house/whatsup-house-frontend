@@ -1,19 +1,16 @@
 'use client'
 
-import { use } from 'react'
-import { useRouter } from 'next/navigation'
-import { CheckCircle, Calendar, MapPin, CreditCard } from 'lucide-react'
+import { Suspense, use } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CheckCircle, Calendar, MapPin, CreditCard, Hash } from 'lucide-react'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import dayjs from 'dayjs'
 
-export default function ApplyCompletePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = use(params)
+function ApplyCompleteContent({ id }: { id: string }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const bookingNumber = searchParams.get('bookingNumber')
   const { data: gathering, isLoading } = useGatheringDetail(id)
 
   if (isLoading || !gathering) {
@@ -29,7 +26,6 @@ export default function ApplyCompletePage({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* 메인 콘텐츠 */}
       <div className="flex-1 flex flex-col items-center px-6 pt-16 pb-6">
         {/* 완료 아이콘 */}
         <div className="w-40 h-40 mb-6 flex items-center justify-center">
@@ -37,16 +33,25 @@ export default function ApplyCompletePage({
             <div className="w-28 h-28 rounded-full bg-primary-light flex items-center justify-center">
               <CheckCircle size={56} className="text-primary" />
             </div>
-            {/* 데코 도트 */}
-            <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#FFE082]" />
-            <div className="absolute -bottom-1 -left-3 w-3 h-3 rounded-full bg-[#A5D6A7]" />
-            <div className="absolute top-4 -left-4 w-2 h-2 rounded-full bg-[#CE93D8]" />
+            <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-tag-bg" />
+            <div className="absolute -bottom-1 -left-3 w-3 h-3 rounded-full bg-tag-bg" />
+            <div className="absolute top-4 -left-4 w-2 h-2 rounded-full bg-tag-bg" />
           </div>
         </div>
 
-        {/* 제목 */}
         <h1 className="text-2xl font-bold text-foreground mb-2">신청이 완료됐어요! 🎉</h1>
         <p className="text-sm text-tag-text mb-8">게더링 당일에 뵙겠습니다</p>
+
+        {/* 예약번호 (비회원 전용) */}
+        {bookingNumber && (
+          <div className="w-full bg-primary-light rounded-card px-5 py-4 mb-4 flex items-center gap-3">
+            <Hash size={18} className="text-primary shrink-0" />
+            <div>
+              <p className="text-xs text-tag-text">예약번호</p>
+              <p className="text-base font-bold text-primary tracking-wider">{bookingNumber}</p>
+            </div>
+          </div>
+        )}
 
         {/* 게더링 요약 카드 */}
         <Card className="w-full p-5 mb-8">
@@ -93,17 +98,6 @@ export default function ApplyCompletePage({
         {/* 버튼들 */}
         <div className="w-full flex flex-col gap-3">
           <Button
-            variant="kakao"
-            size="lg"
-            className="w-full"
-            onClick={() => {
-              // 카카오톡 알림 연동 (추후 구현)
-            }}
-          >
-            ● 카카오톡으로 일정 알림 받기
-          </Button>
-
-          <Button
             variant="outlined"
             size="lg"
             className="w-full"
@@ -121,5 +115,22 @@ export default function ApplyCompletePage({
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ApplyCompletePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = use(params)
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen bg-background">
+        <LoadingSpinner size="lg" />
+      </div>
+    }>
+      <ApplyCompleteContent id={id} />
+    </Suspense>
   )
 }
