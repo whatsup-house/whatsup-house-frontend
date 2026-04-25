@@ -22,12 +22,17 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// 응답 인터셉터: 401 시 로그인 페이지 이동
+// 응답 인터셉터: 401/403 시 auth 상태 초기화 후 로그인 페이지 이동
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      window.location.href = '/login'
+    const status = error.response?.status
+    if (status === 401 || status === 403) {
+      try { localStorage.removeItem('auth-storage') } catch { /* ignore */ }
+      if (typeof window !== 'undefined') {
+        const returnUrl = encodeURIComponent(window.location.pathname)
+        window.location.href = `/login?returnUrl=${returnUrl}`
+      }
     }
     return Promise.reject(error)
   }
