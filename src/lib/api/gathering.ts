@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, GatheringListItem, GatheringDetail, GuestApplicationRequest, UserApplicationRequest } from './types'
+import type { ApiResponse, GatheringListItem, GatheringDetail, GuestApplicationRequest, GuestApplicationResponse, UserApplicationRequest } from './types'
 
 // 날짜별 게더링 목록 조회
 export const fetchGatherings = async (date: string): Promise<GatheringListItem[]> => {
@@ -26,8 +26,9 @@ export const fetchCalendarDots = async (year: number, month: number): Promise<st
 }
 
 // 비회원 게더링 신청
-export const submitGuestApplication = async (id: string, data: GuestApplicationRequest): Promise<void> => {
-  await apiClient.post<ApiResponse<unknown>>(`/api/gatherings/${id}/applications/guest`, data)
+export const submitGuestApplication = async (id: string, data: GuestApplicationRequest): Promise<GuestApplicationResponse> => {
+  const response = await apiClient.post<ApiResponse<GuestApplicationResponse>>(`/api/gatherings/${id}/applications/guest`, data)
+  return response.data.data
 }
 
 // 회원 게더링 신청 (JWT 필요)

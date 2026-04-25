@@ -67,12 +67,23 @@ export type Gender = 'MALE' | 'FEMALE'
 export type ReferralSource = 'INSTAGRAM' | 'FRIEND' | 'BLOG' | 'OTHER'
 
 export interface GuestApplicationRequest {
-  applicantName: string
-  applicantPhone: string
+  name: string
+  phone: string
   gender: Gender
   age: number
-  mbti: string
-  referralSource: ReferralSource
+  instagramId?: string
+  job?: string
+  mbti?: string
+  intro?: string
+  referrerName?: string
+}
+
+export interface GuestApplicationResponse {
+  id: string
+  bookingNumber: string
+  gatheringId: string
+  status: string
+  createdAt: string
 }
 
 export interface UserApplicationRequest {
