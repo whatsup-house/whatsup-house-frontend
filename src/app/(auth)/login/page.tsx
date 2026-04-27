@@ -4,22 +4,29 @@ import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useLogin } from '@/lib/hooks/useAuth'
+import { safeReturnUrl } from '@/lib/utils/url'
 
-interface FormValues {
-  email: string
-  password: string
-}
+const loginSchema = z.object({
+  email: z.string().email('올바른 이메일 형식을 입력해주세요'),
+  password: z.string().min(1, '비밀번호를 입력해주세요'),
+})
+
+type FormValues = z.infer<typeof loginSchema>
 
 function LoginForm() {
   const searchParams = useSearchParams()
-  const returnUrl = searchParams.get('returnUrl') ?? '/'
+  const returnUrl = safeReturnUrl(searchParams.get('returnUrl'))
   const [showPassword, setShowPassword] = useState(false)
   const loginMutation = useLogin(returnUrl)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>()
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(loginSchema),
+  })
 
   const onSubmit = (data: FormValues) => {
     loginMutation.mutate({ email: data.email, password: data.password })
@@ -89,7 +96,9 @@ function LoginForm() {
         </div>
 
         {loginMutation.isError && (
-          <p className="text-sm text-primary text-center">이메일 또는 비밀번호를 확인해주세요.</p>
+          <p className="text-sm text-primary text-center">
+            {(loginMutation.error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '이메일 또는 비밀번호를 확인해주세요.'}
+          </p>
         )}
 
         <Button

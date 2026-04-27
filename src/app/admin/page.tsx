@@ -25,7 +25,7 @@ export default function AdminDashboardPage() {
   })
   const weeklyApplications = weeklyGatherings.reduce((sum, g) => sum + g.applicantCount, 0)
   const totalRevenue = weeklyGatherings.reduce((sum, g) => sum + (g.price ?? 0) * g.applicantCount, 0)
-  const recruitingCount = gatherings.filter((g) => g.status === 'RECRUITING').length
+  const recruitingCount = gatherings.filter((g) => g.status === 'OPEN').length
 
   const updatedTime = dataUpdatedAt ? dayjs(dataUpdatedAt).format('HH:mm:ss') : '-'
 
@@ -149,7 +149,7 @@ export default function AdminDashboardPage() {
               <span className="text-xs text-tag-text">총 {gatherings.length}건</span>
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {(['RECRUITING', 'CLOSED', 'COMPLETED', 'CANCELLED'] as AdminGatheringStatus[]).map((status) => {
+              {(['OPEN', 'CLOSED', 'COMPLETED', 'CANCELLED'] as AdminGatheringStatus[]).map((status) => {
                 const count = gatherings.filter((g) => g.status === status).length
                 const pct = gatherings.length > 0 ? Math.round((count / gatherings.length) * 100) : 0
                 return (
@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
                     <div className="h-1.5 bg-tag-bg rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
-                          status === 'RECRUITING' ? 'bg-green-500' :
+                          status === 'OPEN' ? 'bg-green-500' :
                           status === 'CLOSED' ? 'bg-gray-400' :
                           status === 'COMPLETED' ? 'bg-blue-500' : 'bg-red-400'
                         }`}

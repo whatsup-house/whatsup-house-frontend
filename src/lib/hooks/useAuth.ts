@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { login, register, checkNickname, fetchMyProfile } from '@/lib/api/auth'
+import { login, logout as logoutApi, register, checkNickname, fetchMyProfile } from '@/lib/api/auth'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useRouter } from 'next/navigation'
 import type { RegisterRequest } from '@/lib/api/types'
@@ -26,6 +26,22 @@ export function useRegister() {
   })
 }
 
+export function useRegisterAndLogin() {
+  const { login: storeLogin } = useAuthStore()
+  const router = useRouter()
+
+  return useMutation({
+    mutationFn: async (data: RegisterRequest) => {
+      await register(data)
+      return login(data.email, data.password)
+    },
+    onSuccess: (loginData) => {
+      storeLogin(loginData.accessToken, loginData.user.id, loginData.user.nickname, loginData.user.admin)
+      router.push('/')
+    },
+  })
+}
+
 export function useCheckNickname(nickname: string) {
   return useQuery({
     queryKey: ['nickname-check', nickname],
@@ -42,5 +58,18 @@ export function useMyProfile() {
     queryFn: fetchMyProfile,
     enabled: isLoggedIn,
     staleTime: 1000 * 60 * 5, // 5분
+  })
+}
+
+export function useLogout() {
+  const { logout: storeLogout } = useAuthStore()
+  const router = useRouter()
+
+  return useMutation({
+    mutationFn: logoutApi,
+    onSettled: () => {
+      storeLogout()
+      router.push('/')
+    },
   })
 }

@@ -1,7 +1,7 @@
 import apiClient from './client'
 import type { ApiResponse } from './types'
 
-export type AdminGatheringStatus = 'RECRUITING' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+export type AdminGatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 
 export interface AdminGathering {
   id: string

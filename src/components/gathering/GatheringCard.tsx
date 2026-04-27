@@ -1,7 +1,15 @@
 import Link from 'next/link'
-import { MapPin, Clock } from 'lucide-react'
+import { MapPin, Clock, CalendarDays } from 'lucide-react'
+import dayjs from 'dayjs'
 import Badge from '@/components/ui/Badge'
 import type { GatheringListItem } from '@/lib/api/types'
+
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
+
+function formatEventDate(date: string): string {
+  const d = dayjs(date)
+  return `${d.month() + 1}월 ${d.date()}일 (${WEEKDAYS[d.day()]})`
+}
 
 interface GatheringCardProps {
   gathering: GatheringListItem
@@ -9,9 +17,9 @@ interface GatheringCardProps {
 
 export default function GatheringCard({ gathering }: GatheringCardProps) {
   const {
-    id, title, startTime, locationName, price,
-    capacity, currentApplicants, thumbnailUrl,
-    status, moodTags,
+    id, title, eventDate, startTime, price,
+    maxAttendees, thumbnailUrl,
+    status, location,
   } = gathering
 
   return (
@@ -24,7 +32,10 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
           ) : (
             <div className="w-full h-full bg-tag-bg" />
           )}
-          <div className="absolute top-3 left-3">
+          {status !== 'OPEN' && (
+            <div className="absolute inset-0 bg-black/40" />
+          )}
+          <div className="absolute top-3 right-3">
             <Badge variant={status} />
           </div>
         </div>
@@ -37,28 +48,22 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
 
           <div className="flex flex-col gap-1 text-sm text-tag-text mb-3">
             <div className="flex items-center gap-1.5">
+              <CalendarDays size={13} />
+              <span>{formatEventDate(eventDate)}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
               <Clock size={13} />
               <span>{startTime.slice(0, 5)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin size={13} />
-              <span>{locationName}</span>
+              <span>{location?.name}</span>
             </div>
           </div>
 
-          {moodTags && moodTags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {moodTags.slice(0, 3).map((tag) => (
-                <span key={tag} className="text-xs bg-tag-bg text-tag-text px-2.5 py-1 rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
           <div className="flex items-center justify-between">
             <span className="font-bold text-foreground">{price.toLocaleString()}원</span>
-            <span className="text-xs text-tag-text">{currentApplicants}/{capacity}명</span>
+            <span className="text-xs text-tag-text">최대 {maxAttendees}명</span>
           </div>
         </div>
       </div>

@@ -9,27 +9,27 @@ export interface ApiResponse<T> {
 export interface GatheringListItem {
   id: string
   title: string
-  date: string           // yyyy-MM-dd
+  description: string
+  eventDate: string      // YYYY-MM-DD
   startTime: string      // HH:mm:ss
   endTime: string
-  locationName: string
   price: number
-  capacity: number
-  currentApplicants: number
+  maxAttendees: number
+  status: 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
   thumbnailUrl: string | null
-  moodTags: string[] | null
-  activityTags: string[] | null
-  status: 'RECRUITING' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+  location: {
+    id: string
+    name: string
+  } | null
 }
 
 export interface GatheringDetail extends GatheringListItem {
-  description: string
-  howToRun: string[] | null
-  locationAddress: string
-  photoUrls: string[] | null
-  mileageReward: number
-  averageRating: number | null
-  reviewCount: number
+  howToRun?: string[] | null
+  locationAddress?: string
+  photoUrls?: string[] | null
+  mileageReward?: number
+  averageRating?: number | null
+  reviewCount?: number
 }
 
 // 인증 타입
@@ -49,16 +49,17 @@ export interface RegisterRequest {
   email: string
   password: string
   name: string
-  phone: string
   nickname: string
-  bio?: string
-  gender?: string
-  age?: number
-  job?: string
-  mbti?: string
-  animalType?: string
-  interests?: string[]
-  avatarUrl?: string
+  gender: Gender   // @NotNull in backend
+  age: number      // @NotNull in backend
+  phone?: string   // nullable, 11 digits
+}
+
+export interface RegisterResponse {
+  id: string
+  email: string
+  nickname: string
+  createdAt: string
 }
 
 // 신청 관련 타입
@@ -66,12 +67,23 @@ export type Gender = 'MALE' | 'FEMALE'
 export type ReferralSource = 'INSTAGRAM' | 'FRIEND' | 'BLOG' | 'OTHER'
 
 export interface GuestApplicationRequest {
-  applicantName: string
-  applicantPhone: string
+  name: string
+  phone: string
   gender: Gender
   age: number
-  mbti: string
-  referralSource: ReferralSource
+  instagramId?: string
+  job?: string
+  mbti?: string
+  intro?: string
+  referrerName?: string
+}
+
+export interface GuestApplicationResponse {
+  id: string
+  bookingNumber: string
+  gatheringId: string
+  status: string
+  createdAt: string
 }
 
 export interface UserApplicationRequest {
@@ -83,12 +95,6 @@ export interface UserApplicationRequest {
   referralSource: ReferralSource
 }
 
-// 달력 dot 응답 타입
-export interface CalendarDotsResponse {
-  year: number
-  month: number
-  dates: string[]
-}
 
 export interface UserProfile {
   id: string
