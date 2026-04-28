@@ -2,6 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminGatheringApi, GatheringCreateRequest } from '@/lib/api/adminGathering'
 import type { AdminGatheringStatus } from '@/lib/api/admin'
 
+export function useAdminApplications(gatheringId: string) {
+  return useQuery({
+    queryKey: ['admin', 'applications', gatheringId],
+    queryFn: () => adminGatheringApi.getApplicationsByGathering(gatheringId),
+    enabled: !!gatheringId,
+    staleTime: 1000 * 30,
+  })
+}
+
 export function useAdminLocations() {
   return useQuery({
     queryKey: ['admin', 'locations'],
