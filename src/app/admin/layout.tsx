@@ -7,7 +7,7 @@ import {
   LayoutDashboard, CalendarDays, MapPin, Users, LogOut, ClipboardList,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/authStore'
-import { useHydration } from '@/lib/hooks/useHydration'
+import { useLogout } from '@/lib/hooks/useAuth'
 
 const sidebarItems = [
   { href: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
@@ -20,22 +20,16 @@ const sidebarItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const hydrated = useHydration()
-  const { isLoggedIn, isAdmin, nickname, logout } = useAuthStore()
+  const { isLoggedIn, isAdmin, nickname, isInitialized } = useAuthStore()
+  const logoutMutation = useLogout()
 
-  // hydration 완료 후 비관리자 접근 차단
   useEffect(() => {
-    if (!hydrated) return
+    if (!isInitialized) return
     if (!isLoggedIn) router.replace('/login?returnUrl=/admin')
     else if (!isAdmin) router.replace('/')
-  }, [hydrated, isLoggedIn, isAdmin, router])
+  }, [isInitialized, isLoggedIn, isAdmin, router])
 
-  if (!hydrated || !isLoggedIn || !isAdmin) return null
-
-  const handleLogout = () => {
-    logout()
-    router.push('/')
-  }
+  if (!isInitialized || !isLoggedIn || !isAdmin) return null
 
   return (
     <div className="flex min-h-screen bg-[#F8F5F2]">
@@ -80,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-sm text-white/80 font-medium">{nickname ?? '관리자'}</span>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={() => logoutMutation.mutate()}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-input text-sm text-white/50 hover:bg-white/10 hover:text-white transition-colors"
           >
             <LogOut size={18} />

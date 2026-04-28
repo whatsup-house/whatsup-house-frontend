@@ -111,6 +111,7 @@ export interface UserProfile {
   animalColor: string
   animalPose: string
   interests: string[] | null
-  mileage: number
+  mileage?: number
   avatarUrl: string | null
+  admin?: boolean
 }
