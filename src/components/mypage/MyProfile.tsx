@@ -23,17 +23,17 @@ function ProfileRow({ label, value }: { label: string; value: string | null | un
 
 export default function MyProfile() {
   const router = useRouter()
-  const { isLoggedIn, hydrated } = useRequireAuth()
+  const { isLoggedIn, isInitialized } = useRequireAuth()
   const { data: profile, isLoading } = useMyProfile()
   const logout = useLogout()
 
   useEffect(() => {
-    if (hydrated && !isLoggedIn) {
+    if (isInitialized && !isLoggedIn) {
       router.replace('/login?returnUrl=/mypage')
     }
-  }, [hydrated, isLoggedIn, router])
+  }, [isInitialized, isLoggedIn, router])
 
-  if (!hydrated || !isLoggedIn || isLoading) {
+  if (!isInitialized || !isLoggedIn || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-sm text-tag-text">불러오는 중...</p>
@@ -71,7 +71,7 @@ export default function MyProfile() {
           </div>
           <div className="bg-tag-bg rounded-full px-4 py-1.5">
             <span className="text-sm font-semibold text-foreground">
-              {profile.mileage.toLocaleString()} 마일리지
+              {(profile.mileage ?? 0).toLocaleString()} 마일리지
             </span>
           </div>
         </div>
