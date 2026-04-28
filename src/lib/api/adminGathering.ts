@@ -43,6 +43,8 @@ export interface LocationItem {
   contractStatus: string
 }
 
+export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'ATTENDED'
+
 export interface AdminApplicationItem {
   id: string
   bookingNumber?: string
@@ -54,7 +56,7 @@ export interface AdminApplicationItem {
   mbti: string | null
   intro: string | null
   referralSource: string | null
-  status: string
+  status: ApplicationStatus
   createdAt: string
   isGuest: boolean
 }
@@ -136,5 +138,13 @@ export const adminGatheringApi = {
 
   deleteApplication: async (applicationId: string) => {
     await apiClient.delete(`/api/admin/applications/${applicationId}`)
+  },
+
+  updateApplicationStatus: async (applicationId: string, status: ApplicationStatus) => {
+    const res = await apiClient.patch<ApiResponse<unknown>>(
+      `/api/admin/applications/${applicationId}/status`,
+      { status }
+    )
+    return res.data.data
   },
 }
