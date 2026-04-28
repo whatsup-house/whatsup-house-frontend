@@ -29,8 +29,9 @@ export function useUpdateGathering(onSuccess?: () => void) {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: GatheringCreateRequest }) =>
       adminGatheringApi.update(id, data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'gatherings'] })
+      queryClient.invalidateQueries({ queryKey: ['gathering', variables.id] })
       onSuccess?.()
     },
     onError: (err: unknown) => {
