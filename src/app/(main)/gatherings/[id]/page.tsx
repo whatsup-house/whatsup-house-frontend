@@ -40,17 +40,25 @@ export default function GatheringDetailPage({
 
   const isRecruiting = gathering.status === 'OPEN'
 
+  const APPLY_BUTTON_LABEL: Record<string, string> = {
+    OPEN: '신청하기',
+    CLOSED: '마감',
+    COMPLETED: '종료된 게더링',
+    CANCELLED: '취소됨',
+  }
+  const applyButtonLabel = APPLY_BUTTON_LABEL[gathering.status] ?? '마감'
+
   const handleApplyClick = () => {
-    if (isLoggedIn) {
-      router.push(`/gatherings/${id}/apply?type=user`)
-    } else {
-      setIsModalOpen(true)
-    }
+    setIsModalOpen(true)
   }
 
   const handleLoginApply = () => {
     setIsModalOpen(false)
-    requireAuth(`/gatherings/${id}`)
+    if (isLoggedIn) {
+      router.push(`/gatherings/${id}/apply`)
+    } else {
+      requireAuth(`/gatherings/${id}`)
+    }
   }
 
   const handleGuestApply = () => {
@@ -77,7 +85,7 @@ export default function GatheringDetailPage({
             disabled={!isRecruiting}
             onClick={handleApplyClick}
           >
-            {isRecruiting ? '신청하기' : '마감'}
+            {applyButtonLabel}
           </Button>
         </div>
       </div>
