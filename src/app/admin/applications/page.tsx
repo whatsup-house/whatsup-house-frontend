@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGatheringApi, AdminGatheringListItem } from '@/lib/api/adminGathering'
+import { useAdminApplications } from '@/lib/hooks/useAdminGathering'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
@@ -189,11 +190,7 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
 function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   const queryClient = useQueryClient()
 
-  const { data: participants = [], isLoading } = useQuery({
-    queryKey: ['admin', 'applications', gatheringId],
-    queryFn: () => adminGatheringApi.getApplications(gatheringId),
-    enabled: !!gatheringId,
-  })
+  const { data: participants = [], isLoading } = useAdminApplications(gatheringId)
 
   const { mutate: updateAttendance } = useMutation({
     mutationFn: ({ id, attended }: { id: string; attended: boolean }) =>
@@ -236,7 +233,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
       <table className="w-full">
         <thead>
           <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
-            {['이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '출석', '삭제'].map((col) => (
+            {['예약번호', '이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '출석', '삭제'].map((col) => (
               <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
             ))}
           </tr>
@@ -246,6 +243,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
             const isAttended = p.status === 'ATTENDED'
             return (
               <tr key={p.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
+                <td className="px-4 py-3 text-[12px] text-[#767676] whitespace-nowrap">{p.bookingNumber ?? '-'}</td>
                 <td className="px-4 py-3 font-medium text-[14px]">{p.name}</td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-0.5 rounded-full text-xs ${p.isGuest ? 'bg-[#FFF3E0] text-[#FF9800]' : 'bg-[#E3F2FD] text-[#1976D2]'}`}>

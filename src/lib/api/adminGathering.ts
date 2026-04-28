@@ -45,6 +45,7 @@ export interface LocationItem {
 
 export interface AdminApplicationItem {
   id: string
+  bookingNumber?: string
   name: string
   phone: string | null
   gender: string | null
@@ -114,6 +115,13 @@ export const adminGatheringApi = {
   getApplications: async (gatheringId: string): Promise<AdminApplicationItem[]> => {
     const res = await apiClient.get<ApiResponse<AdminApplicationItem[]>>(
       `/api/admin/gatherings/${gatheringId}/applications`
+    )
+    return res.data.data ?? []
+  },
+
+  getApplicationsByGathering: async (gatheringId: string): Promise<AdminApplicationItem[]> => {
+    const res = await apiClient.get<ApiResponse<AdminApplicationItem[]>>(
+      `/api/admin/applications?gatheringId=${gatheringId}`
     )
     return res.data.data ?? []
   },
