@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card } from '@/components/ui'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import dayjs from 'dayjs'
@@ -16,9 +17,15 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const {
     title, eventDate, startTime, endTime, location,
     price, maxAttendees, thumbnailUrl,
-    description, howToRun,
+    description, howToRun, photoUrls, mileageReward,
     reviewCount,
   } = gathering
+
+  const photos = photoUrls && photoUrls.length > 0 ? photoUrls : (thumbnailUrl ? [thumbnailUrl] : [])
+  const [photoIndex, setPhotoIndex] = useState(0)
+
+  const handlePrevPhoto = () => setPhotoIndex((i) => (i - 1 + photos.length) % photos.length)
+  const handleNextPhoto = () => setPhotoIndex((i) => (i + 1) % photos.length)
 
   const formattedDate = dayjs(eventDate).format('YYYY년 M월 D일 dddd')
   const formattedStartTime = startTime?.slice(0, 5) ?? ''
@@ -38,10 +45,10 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
     <div className="bg-card">
       {/* 헤더 */}
       <div className="relative">
-        {/* 썸네일 */}
-        <div className="relative w-full aspect-[390/260] bg-tag-bg">
-          {thumbnailUrl ? (
-            <img src={thumbnailUrl} alt={title} className="w-full h-full object-cover" />
+        {/* 이미지 슬라이더 */}
+        <div className="relative w-full aspect-[390/260] bg-tag-bg overflow-hidden">
+          {photos.length > 0 ? (
+            <img src={photos[photoIndex]} alt={`${title} ${photoIndex + 1}`} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-gradient-to-b from-tag-bg to-background" />
           )}
@@ -63,11 +70,43 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             </button>
           </div>
 
-          {/* 와썹하우스 주최 뱃지 */}
-          <div className="absolute bottom-3 left-4">
+          {/* 슬라이더 화살표 (2장 이상) */}
+          {photos.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevPhoto}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm"
+                aria-label="이전 사진"
+              >
+                <ChevronLeft size={18} className="text-white" />
+              </button>
+              <button
+                onClick={handleNextPhoto}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm"
+                aria-label="다음 사진"
+              >
+                <ChevronRight size={18} className="text-white" />
+              </button>
+            </>
+          )}
+
+          {/* 하단 영역: 뱃지 + 도트 인디케이터 */}
+          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
             <span className="bg-primary text-white text-xs font-medium px-3 py-1.5 rounded-full">
               와썹하우스 주최
             </span>
+            {photos.length > 1 && (
+              <div className="flex items-center gap-1.5 mr-1">
+                {photos.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPhotoIndex(i)}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${i === photoIndex ? 'bg-white' : 'bg-white/40'}`}
+                    aria-label={`${i + 1}번 사진`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -135,6 +174,17 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
                 </p>
               </div>
             </div>
+
+            {/* 마일리지 적립 */}
+            {mileageReward != null && mileageReward > 0 && (
+              <div className="flex items-start gap-3">
+                <Gift size={18} className="text-tag-text mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-tag-text mb-0.5">마일리지 적립</p>
+                  <p className="text-sm font-semibold text-primary">+{mileageReward.toLocaleString()}M</p>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 
