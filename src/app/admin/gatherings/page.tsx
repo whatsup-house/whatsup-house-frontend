@@ -123,12 +123,14 @@ export default function AdminGatheringsPage() {
               )}
               {gatherings.map((g) => {
                 const fillRate = g.capacity > 0 ? g.currentApplicants / g.capacity : 0
+                const isReadOnly = g.status === 'COMPLETED' || g.status === 'CANCELLED'
                 return (
                   <tr key={g.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
                     <td className="px-4 py-3 max-w-[220px]">
                       <button
-                        onClick={() => handleOpenEdit(g)}
-                        className="font-medium text-[14px] text-[#1A1A1A] hover:text-primary text-left truncate block w-full"
+                        onClick={() => !isReadOnly && handleOpenEdit(g)}
+                        disabled={isReadOnly}
+                        className="font-medium text-[14px] text-[#1A1A1A] hover:text-primary text-left truncate block w-full disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {g.title}
                       </button>
@@ -164,7 +166,9 @@ export default function AdminGatheringsPage() {
                       <div className="flex items-center gap-3 text-[13px]">
                         <button
                           onClick={() => handleOpenEdit(g)}
-                          className="text-primary hover:underline"
+                          disabled={isReadOnly}
+                          className="text-primary hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+                          title={isReadOnly ? '완료/취소된 게더링은 수정할 수 없습니다' : undefined}
                         >
                           수정
                         </button>
