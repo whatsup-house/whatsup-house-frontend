@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Card } from '@/components/ui'
+import { Card, Badge } from '@/components/ui'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import dayjs from 'dayjs'
 
@@ -15,7 +15,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const router = useRouter()
 
   const {
-    title, eventDate, startTime, endTime, location,
+    title, status, eventDate, startTime, endTime, location,
     price, maxAttendees, thumbnailUrl,
     description, howToRun, photoUrls, mileageReward,
     reviewCount,
@@ -114,7 +114,12 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
       {/* 본문 영역 */}
       <div className="px-4 pt-5 pb-4">
         {/* 제목 */}
-        <h1 className="text-xl font-bold text-foreground leading-tight mb-3">{title}</h1>
+        <div className="mb-3">
+          <div className="mb-2">
+            <Badge variant={status} />
+          </div>
+          <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
+        </div>
 
         {/* 정보 카드 */}
         <Card className="p-4 mb-6 border border-tag-bg/50">
