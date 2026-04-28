@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminGatheringApi, GatheringCreateRequest } from '@/lib/api/adminGathering'
+import type { AdminGatheringStatus } from '@/lib/api/admin'
 
 export function useAdminLocations() {
   return useQuery({
@@ -37,6 +38,22 @@ export function useUpdateGathering(onSuccess?: () => void) {
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
       alert(msg || '저장 중 오류가 발생했어요.')
+    },
+  })
+}
+
+export function useUpdateGatheringStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: AdminGatheringStatus }) =>
+      adminGatheringApi.updateStatus(id, status),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'gatherings'] })
+      queryClient.invalidateQueries({ queryKey: ['gathering', variables.id] })
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      alert(msg || '상태 변경 중 오류가 발생했어요.')
     },
   })
 }
