@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { ArrowLeft, Bell } from 'lucide-react'
 import { useNavigationStore } from '@/lib/store/navigationStore'
 
-const HIDDEN_PATTERNS = [/^\/gatherings\/[^/]+/]
+const HIDDEN_PATTERNS = [/^\/gatherings\/[^/]+$/]
 
 const PAGE_TITLES: Record<string, string> = {
   '/': '와썹하우스',
