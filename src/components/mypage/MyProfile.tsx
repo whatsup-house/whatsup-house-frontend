@@ -51,12 +51,6 @@ export default function MyProfile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
-        <div className="px-4 py-4">
-          <h1 className="text-base font-bold text-foreground text-center">마이페이지</h1>
-        </div>
-      </header>
-
       <div className="px-6 py-6 flex flex-col gap-4">
         {/* 프로필 요약 */}
         <div className="bg-card rounded-card p-5 flex flex-col items-center gap-3">

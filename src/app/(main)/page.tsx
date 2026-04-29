@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import dayjs from 'dayjs'
-import { Bell } from 'lucide-react'
 import ViewToggle from '@/components/gathering/ViewToggle'
 import CalendarView from '@/components/gathering/CalendarView'
 import MapView from '@/components/gathering/MapView'
@@ -28,13 +27,6 @@ export default function MainHomePage() {
 
   return (
     <div className="min-h-screen bg-background pb-6">
-      <header className="flex items-center justify-between px-4 py-4">
-        <h1 className="text-lg font-bold text-foreground">와썹하우스</h1>
-        <button className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
-          <Bell size={22} className="text-foreground" />
-        </button>
-      </header>
-
       <div className="mb-4">
         <ViewToggle view={view} onChange={setView} />
       </div>
