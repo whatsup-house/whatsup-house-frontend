@@ -32,21 +32,17 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
-    // refresh 대상이 아닌 경우 그대로 reject
-    // - 401이 아닌 에러
-    // - 이미 재시도한 요청 (_retry)
-    // - /api/auth/refresh 자체의 실패 (무한루프 방지)
-    // - /api/users/me: useInitAuth에서 비로그인 여부 판단하는 경로
     if (
       error.response?.status !== 401 ||
       original._retry ||
-      original.url?.includes('/api/auth/refresh') ||
-      original.url?.includes('/api/users/me')
+      original.url?.includes('/api/auth/refresh')
     ) {
       return Promise.reject(error)
     }
 
-    // 이미 재발급 진행 중이면 큐에 쌓아두었다가 완료 후 재시도
+    // /api/users/me 는 앱 초기 인증 확인용 — refresh 실패 시 login 리다이렉트 하지 않음
+    const isInitAuthCall = original.url?.includes('/api/users/me') ?? false
+
     if (isRefreshing) {
       return new Promise<void>((resolve, reject) => {
         refreshQueue.push({ resolve, reject })
@@ -66,7 +62,7 @@ apiClient.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError)
       useAuthStore.getState().logout()
-      if (typeof window !== 'undefined') {
+      if (!isInitAuthCall && typeof window !== 'undefined') {
         const returnUrl = encodeURIComponent(window.location.pathname)
         window.location.href = `/login?returnUrl=${returnUrl}`
       }
