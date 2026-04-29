@@ -13,6 +13,9 @@ const PAGE_TITLES: Record<string, string> = {
   '/gatherings': '게더링',
   '/social': '소셜',
   '/mypage': '마이페이지',
+  '/login': '로그인',
+  '/register': '회원가입',
+  '/onboarding': '온보딩',
 }
 
 function getTitle(pathname: string): string {
@@ -35,7 +38,7 @@ export default function TopNav() {
   const title = getTitle(pathname)
 
   return (
-    <header className="sticky top-0 z-30 bg-card border-b border-tag-bg">
+    <header className="sticky top-0 z-30">
       <div className="flex items-center justify-between h-14 px-4">
         <div className="flex items-center gap-1">
           {!isRootTab && (
