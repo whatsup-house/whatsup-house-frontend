@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, Badge } from '@/components/ui'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import dayjs from 'dayjs'
@@ -12,8 +11,6 @@ interface GatheringDetailProps {
 }
 
 export default function GatheringDetail({ gathering }: GatheringDetailProps) {
-  const router = useRouter()
-
   const {
     title, status, eventDate, startTime, endTime, location,
     price, maxAttendees, thumbnailUrl,
@@ -54,14 +51,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
           )}
 
           {/* 헤더 오버레이 */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => router.back()}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm min-h-[44px] min-w-[44px]"
-              aria-label="뒤로가기"
-            >
-              <ArrowLeft size={20} className="text-white" />
-            </button>
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-end px-4 py-3">
             <button
               className="w-10 h-10 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm min-h-[44px] min-w-[44px]"
               aria-label="공유하기"
