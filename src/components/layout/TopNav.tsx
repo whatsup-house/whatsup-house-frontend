@@ -2,11 +2,9 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { ArrowLeft, Bell } from 'lucide-react'
+import { useNavigationStore } from '@/lib/store/navigationStore'
 
-// BottomNav와 동일하게 /gatherings/[id] 및 하위 경로에서 숨김
 const HIDDEN_PATTERNS = [/^\/gatherings\/[^/]+/]
-
-const ROOT_TABS = ['/', '/gatherings', '/social', '/mypage']
 
 const PAGE_TITLES: Record<string, string> = {
   '/': '와썹하우스',
@@ -29,21 +27,27 @@ function getTitle(pathname: string): string {
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const { stack, back } = useNavigationStore()
 
   if (HIDDEN_PATTERNS.some((pattern) => pattern.test(pathname))) {
     return null
   }
 
-  const isRootTab = ROOT_TABS.includes(pathname)
+  const canGoBack = stack.length > 1
   const title = getTitle(pathname)
+
+  const handleBack = () => {
+    back()
+    router.back()
+  }
 
   return (
     <header className="sticky top-0 z-30">
       <div className="flex items-center justify-between h-14 px-4">
         <div className="flex items-center gap-1">
-          {!isRootTab && (
+          {canGoBack && (
             <button
-              onClick={() => router.back()}
+              onClick={handleBack}
               className="-ml-1 p-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-foreground"
               aria-label="뒤로가기"
             >
