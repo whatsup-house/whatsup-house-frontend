@@ -1,8 +1,8 @@
 'use client'
 
-import { Suspense, use } from 'react'
+import { Suspense, use, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckCircle, Calendar, MapPin, CreditCard, Hash } from 'lucide-react'
+import { CheckCircle, Calendar, MapPin, CreditCard, Hash, Copy, Check } from 'lucide-react'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import dayjs from 'dayjs'
@@ -12,6 +12,14 @@ function ApplyCompleteContent({ id }: { id: string }) {
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
   const { data: gathering, isLoading } = useGatheringDetail(id)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    if (!bookingNumber) return
+    await navigator.clipboard.writeText(bookingNumber)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   if (isLoading || !gathering) {
     return (
@@ -44,12 +52,24 @@ function ApplyCompleteContent({ id }: { id: string }) {
 
         {/* 예약번호 (비회원 전용) */}
         {bookingNumber && (
-          <div className="w-full bg-primary-light rounded-card px-5 py-4 mb-4 flex items-center gap-3">
-            <Hash size={18} className="text-primary shrink-0" />
-            <div>
-              <p className="text-xs text-tag-text">예약번호</p>
-              <p className="text-base font-bold text-primary tracking-wider">{bookingNumber}</p>
+          <div className="w-full mb-4">
+            <div className="bg-primary-light rounded-card px-5 py-4 flex items-center gap-3">
+              <Hash size={18} className="text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-tag-text">예약번호</p>
+                <p className="text-base font-bold text-primary tracking-wider">{bookingNumber}</p>
+              </div>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1 text-xs text-primary font-medium shrink-0"
+              >
+                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? '복사됨' : '복사'}
+              </button>
             </div>
+            <p className="text-xs text-tag-text mt-2 px-1">
+              예약번호와 연락처로 신청 내역을 조회할 수 있어요
+            </p>
           </div>
         )}
 
@@ -97,14 +117,25 @@ function ApplyCompleteContent({ id }: { id: string }) {
 
         {/* 버튼들 */}
         <div className="w-full flex flex-col gap-3">
-          <Button
-            variant="outlined"
-            size="lg"
-            className="w-full"
-            onClick={() => router.push('/mypage')}
-          >
-            내 신청 내역 확인하기
-          </Button>
+          {bookingNumber ? (
+            <Button
+              variant="outlined"
+              size="lg"
+              className="w-full"
+              onClick={() => router.push('/applications/check')}
+            >
+              예약 내역 조회하기
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              size="lg"
+              className="w-full"
+              onClick={() => router.push('/mypage')}
+            >
+              내 신청 내역 확인하기
+            </Button>
+          )}
 
           <button
             onClick={() => router.push('/')}
