@@ -103,6 +103,8 @@ export interface UserProfile {
   name: string | null
   phone: string | null
   bio: string | null
+  intro?: string | null
+  instagramId?: string | null
   gender: string | null
   age: number | null
   job: string | null
