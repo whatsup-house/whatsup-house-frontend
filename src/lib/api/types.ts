@@ -96,6 +96,22 @@ export interface UserApplicationRequest {
 }
 
 
+// 내 신청 내역 타입
+export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
+
+export interface ApplicationListItem {
+  id: string
+  bookingNumber: string
+  status: ApplicationStatus
+  gathering: {
+    id: string
+    title: string
+    eventDate: string
+    thumbnailUrl: string | null
+  }
+  createdAt: string
+}
+
 export interface UserProfile {
   id: string
   email: string
