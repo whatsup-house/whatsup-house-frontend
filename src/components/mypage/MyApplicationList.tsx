@@ -92,7 +92,7 @@ export default function MyApplicationList() {
             </div>
           </div>
 
-          {item.status === 'PENDING' || item.status === 'CONFIRMED' ? (
+          {item.status === 'PENDING' ? (
             <div className="mt-3 pt-3 border-t border-tag-bg/50">
               {confirmingId === item.id ? (
                 <div className="flex items-center justify-between gap-2">
