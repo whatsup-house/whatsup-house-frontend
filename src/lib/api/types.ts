@@ -96,6 +96,19 @@ export interface UserApplicationRequest {
 }
 
 
+// 프로필 수정 요청 타입
+export interface ProfileUpdateRequest {
+  nickname?: string
+  phone?: string
+  name?: string
+  gender?: Gender
+  age?: number
+  instagramId?: string
+  mbti?: string
+  job?: string
+  intro?: string
+}
+
 // 내 신청 내역 타입
 export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
 
