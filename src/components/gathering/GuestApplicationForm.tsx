@@ -69,7 +69,7 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
     reset({
       instagramId: profile.instagramId ?? undefined,
       job: profile.job ?? undefined,
-      intro: profile.intro ?? undefined,
+      intro: profile.intro ?? profile.bio ?? undefined,
     })
   }, [isLoggedIn, profile, reset])
 
