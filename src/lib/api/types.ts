@@ -125,6 +125,20 @@ export interface ApplicationListItem {
   createdAt: string
 }
 
+// 비회원 신청 조회 응답 타입
+export interface GuestApplicationCheckResponse {
+  id: string
+  bookingNumber: string
+  status: ApplicationStatus
+  gathering: {
+    id: string
+    title: string
+    eventDate: string
+    thumbnailUrl: string | null
+  }
+  createdAt: string
+}
+
 export interface UserProfile {
   id: string
   email: string
