@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchMyApplications, cancelApplication } from '@/lib/api/application'
+import { fetchMyApplications, cancelApplication, checkGuestApplication } from '@/lib/api/application'
 
 export function useMyApplications(enabled: boolean) {
   return useQuery({
@@ -17,5 +17,12 @@ export function useCancelApplication() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-applications'] })
     },
+  })
+}
+
+export function useCheckGuestApplication() {
+  return useMutation({
+    mutationFn: ({ bookingNumber, phone }: { bookingNumber: string; phone: string }) =>
+      checkGuestApplication(bookingNumber, phone),
   })
 }
