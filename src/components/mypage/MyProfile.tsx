@@ -1,10 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { Pencil } from 'lucide-react'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import Button from '@/components/ui/Button'
+import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 
 const GENDER_LABELS: Record<string, string> = {
   MALE: '남성',
@@ -26,6 +28,7 @@ export default function MyProfile() {
   const { isLoggedIn, isInitialized } = useRequireAuth()
   const { data: profile, isLoading } = useMyProfile()
   const logout = useLogout()
+  const [showEdit, setShowEdit] = useState(false)
 
   useEffect(() => {
     if (isInitialized && !isLoggedIn) {
@@ -50,10 +53,21 @@ export default function MyProfile() {
   }
 
   return (
+    <>
+    {showEdit && (
+      <ProfileEditOverlay profile={profile} onClose={() => setShowEdit(false)} />
+    )}
     <div className="min-h-screen bg-background">
       <div className="px-6 py-6 flex flex-col gap-4">
         {/* 프로필 요약 */}
-        <div className="bg-card rounded-card p-5 flex flex-col items-center gap-3">
+        <div className="bg-card rounded-card p-5 flex flex-col items-center gap-3 relative">
+          <button
+            onClick={() => setShowEdit(true)}
+            className="absolute top-4 right-4 min-w-[36px] min-h-[36px] flex items-center justify-center text-tag-text"
+            aria-label="프로필 수정"
+          >
+            <Pencil size={16} />
+          </button>
           <div className="w-16 h-16 rounded-full bg-tag-bg flex items-center justify-center text-2xl">
             🐾
           </div>
@@ -115,5 +129,6 @@ export default function MyProfile() {
         </Button>
       </div>
     </div>
+    </>
   )
 }
