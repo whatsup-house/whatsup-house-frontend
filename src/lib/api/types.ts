@@ -106,7 +106,8 @@ export interface ProfileUpdateRequest {
   instagramId?: string
   mbti?: string
   job?: string
-  intro?: string
+  bio?: string
+  interests?: string[]
 }
 
 // 내 신청 내역 타입
