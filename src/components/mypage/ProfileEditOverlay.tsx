@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { X } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useUpdateProfile } from '@/lib/hooks/useAuth'
 import type { UserProfile, Gender } from '@/lib/api/types'
@@ -26,7 +26,7 @@ const schema = z.object({
   age: z.number().int().min(1, '올바른 나이를 입력해주세요').max(100, '올바른 나이를 입력해주세요'),
   instagramId: z.string().optional(),
   job: z.string().optional(),
-  intro: z.string().optional(),
+  bio: z.string().max(100, '소개는 100자 이하여야 합니다').optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -43,6 +43,8 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
     (profile.gender as Gender | null) ?? null
   )
   const [userMbti, setUserMbti] = useState<(string | null)[] | null>(null)
+  const [interests, setInterests] = useState<string[]>(profile.interests ?? [])
+  const [interestInput, setInterestInput] = useState('')
   const [genderError, setGenderError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -63,6 +65,18 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
 
   const mbtiString = mbti.every((v) => v !== null) ? mbti.join('') : null
 
+  const addInterest = () => {
+    const trimmed = interestInput.trim()
+    if (trimmed && !interests.includes(trimmed) && interests.length < 10) {
+      setInterests((prev) => [...prev, trimmed])
+      setInterestInput('')
+    }
+  }
+
+  const removeInterest = (target: string) => {
+    setInterests((prev) => prev.filter((i) => i !== target))
+  }
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   })
@@ -75,7 +89,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
       age: profile.age ?? undefined,
       instagramId: profile.instagramId ?? '',
       job: profile.job ?? '',
-      intro: profile.intro ?? profile.bio ?? '',
+      bio: profile.bio ?? '',
     })
   }, [profile, reset])
 
@@ -96,8 +110,9 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
         age: formData.age,
         instagramId: formData.instagramId || undefined,
         job: formData.job || undefined,
-        intro: formData.intro || undefined,
+        bio: formData.bio || undefined,
         mbti: mbtiString ?? undefined,
+        interests: interests.length > 0 ? interests : undefined,
       })
       onClose()
     } catch {
@@ -187,6 +202,16 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
             </h2>
           </div>
           <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-foreground">한 줄 소개</label>
+              <textarea
+                placeholder="나를 한 줄로 표현해보세요"
+                {...register('bio')}
+                className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground text-sm placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[80px]"
+                rows={3}
+              />
+              {errors.bio && <p className="text-xs text-primary pl-1">{errors.bio.message}</p>}
+            </div>
             <Input
               label="인스타그램 ID"
               placeholder="@username"
@@ -235,14 +260,49 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
                 </p>
               )}
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-foreground">한 줄 자기소개</label>
-              <textarea
-                placeholder="당신은 어떤 분인가요?"
-                {...register('intro')}
-                className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground text-sm placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[80px]"
-                rows={3}
-              />
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-foreground">관심사</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={interestInput}
+                  onChange={(e) => setInterestInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addInterest() } }}
+                  placeholder="관심사 입력 후 추가"
+                  maxLength={20}
+                  className="flex-1 px-4 py-2.5 rounded-input border border-tag-bg bg-card text-foreground text-sm placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[44px]"
+                />
+                <button
+                  type="button"
+                  onClick={addInterest}
+                  disabled={!interestInput.trim() || interests.length >= 10}
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-input bg-tag-bg text-tag-text disabled:opacity-40"
+                  aria-label="관심사 추가"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+              {interests.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {interests.map((interest) => (
+                    <span
+                      key={interest}
+                      className="flex items-center gap-1 bg-tag-bg text-tag-text text-xs px-3 py-1.5 rounded-full"
+                    >
+                      {interest}
+                      <button
+                        type="button"
+                        onClick={() => removeInterest(interest)}
+                        className="ml-0.5 text-tag-text"
+                        aria-label={`${interest} 삭제`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-tag-text">최대 10개</p>
             </div>
           </div>
         </div>
