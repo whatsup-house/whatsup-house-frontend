@@ -53,6 +53,10 @@ export interface RegisterRequest {
   gender: Gender   // @NotNull in backend
   age: number      // @NotNull in backend
   phone?: string   // nullable, 11 digits
+  bio?: string
+  job?: string
+  mbti?: string
+  interests?: string[]
 }
 
 export interface RegisterResponse {
