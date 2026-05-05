@@ -77,7 +77,7 @@ export function useCheckNickname(nickname: string) {
 export function useMyProfile() {
   const { isLoggedIn } = useAuthStore()
   return useQuery({
-    queryKey: ['my-profile'],
+    queryKey: ['user', 'me'],
     queryFn: fetchMyProfile,
     enabled: isLoggedIn,
     staleTime: 1000 * 60 * 5,
@@ -89,7 +89,7 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: (data: ProfileUpdateRequest) => updateMyProfile(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-profile'] })
+      queryClient.invalidateQueries({ queryKey: ['user', 'me'] })
     },
   })
 }

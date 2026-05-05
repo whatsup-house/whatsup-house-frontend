@@ -53,6 +53,10 @@ export interface RegisterRequest {
   gender: Gender   // @NotNull in backend
   age: number      // @NotNull in backend
   phone?: string   // nullable, 11 digits
+  bio?: string
+  job?: string
+  mbti?: string
+  interests?: string[]
 }
 
 export interface RegisterResponse {
@@ -106,7 +110,8 @@ export interface ProfileUpdateRequest {
   instagramId?: string
   mbti?: string
   job?: string
-  intro?: string
+  bio?: string
+  interests?: string[]
 }
 
 // 내 신청 내역 타입
