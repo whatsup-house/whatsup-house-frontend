@@ -42,7 +42,7 @@ export default function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-30">
+    <header className="sticky top-0 z-30 bg-card/85 backdrop-blur-md border-b border-tag-bg">
       <div className="flex items-center justify-between h-14 px-4">
         <div className="flex items-center gap-1">
           {canGoBack && (
