@@ -64,7 +64,7 @@ export default function HeroCarousel() {
         wheelTimer.current = setTimeout(() => {
           wheelLocked.current = false
           wheelAccum.current = 0
-        }, 300)
+        }, 70)
         return
       }
 
@@ -78,7 +78,7 @@ export default function HeroCarousel() {
         if (wheelTimer.current) clearTimeout(wheelTimer.current)
         wheelTimer.current = setTimeout(() => {
           wheelLocked.current = false
-        }, 300)
+        }, 70)
       }
     }
 
@@ -124,7 +124,7 @@ export default function HeroCarousel() {
 
       {/* 슬라이드 컨테이너 */}
       <div
-        className="flex transition-transform duration-300 ease-in-out w-full h-full"
+        className="flex transition-transform duration-70 ease-in-out w-full h-full"
         style={{ transform: `translateX(-${idx * 100}%)` }}
       >
         {SLIDES.map((slide, i) => (
