@@ -1,44 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse } from './types'
-
-export interface AdminUserListItem {
-  id: string
-  nickname: string
-  name: string | null
-  phone: string | null
-  email: string
-  gender: string | null
-  age: number | null
-  job: string | null
-  mbti: string | null
-  createdAt: string
-  applicationCount: number
-  mileage: number
-  accountStatus: string  // ACTIVE / SUSPENDED / ADMIN
-}
-
-export interface AdminUserDetail extends AdminUserListItem {
-  bio: string | null
-  animalType: string | null
-  interests: string[] | null
-  applicationHistory: AdminUserApplicationItem[]
-}
-
-export interface AdminUserApplicationItem {
-  id: string
-  gatheringTitle?: string
-  status: string
-  createdAt: string
-  isGuest: boolean
-}
-
-export interface AdminUserPage {
-  content: AdminUserListItem[]
-  totalElements: number
-  totalPages: number
-  number: number
-  size: number
-}
+import type { ApiResponse, AdminUserListItem, AdminUserDetail, AdminUserPage } from './types'
 
 export const adminUserApi = {
   getUsers: async (keyword?: string, page = 0, size = 10): Promise<AdminUserPage> => {
@@ -60,3 +21,5 @@ export const adminUserApi = {
     await apiClient.patch(`/api/admin/users/${id}/status?suspend=${suspend}`)
   },
 }
+
+export type { AdminUserListItem, AdminUserDetail, AdminUserPage }

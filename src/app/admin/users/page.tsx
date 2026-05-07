@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminUserApi, AdminUserListItem } from '@/lib/api/adminUser'
+import type { AdminUserListItem } from '@/lib/api/types'
+import { useAdminUsers } from '@/lib/hooks/useAdminUsers'
 import { UserDetailPanel } from '@/components/admin/UserDetailPanel'
 import { LoadingSpinner, Pagination } from '@/components/ui'
-import { useForm } from 'react-hook-form'
 
 const GENDER_LABEL: Record<string, string> = { MALE: '남', FEMALE: '여', NONE: '-' }
 const STATUS_STYLE: Record<string, string> = {
@@ -18,17 +17,12 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function AdminUsersPage() {
-  const queryClient = useQueryClient()
   const [keyword, setKeyword] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [page, setPage] = useState(0)
   const [selectedUser, setSelectedUser] = useState<AdminUserListItem | null>(null)
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin', 'users', keyword, page],
-    queryFn: () => adminUserApi.getUsers(keyword || undefined, page),
-  })
-
+  const { data, isLoading } = useAdminUsers(keyword, page)
   const users: AdminUserListItem[] = data?.content ?? []
 
   const handleSearch = (e: React.FormEvent) => {
@@ -40,13 +34,11 @@ export default function AdminUsersPage() {
   return (
     <div className="flex gap-6">
       <div className="flex-1 min-w-0">
-        {/* 헤더 */}
         <div className="flex items-center justify-between mb-5">
           <h1 className="font-bold text-[22px] text-foreground">회원 관리</h1>
           <span className="text-sm text-[#767676]">총 {data?.totalElements ?? 0}명</span>
         </div>
 
-        {/* 검색 */}
         <form
           onSubmit={handleSearch}
           className="bg-white rounded-[12px] p-4 mb-4 flex gap-3 shadow-[0_2px_12px_rgba(0,0,0,0.08)]"
@@ -76,7 +68,6 @@ export default function AdminUsersPage() {
           )}
         </form>
 
-        {/* 테이블 */}
         <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
           <table className="w-full">
             <thead>
@@ -108,12 +99,13 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-3 text-[13px] text-[#767676]">{u.job ?? '-'}</td>
                   <td className="px-4 py-3">
-                    {u.mbti && (
+                    {u.mbti ? (
                       <span className="px-2 py-0.5 bg-[#F0EBE8] text-[#5C4033] rounded-full text-xs">
                         {u.mbti}
                       </span>
+                    ) : (
+                      <span className="text-[13px] text-[#767676]">-</span>
                     )}
-                    {!u.mbti && <span className="text-[13px] text-[#767676]">-</span>}
                   </td>
                   <td className="px-4 py-3 text-[13px]">{u.applicationCount}건</td>
                   <td className="px-4 py-3 text-[13px] whitespace-nowrap">
@@ -145,14 +137,10 @@ export default function AdminUsersPage() {
         />
       </div>
 
-      {/* 회원 상세 패널 */}
       {selectedUser && (
         <UserDetailPanel
           user={selectedUser}
-          onClose={() => {
-            setSelectedUser(null)
-            queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
-          }}
+          onClose={() => setSelectedUser(null)}
         />
       )}
     </div>
