@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication } from '@/lib/api/application'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken } from '@/lib/api/application'
 import type { ApplicationStatus } from '@/lib/api/types'
 
 export function useMyApplications(enabled: boolean) {
@@ -35,5 +35,14 @@ export function useCheckGuestApplication() {
   return useMutation({
     mutationFn: ({ bookingNumber, phone }: { bookingNumber: string; phone: string }) =>
       checkGuestApplication(bookingNumber, phone),
+  })
+}
+
+export function useApplicationByToken(token: string) {
+  return useQuery({
+    queryKey: ['application', 'token', token],
+    queryFn: () => fetchApplicationByToken(token),
+    enabled: !!token,
+    retry: false,
   })
 }

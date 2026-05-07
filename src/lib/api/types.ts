@@ -144,6 +144,23 @@ export interface GuestApplicationCheckResponse {
   createdAt: string
 }
 
+// 토큰 기반 비로그인 신청 조회 응답 타입
+export interface ApplicationTokenCheckResponse {
+  id: string
+  bookingNumber: string
+  status: ApplicationStatus
+  applicantName: string | null
+  gathering: {
+    id: string
+    title: string
+    eventDate: string
+    startTime?: string
+    locationName?: string | null
+    thumbnailUrl: string | null
+  }
+  createdAt: string
+}
+
 export interface AdminDashboardGathering {
   id: string
   title: string
