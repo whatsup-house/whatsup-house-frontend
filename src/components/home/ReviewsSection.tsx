@@ -12,6 +12,8 @@ const REVIEWS: Review[] = [
   { img: '/home/home-5.png', nick: '밤산책',       mbti: 'INTJ', text: '퇴근하고 가볍게 다녀오기 딱 좋네요.' },
 ]
 
+import Link from 'next/link'
+
 export default function ReviewsSection() {
   return (
     <div className="pt-2 pb-6">
@@ -20,7 +22,9 @@ export default function ReviewsSection() {
           <div className="w-1 h-[18px] rounded-full bg-primary" />
           <span className="text-[15px] font-bold text-foreground">다녀온 사람들의 후기</span>
         </div>
-        <span className="text-xs text-tag-text/70">전체보기 ›</span>
+        <Link href="/reviews" className="text-xs text-tag-text/70 min-h-[36px] flex items-center">
+          전체보기 ›
+        </Link>
       </div>
       <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4">
         {REVIEWS.map((review, i) => (
