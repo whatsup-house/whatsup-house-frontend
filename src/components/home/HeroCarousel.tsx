@@ -57,7 +57,16 @@ export default function HeroCarousel() {
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return
       e.preventDefault()
-      if (wheelLocked.current) return
+
+      if (wheelLocked.current) {
+        // 관성 이벤트가 계속 오는 동안 타이머를 연장해 lock 유지
+        if (wheelTimer.current) clearTimeout(wheelTimer.current)
+        wheelTimer.current = setTimeout(() => {
+          wheelLocked.current = false
+          wheelAccum.current = 0
+        }, 300)
+        return
+      }
 
       wheelAccum.current += e.deltaX
       if (Math.abs(wheelAccum.current) > 30) {
@@ -67,10 +76,9 @@ export default function HeroCarousel() {
         wheelAccum.current = 0
         wheelLocked.current = true
         if (wheelTimer.current) clearTimeout(wheelTimer.current)
-        // 관성 스크롤이 끝날 때까지 추가 입력 차단
         wheelTimer.current = setTimeout(() => {
           wheelLocked.current = false
-        }, 600)
+        }, 300)
       }
     }
 
