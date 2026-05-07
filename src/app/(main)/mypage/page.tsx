@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import MyProfile from '@/components/mypage/MyProfile'
 import MyApplicationList from '@/components/mypage/MyApplicationList'
+import MyReviewList from '@/components/mypage/MyReviewList'
 
 const TABS = [
   { key: 'profile', label: '프로필' },
   { key: 'applications', label: '신청 내역' },
+  { key: 'reviews', label: '후기' },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
@@ -34,13 +36,13 @@ export default function MyPage() {
         </div>
       </div>
 
-      {activeTab === 'profile' ? (
-        <MyProfile />
-      ) : (
+      {activeTab === 'profile' && <MyProfile />}
+      {activeTab === 'applications' && (
         <div className="px-4 py-5">
           <MyApplicationList />
         </div>
       )}
+      {activeTab === 'reviews' && <MyReviewList />}
     </div>
   )
 }

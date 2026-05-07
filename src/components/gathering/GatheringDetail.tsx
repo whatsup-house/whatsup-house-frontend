@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, Badge } from '@/components/ui'
+import ReviewListSection from './ReviewListSection'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import dayjs from 'dayjs'
 
@@ -231,42 +232,16 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
 
         {/* 후기 섹션 */}
         <div className="mb-2">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-1 h-5 bg-primary rounded-full" />
-            <h2 className="text-base font-bold text-foreground">참가자 후기</h2>
-          </div>
-
-          {(reviewCount ?? 0) > 0 ? (
-            <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide">
-              {/* 후기 카드 예시 (실제 후기 데이터 연결시 교체) */}
-              <Card className="min-w-[200px] max-w-[200px] p-4 shrink-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-tag-bg" />
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">참가자</p>
-                    <p className="text-[10px] text-tag-text">2024.05.20</p>
-                  </div>
-                </div>
-                <p className="text-xs text-tag-text leading-relaxed line-clamp-3">
-                  &quot;분위기가 너무 좋았어요. 다음에도 참여하고 싶습니다!&quot;
-                </p>
-              </Card>
-              <Card className="min-w-[200px] max-w-[200px] p-4 shrink-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-tag-bg" />
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">참가자</p>
-                    <p className="text-[10px] text-tag-text">2024.05.18</p>
-                  </div>
-                </div>
-                <p className="text-xs text-tag-text leading-relaxed line-clamp-3">
-                  &quot;편안한 분위기에서 좋은 사람들과 시간을 보낼 수 있었습니다.&quot;
-                </p>
-              </Card>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-primary rounded-full" />
+              <h2 className="text-base font-bold text-foreground">참가자 후기</h2>
             </div>
-          ) : (
-            <p className="text-sm text-tag-text py-4">아직 후기가 없어요.</p>
-          )}
+            {(reviewCount ?? 0) > 0 && (
+              <span className="text-sm text-tag-text">{reviewCount}개</span>
+            )}
+          </div>
+          <ReviewListSection />
         </div>
       </div>
     </div>

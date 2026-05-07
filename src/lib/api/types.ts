@@ -161,6 +161,23 @@ export interface ApplicationTokenCheckResponse {
   createdAt: string
 }
 
+export type ReviewType = 'TEXT' | 'PHOTO'
+
+export interface ReviewItem {
+  id: string
+  authorNickname: string
+  authorAnimalType: string
+  createdAt: string
+  gatheringId: string
+  gatheringTitle: string
+  type: ReviewType
+  imageUrl?: string | null
+  content: string
+  likeCount: number
+  isLikedByMe: boolean
+  isMyReview: boolean
+}
+
 export interface AdminDashboardGathering {
   id: string
   title: string
