@@ -32,6 +32,7 @@ export default function HeroCarousel() {
   const containerRef = useRef<HTMLDivElement>(null)
   const wheelAccum = useRef(0)
   const wheelLocked = useRef(false)
+  const wheelLockStart = useRef(0)
   const wheelTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
 
@@ -59,12 +60,14 @@ export default function HeroCarousel() {
       e.preventDefault()
 
       if (wheelLocked.current) {
-        // 관성 이벤트가 계속 오는 동안 타이머를 연장해 lock 유지
-        if (wheelTimer.current) clearTimeout(wheelTimer.current)
-        wheelTimer.current = setTimeout(() => {
-          wheelLocked.current = false
-          wheelAccum.current = 0
-        }, 70)
+        // 300ms(애니메이션 완료) 이후부터 관성 이벤트마다 70ms씩 연장
+        if (Date.now() - wheelLockStart.current >= 300) {
+          if (wheelTimer.current) clearTimeout(wheelTimer.current)
+          wheelTimer.current = setTimeout(() => {
+            wheelLocked.current = false
+            wheelAccum.current = 0
+          }, 70)
+        }
         return
       }
 
@@ -75,10 +78,12 @@ export default function HeroCarousel() {
         resetTimer()
         wheelAccum.current = 0
         wheelLocked.current = true
+        wheelLockStart.current = Date.now()
         if (wheelTimer.current) clearTimeout(wheelTimer.current)
+        // 애니메이션(300ms) 동안은 무조건 lock 유지
         wheelTimer.current = setTimeout(() => {
           wheelLocked.current = false
-        }, 70)
+        }, 300)
       }
     }
 
