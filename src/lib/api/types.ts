@@ -160,6 +160,45 @@ export interface AdminDashboardGathering {
   status: 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 }
 
+export interface AdminUserApplicationItem {
+  id: string
+  gatheringTitle?: string
+  status: string
+  createdAt: string
+  isGuest: boolean
+}
+
+export interface AdminUserListItem {
+  id: string
+  nickname: string
+  name: string | null
+  phone: string | null
+  email: string
+  gender: string | null
+  age: number | null
+  job: string | null
+  mbti: string | null
+  createdAt: string
+  applicationCount: number
+  mileage: number
+  accountStatus: string
+}
+
+export interface AdminUserDetail extends AdminUserListItem {
+  bio: string | null
+  animalType: string | null
+  interests: string[] | null
+  applicationHistory: AdminUserApplicationItem[]
+}
+
+export interface AdminUserPage {
+  content: AdminUserListItem[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
+}
+
 export interface UserProfile {
   id: string
   email: string

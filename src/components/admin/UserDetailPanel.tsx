@@ -1,7 +1,7 @@
 'use client'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { adminUserApi, AdminUserListItem } from '@/lib/api/adminUser'
+import type { AdminUserListItem } from '@/lib/api/types'
+import { useAdminUserDetail, useUpdateUserStatus } from '@/lib/hooks/useAdminUsers'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Button from '@/components/ui/Button'
 import dayjs from 'dayjs'
@@ -25,21 +25,8 @@ interface UserDetailPanelProps {
 }
 
 export function UserDetailPanel({ user, onClose }: UserDetailPanelProps) {
-  const queryClient = useQueryClient()
-
-  const { data: detail, isLoading } = useQuery({
-    queryKey: ['admin', 'users', user.id],
-    queryFn: () => adminUserApi.getUserDetail(user.id),
-  })
-
-  const { mutate: updateStatus, isPending } = useMutation({
-    mutationFn: (suspend: boolean) => adminUserApi.updateStatus(user.id, suspend),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users', user.id] })
-    },
-    onError: () => alert('상태 변경 중 오류가 발생했습니다.'),
-  })
+  const { data: detail, isLoading } = useAdminUserDetail(user.id)
+  const { mutate: updateStatus, isPending } = useUpdateUserStatus(user.id)
 
   const isSuspended = (detail?.accountStatus ?? user.accountStatus) === 'SUSPENDED'
   const isAdmin = (detail?.accountStatus ?? user.accountStatus) === 'ADMIN'
