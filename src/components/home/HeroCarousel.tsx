@@ -31,6 +31,7 @@ export default function HeroCarousel() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const wheelAccum = useRef(0)
+  const wheelLocked = useRef(false)
   const wheelTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
 
@@ -56,17 +57,21 @@ export default function HeroCarousel() {
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return
       e.preventDefault()
+      if (wheelLocked.current) return
 
       wheelAccum.current += e.deltaX
-      if (wheelTimer.current) clearTimeout(wheelTimer.current)
-      wheelTimer.current = setTimeout(() => {
-        if (Math.abs(wheelAccum.current) > 30) {
-          const dir = wheelAccum.current > 0 ? 1 : -1
-          setIdx(prev => Math.max(0, Math.min(SLIDES.length - 1, prev + dir)))
-          resetTimer()
-        }
+      if (Math.abs(wheelAccum.current) > 30) {
+        const dir = wheelAccum.current > 0 ? 1 : -1
+        setIdx(prev => Math.max(0, Math.min(SLIDES.length - 1, prev + dir)))
+        resetTimer()
         wheelAccum.current = 0
-      }, 50)
+        wheelLocked.current = true
+        if (wheelTimer.current) clearTimeout(wheelTimer.current)
+        // 관성 스크롤이 끝날 때까지 추가 입력 차단
+        wheelTimer.current = setTimeout(() => {
+          wheelLocked.current = false
+        }, 600)
+      }
     }
 
     el.addEventListener('wheel', handleWheel, { passive: false })
