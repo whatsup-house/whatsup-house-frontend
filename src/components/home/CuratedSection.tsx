@@ -8,9 +8,10 @@ interface CuratedItem {
 }
 
 const ITEMS: CuratedItem[] = [
-  { rank: 1, title: '전국 대학생 게더링', sub: '5월 21일 수', img: '/home/home-1.png' },
-  { rank: 2, title: '경찰과 도둑',         sub: '5월 11일 일', img: '/home/home-3.png' },
-  { rank: 3, title: '퇴근 게더링',         sub: '5월 1·2일',  img: '/home/home-5.png' },
+  { rank: 1, title: '퇴근 게더링', sub: '매주 금요일, 토요일', img: '/home/home-2.png' },
+  { rank: 2, title: '전국 대학생 게더링', sub: '5월 21일 수요일', img: '/home/home-4.png' },
+  { rank: 3, title: '경찰과 도둑', sub: '5월 11일 일요일', img: '/home/home-3.png' },
+
 ]
 
 export default function CuratedSection() {
@@ -27,9 +28,8 @@ export default function CuratedSection() {
             className="flex items-center gap-3 bg-card rounded-2xl p-2.5 border border-tag-bg/40"
           >
             <span
-              className={`w-7 text-center text-lg font-bold flex-shrink-0 ${
-                item.rank === 1 ? 'text-primary' : 'text-tag-text'
-              }`}
+              className={`w-7 text-center text-lg font-bold flex-shrink-0 ${item.rank === 1 ? 'text-primary' : 'text-tag-text'
+                }`}
             >
               {item.rank}
             </span>

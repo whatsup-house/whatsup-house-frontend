@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Flame } from 'lucide-react'
 
@@ -16,22 +16,95 @@ interface Slide {
 }
 
 const SLIDES: Slide[] = [
-  { type: 'gathering', src: '/home/home-1.png', label: '전국 대학생 게더링', date: '5월 21일 수', gatheringId: '1' },
-  { type: 'calendar',  src: '/home/home-2.png', label: '5월 게더링 일정' },
-  { type: 'gathering', src: '/home/home-3.png', label: '경찰과 도둑', date: '5월 11일 일', gatheringId: '2' },
-  { type: 'story',     src: '/home/home-4.png', label: '우리 젊다', sub: 'Whatsup house story' },
-  { type: 'story',     src: '/home/home-5.png', label: '퇴근 게더링', sub: '와썹하우스' },
+  { type: 'calendar', src: '/home/home-1.png', label: '5월 게더링 일정' },
+  { type: 'story', src: '/home/home-2.png', label: '퇴근 게더링', sub: '와썹하우스' },
+  { type: 'gathering', src: '/home/home-3.png', label: '전국 대학생 게더링', date: '5월 21일 수', gatheringId: '1' },
+  { type: 'gathering', src: '/home/home-4.png', label: '경찰과 도둑', date: '5월 11일 일', gatheringId: '2' },
+  { type: 'story', src: '/home/home-5.png', label: '우리 젊다', sub: 'Whatsup house story' },
 ]
+
+const AUTO_INTERVAL = 5000
+// 이 시간(ms) 이상 wheel 이벤트가 없으면 새 제스처로 판단
+const GESTURE_GAP = 100
+const SWIPE_THRESHOLD = 40
 
 export default function HeroCarousel() {
   const [idx, setIdx] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
+  const touchStartX = useRef(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
-  const handleScroll = () => {
-    if (!ref.current) return
-    const w = ref.current.offsetWidth
-    setIdx(Math.round(ref.current.scrollLeft / w))
+  // 제스처 상태 (lock 없음 — 제스처 경계만 감지)
+  const wheelAccum = useRef(0)
+  const wheelGestureDir = useRef(0)   // 현재 제스처 방향 (1 or -1 or 0)
+  const wheelLastTime = useRef(0)
+  const wheelTriggered = useRef(false) // 이번 제스처에서 이미 전환했는지
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      setIdx(prev => (prev + 1) % SLIDES.length)
+    }, AUTO_INTERVAL)
+  }, [])
+
+  useEffect(() => {
+    resetTimer()
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [resetTimer])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return
+      e.preventDefault()
+
+      const now = Date.now()
+      const gap = now - wheelLastTime.current
+      const dir = e.deltaX > 0 ? 1 : -1
+
+      // 새 제스처: 시간 간격 초과 또는 방향 전환
+      const isNewGesture =
+        gap > GESTURE_GAP ||
+        (wheelGestureDir.current !== 0 && dir !== wheelGestureDir.current)
+
+      if (isNewGesture) {
+        wheelAccum.current = 0
+        wheelTriggered.current = false
+        wheelGestureDir.current = 0
+      }
+
+      wheelLastTime.current = now
+      if (wheelGestureDir.current === 0) wheelGestureDir.current = dir
+      if (wheelTriggered.current) return
+
+      wheelAccum.current += e.deltaX
+      if (Math.abs(wheelAccum.current) >= SWIPE_THRESHOLD) {
+        setIdx(prev => Math.max(0, Math.min(SLIDES.length - 1, prev + wheelGestureDir.current)))
+        resetTimer()
+        wheelTriggered.current = true
+        wheelAccum.current = 0
+      }
+    }
+
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheel)
+  }, [resetTimer])
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 50) {
+      setIdx(prev => Math.max(0, Math.min(SLIDES.length - 1, prev + (diff > 0 ? 1 : -1))))
+      resetTimer()
+    }
   }
 
   const handleSlideClick = (slide: Slide) => {
@@ -40,11 +113,15 @@ export default function HeroCarousel() {
     } else if (slide.type === 'gathering' && slide.gatheringId) {
       router.push(`/gatherings/${slide.gatheringId}`)
     }
-    // story: 1차 릴리즈 비활성
   }
 
   return (
-    <div className="relative w-full aspect-[9/16] max-h-[520px]">
+    <div
+      ref={containerRef}
+      className="relative w-full aspect-[9/16] overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* 카운터 pill */}
       <div className="absolute top-3.5 right-3.5 z-10 bg-black/45 backdrop-blur-sm text-white rounded-full px-3 py-1 text-[11px] font-semibold">
         {idx + 1} / {SLIDES.length}
@@ -52,14 +129,13 @@ export default function HeroCarousel() {
 
       {/* 슬라이드 컨테이너 */}
       <div
-        ref={ref}
-        onScroll={handleScroll}
-        className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory w-full h-full"
+        className="flex transition-transform duration-500 ease-out w-full h-full"
+        style={{ transform: `translateX(-${idx * 100}%)` }}
       >
         {SLIDES.map((slide, i) => (
           <div
             key={i}
-            className="flex-none w-full h-full relative overflow-hidden snap-start cursor-pointer bg-tag-bg"
+            className="flex-none w-full h-full relative overflow-hidden cursor-pointer bg-tag-bg"
             onClick={() => handleSlideClick(slide)}
           >
             <img
@@ -70,7 +146,6 @@ export default function HeroCarousel() {
                 ;(e.target as HTMLImageElement).style.display = 'none'
               }}
             />
-            {/* 하단 그라디언트 + 레이블 */}
             <div
               className="absolute inset-x-0 bottom-0 px-5 pb-5 pt-10 text-white"
               style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }}
