@@ -144,6 +144,22 @@ export interface GuestApplicationCheckResponse {
   createdAt: string
 }
 
+export interface AdminDashboardGathering {
+  id: string
+  title: string
+  eventDate: string
+  startTime: string
+  endTime: string
+  locationName: string | null
+  price: number
+  maxAttendees: number
+  applicantCount: number
+  pendingCount: number
+  confirmedCount: number
+  attendedCount: number
+  status: 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+}
+
 export interface UserProfile {
   id: string
   email: string
