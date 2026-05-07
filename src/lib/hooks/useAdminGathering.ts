@@ -2,6 +2,28 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminGatheringApi, GatheringCreateRequest, ApplicationStatus } from '@/lib/api/adminGathering'
 import type { AdminGatheringStatus } from '@/lib/api/admin'
 
+export function useDeleteApplication(gatheringId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => adminGatheringApi.deleteApplication(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'applications', gatheringId] })
+    },
+    onError: (err: unknown) => {
+      const axiosErr = err as { response?: { status?: number; data?: { code?: string } } }
+      const status = axiosErr?.response?.status
+      const code = axiosErr?.response?.data?.code
+      if (status === 400 && code === 'CANNOT_DELETE') {
+        alert('이 신청은 반려할 수 없습니다.')
+      } else if (status === 404) {
+        alert('이미 삭제된 신청입니다.')
+      } else {
+        alert('삭제 중 오류가 발생했어요.')
+      }
+    },
+  })
+}
+
 export function useAdminApplications(gatheringId: string) {
   return useQuery({
     queryKey: ['admin', 'applications', gatheringId],

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { adminGatheringApi, AdminGatheringListItem, ApplicationStatus } from '@/lib/api/adminGathering'
-import { useAdminApplications, useUpdateApplicationStatus } from '@/lib/hooks/useAdminGathering'
+import { useAdminApplications, useUpdateApplicationStatus, useDeleteApplication } from '@/lib/hooks/useAdminGathering'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
@@ -203,16 +203,9 @@ const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
 
 // ─── 참가자 테이블 ──────────────────────────────────────────────────────
 function ParticipantTable({ gatheringId }: { gatheringId: string }) {
-  const queryClient = useQueryClient()
-
   const { data: participants = [], isLoading } = useAdminApplications(gatheringId)
   const { mutate: changeStatus } = useUpdateApplicationStatus(gatheringId)
-
-  const { mutate: deleteApplication } = useMutation({
-    mutationFn: adminGatheringApi.deleteApplication,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['admin', 'applications', gatheringId] }),
-  })
+  const { mutate: deleteApplication, isPending: isDeleting, variables: deletingId } = useDeleteApplication(gatheringId)
 
   if (isLoading) {
     return <div className="flex justify-center py-12"><LoadingSpinner /></div>
@@ -295,14 +288,21 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <button
-                    onClick={() => {
-                      if (confirm(`${p.name}님을 삭제할까요?`)) deleteApplication(p.id)
-                    }}
-                    className="text-red-500 text-[13px] hover:underline"
-                  >
-                    삭제
-                  </button>
+                  {p.status === 'ATTENDED' ? (
+                    <span className="text-[12px] text-[#BBBBBB]">반려 불가</span>
+                  ) : isDeleting && deletingId === p.id ? (
+                    <span className="text-[12px] text-[#767676]">삭제 중…</span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (confirm('이 신청을 반려하시겠습니까?')) deleteApplication(p.id)
+                      }}
+                      disabled={isDeleting}
+                      className="text-red-500 text-[13px] hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      반려
+                    </button>
+                  )}
                 </td>
               </tr>
             )
