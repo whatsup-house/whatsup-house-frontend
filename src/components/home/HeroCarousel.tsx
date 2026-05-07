@@ -29,11 +29,10 @@ export default function HeroCarousel() {
   const [idx, setIdx] = useState(0)
   const touchStartX = useRef(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const wheelAccum = useRef(0)
+  const wheelTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
-
-  const goTo = useCallback((newIdx: number) => {
-    setIdx(Math.max(0, Math.min(SLIDES.length - 1, newIdx)))
-  }, [])
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
@@ -49,6 +48,34 @@ export default function HeroCarousel() {
     }
   }, [resetTimer])
 
+  // 트랙패드 수평 스크롤 지원 (passive: false 로 preventDefault 필요)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return
+      e.preventDefault()
+
+      wheelAccum.current += e.deltaX
+      if (wheelTimer.current) clearTimeout(wheelTimer.current)
+      wheelTimer.current = setTimeout(() => {
+        if (Math.abs(wheelAccum.current) > 30) {
+          const dir = wheelAccum.current > 0 ? 1 : -1
+          setIdx(prev => Math.max(0, Math.min(SLIDES.length - 1, prev + dir)))
+          resetTimer()
+        }
+        wheelAccum.current = 0
+      }, 50)
+    }
+
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      el.removeEventListener('wheel', handleWheel)
+      if (wheelTimer.current) clearTimeout(wheelTimer.current)
+    }
+  }, [resetTimer])
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
   }
@@ -56,7 +83,7 @@ export default function HeroCarousel() {
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartX.current - e.changedTouches[0].clientX
     if (Math.abs(diff) > 50) {
-      goTo(idx + (diff > 0 ? 1 : -1))
+      setIdx(prev => Math.max(0, Math.min(SLIDES.length - 1, prev + (diff > 0 ? 1 : -1))))
       resetTimer()
     }
   }
@@ -72,7 +99,8 @@ export default function HeroCarousel() {
 
   return (
     <div
-      className="relative w-full aspect-[27/49] max-h-[520px] overflow-hidden"
+      ref={containerRef}
+      className="relative w-full aspect-[9/16] overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
