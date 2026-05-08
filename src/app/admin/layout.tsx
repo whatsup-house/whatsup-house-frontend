@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import {
-  LayoutDashboard, CalendarDays, MapPin, Users, LogOut, ClipboardList,
+  LayoutDashboard, CalendarDays, MapPin, Users, LogOut, ClipboardList, Home,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useLogout } from '@/lib/hooks/useAuth'
@@ -12,6 +12,7 @@ import { useLogout } from '@/lib/hooks/useAuth'
 const sidebarItems = [
   { href: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
   { href: '/admin/gatherings', icon: CalendarDays, label: '게더링 관리' },
+  { href: '/admin/home', icon: Home, label: '홈화면 관리' },
   { href: '/admin/applications', icon: ClipboardList, label: '참가자 관리' },
   { href: '/admin/locations', icon: MapPin, label: '장소 관리' },
   { href: '/admin/users', icon: Users, label: '회원 관리' },

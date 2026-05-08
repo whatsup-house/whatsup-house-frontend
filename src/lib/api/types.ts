@@ -246,6 +246,50 @@ export interface AdminUserPage {
   size: number
 }
 
+export type HeroSlideType = 'GATHERING' | 'CALENDAR' | 'STORY'
+
+export interface AdminHeroCarouselSlide {
+  id: string
+  type: HeroSlideType
+  imageUrl: string
+  label: string
+  sub: string | null
+  date: string | null
+  gatheringId: string | null
+  displayOrder: number
+  isActive: boolean
+}
+
+export interface AdminHeroCarouselSlideRequest {
+  type: HeroSlideType
+  imageUrl: string
+  label: string
+  sub?: string
+  date?: string
+  gatheringId?: string
+  displayOrder: number
+}
+
+export interface AdminHomeReview {
+  id: string
+  content: string
+  authorName: string
+  avatarUrl: string | null
+  gatheringTitle: string
+  rating: number
+  displayOrder: number
+  isActive: boolean
+}
+
+export interface AdminHomeReviewRequest {
+  content: string
+  authorName: string
+  avatarUrl?: string
+  gatheringTitle: string
+  rating: number
+  displayOrder?: number
+}
+
 export interface UserProfile {
   id: string
   email: string
