@@ -161,6 +161,19 @@ export interface ApplicationTokenCheckResponse {
   createdAt: string
 }
 
+export interface HomeReviewItem {
+  id: string
+  content: string
+  authorName: string
+  avatarUrl: string | null
+  gatheringTitle: string
+  rating: number
+}
+
+export interface HomeReviewsResponse {
+  reviews: HomeReviewItem[]
+}
+
 export type ReviewType = 'TEXT' | 'PHOTO'
 
 export interface ReviewItem {
