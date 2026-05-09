@@ -2,11 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AdminHeroCarouselSlide, AdminHeroCarouselSlideRequest } from '@/lib/api/types'
 
 let mockSlides: AdminHeroCarouselSlide[] = [
-  { id: '1', type: 'CALENDAR', imageUrl: '/home/home-1.png', label: '5월 게더링 일정', sub: null, date: null, gatheringId: null, displayOrder: 1, isActive: true },
-  { id: '2', type: 'GATHERING', imageUrl: '/home/home-2.png', label: '퇴근 게더링', sub: null, date: '5월 14일 목', gatheringId: 'c2000000-0000-0000-0000-000000000001', displayOrder: 2, isActive: true },
-  { id: '3', type: 'GATHERING', imageUrl: '/home/home-3.png', label: '대학생 게더링', sub: null, date: '5월 17일 토', gatheringId: 'c2000000-0000-0000-0000-000000000002', displayOrder: 3, isActive: true },
-  { id: '4', type: 'GATHERING', imageUrl: '/home/home-4.png', label: '경찰과 도둑', sub: null, date: '5월 25일 일', gatheringId: 'c2000000-0000-0000-0000-000000000004', displayOrder: 4, isActive: true },
-  { id: '5', type: 'STORY', imageUrl: '/home/home-5.png', label: '썬데이 러닝 클럽', sub: 'Whatsup house', date: null, gatheringId: null, displayOrder: 5, isActive: true },
+  { id: '1', type: 'CALENDAR',  imageUrl: '/home/home-1.png', label: '5월 게더링 일정',           sub: null,            date: null,        gatheringId: null,                                     displayOrder: 1, isActive: true },
+  { id: '2', type: 'GATHERING', imageUrl: '/home/home-2.png', label: '퇴근 게더링',               sub: null,            date: '5월 14일 목', gatheringId: 'c2000000-0000-0000-0000-000000000001', displayOrder: 2, isActive: true },
+  { id: '3', type: 'GATHERING', imageUrl: '/home/home-4.png', label: '대학생 게더링',             sub: null,            date: '5월 17일 토', gatheringId: 'c2000000-0000-0000-0000-000000000002', displayOrder: 3, isActive: true },
+  { id: '4', type: 'GATHERING', imageUrl: '/home/home-3.png', label: '경찰과 도둑',               sub: null,            date: '5월 25일 일', gatheringId: 'c2000000-0000-0000-0000-000000000004', displayOrder: 4, isActive: true },
+  { id: '5', type: 'GATHERING', imageUrl: '/home/home-6.png', label: '썬데이 러닝 클럽 (SRC)',   sub: null,            date: '5월 18일 일', gatheringId: 'c2000000-0000-0000-0000-000000000003', displayOrder: 5, isActive: true },
+  { id: '6', type: 'STORY',     imageUrl: '/home/home-5.png', label: '우리 젊다',                 sub: 'Whatsup house', date: null,        gatheringId: null,                                     displayOrder: 6, isActive: true },
 ]
 
 let nextId = 6

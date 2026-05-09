@@ -16,11 +16,12 @@ interface Slide {
 }
 
 const SLIDES: Slide[] = [
-  { type: 'calendar', src: '/home/home-1.png', label: '5월 게더링 일정' },
-  { type: 'story', src: '/home/home-2.png', label: '퇴근 게더링', sub: '와썹하우스' },
-  { type: 'gathering', src: '/home/home-3.png', label: '전국 대학생 게더링', date: '5월 21일 수', gatheringId: '1' },
-  { type: 'gathering', src: '/home/home-4.png', label: '경찰과 도둑', date: '5월 11일 일', gatheringId: '2' },
-  { type: 'story', src: '/home/home-5.png', label: '우리 젊다', sub: 'Whatsup house story' },
+  { type: 'calendar',  src: '/home/home-1.png', label: '5월 게더링 일정' },
+  { type: 'gathering', src: '/home/home-2.png', label: '퇴근 게더링',              date: '5월 14일 목', gatheringId: 'c2000000-0000-0000-0000-000000000001' },
+  { type: 'gathering', src: '/home/home-4.png', label: '대학생 게더링',            date: '5월 17일 토', gatheringId: 'c2000000-0000-0000-0000-000000000002' },
+  { type: 'gathering', src: '/home/home-3.png', label: '경찰과 도둑',              date: '5월 25일 일', gatheringId: 'c2000000-0000-0000-0000-000000000004' },
+  { type: 'gathering', src: '/home/home-6.png', label: '썬데이 러닝 클럽 (SRC)',  date: '5월 18일 일', gatheringId: 'c2000000-0000-0000-0000-000000000003' },
+  { type: 'story',     src: '/home/home-5.png', label: '우리 젊다',               sub: 'Whatsup house' },
 ]
 
 const AUTO_INTERVAL = 5000
