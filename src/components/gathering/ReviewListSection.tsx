@@ -186,11 +186,6 @@ export default function ReviewListSection() {
         ))}
       </div>
 
-      {/* 후기 작성 버튼 */}
-      <button className="w-full mt-4 py-3 bg-primary text-white text-sm font-bold rounded-card">
-        후기 작성하기
-      </button>
-
       {/* 비로그인 토스트 */}
       {toast && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-foreground/90 text-white text-sm px-4 py-2.5 rounded-full shadow-lg z-50 whitespace-nowrap pointer-events-none">
