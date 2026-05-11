@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { MoreVertical } from 'lucide-react'
 import type { ReviewItem } from '@/lib/api/types'
 
@@ -57,15 +58,11 @@ export default function ReviewCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
             <span className="text-sm font-bold text-foreground truncate">{review.authorNickname}</span>
-            <span
-              className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 ${
-                review.type === 'PHOTO'
-                  ? 'bg-primary-light text-primary'
-                  : 'bg-tag-bg text-tag-text'
-              }`}
-            >
-              {review.type === 'PHOTO' ? '📷 사진' : 'T 텍스트'}
-            </span>
+            {review.type === 'PHOTO' && (
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 bg-primary-light text-primary">
+                📷 포토리뷰
+              </span>
+            )}
           </div>
           <p className="text-[11px] text-tag-text">{review.createdAt} 작성</p>
         </div>
@@ -82,12 +79,15 @@ export default function ReviewCard({
       {/* 게더링 제목 칩 (전체 후기 모드) */}
       {showGatheringTitle && (
         <div className="mx-4 mb-3">
-          <div className="flex items-center gap-1.5 bg-tag-bg rounded-[10px] px-3 py-2">
+          <Link
+            href={`/gatherings/${review.gatheringId}`}
+            className="flex items-center gap-1.5 bg-tag-bg rounded-[10px] px-3 py-2 active:opacity-70 transition-opacity"
+          >
             <div className="w-0.5 h-3.5 bg-primary rounded-full shrink-0" />
             <span className="text-xs font-semibold text-foreground truncate">
               {review.gatheringTitle}
             </span>
-          </div>
+          </Link>
         </div>
       )}
 
