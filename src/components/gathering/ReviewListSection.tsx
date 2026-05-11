@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import ReviewCard from './ReviewCard'
 import { useAuthStore } from '@/lib/store/authStore'
 import type { ReviewItem } from '@/lib/api/types'
 
@@ -15,7 +14,7 @@ const MOCK_REVIEWS: ReviewItem[] = [
     gatheringTitle: '느린 오후의 재즈 감상 모임',
     type: 'PHOTO',
     imageUrl: '/home/home-1.png',
-    content: '오랜만에 깊은 대화를 나눴어요. 사장님이 추천해주신 LP가 진짜 좋았고 같이 간 분들도 다들 편안한 분위기였어요. 다음에도 또 가고 싶어요!',
+    content: '오랜만에 깊은 대화를 나눴어요. 사장님이 추천해주신 LP가 진짜 좋았고 같이 간 분들도 다들 편안한 분위기였어요.',
     likeCount: 24,
     isLikedByMe: false,
     isMyReview: false,
@@ -28,7 +27,7 @@ const MOCK_REVIEWS: ReviewItem[] = [
     gatheringId: 'g1',
     gatheringTitle: '느린 오후의 재즈 감상 모임',
     type: 'TEXT',
-    content: '생각보다 분위기가 너무 편해서 놀랐습니다 ☺️ 처음 봤는데 다들 친절하셨어요.',
+    content: '생각보다 분위기가 너무 편해서 놀랐습니다. 처음 봤는데 다들 친절하셨어요.',
     likeCount: 12,
     isLikedByMe: false,
     isMyReview: false,
@@ -89,21 +88,84 @@ const MOCK_REVIEWS: ReviewItem[] = [
   },
 ]
 
-type SortType = 'latest' | 'recommended'
-const PAGE_SIZE = 4
+function HeartIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={filled ? 'text-primary' : 'text-tag-text'}
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  )
+}
+
+function ReviewCardCompact({ review, isLoggedIn, onToast }: {
+  review: ReviewItem
+  isLoggedIn: boolean
+  onToast: (msg: string) => void
+}) {
+  const [liked, setLiked] = useState(review.isLikedByMe)
+  const [likeCount, setLikeCount] = useState(review.likeCount)
+
+  const handleLike = () => {
+    if (!isLoggedIn) { onToast('로그인이 필요한 기능이에요'); return }
+    setLiked((prev) => !prev)
+    setLikeCount((c) => (liked ? c - 1 : c + 1))
+  }
+
+  return (
+    <div className="flex-none w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden snap-start">
+      {/* 상단: 사진 or 이모지 */}
+      <div className="relative w-full aspect-square bg-tag-bg">
+        {review.type === 'PHOTO' && review.imageUrl ? (
+          <img
+            src={review.imageUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-4xl">
+            {review.authorAnimalType}
+          </div>
+        )}
+      </div>
+
+      {/* 하단 텍스트 */}
+      <div className="p-3">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span className="text-[11px] font-semibold text-foreground truncate">
+            {review.authorNickname}
+          </span>
+          <span className="text-[9px] text-tag-text shrink-0">{review.createdAt}</span>
+        </div>
+        <p className="text-xs text-tag-text leading-relaxed line-clamp-3 mb-2">
+          {review.content}
+        </p>
+        <button
+          onClick={handleLike}
+          className="flex items-center gap-1 min-h-[28px]"
+          aria-label={liked ? '추천 취소' : '추천'}
+        >
+          <HeartIcon filled={liked} />
+          <span className={`text-[11px] font-medium ${liked ? 'text-primary' : 'text-tag-text'}`}>
+            {likeCount}
+          </span>
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function ReviewListSection() {
   const { isLoggedIn } = useAuthStore()
-  const [sort, setSort] = useState<SortType>('latest')
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [toast, setToast] = useState<string | null>(null)
-
-  const sorted = sort === 'recommended'
-    ? [...MOCK_REVIEWS].sort((a, b) => b.likeCount - a.likeCount)
-    : MOCK_REVIEWS
-
-  const visible = sorted.slice(0, visibleCount)
-  const hasMore = visibleCount < sorted.length
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -112,45 +174,17 @@ export default function ReviewListSection() {
 
   return (
     <div className="relative">
-      {/* 정렬 탭 */}
-      <div className="flex gap-2 mb-4">
-        {(['latest', 'recommended'] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setSort(s)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-              sort === s ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-            }`}
-          >
-            {s === 'latest' ? '최신순' : '추천순'}
-          </button>
+      {/* 가로 스크롤 카드 목록 */}
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1 -mx-4 px-4">
+        {MOCK_REVIEWS.map((review) => (
+          <ReviewCardCompact
+            key={review.id}
+            review={review}
+            isLoggedIn={isLoggedIn}
+            onToast={showToast}
+          />
         ))}
       </div>
-
-      {/* 카드 목록 */}
-      {visible.map((review) => (
-        <ReviewCard
-          key={review.id}
-          review={review}
-          isLoggedIn={isLoggedIn}
-          onToast={showToast}
-        />
-      ))}
-
-      {/* 더보기 버튼 */}
-      {hasMore && (
-        <button
-          onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-          className="w-full py-3 text-sm font-medium text-tag-text border border-tag-bg rounded-card mb-4"
-        >
-          후기 더보기
-        </button>
-      )}
-
-      {/* 후기 작성 버튼 (API 연결 후 ATTENDED 조건으로 교체) */}
-      <button className="w-full py-3 bg-primary text-white text-sm font-bold rounded-card">
-        후기 작성하기
-      </button>
 
       {/* 비로그인 토스트 */}
       {toast && (
