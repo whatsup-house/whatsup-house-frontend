@@ -241,7 +241,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <span className="text-sm text-tag-text">{reviewCount}개</span>
             )}
           </div>
-          <ReviewListSection />
+          <ReviewListSection gatheringId={gathering.id} mileageReward={gathering.mileageReward} />
         </div>
       </div>
     </div>

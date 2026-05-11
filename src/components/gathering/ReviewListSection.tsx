@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useAuthStore } from '@/lib/store/authStore'
+import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
+import ReviewWriteForm from './ReviewWriteForm'
 import type { ReviewItem } from '@/lib/api/types'
 
 const MOCK_REVIEWS: ReviewItem[] = [
@@ -163,9 +165,19 @@ function ReviewCardCompact({ review, isLoggedIn, onToast }: {
   )
 }
 
-export default function ReviewListSection() {
+interface ReviewListSectionProps {
+  gatheringId?: string
+  mileageReward?: number
+}
+
+export default function ReviewListSection({ gatheringId, mileageReward }: ReviewListSectionProps) {
   const { isLoggedIn } = useAuthStore()
   const [toast, setToast] = useState<string | null>(null)
+
+  const { data: attendedApps } = useMyApplicationsMe('ATTENDED', isLoggedIn)
+  const hasAttended = gatheringId
+    ? (attendedApps?.some((app) => app.gathering.id === gatheringId) ?? false)
+    : false
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -185,6 +197,11 @@ export default function ReviewListSection() {
           />
         ))}
       </div>
+
+      {/* ATTENDED 유저 후기 작성 폼 */}
+      {hasAttended && gatheringId && (
+        <ReviewWriteForm gatheringId={gatheringId} mileageReward={mileageReward} />
+      )}
 
       {/* 비로그인 토스트 */}
       {toast && (

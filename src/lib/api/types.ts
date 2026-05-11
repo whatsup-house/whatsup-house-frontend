@@ -290,6 +290,23 @@ export interface AdminHomeReviewRequest {
   displayOrder?: number
 }
 
+export interface ReviewCreateRequest {
+  type: ReviewType
+  content: string
+  imageUrl?: string | null
+  rating: number
+}
+
+export interface ReviewCreateResponse {
+  id: string
+  type: ReviewType
+  content: string
+  imageUrl: string | null
+  rating: number
+  mileageEarned: number
+  createdAt: string
+}
+
 export interface UserProfile {
   id: string
   email: string
