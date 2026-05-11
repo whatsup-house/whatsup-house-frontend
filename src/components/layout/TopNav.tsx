@@ -9,6 +9,7 @@ const HIDDEN_PATTERNS: RegExp[] = []
 const PAGE_TITLES: Record<string, string> = {
   '/': '와썹하우스',
   '/gatherings': '게더링',
+  '/reviews': '다녀온 사람들의 후기',
   '/social': '소셜',
   '/mypage': '마이페이지',
   '/login': '로그인',
