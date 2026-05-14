@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import type { HomeReviewsResponse } from '@/lib/api/types'
 
-const MOCK_REVIEWS: HomeReviewsResponse = {
+export const MOCK_HOME_REVIEWS: HomeReviewsResponse = {
   reviews: [
     { id: 'r1', authorName: '예림',   avatarUrl: '/review/review1.JPG', gatheringTitle: '퇴근 게더링',          content: '퇴근하고 팜팜발리에서 처음 만난 분들인데 이렇게 편안할 줄 몰랐어요. 2시간이 어떻게 지나갔는지 모를 정도였어요.', rating: 5 },
     { id: 'r2', authorName: '지은이', avatarUrl: '/review/review2.JPG', gatheringTitle: '퇴근 게더링',          content: '혼자 가기 망설였는데 다들 너무 자연스럽게 받아줘서 금방 친해졌어요. 직장인들끼리 공감대가 엄청났습니다.', rating: 5 },
@@ -17,7 +17,7 @@ const MOCK_REVIEWS: HomeReviewsResponse = {
 export function useHomeReviews() {
   return useQuery({
     queryKey: ['home', 'reviews'],
-    queryFn: () => Promise.resolve(MOCK_REVIEWS),
+    queryFn: () => Promise.resolve(MOCK_HOME_REVIEWS),
     staleTime: Infinity,
   })
 }
