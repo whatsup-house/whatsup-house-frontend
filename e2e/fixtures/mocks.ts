@@ -1,10 +1,9 @@
 import type { Page } from '@playwright/test'
 import { MOCK_HERO_CAROUSEL_SLIDES } from '@/lib/hooks/useAdminHeroCarousel'
 import { MOCK_ADMIN_HOME_REVIEWS } from '@/lib/hooks/useAdminHomeReview'
-import { MOCK_HOME_REVIEWS } from '@/lib/hooks/useHome'
 
 // 훅 파일의 mock 데이터를 그대로 재export해서 spec 파일에서도 동일한 데이터 참조 가능
-export { MOCK_HERO_CAROUSEL_SLIDES, MOCK_ADMIN_HOME_REVIEWS, MOCK_HOME_REVIEWS }
+export { MOCK_HERO_CAROUSEL_SLIDES, MOCK_ADMIN_HOME_REVIEWS }
 
 // ─── E2E 전용 Mock Data ────────────────────────────────────────────────────────
 // DB 시드 및 프론트엔드 컴포넌트 내부 mock과 동일한 ID/데이터를 사용한다.
@@ -292,6 +291,14 @@ export const mockGatheringReviews = [
     isMyReview: false,
   },
 ]
+
+export const mockAllReviewsPage = {
+  content: mockGatheringReviews,
+  page: 0,
+  size: 6,
+  totalElements: mockGatheringReviews.length,
+  totalPages: 1,
+}
 
 export const mockDashboardGatherings = [
   {

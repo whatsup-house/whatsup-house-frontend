@@ -1,14 +1,19 @@
 import { test, expect } from '@playwright/test'
-import { setupUserContext, setupGuestContext, mockGatheringReviews, MOCK_HOME_REVIEWS } from '../fixtures/mocks'
+import { setupUserContext, setupGuestContext, mockGatheringReviews, mockAllReviewsPage } from '../fixtures/mocks'
+
+function apiRes<T>(data: T) {
+  return { success: true, message: 'OK', data }
+}
 
 // AUTH-U-07: 후기 관련 페이지 탐색
 test.describe('후기 페이지', () => {
-  test('홈 화면의 후기 섹션이 훅 mock 데이터로 표시된다', async ({ page }) => {
-    // useHomeReviews 훅은 내부에서 Promise.resolve(MOCK_HOME_REVIEWS)로 동작 → page.route() 불필요
-    // MOCK_HOME_REVIEWS를 직접 참조해 assertion → 훅 데이터 변경 시 테스트도 자동 반영
+  test('홈 화면의 후기 섹션이 API 데이터로 표시된다', async ({ page }) => {
     await setupGuestContext(page)
+    await page.route('**/api/reviews**', (route) =>
+      route.fulfill({ json: apiRes(mockAllReviewsPage) })
+    )
     await page.goto('/')
-    await expect(page.getByText(MOCK_HOME_REVIEWS.reviews[0].authorName)).toBeVisible()
+    await expect(page.getByText(mockGatheringReviews[0].authorNickname)).toBeVisible()
     await page.screenshot({ path: 'e2e/screenshots/user/reviews-01-home-section.png', fullPage: true })
   })
 
