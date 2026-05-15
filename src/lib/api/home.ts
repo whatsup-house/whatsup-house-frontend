@@ -1,5 +1,10 @@
 import apiClient from './client'
-import type { ApiResponse, HomeReviewsResponse } from './types'
+import type { ApiResponse, HeroCarouselSlide, HomeReviewsResponse } from './types'
+
+export const fetchHeroCarousel = async (): Promise<HeroCarouselSlide[]> => {
+  const response = await apiClient.get<ApiResponse<HeroCarouselSlide[]>>('/api/home/carousel')
+  return response.data.data
+}
 
 export const fetchHomeReviews = async (): Promise<HomeReviewsResponse> => {
   const response = await apiClient.get<ApiResponse<HomeReviewsResponse>>('/api/home/reviews')
