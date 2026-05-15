@@ -7,6 +7,7 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { LoadingSpinner, ApiErrorMessage, Button } from '@/components/ui'
 import GatheringDetail from '@/components/gathering/GatheringDetail'
 import ApplyModal from '@/components/gathering/ApplyModal'
+import GatheringDateSheet from '@/components/gathering/GatheringDateSheet'
 
 export default function GatheringDetailPage({
   params,
@@ -18,6 +19,7 @@ export default function GatheringDetailPage({
   const { isLoggedIn, requireAuth } = useRequireAuth()
   const { data: gathering, isLoading, isError, refetch } = useGatheringDetail(id)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDateSheetOpen, setIsDateSheetOpen] = useState(false)
 
   if (isLoading) {
     return (
@@ -78,15 +80,25 @@ export default function GatheringDetailPage({
             <p className="text-xs text-tag-text">참가비</p>
             <p className="text-lg font-bold text-foreground">{gathering.price.toLocaleString()}원</p>
           </div>
-          <Button
-            variant="primary"
-            size="default"
-            className="px-8"
-            disabled={!isRecruiting}
-            onClick={handleApplyClick}
-          >
-            {applyButtonLabel}
-          </Button>
+          {isRecruiting ? (
+            <Button
+              variant="primary"
+              size="default"
+              className="px-8"
+              onClick={handleApplyClick}
+            >
+              신청하기
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              size="default"
+              className="px-6"
+              onClick={() => setIsDateSheetOpen(true)}
+            >
+              다른 날짜 보기
+            </Button>
+          )}
         </div>
       </div>
 
@@ -97,6 +109,15 @@ export default function GatheringDetailPage({
         onClose={() => setIsModalOpen(false)}
         onLoginApply={handleLoginApply}
         onGuestApply={handleGuestApply}
+      />
+
+      {/* 다른 날짜 보기 바텀 시트 */}
+      <GatheringDateSheet
+        title={gathering.title}
+        currentGatheringId={gathering.id}
+        currentEventDate={gathering.eventDate}
+        isOpen={isDateSheetOpen}
+        onClose={() => setIsDateSheetOpen(false)}
       />
     </div>
   )

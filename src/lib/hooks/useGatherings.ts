@@ -10,6 +10,16 @@ export function useGatheringsAll() {
   })
 }
 
+export function useGatheringsByTitle(title: string) {
+  return useQuery({
+    queryKey: ['gatherings', 'all'],
+    queryFn: fetchGatheringsAll,
+    staleTime: 1000 * 60 * 5,
+    select: (data) => data.filter((g) => g.title === title),
+    enabled: !!title,
+  })
+}
+
 export function useGatherings(date: string) {
   return useQuery({
     queryKey: ['gatherings', 'date', date],
