@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
+import { useToggleReviewLike } from '@/lib/hooks/useReview'
 import ReviewWriteForm from './ReviewWriteForm'
 import type { ReviewItem } from '@/lib/api/types'
 
@@ -142,11 +143,24 @@ function ReviewCardCompact({ review, isLoggedIn, onToast }: {
 }) {
   const [liked, setLiked] = useState(review.isLikedByMe)
   const [likeCount, setLikeCount] = useState(review.likeCount)
+  const { mutate: toggleLike } = useToggleReviewLike()
 
   const handleLike = () => {
     if (!isLoggedIn) { onToast('로그인이 필요한 기능이에요'); return }
-    setLiked((prev) => !prev)
-    setLikeCount((c) => (liked ? c - 1 : c + 1))
+    const prevLiked = liked
+    const prevCount = likeCount
+    setLiked(!prevLiked)
+    setLikeCount(prevLiked ? prevCount - 1 : prevCount + 1)
+    toggleLike(review.id, {
+      onSuccess: (data) => {
+        setLiked(data.liked)
+        setLikeCount(data.likeCount)
+      },
+      onError: () => {
+        setLiked(prevLiked)
+        setLikeCount(prevCount)
+      },
+    })
   }
 
   return (
