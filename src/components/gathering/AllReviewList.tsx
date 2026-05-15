@@ -144,10 +144,12 @@ export default function AllReviewList() {
   const [gatheringId, setGatheringId] = useState('all')
   const [page, setPage] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
 
+  const available = MOCK_ALL_REVIEWS.filter((r) => !deletedIds.has(r.id))
   const filtered = gatheringId === 'all'
-    ? MOCK_ALL_REVIEWS
-    : MOCK_ALL_REVIEWS.filter((r) => r.gatheringId === gatheringId)
+    ? available
+    : available.filter((r) => r.gatheringId === gatheringId)
 
   const sorted = sort === 'recommended'
     ? [...filtered].sort((a, b) => b.likeCount - a.likeCount)
@@ -199,6 +201,7 @@ export default function AllReviewList() {
           isLoggedIn={isLoggedIn}
           showGatheringTitle
           onToast={showToast}
+          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.id]))}
         />
       ))}
 

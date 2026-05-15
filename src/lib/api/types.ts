@@ -208,6 +208,11 @@ export interface ReviewLikeResponse {
   likeCount: number
 }
 
+export interface ReviewDeleteResponse {
+  reviewId: string
+  deleted: boolean
+}
+
 export interface AdminDashboardGathering {
   id: string
   title: string
