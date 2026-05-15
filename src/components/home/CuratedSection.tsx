@@ -7,7 +7,7 @@ import { useCuratedGatherings } from '@/lib/hooks/useHome'
 export default function CuratedSection() {
   const router = useRouter()
   const { data, isLoading } = useCuratedGatherings()
-  const gatherings = data?.gatherings ?? []
+  const gatherings = data ?? []
 
   if (isLoading) {
     return (
@@ -50,10 +50,10 @@ export default function CuratedSection() {
           >
             <span
               className={`w-7 text-center text-lg font-bold flex-shrink-0 ${
-                item.rank === 1 ? 'text-primary' : 'text-tag-text'
+                item.curatedRank === 0 ? 'text-primary' : 'text-tag-text'
               }`}
             >
-              {item.rank}
+              {item.curatedRank + 1}
             </span>
             <div className="relative w-12 h-12 flex-shrink-0 bg-tag-bg rounded-xl overflow-hidden">
               {item.thumbnailUrl && (
@@ -67,7 +67,7 @@ export default function CuratedSection() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
               <p className="text-[11px] text-tag-text/70 mt-0.5">
-                {[item.date, item.locationName].filter(Boolean).join(' · ')}
+                {[item.eventDate, item.locationName].filter(Boolean).join(' · ')}
               </p>
             </div>
           </button>

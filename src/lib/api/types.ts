@@ -165,15 +165,11 @@ export interface CuratedGathering {
   id: string
   title: string
   thumbnailUrl: string | null
-  date: string
+  eventDate: string
   locationName: string | null
   price: number
   status: 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
-  rank: number
-}
-
-export interface CuratedResponse {
-  gatherings: CuratedGathering[]
+  curatedRank: number
 }
 
 export interface HomeReviewItem {
