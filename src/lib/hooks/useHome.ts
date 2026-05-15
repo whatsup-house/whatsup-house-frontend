@@ -1,5 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
+import { fetchHeroCarousel } from '@/lib/api/home'
 import type { HomeReviewsResponse } from '@/lib/api/types'
+
+export function useHeroCarousel() {
+  return useQuery({
+    queryKey: ['home', 'carousel'],
+    queryFn: fetchHeroCarousel,
+    staleTime: 1000 * 60 * 5,
+  })
+}
 
 export const MOCK_HOME_REVIEWS: HomeReviewsResponse = {
   reviews: [

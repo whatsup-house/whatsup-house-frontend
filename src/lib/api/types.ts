@@ -248,6 +248,17 @@ export interface AdminUserPage {
 
 export type HeroSlideType = 'GATHERING' | 'CALENDAR' | 'STORY'
 
+export interface HeroCarouselSlide {
+  id: string
+  type: HeroSlideType
+  imageUrl: string
+  label: string
+  sub: string | null
+  date: string | null
+  gatheringId: string | null
+  displayOrder: number
+}
+
 export interface AdminHeroCarouselSlide {
   id: string
   type: HeroSlideType
