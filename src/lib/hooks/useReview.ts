@@ -1,6 +1,18 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createReview, deleteReview, toggleReviewLike } from '@/lib/api/review'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createReview, deleteReview, fetchGatheringReviewsPage, toggleReviewLike } from '@/lib/api/review'
 import type { ReviewCreateRequest } from '@/lib/api/types'
+
+export function useGatheringReviews(
+  gatheringId: string,
+  sort: 'LATEST' | 'LIKES',
+  page: number,
+) {
+  return useQuery({
+    queryKey: ['gathering', gatheringId, 'reviews', sort, page],
+    queryFn: () => fetchGatheringReviewsPage(gatheringId, sort, page),
+    enabled: !!gatheringId,
+  })
+}
 
 export function useCreateReview(
   gatheringId: string,
