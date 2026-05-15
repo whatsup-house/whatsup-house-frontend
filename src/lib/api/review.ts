@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, ReviewCreateRequest, ReviewCreateResponse, ReviewItem } from './types'
+import type { ApiResponse, ReviewCreateRequest, ReviewCreateResponse, ReviewItem, ReviewLikeResponse } from './types'
 
 export const fetchGatheringReviews = async (gatheringId: string): Promise<ReviewItem[]> => {
   const response = await apiClient.get<ApiResponse<ReviewItem[]>>(`/api/gatherings/${gatheringId}/reviews`)
@@ -14,5 +14,10 @@ export const createReview = async (
     `/api/gatherings/${gatheringId}/reviews`,
     data,
   )
+  return response.data.data
+}
+
+export const toggleReviewLike = async (reviewId: string): Promise<ReviewLikeResponse> => {
+  const response = await apiClient.post<ApiResponse<ReviewLikeResponse>>(`/api/reviews/${reviewId}/like`)
   return response.data.data
 }

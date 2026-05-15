@@ -202,6 +202,12 @@ export interface ReviewItem {
   isMyReview: boolean
 }
 
+export interface ReviewLikeResponse {
+  reviewId: string
+  liked: boolean
+  likeCount: number
+}
+
 export interface AdminDashboardGathering {
   id: string
   title: string

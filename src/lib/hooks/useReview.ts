@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createReview } from '@/lib/api/review'
+import { createReview, toggleReviewLike } from '@/lib/api/review'
 import type { ReviewCreateRequest } from '@/lib/api/types'
 
 export function useCreateReview(
@@ -13,5 +13,11 @@ export function useCreateReview(
       qc.invalidateQueries({ queryKey: ['gathering', gatheringId, 'reviews'] })
       onSuccess?.(result.mileageEarned)
     },
+  })
+}
+
+export function useToggleReviewLike() {
+  return useMutation({
+    mutationFn: (reviewId: string) => toggleReviewLike(reviewId),
   })
 }
