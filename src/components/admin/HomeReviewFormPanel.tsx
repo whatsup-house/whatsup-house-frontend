@@ -37,7 +37,7 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
   const [isActive, setIsActive] = useState(review?.isActive ?? true)
   const [trackedReviewId, setTrackedReviewId] = useState(review?.id ?? null)
 
-  if (review?.id !== trackedReviewId) {
+  if ((review?.id ?? null) !== trackedReviewId) {
     setTrackedReviewId(review?.id ?? null)
     setIsActive(review?.isActive ?? true)
   }
