@@ -213,6 +213,14 @@ export interface ReviewDeleteResponse {
   deleted: boolean
 }
 
+export interface GatheringReviewPageResponse {
+  content: ReviewItem[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 export interface AdminDashboardGathering {
   id: string
   title: string

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, Badge } from '@/components/ui'
-import ReviewListSection from './ReviewListSection'
+import GatheringReviewSection from './GatheringReviewSection'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import dayjs from 'dayjs'
 
@@ -241,7 +241,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <span className="text-sm text-tag-text">{reviewCount}개</span>
             )}
           </div>
-          <ReviewListSection gatheringId={gathering.id} mileageReward={gathering.mileageReward} />
+          <GatheringReviewSection gatheringId={gathering.id} mileageReward={gathering.mileageReward} />
         </div>
       </div>
     </div>
