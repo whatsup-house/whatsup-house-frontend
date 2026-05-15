@@ -161,6 +161,17 @@ export interface ApplicationTokenCheckResponse {
   createdAt: string
 }
 
+export interface CuratedGathering {
+  id: string
+  title: string
+  thumbnailUrl: string | null
+  eventDate: string
+  locationName: string | null
+  price: number
+  status: 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+  curatedRank: number
+}
+
 export interface HomeReviewItem {
   id: string
   content: string
