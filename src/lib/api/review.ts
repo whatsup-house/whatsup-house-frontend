@@ -30,6 +30,19 @@ export const createReview = async (
   return response.data.data
 }
 
+export const fetchAllReviews = async (
+  sort: 'LATEST' | 'LIKES',
+  page: number,
+  size = 10,
+  gatheringId?: string,
+): Promise<GatheringReviewPageResponse> => {
+  const response = await apiClient.get<ApiResponse<GatheringReviewPageResponse>>(
+    '/api/reviews',
+    { params: { sort, page, size, ...(gatheringId ? { gatheringId } : {}) } },
+  )
+  return response.data.data
+}
+
 export const toggleReviewLike = async (reviewId: string): Promise<ReviewLikeResponse> => {
   const response = await apiClient.post<ApiResponse<ReviewLikeResponse>>(`/api/reviews/${reviewId}/like`)
   return response.data.data

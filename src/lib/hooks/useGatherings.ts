@@ -1,6 +1,14 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { fetchGatherings, fetchCalendarDots, fetchGatheringDetail, submitGuestApplication, submitUserApplication } from '@/lib/api/gathering'
+import { fetchGatherings, fetchGatheringsAll, fetchCalendarDots, fetchGatheringDetail, submitGuestApplication, submitUserApplication } from '@/lib/api/gathering'
 import type { GuestApplicationRequest, UserApplicationRequest } from '@/lib/api/types'
+
+export function useGatheringsAll() {
+  return useQuery({
+    queryKey: ['gatherings', 'all'],
+    queryFn: fetchGatheringsAll,
+    staleTime: 1000 * 60 * 5,
+  })
+}
 
 export function useGatherings(date: string) {
   return useQuery({
