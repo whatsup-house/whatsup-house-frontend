@@ -57,10 +57,12 @@ export default function MyReviewList() {
   const [sort, setSort] = useState<SortType>('latest')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [toast, setToast] = useState<string | null>(null)
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
 
+  const remaining = MOCK_MY_REVIEWS.filter((r) => !deletedIds.has(r.id))
   const sorted = sort === 'recommended'
-    ? [...MOCK_MY_REVIEWS].sort((a, b) => b.likeCount - a.likeCount)
-    : MOCK_MY_REVIEWS
+    ? [...remaining].sort((a, b) => b.likeCount - a.likeCount)
+    : remaining
 
   const visible = sorted.slice(0, visibleCount)
   const hasMore = visibleCount < sorted.length
@@ -70,7 +72,7 @@ export default function MyReviewList() {
     setTimeout(() => setToast(null), 2500)
   }
 
-  if (MOCK_MY_REVIEWS.length === 0) {
+  if (remaining.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-tag-text">아직 작성한 후기가 없어요</p>
     )
@@ -101,6 +103,7 @@ export default function MyReviewList() {
           isLoggedIn={isLoggedIn}
           showGatheringTitle
           onToast={showToast}
+          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.id]))}
         />
       ))}
 
