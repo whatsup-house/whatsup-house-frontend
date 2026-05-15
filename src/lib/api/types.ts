@@ -252,11 +252,11 @@ export interface HeroCarouselSlide {
   id: string
   type: HeroSlideType
   imageUrl: string
-  label: string
-  sub: string | null
-  date: string | null
+  title: string
+  content: string | null
+  dateLabel: string | null
   gatheringId: string | null
-  displayOrder: number
+  sortOrder: number
 }
 
 export interface AdminHeroCarouselSlide {
