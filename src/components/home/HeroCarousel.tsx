@@ -134,7 +134,7 @@ export default function HeroCarousel() {
           >
             <img
               src={slide.imageUrl}
-              alt={slide.label}
+              alt={slide.title}
               className="w-full h-full object-cover block"
               onError={(e) => {
                 ;(e.target as HTMLImageElement).style.display = 'none'
@@ -149,7 +149,7 @@ export default function HeroCarousel() {
                   <p className="text-[11px] font-semibold uppercase tracking-widest opacity-85 mb-1">
                     이번 달 일정
                   </p>
-                  <p className="text-lg font-bold">{slide.label}</p>
+                  <p className="text-lg font-bold">{slide.title}</p>
                   <p className="text-xs opacity-85 mt-1">탭해서 전체 게더링 보기 →</p>
                 </>
               )}
@@ -159,18 +159,18 @@ export default function HeroCarousel() {
                     <Flame size={12} />
                     모집중
                   </span>
-                  <p className="text-xl font-bold mb-1">{slide.label}</p>
-                  {slide.date && <p className="text-xs opacity-90">{slide.date}</p>}
+                  <p className="text-xl font-bold mb-1">{slide.title}</p>
+                  {slide.dateLabel && <p className="text-xs opacity-90">{slide.dateLabel}</p>}
                 </>
               )}
               {slide.type === 'STORY' && (
                 <>
-                  {slide.sub && (
+                  {slide.content && (
                     <p className="text-[11px] font-semibold uppercase tracking-widest opacity-85 mb-1">
-                      {slide.sub}
+                      {slide.content}
                     </p>
                   )}
-                  <p className="text-lg font-bold">{slide.label}</p>
+                  <p className="text-lg font-bold">{slide.title}</p>
                 </>
               )}
             </div>
