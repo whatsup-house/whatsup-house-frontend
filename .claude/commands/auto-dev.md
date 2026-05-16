@@ -17,7 +17,10 @@ FAILURE_REASON = ""
 ```
 
 각 단계 진입 시 `▶ N단계 시작` 을 출력한다.
-실패로 루프백할 때는 `↩ N단계로 재시도 (M/2회)` 를 출력한다.
+실패로 루프백할 때는 `↩ 2단계로 재시도 (BUILD M/2회, REVIEW M/2회)` 를 출력한다.
+
+파이프라인 단계 요약:
+1단계 → 2단계 → 3·4단계(병렬) → 5단계 → 6단계
 
 ---
 
@@ -32,6 +35,11 @@ Atlassian Rovo MCP로 이슈를 조회한다.
 조회 후:
 - 이슈 상태를 "진행 중"으로 전환한다 (transition ID: `31`)
 - 이슈 제목, 구현 사항, 필요 API 엔드포인트를 파악한다.
+
+이어서 `Agent` 도구로 `.claude/agent/spec-reader.md`에 정의된 `spec-reader` 에이전트를 호출한다.
+- 프롬프트: "구글 드라이브에서 와썹하우스 명세서를 검색하고, '{이슈 제목}'과 관련된 내용만 찾아서 요약해줘."
+- 반환된 명세 요약을 SPEC_SUMMARY 변수에 저장한다.
+- 명세가 없으면 SPEC_SUMMARY = "" 로 두고 Jira 이슈 설명만으로 진행한다.
 
 ---
 
@@ -69,52 +77,43 @@ git checkout -b BRANCH_NAME
 
 ---
 
-## 3단계: 빌드/린트 검증
+## 3·4단계: 빌드/린트 검증 + 코드 리뷰 (병렬)
 
-`▶ 3단계: 빌드/린트 검증 (BUILD_RETRIES: {현재값}/2)`
+`▶ 3·4단계: 빌드 검증 + 코드 리뷰 병렬 실행 (BUILD_RETRIES: {현재값}/2, REVIEW_RETRIES: {현재값}/2)`
 
-```bash
-npm run lint && npm run build
-```
+`Agent` 도구로 아래 두 에이전트를 **동시에** 호출한다.
 
-**통과** → 4단계로 진행
+- `build-validator` 에이전트 (`.claude/agent/build-validator.md`)
+- `frontend-reviewer` 에이전트 (`.claude/agent/frontend-reviewer.md`)
+  - 프롬프트에 변경 파일 목록과 각 파일의 전체 내용 포함
+  - "위 파일들이 프로젝트 규칙(`.claude/rules/frontend/`)을 위반하는지 검토해줘."
 
-**실패 & BUILD_RETRIES < 2:**
-```
-BUILD_RETRIES += 1
-FAILURE_REASON = "빌드/린트 오류: {오류 메시지 요약}"
-```
-`↩ 2단계로 재시도 (BUILD_RETRIES/2회)` 출력 후 오류를 수정하러 2단계로 돌아간다.
+두 에이전트의 결과를 모두 받은 후 아래 순서로 평가한다.
 
-**실패 & BUILD_RETRIES >= 2:**
-```
-FAILURE_REASON = "빌드/린트 3회 모두 실패.\n마지막 오류: {오류 메시지 전체}"
-```
-6단계(실패 알림)로 이동한다.
+### 결과 평가
 
----
+**① 빌드 실패 여부 확인**
 
-## 4단계: 코드 리뷰
+`BUILD_FAILURE` 반환 시:
+- BUILD_RETRIES < 2 → `BUILD_RETRIES += 1`, 리뷰 결과와 함께 FAILURE_REASON에 합산
+- BUILD_RETRIES >= 2 → `FAILURE_REASON = "빌드/린트 3회 모두 실패.\n{오류 내용 전체}"` → 6단계(실패)
 
-`▶ 4단계: 코드 리뷰 (REVIEW_RETRIES: {현재값}/2)`
+**② 리뷰 위반 여부 확인**
 
-`review.md` 의 검토 기준(데이터 흐름, 타입 안전성, 상태 관리, 컴포넌트 규칙, 스타일링)으로 변경된 파일을 검토한다.
+규칙 위반 반환 시:
+- REVIEW_RETRIES < 2 → `REVIEW_RETRIES += 1`, 지적 사항을 FAILURE_REASON에 합산
+- REVIEW_RETRIES >= 2 → `FAILURE_REASON = "리뷰 3회 모두 통과 실패.\n{위반 내용 전체}"` → 6단계(실패)
 
-**"규칙 위반 없음"** → 5단계로 진행
+**③ 종합 판단**
 
-**위반 발견 & REVIEW_RETRIES < 2:**
-```
-REVIEW_RETRIES += 1
-FAILURE_REASON = "리뷰 지적: {위반 내용 요약}"
-```
-`↩ 2단계로 재시도 (REVIEW_RETRIES/2회)` 출력 후 지적 사항을 수정하러 2단계로 돌아간다.
-2단계 수정 완료 후 반드시 3단계(빌드 재검증)도 다시 실행한다.
+- 빌드 실패 또는 리뷰 위반이 하나라도 있고 재시도 가능 →
+  ```
+  FAILURE_REASON = "빌드 오류: {요약}\n리뷰 지적: {요약}"  (해당하는 항목만)
+  ```
+  `↩ 2단계로 재시도 (BUILD_RETRIES/2회, REVIEW_RETRIES/2회)` 출력 후 2단계로 돌아간다.
+  2단계 수정 완료 후 반드시 3·4단계를 다시 실행한다.
 
-**위반 발견 & REVIEW_RETRIES >= 2:**
-```
-FAILURE_REASON = "리뷰 3회 모두 통과 실패.\n마지막 지적 사항: {위반 내용 전체}"
-```
-6단계(실패 알림)로 이동한다.
+- 빌드 성공 + 리뷰 위반 없음 → 5단계로 진행
 
 ---
 
@@ -122,33 +121,19 @@ FAILURE_REASON = "리뷰 3회 모두 통과 실패.\n마지막 지적 사항: {�
 
 `▶ 5단계: 커밋 및 PR 생성`
 
-### 커밋
+`Agent` 도구로 `.claude/agent/pr-creator.md`에 정의된 `pr-creator` 에이전트를 호출한다.
+프롬프트에 다음 내용을 포함한다:
+- `ISSUE_KEY`: $ARGUMENTS
+- `ISSUE_TITLE`: 1단계에서 파악한 이슈 제목
+- `JIRA_URL`: `https://whatsuphouse.atlassian.net/browse/$ARGUMENTS`
+- `CHANGED_FILES`: 2단계에서 생성/수정한 파일 경로 목록
+- `COMMIT_MESSAGE`: 이슈 제목을 한 줄로 요약한 한국어 문장
 
-변경된 파일을 명시적으로 스테이징하고 커밋한다.
+**에이전트가 `PR_SUCCESS` 반환** → PR_URL 변수에 저장 → 6단계(성공 알림)로 이동
 
-```bash
-git add {변경된 파일 경로들}
-git commit -m "feat: {이슈 제목을 한 줄로 요약}"
+**에이전트가 `PR_FAILURE` 반환:**
 ```
-
-커밋 메시지 규칙:
-- AI 활용 관련 내용 절대 포함 금지 (Co-Authored-By 등)
-- 한국어 요약
-
-### PR 생성
-
-`pr.md` 의 PR 생성 로직을 따르되, 아래 조건을 추가한다.
-
-- `--base develop`
-- PR 제목: `[$ARGUMENTS] {이슈 제목 요약}`
-- PR 본문 "관련 티켓" 섹션에 `$ARGUMENTS` 이슈 키와 Jira 링크 명시
-  - 형식: `**$ARGUMENTS**: [{이슈 제목}](https://whatsuphouse.atlassian.net/browse/$ARGUMENTS)`
-
-**PR 생성 성공** → PR URL을 PR_URL 변수에 저장 → 6단계(성공 알림)로 이동
-
-**PR 생성 실패:**
-```
-FAILURE_REASON = "PR 생성 실패: {오류 메시지}"
+FAILURE_REASON = "PR 생성 실패: {에이전트가 반환한 오류 메시지}"
 ```
 6단계(실패 알림)로 이동한다.
 
