@@ -14,10 +14,5 @@
     ],
     "deny": []
   },
-  "mcpServers": {
-    "gdrive": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-google-drive"]
-    }
-  }
+  "mcpServers": {}
 }

@@ -36,11 +36,6 @@ Atlassian Rovo MCP로 이슈를 조회한다.
 - 이슈 상태를 "진행 중"으로 전환한다 (transition ID: `31`)
 - 이슈 제목, 구현 사항, 필요 API 엔드포인트를 파악한다.
 
-이어서 `Agent` 도구로 `.claude/agent/spec-reader.md`에 정의된 `spec-reader` 에이전트를 호출한다.
-- 프롬프트: "구글 드라이브에서 와썹하우스 명세서를 검색하고, '{이슈 제목}'과 관련된 내용만 찾아서 요약해줘."
-- 반환된 명세 요약을 SPEC_SUMMARY 변수에 저장한다.
-- 명세가 없으면 SPEC_SUMMARY = "" 로 두고 Jira 이슈 설명만으로 진행한다.
-
 ---
 
 ## 2단계: 코드 구현
