@@ -11,6 +11,7 @@
 ```
 ISSUE_KEY     = $ARGUMENTS
 BRANCH_NAME   = feat/{$ARGUMENTS를 소문자로} (예: feat/kan-9)
+PLAN          = ""  (1단계에서 채워짐)
 BUILD_RETRIES = 0   (최대 2)
 REVIEW_RETRIES = 0  (최대 2)
 FAILURE_REASON = ""
@@ -20,7 +21,7 @@ FAILURE_REASON = ""
 실패로 루프백할 때는 `↩ 2단계로 재시도 (BUILD M/2회, REVIEW M/2회)` 를 출력한다.
 
 파이프라인 단계 요약:
-1단계 → 2단계 → 3·4단계(병렬) → 5단계 → 6단계
+1단계 → 2단계 → 3·4단계(병렬) → 5단계 → 6단계(알림 + 스킬 누적)
 
 ---
 
@@ -36,12 +37,26 @@ Atlassian Rovo MCP로 이슈를 조회한다.
 - 이슈 상태를 "진행 중"으로 전환한다 (transition ID: `31`)
 - 이슈 제목, 구현 사항, 필요 API 엔드포인트를 파악한다.
 
+이어서 구현 계획을 수립하고 PLAN 변수에 저장한다.
+
+```
+PLAN:
+- 수정할 파일: (기존 파일 중 변경 필요한 것)
+- 생성할 파일: (없으면 "없음")
+- 구현 접근법: (핵심 로직 한 줄)
+- 재사용 가능한 기존 코드: (lib/hooks, lib/api에서 활용할 수 있는 것)
+- 주의사항: (엣지 케이스, 타입 이슈, SSR 주의점 등)
+```
+
+`memory/skills.md`에 유사한 이슈 패턴이 있으면 참고한다.
+
 ---
 
 ## 2단계: 코드 구현
 
 `▶ 2단계: 개발`
 
+PLAN을 참고해 구현한다.
 루프백으로 재진입 시 실패한 이유(빌드 오류 또는 리뷰 지적 사항)를 반드시 함께 수정한다.
 
 ### 브랜치 준비
@@ -134,7 +149,7 @@ FAILURE_REASON = "PR 생성 실패: {에이전트가 반환한 오류 메시지}
 
 ---
 
-## 6단계: Mattermost 알림
+## 6단계: Mattermost 알림 + 스킬 누적
 
 `▶ 6단계: Mattermost 알림`
 
@@ -142,3 +157,18 @@ FAILURE_REASON = "PR 생성 실패: {에이전트가 반환한 오류 메시지}
 
 - 성공 시: `/notify success $ARGUMENTS {PR_URL}`
 - 실패 시: `/notify failure $ARGUMENTS {FAILURE_REASON}`
+
+### 스킬 누적 (성공 시에만)
+
+성공 알림 후, 아래 형식으로 `memory/skills.md` 파일 끝에 항목을 추가한다.
+
+```
+### $ARGUMENTS | {이슈 제목 요약} | {오늘 날짜 YYYY-MM-DD}
+- 이슈 유형: {상태 분기 / API 연동 / UI 컴포넌트 / 관리자 기능 / ...}
+- 수정 파일: {2단계에서 변경한 파일 목록}
+- 핵심 접근법: {PLAN의 구현 접근법 한 줄}
+- 재사용 포인트: {다음 유사 작업에서 참고할 내용}
+```
+
+`memory/skills.md` 경로:
+`/Users/binys/.claude/projects/-Users-binys-Desktop----whatsup-house-frontend/memory/skills.md`
