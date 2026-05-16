@@ -2,7 +2,7 @@
 
 import { useState, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGatheringDetail } from '@/lib/hooks/useGatherings'
+import { useGatheringDetail, useGatheringsByTitle } from '@/lib/hooks/useGatherings'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { LoadingSpinner, ApiErrorMessage, Button } from '@/components/ui'
 import GatheringDetail from '@/components/gathering/GatheringDetail'
@@ -18,6 +18,7 @@ export default function GatheringDetailPage({
   const router = useRouter()
   const { isLoggedIn, requireAuth } = useRequireAuth()
   const { data: gathering, isLoading, isError, refetch } = useGatheringDetail(id)
+  const { data: sameNameGatherings } = useGatheringsByTitle(gathering?.title ?? '')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDateSheetOpen, setIsDateSheetOpen] = useState(false)
 
@@ -41,14 +42,10 @@ export default function GatheringDetailPage({
   }
 
   const isRecruiting = gathering.status === 'OPEN'
-
-  const APPLY_BUTTON_LABEL: Record<string, string> = {
-    OPEN: '신청하기',
-    CLOSED: '마감',
-    COMPLETED: '종료된 게더링',
-    CANCELLED: '취소됨',
-  }
-  const applyButtonLabel = APPLY_BUTTON_LABEL[gathering.status] ?? '마감'
+  const today = new Date().toISOString().split('T')[0]
+  const hasFutureDates = sameNameGatherings?.some(
+    g => g.id !== gathering.id && g.eventDate > today
+  ) ?? false
 
   const handleApplyClick = () => {
     setIsModalOpen(true)
@@ -89,7 +86,7 @@ export default function GatheringDetailPage({
             >
               신청하기
             </Button>
-          ) : (
+          ) : hasFutureDates ? (
             <Button
               variant="outlined"
               size="default"
@@ -97,6 +94,15 @@ export default function GatheringDetailPage({
               onClick={() => setIsDateSheetOpen(true)}
             >
               다른 날짜 보기
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              size="default"
+              className="px-6"
+              disabled
+            >
+              운영 종료
             </Button>
           )}
         </div>
