@@ -14,5 +14,28 @@
     ],
     "deny": []
   },
-  "mcpServers": {}
+  "mcpServers": {},
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post-edit-lint.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/stop-uncommitted-check.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
