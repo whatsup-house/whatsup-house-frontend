@@ -20,6 +20,6 @@ export const useAuthStore = create<AuthState>()((set) => ({
   login: (userId, nickname, isAdmin) =>
     set({ userId, nickname, isAdmin, isLoggedIn: true, isInitialized: true }),
   logout: () =>
-    set({ userId: null, nickname: null, isAdmin: false, isLoggedIn: false }),
+    set({ userId: null, nickname: null, isAdmin: false, isLoggedIn: false, isInitialized: true }),
   setInitialized: () => set({ isInitialized: true }),
 }))
