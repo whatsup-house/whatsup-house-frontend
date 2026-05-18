@@ -173,33 +173,34 @@ export interface CuratedGathering {
 }
 
 export interface HomeReviewItem {
-  id: string
-  content: string
-  authorName: string
-  avatarUrl: string | null
+  reviewId: string
+  nickname: string
+  gatheringId: string
   gatheringTitle: string
-  rating: number
-}
-
-export interface HomeReviewsResponse {
-  reviews: HomeReviewItem[]
+  reviewContent: string
+  likeCount: number
+  thumbnailImageUrl: string | null
+  homeDisplayOrder: number
 }
 
 export type ReviewType = 'TEXT' | 'PHOTO'
 
+export interface ReviewImageItem {
+  imageId: string
+  imageUrl: string
+  displayOrder: number
+}
+
 export interface ReviewItem {
-  id: string
-  authorNickname: string
-  authorAnimalType: string
-  createdAt: string
+  reviewId: string
+  userId: string
+  applicationId: string
   gatheringId: string
-  gatheringTitle: string
-  type: ReviewType
-  imageUrl?: string | null
-  content: string
+  reviewType: ReviewType
+  reviewContent: string
   likeCount: number
-  isLikedByMe: boolean
-  isMyReview: boolean
+  images: ReviewImageItem[]
+  createdAt: string
 }
 
 export interface ReviewLikeResponse {

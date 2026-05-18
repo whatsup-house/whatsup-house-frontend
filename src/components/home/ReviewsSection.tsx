@@ -1,37 +1,34 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useHomeReviews } from '@/lib/hooks/useHome'
-import type { ReviewItem } from '@/lib/api/types'
+import type { HomeReviewItem } from '@/lib/api/types'
 
-type SortType = 'LIKES' | 'LATEST'
-
-function HomeReviewCard({ review }: { review: ReviewItem }) {
+function HomeReviewCard({ review }: { review: HomeReviewItem }) {
   return (
     <div className="flex-none w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden snap-start">
       <div className="relative w-full aspect-square bg-tag-bg flex items-center justify-center overflow-hidden">
-        {review.type === 'PHOTO' && review.imageUrl ? (
+        {review.thumbnailImageUrl ? (
           <img
-            src={review.imageUrl}
+            src={review.thumbnailImageUrl}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <span className="text-4xl">{review.authorAnimalType}</span>
+          <span className="text-4xl">🐾</span>
         )}
       </div>
       <div className="p-3">
         <div className="flex items-center gap-1.5 mb-1.5">
-          <span className="text-[11px] font-semibold text-tag-text truncate">{review.authorNickname}</span>
-          {review.type === 'PHOTO' && (
+          <span className="text-[11px] font-semibold text-tag-text truncate">{review.nickname}</span>
+          {review.thumbnailImageUrl && (
             <span className="text-[9px] font-semibold text-primary bg-primary-light rounded px-1 py-0.5 shrink-0">
               📷
             </span>
           )}
         </div>
         <p className="text-[10px] text-tag-text font-medium truncate mb-1">{review.gatheringTitle}</p>
-        <p className="text-xs text-tag-text leading-relaxed line-clamp-2">{review.content}</p>
+        <p className="text-xs text-tag-text leading-relaxed line-clamp-2">{review.reviewContent}</p>
       </div>
     </div>
   )
@@ -51,9 +48,8 @@ function SkeletonCard() {
 }
 
 export default function ReviewsSection() {
-  const [sort, setSort] = useState<SortType>('LIKES')
-  const { data, isLoading } = useHomeReviews(sort)
-  const reviews = data?.content ?? []
+  const { data, isLoading } = useHomeReviews()
+  const reviews = data ?? []
 
   if (!isLoading && reviews.length === 0) return null
 
@@ -69,24 +65,10 @@ export default function ReviewsSection() {
         </Link>
       </div>
 
-      <div className="flex gap-2 px-4 mb-3">
-        {(['LIKES', 'LATEST'] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setSort(s)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
-              sort === s ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-            }`}
-          >
-            {s === 'LIKES' ? '추천순' : '최신순'}
-          </button>
-        ))}
-      </div>
-
       <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4">
         {isLoading
           ? Array.from({ length: 4 }, (_, i) => <SkeletonCard key={i} />)
-          : reviews.map((review) => <HomeReviewCard key={review.id} review={review} />)
+          : reviews.map((review) => <HomeReviewCard key={review.reviewId} review={review} />)
         }
       </div>
     </div>

@@ -58,7 +58,7 @@ function Pagination({ page, totalPages, onChange }: {
 }
 
 export default function GatheringReviewSection({ gatheringId, mileageReward }: GatheringReviewSectionProps) {
-  const { isLoggedIn } = useAuthStore()
+  const { isLoggedIn, userId } = useAuthStore()
   const [sort, setSort] = useState<ReviewSort>('LIKES')
   const [page, setPage] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
@@ -69,10 +69,10 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
 
   const { data, isLoading } = useGatheringReviews(gatheringId, sort, page)
 
-  const reviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.id))
+  const reviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.reviewId))
   const totalElements = data?.totalElements ?? 0
   const totalPages = data?.totalPages ?? 0
-  const hasMyReview = reviews.some((r) => r.isMyReview)
+  const hasMyReview = isLoggedIn && reviews.some((r) => r.userId === userId)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -123,11 +123,11 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
       {/* 리뷰 목록 */}
       {reviews.map((review) => (
         <ReviewCard
-          key={review.id}
+          key={review.reviewId}
           review={review}
           isLoggedIn={isLoggedIn}
           onToast={showToast}
-          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.id]))}
+          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
         />
       ))}
 

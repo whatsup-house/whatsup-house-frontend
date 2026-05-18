@@ -7,45 +7,37 @@ import type { ReviewItem } from '@/lib/api/types'
 
 const MOCK_MY_REVIEWS: ReviewItem[] = [
   {
-    id: 'mr1',
-    authorNickname: '밤산책',
-    authorAnimalType: '🐱',
-    createdAt: '1주 전',
+    reviewId: 'mr1',
+    userId: 'mock-user',
+    applicationId: 'app1',
     gatheringId: 'g1',
-    gatheringTitle: '느린 오후의 재즈 감상 모임',
-    type: 'PHOTO',
-    imageUrl: '/home/home-2.png',
-    content: '퇴근하고 가볍게 다녀오기 딱 좋았어요. 음악도 좋고 공간도 아늑했어요.',
+    reviewType: 'PHOTO',
+    images: [{ imageId: 'img1', imageUrl: '/home/home-2.png', displayOrder: 0 }],
+    reviewContent: '퇴근하고 가볍게 다녀오기 딱 좋았어요. 음악도 좋고 공간도 아늑했어요.',
     likeCount: 9,
-    isLikedByMe: false,
-    isMyReview: true,
+    createdAt: '2026-05-11T10:00:00',
   },
   {
-    id: 'mr2',
-    authorNickname: '밤산책',
-    authorAnimalType: '🐱',
-    createdAt: '1주 전',
+    reviewId: 'mr2',
+    userId: 'mock-user',
+    applicationId: 'app2',
     gatheringId: 'g3',
-    gatheringTitle: '퇴근 후 오일파스텔 드로잉',
-    type: 'TEXT',
-    content: '손이 어색했지만 결과물은 마음에 듭니다. 선생님이 친절하게 도와주셔서 좋았어요.',
+    reviewType: 'TEXT',
+    images: [],
+    reviewContent: '손이 어색했지만 결과물은 마음에 듭니다. 선생님이 친절하게 도와주셔서 좋았어요.',
     likeCount: 14,
-    isLikedByMe: false,
-    isMyReview: true,
+    createdAt: '2026-05-11T10:00:00',
   },
   {
-    id: 'mr3',
-    authorNickname: '밤산책',
-    authorAnimalType: '🐱',
-    createdAt: '3주 전',
+    reviewId: 'mr3',
+    userId: 'mock-user',
+    applicationId: 'app3',
     gatheringId: 'g2',
-    gatheringTitle: '성수동 에스프레소 투어',
-    type: 'PHOTO',
-    imageUrl: '/home/home-4.png',
-    content: '커피 종류별 비교가 흥미로웠어요. 다음엔 꼭 친구랑 같이 가고 싶어요.',
+    reviewType: 'PHOTO',
+    images: [{ imageId: 'img3', imageUrl: '/home/home-4.png', displayOrder: 0 }],
+    reviewContent: '커피 종류별 비교가 흥미로웠어요. 다음엔 꼭 친구랑 같이 가고 싶어요.',
     likeCount: 18,
-    isLikedByMe: false,
-    isMyReview: true,
+    createdAt: '2026-04-27T10:00:00',
   },
 ]
 
@@ -59,7 +51,7 @@ export default function MyReviewList() {
   const [toast, setToast] = useState<string | null>(null)
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
 
-  const remaining = MOCK_MY_REVIEWS.filter((r) => !deletedIds.has(r.id))
+  const remaining = MOCK_MY_REVIEWS.filter((r) => !deletedIds.has(r.reviewId))
   const sorted = sort === 'recommended'
     ? [...remaining].sort((a, b) => b.likeCount - a.likeCount)
     : remaining
@@ -98,12 +90,12 @@ export default function MyReviewList() {
       {/* 카드 목록 (게더링 제목 칩 포함) */}
       {visible.map((review) => (
         <ReviewCard
-          key={review.id}
+          key={review.reviewId}
           review={review}
           isLoggedIn={isLoggedIn}
           showGatheringTitle
           onToast={showToast}
-          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.id]))}
+          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
         />
       ))}
 

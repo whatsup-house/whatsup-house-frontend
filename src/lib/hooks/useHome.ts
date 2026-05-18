@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchCuratedGatherings, fetchHeroCarousel } from '@/lib/api/home'
-import { fetchAllReviews } from '@/lib/api/review'
+import { fetchCuratedGatherings, fetchHeroCarousel, fetchHomeReviews } from '@/lib/api/home'
 
 export function useHeroCarousel() {
   return useQuery({
@@ -18,10 +17,10 @@ export function useCuratedGatherings() {
   })
 }
 
-export function useHomeReviews(sort: 'LIKES' | 'LATEST' = 'LIKES') {
+export function useHomeReviews() {
   return useQuery({
-    queryKey: ['home', 'reviews', sort],
-    queryFn: () => fetchAllReviews(sort, 0, 6),
+    queryKey: ['home', 'reviews'],
+    queryFn: fetchHomeReviews,
     staleTime: 1000 * 60 * 5,
   })
 }

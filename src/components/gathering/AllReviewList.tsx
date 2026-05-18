@@ -103,7 +103,7 @@ function Pagination({ page, totalPages, onChange }: {
 }
 
 export default function AllReviewList() {
-  const { isLoggedIn } = useAuthStore()
+  const { isLoggedIn, userId } = useAuthStore()
   const [sort, setSort] = useState<SortType>('LIKES')
   const [gatheringId, setGatheringId] = useState<string | undefined>(undefined)
   const [myReviewOnly, setMyReviewOnly] = useState(false)
@@ -116,8 +116,8 @@ export default function AllReviewList() {
 
   const gatheringOptions = (gatheringsData ?? []).map((g) => ({ id: g.id, title: g.title }))
 
-  const allReviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.id))
-  const reviews = myReviewOnly ? allReviews.filter((r) => r.isMyReview) : allReviews
+  const allReviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.reviewId))
+  const reviews = myReviewOnly ? allReviews.filter((r) => r.userId === userId) : allReviews
   const totalPages = data?.totalPages ?? 0
 
   const showToast = (msg: string) => {
@@ -201,12 +201,12 @@ export default function AllReviewList() {
       {/* 카드 목록 */}
       {reviews.map((review) => (
         <ReviewCard
-          key={review.id}
+          key={review.reviewId}
           review={review}
           isLoggedIn={isLoggedIn}
           showGatheringTitle
           onToast={showToast}
-          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.id]))}
+          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
         />
       ))}
 
