@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Pencil } from 'lucide-react'
+import Link from 'next/link'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import Button from '@/components/ui/Button'
@@ -77,11 +78,15 @@ export default function MyProfile() {
               <p className="text-sm text-tag-text mt-1">{profile.bio}</p>
             )}
           </div>
-          <div className="bg-tag-bg rounded-full px-4 py-1.5">
+          <Link
+            href="/mypage/mileage"
+            className="bg-tag-bg rounded-full px-4 py-1.5 flex items-center gap-1"
+          >
             <span className="text-sm font-semibold text-foreground">
               {(profile.mileage ?? 0).toLocaleString()} 마일리지
             </span>
-          </div>
+            <span className="text-xs text-tag-text">›</span>
+          </Link>
         </div>
 
         {/* 상세 정보 */}
