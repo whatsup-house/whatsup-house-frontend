@@ -369,3 +369,29 @@ export interface UserProfile {
   avatarUrl: string | null
   admin?: boolean
 }
+
+// 마일리지 타입
+export type MileageType = 'SIGNUP' | 'ATTENDANCE' | 'REVIEW_REWARD' | 'REVIEW_UPGRADE' | 'ADMIN_ADJUST'
+
+export interface MileageBalanceResponse {
+  userId: string
+  mileage: number
+}
+
+export interface MileageHistoryItem {
+  id: string
+  type: MileageType
+  amount: number
+  balanceAfter: number
+  relatedId: string | null
+  adjustReason: string | null
+  createdAt: string
+}
+
+export interface MileageHistoryPageResponse {
+  content: MileageHistoryItem[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
