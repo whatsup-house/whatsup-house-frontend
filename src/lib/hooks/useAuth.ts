@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import type { RegisterRequest, ProfileUpdateRequest } from '@/lib/api/types'
 
 export function useInitAuth() {
-  const { login: storeLogin, setInitialized } = useAuthStore()
+  const { login: storeLogin, logout: storeLogout } = useAuthStore()
 
   const query = useQuery({
     queryKey: ['auth-me'],
@@ -22,9 +22,9 @@ export function useInitAuth() {
     if (query.isSuccess && query.data) {
       storeLogin(query.data.id, query.data.nickname, query.data.admin ?? false)
     } else if (query.isError) {
-      setInitialized()
+      storeLogout()
     }
-  }, [query.isSuccess, query.isError, query.data, storeLogin, setInitialized])
+  }, [query.isSuccess, query.isError, query.data, storeLogin, storeLogout])
 
   return query
 }

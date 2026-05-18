@@ -40,8 +40,7 @@ apiClient.interceptors.response.use(
     if (
       error.response?.status !== 401 ||
       original._retry ||
-      original.url?.includes('/api/auth/refresh') ||
-      original.url?.includes('/api/users/me')
+      original.url?.includes('/api/auth/refresh')
     ) {
       return Promise.reject(error)
     }
@@ -66,7 +65,7 @@ apiClient.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError)
       useAuthStore.getState().logout()
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         const returnUrl = encodeURIComponent(window.location.pathname)
         window.location.href = `/login?returnUrl=${returnUrl}`
       }
