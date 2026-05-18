@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { MoreVertical } from 'lucide-react'
+import { MoreVertical, User } from 'lucide-react'
+import dayjs from 'dayjs'
 import { useToggleReviewLike, useDeleteReview } from '@/lib/hooks/useReview'
+import { useAuthStore } from '@/lib/store/authStore'
 import type { ReviewItem } from '@/lib/api/types'
 
 interface ReviewCardProps {
@@ -78,7 +80,9 @@ export default function ReviewCard({
   onToast,
   onDeleted,
 }: ReviewCardProps) {
-  const [liked, setLiked] = useState(review.isLikedByMe)
+  const { userId } = useAuthStore()
+  const isMyReview = isLoggedIn && review.userId === userId
+  const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(review.likeCount)
   const [showMenu, setShowMenu] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -110,7 +114,7 @@ export default function ReviewCard({
     const prevCount = likeCount
     setLiked(!prevLiked)
     setLikeCount(prevLiked ? prevCount - 1 : prevCount + 1)
-    toggleLike(review.id, {
+    toggleLike(review.reviewId, {
       onSuccess: (data) => {
         setLiked(data.liked)
         setLikeCount(data.likeCount)
@@ -123,7 +127,7 @@ export default function ReviewCard({
   }
 
   const handleDeleteConfirm = () => {
-    doDelete(review.id, {
+    doDelete(review.reviewId, {
       onSuccess: () => {
         setShowDeleteConfirm(false)
         onToast('리뷰가 삭제됐어요')
@@ -138,23 +142,22 @@ export default function ReviewCard({
   return (
     <>
       <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden mb-3.5">
-        {/* 헤더: 아바타, 닉네임, 타입 배지 */}
+        {/* 헤더: 아바타, 타입 배지 */}
         <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2.5">
-          <div className="w-9 h-9 rounded-full bg-tag-bg flex items-center justify-center text-lg shrink-0">
-            {review.authorAnimalType}
+          <div className="w-9 h-9 rounded-full bg-tag-bg flex items-center justify-center shrink-0">
+            <User size={18} className="text-tag-text" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="text-sm font-bold text-foreground truncate">{review.authorNickname}</span>
-              {review.type === 'PHOTO' && (
+              {review.reviewType === 'PHOTO' && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 bg-primary-light text-primary">
                   📷 포토리뷰
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-tag-text">{review.createdAt} 작성</p>
+            <p className="text-[11px] text-tag-text">{dayjs(review.createdAt).format('YYYY.MM.DD')} 작성</p>
           </div>
-          {review.isMyReview && (
+          {isMyReview && (
             <div ref={menuRef} className="relative">
               <button
                 onClick={() => setShowMenu((o) => !o)}
@@ -177,7 +180,7 @@ export default function ReviewCard({
           )}
         </div>
 
-        {/* 게더링 제목 칩 (전체 후기 모드) */}
+        {/* 게더링 링크 칩 (전체 후기 모드) */}
         {showGatheringTitle && (
           <div className="mx-4 mb-3">
             <Link
@@ -186,17 +189,17 @@ export default function ReviewCard({
             >
               <div className="w-0.5 h-3.5 bg-primary rounded-full shrink-0" />
               <span className="text-xs font-semibold text-foreground truncate">
-                {review.gatheringTitle}
+                게더링 보기
               </span>
             </Link>
           </div>
         )}
 
-        {/* 사진 (PHOTO 타입에 imageUrl이 있을 때만) */}
-        {review.type === 'PHOTO' && review.imageUrl && (
+        {/* 사진 (PHOTO 타입에 images가 있을 때만) */}
+        {review.reviewType === 'PHOTO' && review.images?.[0]?.imageUrl && (
           <div className="px-4 pb-3">
             <img
-              src={review.imageUrl}
+              src={review.images[0].imageUrl}
               alt=""
               className="w-full aspect-[4/3] object-cover rounded-card"
             />
@@ -204,7 +207,7 @@ export default function ReviewCard({
         )}
 
         {/* 본문 */}
-        <p className="px-5 pb-3.5 text-sm text-tag-text leading-relaxed">{review.content}</p>
+        <p className="px-5 pb-3.5 text-sm text-tag-text leading-relaxed">{review.reviewContent}</p>
 
         {/* 하단: 추천 버튼 */}
         <div className="border-t border-tag-bg/60 px-4 py-2.5">
