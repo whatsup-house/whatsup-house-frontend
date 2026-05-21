@@ -84,7 +84,6 @@ export default function GuestApplicationCheck() {
 
   return (
     <div className="px-5 py-8">
-      <h1 className="text-xl font-bold text-foreground mb-2">신청 내역 조회</h1>
       <p className="text-sm text-tag-text mb-8">
         예약번호와 연락처로 신청 내역을 확인할 수 있어요
       </p>

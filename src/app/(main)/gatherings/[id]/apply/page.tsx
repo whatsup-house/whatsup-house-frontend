@@ -2,7 +2,6 @@
 
 import { use } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { LoadingSpinner, ApiErrorMessage } from '@/components/ui'
 import GuestApplicationForm from '@/components/gathering/GuestApplicationForm'
@@ -42,21 +41,6 @@ export default function ApplyPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
-        <div className="flex items-center px-4 py-3">
-          <button
-            onClick={() => router.back()}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label="뒤로가기"
-          >
-            <ArrowLeft size={20} className="text-foreground" />
-          </button>
-          <h1 className="flex-1 text-center text-base font-bold text-foreground pr-11">
-            게더링 신청
-          </h1>
-        </div>
-      </header>
-
       <div className="px-4 pt-4 pb-6">
         <div className="flex items-center gap-3 bg-card rounded-card p-3 mb-5 shadow-sm">
           <div className="w-16 h-16 rounded-[12px] overflow-hidden shrink-0 bg-tag-bg">
