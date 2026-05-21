@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, type QueryClient } from '@tanstack/react-query'
 import { fetchCuratedGatherings, fetchHeroCarousel, fetchHomeReviews } from '@/lib/api/home'
 
 export function useHeroCarousel() {
@@ -23,4 +23,12 @@ export function useHomeReviews() {
     queryFn: fetchHomeReviews,
     staleTime: 1000 * 60 * 5,
   })
+}
+
+export async function prefetchHomeQueries(queryClient: QueryClient) {
+  await Promise.allSettled([
+    queryClient.prefetchQuery({ queryKey: ['home', 'carousel'], queryFn: fetchHeroCarousel }),
+    queryClient.prefetchQuery({ queryKey: ['home', 'curated'], queryFn: fetchCuratedGatherings }),
+    queryClient.prefetchQuery({ queryKey: ['home', 'reviews'], queryFn: fetchHomeReviews }),
+  ])
 }

@@ -1,44 +1,32 @@
-'use client'
-
-import { useState } from 'react'
+import type { Metadata } from 'next'
 import dayjs from 'dayjs'
-import CalendarView from '@/components/gathering/CalendarView'
-import GatheringList from '@/components/gathering/GatheringList'
-import { useGatherings, useCalendarDots } from '@/lib/hooks/useGatherings'
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
+import { makeQueryClient } from '@/lib/utils/queryClient'
+import { prefetchGatheringsQueries } from '@/lib/hooks/useGatherings'
+import GatheringsPageClient from '@/components/gathering/GatheringsPageClient'
 
-export default function GatheringsPage() {
+export const metadata: Metadata = {
+  title: '게더링 | 와썹하우스',
+  description: '날짜별 소셜 게더링 일정을 확인하고 신청하세요.',
+  openGraph: {
+    title: '게더링 | 와썹하우스',
+    description: '날짜별 소셜 게더링 일정을 확인하고 신청하세요.',
+    type: 'website',
+  },
+}
+
+export default async function GatheringsPage() {
   const today = dayjs()
-  const [selectedDate, setSelectedDate] = useState(today.format('YYYY-MM-DD'))
-  const [currentYear, setCurrentYear] = useState(today.year())
-  const [currentMonth, setCurrentMonth] = useState(today.month() + 1)
+  const todayStr = today.format('YYYY-MM-DD')
+  const year = today.year()
+  const month = today.month() + 1
 
-  const { data: gatherings, isLoading, isError, refetch } = useGatherings(selectedDate)
-  const { data: calendarDots = [] } = useCalendarDots(currentYear, currentMonth)
-
-  const handleChangeMonth = (year: number, month: number) => {
-    setCurrentYear(year)
-    setCurrentMonth(month)
-  }
+  const queryClient = makeQueryClient()
+  await prefetchGatheringsQueries(queryClient, todayStr, year, month)
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      <div className="mb-5">
-        <CalendarView
-          year={currentYear}
-          month={currentMonth}
-          selectedDate={selectedDate}
-          dotDates={calendarDots}
-          onSelectDate={setSelectedDate}
-          onChangeMonth={handleChangeMonth}
-        />
-      </div>
-      <GatheringList
-        date={selectedDate}
-        gatherings={gatherings}
-        isLoading={isLoading}
-        isError={isError}
-        onRetry={refetch}
-      />
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <GatheringsPageClient />
+    </HydrationBoundary>
   )
 }
