@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { captureFullPage } from '../fixtures/screenshot'
 import { setupAdminContext, mockLocations } from '../fixtures/mocks'
 
 // ADMIN-06: 장소 관리 CRUD
@@ -30,7 +31,7 @@ test.describe('관리자 - 장소 관리', () => {
   test('장소 목록을 조회한다', async ({ page }) => {
     await page.goto('/admin/locations')
     await expect(page.getByText('팜팜발리')).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/admin/locations-01-list.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/admin/locations-01-list.png')
   })
 
   test('새 장소를 추가한다', async ({ page }) => {
@@ -38,7 +39,7 @@ test.describe('관리자 - 장소 관리', () => {
 
     const addBtn = page.getByRole('button', { name: /장소 추가|추가/ })
     await addBtn.click()
-    await page.screenshot({ path: 'e2e/screenshots/admin/locations-02-form.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/admin/locations-02-form.png')
 
     // 폼 입력
     const nameInput = page.getByLabel('장소명').or(page.getByPlaceholder(/장소명|이름/)).first()
@@ -56,7 +57,7 @@ test.describe('관리자 - 장소 관리', () => {
       await capacityInput.fill('15')
     }
 
-    await page.screenshot({ path: 'e2e/screenshots/admin/locations-03-filled.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/admin/locations-03-filled.png')
 
     const saveBtn = page.getByRole('button', { name: /저장|추가/ }).last()
     await saveBtn.click()
@@ -71,7 +72,7 @@ test.describe('관리자 - 장소 관리', () => {
     const editBtn = page.getByRole('button', { name: /수정|편집/ }).first()
     if (await editBtn.isVisible()) {
       await editBtn.click()
-      await page.screenshot({ path: 'e2e/screenshots/admin/locations-05-edit-form.png', fullPage: true })
+      await captureFullPage(page, 'e2e/screenshots/admin/locations-05-edit-form.png')
 
       const saveBtn = page.getByRole('button', { name: /저장|수정 완료/ }).last()
       await saveBtn.click()

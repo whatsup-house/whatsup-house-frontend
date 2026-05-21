@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { captureFullPage } from '../fixtures/screenshot'
 import { setupGuestContext, mockUserProfile } from '../fixtures/mocks'
 
 // AUTH-U-01: 회원가입 → 온보딩
@@ -45,7 +46,7 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     // 1. 회원가입 페이지
     await page.goto('/register')
     await expect(page.getByText('회원가입').first()).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/user/register-01-form.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/register-01-form.png')
 
     // 2. 기본 정보 입력
     await page.getByPlaceholder('이름을 입력해주세요').fill('김새싹')
@@ -61,16 +62,16 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await page.getByPlaceholder('비밀번호를 다시 입력해주세요').fill('Password1!')
     await page.getByPlaceholder('01012345678 (선택, 11자리)').fill('01087654321')
 
-    await page.screenshot({ path: 'e2e/screenshots/user/register-02-filled.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/register-02-filled.png')
 
     // 3. 약관 전체 동의
     await page.getByText('전체 동의').click()
-    await page.screenshot({ path: 'e2e/screenshots/user/register-03-terms.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/register-03-terms.png')
 
     // 4. 다음 → 온보딩
     await page.getByRole('button', { name: '다음' }).click()
     await expect(page).toHaveURL('/onboarding')
-    await page.screenshot({ path: 'e2e/screenshots/user/register-04-onboarding.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/register-04-onboarding.png')
 
     // 5. 직업 선택
     const jobBtn = page.getByText('직장인').or(page.getByText('대학생')).first()
@@ -86,7 +87,7 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await page.getByText('감성').click()
     await page.getByText('독서').click()
 
-    await page.screenshot({ path: 'e2e/screenshots/user/register-05-onboarding-filled.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/register-05-onboarding-filled.png')
 
     registered = true
     // 8. 완료 버튼

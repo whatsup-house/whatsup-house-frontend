@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { captureFullPage } from '../fixtures/screenshot'
 import { setupGuestContext, mockGatheringApis, MOCK_GATHERING_ID } from '../fixtures/mocks'
 
 // AUTH-G-01: 비회원 게더링 신청
@@ -33,12 +34,14 @@ test.describe('비회원 - 게더링 신청', () => {
     // 2. 신청하기 버튼 → 신청 방법 모달
     await page.getByRole('button', { name: '신청하기' }).click()
     await expect(page.getByText('신청 방법을 선택해주세요')).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/guest/apply-02-modal.png' })
+    await expect(page.getByRole('button', { name: /로그인 없이 신청하기/ })).toBeVisible()
+    await page.waitForTimeout(350)
+    await page.screenshot({ path: 'e2e/screenshots/guest/apply-02-modal.png', animations: 'disabled' })
 
     // 3. 로그인 없이 신청하기
     await page.getByRole('button', { name: '로그인 없이 신청하기' }).click()
     await expect(page).toHaveURL(`/gatherings/${MOCK_GATHERING_ID}/apply?type=guest`)
-    await page.screenshot({ path: 'e2e/screenshots/guest/apply-03-form.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/guest/apply-03-form.png')
 
     // 4. 신청 폼 작성
     await page.getByPlaceholder('실명을 입력해주세요').fill('홍길동')
@@ -46,7 +49,7 @@ test.describe('비회원 - 게더링 신청', () => {
     await page.getByRole('button', { name: '남성' }).click()
     await page.getByPlaceholder('나이를 입력해주세요').fill('28')
 
-    await page.screenshot({ path: 'e2e/screenshots/guest/apply-04-form-filled.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/guest/apply-04-form-filled.png')
 
     // 5. 신청 완료하기
     await page.getByRole('button', { name: '신청 완료하기' }).click()
@@ -55,11 +58,13 @@ test.describe('비회원 - 게더링 신청', () => {
     await expect(page).toHaveURL(`/gatherings/${MOCK_GATHERING_ID}/apply/complete?bookingNumber=WH260601Z9X8`)
     await expect(page.getByText('신청이 완료됐어요!')).toBeVisible()
     await expect(page.getByText('WH260601Z9X8')).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/guest/apply-05-complete.png', fullPage: true })
+    await expect(page.getByRole('button', { name: '예약 내역 조회하기' })).toBeVisible()
+    await expect(page.getByText('홈으로 돌아가기')).toBeVisible()
+    await captureFullPage(page, 'e2e/screenshots/guest/apply-05-complete.png')
 
     // 7. 예약번호 복사 버튼 존재 확인 (clipboard API는 테스트 환경에서 제한될 수 있음)
     await expect(page.getByRole('button', { name: '복사' })).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/guest/apply-06-copied.png' })
+    await captureFullPage(page, 'e2e/screenshots/guest/apply-06-copied.png')
 
     // 8. 예약 내역 조회 버튼
     await expect(page.getByRole('button', { name: '예약 내역 조회하기' })).toBeVisible()

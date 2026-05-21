@@ -263,32 +263,26 @@ export const mockAdminUserDetail = {
 // /reviews 페이지용 mock (API 인터셉트 시 사용)
 export const mockGatheringReviews = [
   {
-    id: 'rev-001',
-    authorNickname: '지은이',
-    authorAnimalType: '',
-    createdAt: '2026-05-01T12:00:00',
+    reviewId: 'rev-001',
+    userId: mockUserProfile.id,
+    applicationId: 'app-001',
     gatheringId: MOCK_GATHERING_ID,
-    gatheringTitle: '퇴근 게더링',
-    type: 'TEXT',
-    imageUrl: null,
-    content: '퇴근하고 팜팜발리에서 처음 만난 분들인데 이렇게 편안할 줄 몰랐어요. 2시간이 어떻게 지나갔는지 모를 정도였어요.',
+    reviewType: 'TEXT',
+    images: [],
+    reviewContent: '퇴근하고 팜팜발리에서 처음 만난 분들인데 이렇게 편안할 줄 몰랐어요. 2시간이 어떻게 지나갔는지 모를 정도였어요.',
     likeCount: 5,
-    isLikedByMe: false,
-    isMyReview: true,
+    createdAt: '2026-05-01T12:00:00',
   },
   {
-    id: 'rev-002',
-    authorNickname: '준서',
-    authorAnimalType: '',
-    createdAt: '2026-04-20T10:00:00',
+    reviewId: 'rev-002',
+    userId: 'b1000000-0000-0000-0000-000000000003',
+    applicationId: 'app-002',
     gatheringId: MOCK_GATHERING_ID,
-    gatheringTitle: '퇴근 게더링',
-    type: 'TEXT',
-    imageUrl: null,
-    content: '분위기가 너무 좋았습니다.',
+    reviewType: 'PHOTO',
+    images: [{ imageId: 'img-review-002', imageUrl: '/review/review1.JPG', displayOrder: 0 }],
+    reviewContent: '분위기가 너무 좋았습니다.',
     likeCount: 2,
-    isLikedByMe: true,
-    isMyReview: false,
+    createdAt: '2026-04-20T10:00:00',
   },
 ]
 
@@ -299,6 +293,53 @@ export const mockAllReviewsPage = {
   totalElements: mockGatheringReviews.length,
   totalPages: 1,
 }
+
+export const mockHeroCarouselSlides = MOCK_HERO_CAROUSEL_SLIDES
+  .filter((slide) => slide.isActive)
+  .map((slide) => ({
+    id: slide.id,
+    type: slide.type,
+    imageUrl: slide.imageUrl,
+    title: slide.label,
+    content: slide.sub,
+    dateLabel: slide.date,
+    gatheringId: slide.gatheringId,
+    sortOrder: slide.displayOrder,
+  }))
+
+export const mockCuratedGatherings = mockAdminGatherings.map((gathering, index) => ({
+  id: gathering.id,
+  title: gathering.title,
+  thumbnailUrl: gathering.thumbnailUrl,
+  eventDate: gathering.date,
+  locationName: gathering.locationName,
+  price: gathering.price,
+  status: gathering.status,
+  curatedRank: index,
+}))
+
+export const mockHomeReviews = [
+  {
+    reviewId: 'home-review-001',
+    nickname: '지은이',
+    gatheringId: MOCK_GATHERING_ID,
+    gatheringTitle: '퇴근 게더링',
+    reviewContent: '퇴근하고 처음 만난 분들과 편안하게 이야기했어요.',
+    likeCount: 5,
+    thumbnailImageUrl: '/review/review1.JPG',
+    homeDisplayOrder: 1,
+  },
+  {
+    reviewId: 'home-review-002',
+    nickname: '준서',
+    gatheringId: 'c2000000-0000-0000-0000-000000000003',
+    gatheringTitle: '썬데이 러닝 클럽',
+    reviewContent: '가볍게 뛰고 커피까지 마시는 흐름이 좋았습니다.',
+    likeCount: 2,
+    thumbnailImageUrl: '/review/review2.JPG',
+    homeDisplayOrder: 2,
+  },
+]
 
 export const mockDashboardGatherings = [
   {
@@ -329,7 +370,7 @@ export async function setupGuestContext(page: Page) {
     route.fulfill({ status: 401, json: { success: false, message: '인증 필요', data: null } })
   )
   await page.route('**/api/auth/refresh', (route) =>
-    route.fulfill({ status: 401, json: { success: false, message: '토큰 만료', data: null } })
+    route.fulfill({ status: 200, json: apiRes(null) })
   )
 }
 
@@ -360,5 +401,23 @@ export async function mockGatheringApis(page: Page) {
   )
   await page.route(`**/api/gatherings/${MOCK_CLOSED_GATHERING_ID}`, (route) =>
     route.fulfill({ json: apiRes(mockClosedGathering) })
+  )
+}
+
+export async function mockHomeApis(page: Page) {
+  await page.route('**/api/home/carousel', (route) =>
+    route.fulfill({ json: apiRes(mockHeroCarouselSlides) })
+  )
+  await page.route('**/api/home/curated', (route) =>
+    route.fulfill({ json: apiRes(mockCuratedGatherings) })
+  )
+  await page.route('**/api/home/reviews', (route) =>
+    route.fulfill({ json: apiRes(mockHomeReviews) })
+  )
+}
+
+export async function mockReviewApis(page: Page) {
+  await page.route('**/api/reviews**', (route) =>
+    route.fulfill({ json: apiRes(mockAllReviewsPage) })
   )
 }

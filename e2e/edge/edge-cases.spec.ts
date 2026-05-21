@@ -10,9 +10,9 @@ test.describe('엣지 케이스', () => {
     })
 
     await page.goto(`/gatherings/${MOCK_CLOSED_GATHERING_ID}`)
-    const applyBtn = page.getByRole('button', { name: '마감' })
-    await expect(applyBtn).toBeVisible()
-    await expect(applyBtn).toBeDisabled()
+    const endedButton = page.getByRole('button', { name: '운영 종료' })
+    await expect(endedButton).toBeVisible()
+    await expect(endedButton).toBeDisabled()
     await page.screenshot({ path: 'e2e/screenshots/edge/closed-gathering.png' })
   })
 

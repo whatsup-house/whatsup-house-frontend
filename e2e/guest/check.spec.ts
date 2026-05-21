@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { captureFullPage } from '../fixtures/screenshot'
 import { setupGuestContext } from '../fixtures/mocks'
 
 // AUTH-G-02: 비회원 신청 내역 조회
@@ -31,7 +32,7 @@ test.describe('비회원 - 신청 내역 조회', () => {
 
     await page.goto('/applications/check')
     await expect(page.getByText('신청 내역 조회')).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/guest/check-01-form.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/guest/check-01-form.png')
 
     await page.getByPlaceholder('WH260421A3F2').fill('WH260601Z9X8')
     await page.getByPlaceholder('01012345678').fill('01099998888')
@@ -40,7 +41,7 @@ test.describe('비회원 - 신청 내역 조회', () => {
     await page.getByRole('button', { name: '조회하기' }).click()
     await expect(page.getByText('봄날 감성 게더링')).toBeVisible()
     await expect(page.getByText('확정')).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/guest/check-03-result.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/guest/check-03-result.png')
   })
 
   test('잘못된 예약번호 입력 시 오류 메시지를 표시한다', async ({ page }) => {
