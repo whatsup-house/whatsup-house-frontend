@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, type QueryClient } from '@tanstack/react-query'
 import { fetchGatherings, fetchGatheringsAll, fetchCalendarDots, fetchGatheringDetail, submitGuestApplication, submitUserApplication } from '@/lib/api/gathering'
 import type { GuestApplicationRequest, UserApplicationRequest } from '@/lib/api/types'
 
@@ -56,4 +56,17 @@ export function useSubmitUserApplication() {
     mutationFn: ({ id, data }: { id: string; data: UserApplicationRequest }) =>
       submitUserApplication(id, data),
   })
+}
+
+export async function prefetchGatheringsQueries(queryClient: QueryClient, date: string, year: number, month: number) {
+  await Promise.allSettled([
+    queryClient.prefetchQuery({
+      queryKey: ['gatherings', 'date', date],
+      queryFn: () => fetchGatherings(date),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ['gatherings', 'calendar', year, month],
+      queryFn: () => fetchCalendarDots(year, month),
+    }),
+  ])
 }
