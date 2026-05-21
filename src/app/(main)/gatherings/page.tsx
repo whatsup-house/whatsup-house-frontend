@@ -2,17 +2,12 @@
 
 import { useState } from 'react'
 import dayjs from 'dayjs'
-import ViewToggle from '@/components/gathering/ViewToggle'
 import CalendarView from '@/components/gathering/CalendarView'
-import MapView from '@/components/gathering/MapView'
 import GatheringList from '@/components/gathering/GatheringList'
 import { useGatherings, useCalendarDots } from '@/lib/hooks/useGatherings'
 
-type View = 'calendar' | 'map'
-
 export default function GatheringsPage() {
   const today = dayjs()
-  const [view, setView] = useState<View>('calendar')
   const [selectedDate, setSelectedDate] = useState(today.format('YYYY-MM-DD'))
   const [currentYear, setCurrentYear] = useState(today.year())
   const [currentMonth, setCurrentMonth] = useState(today.month() + 1)
@@ -27,38 +22,23 @@ export default function GatheringsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-6">
-      <div className="mb-4">
-        <ViewToggle view={view} onChange={setView} />
-      </div>
-
-      {view === 'calendar' ? (
-        <>
-          <div className="mb-5">
-            <CalendarView
-              year={currentYear}
-              month={currentMonth}
-              selectedDate={selectedDate}
-              dotDates={calendarDots}
-              onSelectDate={setSelectedDate}
-              onChangeMonth={handleChangeMonth}
-            />
-          </div>
-          <GatheringList
-            date={selectedDate}
-            gatherings={gatherings}
-            isLoading={isLoading}
-            isError={isError}
-            onRetry={refetch}
-          />
-        </>
-      ) : (
-        <MapView
-          gatherings={gatherings ?? []}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
+      <div className="mb-5">
+        <CalendarView
+          year={currentYear}
+          month={currentMonth}
+          selectedDate={selectedDate}
+          dotDates={calendarDots}
+          onSelectDate={setSelectedDate}
+          onChangeMonth={handleChangeMonth}
         />
-      )}
+      </div>
+      <GatheringList
+        date={selectedDate}
+        gatherings={gatherings}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
+      />
     </div>
   )
 }
