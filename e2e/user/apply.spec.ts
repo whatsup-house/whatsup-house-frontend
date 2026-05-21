@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { captureFullPage } from '../fixtures/screenshot'
 import { setupUserContext, mockGatheringApis, mockUserProfile, MOCK_GATHERING_ID } from '../fixtures/mocks'
 
 // AUTH-U-02: 로그인 회원 게더링 신청
@@ -29,7 +30,7 @@ test.describe('회원 - 게더링 신청', () => {
     // 3. 로그인하고 신청하기
     await page.getByRole('button', { name: '로그인하고 신청하기' }).click()
     await expect(page).toHaveURL(`/gatherings/${MOCK_GATHERING_ID}/apply`)
-    await page.screenshot({ path: 'e2e/screenshots/user/apply-03-form.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/apply-03-form.png')
 
     // 4. 폼 입력 (로그인 유저는 이름/연락처 없음)
     await page.getByRole('button', { name: '여성' }).click()
@@ -41,7 +42,7 @@ test.describe('회원 - 게더링 신청', () => {
     // 유입 경로 선택
     await page.getByRole('button', { name: '인스타그램' }).click()
 
-    await page.screenshot({ path: 'e2e/screenshots/user/apply-04-form-filled.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/apply-04-form-filled.png')
 
     // 5. 신청 완료
     await page.getByRole('button', { name: '신청 완료하기' }).click()
@@ -50,7 +51,7 @@ test.describe('회원 - 게더링 신청', () => {
 
     // 회원 신청은 예약번호 없이 "내 신청 내역 확인하기" 버튼
     await expect(page.getByRole('button', { name: '내 신청 내역 확인하기' })).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/user/apply-05-complete.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/user/apply-05-complete.png')
 
     // 6. 내 신청 내역으로 이동
     await page.getByRole('button', { name: '내 신청 내역 확인하기' }).click()

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { captureFullPage } from '../fixtures/screenshot'
 import { setupAdminContext, mockAdminGatherings, mockAdminApplications, MOCK_GATHERING_ID } from '../fixtures/mocks'
 
 // ADMIN-03: 참가자 관리
@@ -29,14 +30,14 @@ test.describe('관리자 - 참가자 관리', () => {
 
   test('날짜를 선택하고 게더링별 참가자를 조회한다', async ({ page }) => {
     await page.goto('/admin/applications')
-    await page.screenshot({ path: 'e2e/screenshots/admin/applications-01-calendar.png', fullPage: true })
+    await captureFullPage(page, 'e2e/screenshots/admin/applications-01-calendar.png')
 
     // 캘린더에서 날짜 선택 (1일)
     const dayBtn = page.getByRole('button', { name: '1' }).first()
     if (await dayBtn.isVisible()) {
       await dayBtn.click()
       await page.waitForTimeout(300)
-      await page.screenshot({ path: 'e2e/screenshots/admin/applications-02-date-selected.png', fullPage: true })
+      await captureFullPage(page, 'e2e/screenshots/admin/applications-02-date-selected.png')
     }
 
     // 게더링 카드 클릭
@@ -44,7 +45,7 @@ test.describe('관리자 - 참가자 관리', () => {
     if (await gatheringCard.isVisible()) {
       await gatheringCard.click()
       await page.waitForTimeout(300)
-      await page.screenshot({ path: 'e2e/screenshots/admin/applications-03-participants.png', fullPage: true })
+      await captureFullPage(page, 'e2e/screenshots/admin/applications-03-participants.png')
 
       // 참가자 이름 확인
       await expect(page.getByText('홍길동')).toBeVisible()
