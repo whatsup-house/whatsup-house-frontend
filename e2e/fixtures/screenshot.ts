@@ -53,6 +53,6 @@ export async function captureFullPage(
       ...options,
     })
   } finally {
-    await styleHandle.evaluate((node) => node.remove()).catch(() => {})
+    await styleHandle.evaluate((node) => (node as Element).remove()).catch(() => {})
   }
 }
