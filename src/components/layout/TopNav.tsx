@@ -13,6 +13,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/social': '소셜',
   '/mypage': '마이페이지',
   '/mypage/mileage': '마일리지',
+  '/applications/check': '신청 내역 조회',
   '/login': '로그인',
   '/register': '회원가입',
   '/onboarding': '온보딩',
