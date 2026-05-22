@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { MoreVertical, User } from 'lucide-react'
 import dayjs from 'dayjs'
+import AppImage from '@/components/ui/AppImage'
 import { useToggleReviewLike, useDeleteReview } from '@/lib/hooks/useReview'
 import { useAuthStore } from '@/lib/store/authStore'
 import type { ReviewItem } from '@/lib/api/types'
@@ -198,11 +199,14 @@ export default function ReviewCard({
         {/* 사진 (PHOTO 타입에 images가 있을 때만) */}
         {review.reviewType === 'PHOTO' && review.images?.[0]?.imageUrl && (
           <div className="px-4 pb-3">
-            <img
-              src={review.images[0].imageUrl}
-              alt=""
-              className="w-full aspect-[4/3] object-cover rounded-card"
-            />
+            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-card">
+              <AppImage
+                src={review.images[0].imageUrl}
+                alt=""
+                className="object-cover"
+                sizes="(max-width: 390px) 100vw, 390px"
+              />
+            </div>
           </div>
         )}
 

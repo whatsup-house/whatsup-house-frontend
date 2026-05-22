@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
 import { useToggleReviewLike } from '@/lib/hooks/useReview'
+import AppImage from '@/components/ui/AppImage'
 import ReviewWriteForm from './ReviewWriteForm'
 import type { ReviewItem } from '@/lib/api/types'
 
@@ -150,10 +151,11 @@ function ReviewCardCompact({ review, isLoggedIn, onToast }: {
       {/* 상단: 사진 or 기본 이미지 */}
       <div className="relative w-full aspect-square bg-tag-bg">
         {review.reviewType === 'PHOTO' && thumbnailUrl ? (
-          <img
+          <AppImage
             src={thumbnailUrl}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
+            className="object-cover"
+            sizes="200px"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-4xl">

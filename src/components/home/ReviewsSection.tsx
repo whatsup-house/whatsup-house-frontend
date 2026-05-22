@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import AppImage from '@/components/ui/AppImage'
 import { useHomeReviews } from '@/lib/hooks/useHome'
 import type { HomeReviewItem } from '@/lib/api/types'
 
@@ -9,10 +10,11 @@ function HomeReviewCard({ review }: { review: HomeReviewItem }) {
     <div className="flex-none w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden snap-start">
       <div className="relative w-full aspect-square bg-tag-bg flex items-center justify-center overflow-hidden">
         {review.thumbnailImageUrl ? (
-          <img
+          <AppImage
             src={review.thumbnailImageUrl}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
+            className="object-cover"
+            sizes="200px"
           />
         ) : (
           <span className="text-4xl">🐾</span>

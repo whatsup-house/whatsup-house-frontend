@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Flame } from 'lucide-react'
+import AppImage from '@/components/ui/AppImage'
 import { useHeroCarousel } from '@/lib/hooks/useHome'
 import type { HeroCarouselSlide } from '@/lib/api/types'
 
@@ -132,10 +133,11 @@ export default function HeroCarousel() {
             className="flex-none w-full h-full relative overflow-hidden cursor-pointer bg-tag-bg"
             onClick={() => handleSlideClick(slide)}
           >
-            <img
+            <AppImage
               src={slide.imageUrl}
               alt={slide.title}
-              className="w-full h-full object-cover block"
+              className="object-cover"
+              sizes="(max-width: 390px) 100vw, 390px"
               onError={(e) => {
                 ;(e.target as HTMLImageElement).style.display = 'none'
               }}
