@@ -19,12 +19,24 @@ const PAGE_TITLES: Record<string, string> = {
   '/onboarding': '온보딩',
 }
 
+const ROOT_PATHS = new Set(['/', '/gatherings', '/mypage'])
+
 function getTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
   if (pathname.endsWith('/apply/complete')) return '신청 완료'
   if (pathname.endsWith('/apply')) return '신청하기'
   if (pathname.startsWith('/gatherings/')) return '게더링'
   return ''
+}
+
+function getFallbackPath(pathname: string): string {
+  if (pathname === '/mypage/mileage') return '/mypage'
+  if (pathname.startsWith('/gatherings/')) {
+    const match = pathname.match(/^\/gatherings\/([^/]+)/)
+    if (pathname.includes('/apply') && match) return `/gatherings/${match[1]}`
+    return '/gatherings'
+  }
+  return '/'
 }
 
 export default function TopNav() {
@@ -36,12 +48,16 @@ export default function TopNav() {
     return null
   }
 
-  const canGoBack = stack.length > 1
+  const canGoBack = !ROOT_PATHS.has(pathname)
   const title = getTitle(pathname)
 
   const handleBack = () => {
-    back()
-    router.back()
+    if (stack.length > 1) {
+      back()
+      router.back()
+      return
+    }
+    router.push(getFallbackPath(pathname))
   }
 
   return (
