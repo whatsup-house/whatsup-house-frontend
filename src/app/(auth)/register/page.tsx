@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
@@ -60,16 +60,16 @@ export default function RegisterPage() {
 
   const {
     register,
+    control,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  const password = watch('password', '')
-  const passwordConfirmValue = watch('passwordConfirm', '')
-  const nicknameValue = watch('nickname', '')
-  const genderValue = watch('gender')
+  const password = useWatch({ control, name: 'password' }) ?? ''
+  const passwordConfirmValue = useWatch({ control, name: 'passwordConfirm' }) ?? ''
+  const nicknameValue = useWatch({ control, name: 'nickname' }) ?? ''
+  const genderValue = useWatch({ control, name: 'gender' })
 
   const passwordValid = password.length >= 8 && PASSWORD_REGEX.test(password)
   const confirmMatch = passwordConfirmValue.length > 0 && passwordConfirmValue === password
