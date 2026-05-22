@@ -1,11 +1,12 @@
 'use client'
 
 import { use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { LoadingSpinner, ApiErrorMessage } from '@/components/ui'
 import GuestApplicationForm from '@/components/gathering/GuestApplicationForm'
-import dayjs from 'dayjs'
+import AppImage from '@/components/ui/AppImage'
+import { formatKoreanNumericDate, formatTime } from '@/lib/utils/date'
 
 export default function ApplyPage({
   params,
@@ -13,7 +14,8 @@ export default function ApplyPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const router = useRouter()
+  const searchParams = useSearchParams()
+  const forceGuest = searchParams.get('type') === 'guest'
 
   const { data: gathering, isLoading, isError, refetch } = useGatheringDetail(id)
 
@@ -36,19 +38,20 @@ export default function ApplyPage({
     )
   }
 
-  const formattedDate = dayjs(gathering.eventDate).format('YYYY. MM. DD (ddd)')
-  const formattedTime = gathering.startTime?.slice(0, 5) ?? ''
+  const formattedDate = formatKoreanNumericDate(gathering.eventDate)
+  const formattedTime = formatTime(gathering.startTime)
 
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 pt-4 pb-6">
         <div className="flex items-center gap-3 bg-card rounded-card p-3 mb-5 shadow-sm">
-          <div className="w-16 h-16 rounded-[12px] overflow-hidden shrink-0 bg-tag-bg">
+          <div className="relative w-16 h-16 rounded-[12px] overflow-hidden shrink-0 bg-tag-bg">
             {gathering.thumbnailUrl ? (
-              <img
+              <AppImage
                 src={gathering.thumbnailUrl}
                 alt={gathering.title}
-                className="w-full h-full object-cover"
+                className="object-cover"
+                sizes="64px"
               />
             ) : (
               <div className="w-full h-full bg-tag-bg" />
@@ -62,7 +65,7 @@ export default function ApplyPage({
           </div>
         </div>
 
-        <GuestApplicationForm gathering={gathering} />
+        <GuestApplicationForm gathering={gathering} forceGuest={forceGuest} />
       </div>
     </div>
   )

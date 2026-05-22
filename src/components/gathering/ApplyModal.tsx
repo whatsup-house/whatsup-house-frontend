@@ -3,8 +3,9 @@
 import { useEffect } from 'react'
 
 import { Button } from '@/components/ui'
+import AppImage from '@/components/ui/AppImage'
 import type { GatheringDetail } from '@/lib/api/types'
-import dayjs from 'dayjs'
+import { formatKoreanShortDate, formatTime } from '@/lib/utils/date'
 
 interface ApplyModalProps {
   gathering: GatheringDetail
@@ -35,8 +36,8 @@ export default function ApplyModal({
 
   if (!isOpen) return null
 
-  const formattedDate = dayjs(gathering.eventDate).format('M월 D일 (ddd)')
-  const formattedTime = `오후 ${gathering.startTime?.slice(0, 5) ?? ''}`
+  const formattedDate = formatKoreanShortDate(gathering.eventDate)
+  const formattedTime = formatTime(gathering.startTime)
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
@@ -60,12 +61,13 @@ export default function ApplyModal({
 
         {/* 게더링 정보 */}
         <div className="flex items-center gap-3 bg-background rounded-card p-3 mb-6">
-          <div className="w-16 h-16 rounded-[12px] overflow-hidden shrink-0 bg-tag-bg">
+          <div className="relative w-16 h-16 rounded-[12px] overflow-hidden shrink-0 bg-tag-bg">
             {gathering.thumbnailUrl ? (
-              <img
+              <AppImage
                 src={gathering.thumbnailUrl}
                 alt={gathering.title}
-                className="w-full h-full object-cover"
+                className="object-cover"
+                sizes="64px"
               />
             ) : (
               <div className="w-full h-full bg-tag-bg" />

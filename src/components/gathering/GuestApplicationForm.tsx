@@ -43,14 +43,16 @@ type FormValues = z.infer<typeof schema>
 
 interface GuestApplicationFormProps {
   gathering: GatheringDetail
+  forceGuest?: boolean
 }
 
-export default function GuestApplicationForm({ gathering }: GuestApplicationFormProps) {
+export default function GuestApplicationForm({ gathering, forceGuest = false }: GuestApplicationFormProps) {
   const router = useRouter()
   const { isLoggedIn } = useAuthStore()
   const { data: profile } = useMyProfile()
   const guestMutation = useSubmitGuestApplication()
   const userMutation = useSubmitUserApplication()
+  const isGuestMode = forceGuest || !isLoggedIn
 
   const [gender, setGender] = useState<Gender | null>(null)
   const [genderError, setGenderError] = useState<string | null>(null)
@@ -65,17 +67,17 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
   })
 
   useEffect(() => {
-    if (!isLoggedIn || !profile) return
+    if (isGuestMode || !isLoggedIn || !profile) return
     reset({
       instagramId: profile.instagramId ?? undefined,
       job: profile.job ?? undefined,
       intro: profile.intro ?? profile.bio ?? undefined,
     })
-  }, [isLoggedIn, profile, reset])
+  }, [isGuestMode, isLoggedIn, profile, reset])
 
   // 프로필 MBTI를 초기값으로, 사용자가 직접 선택하면 그 값으로 override
   const profileMbti: (string | null)[] =
-    isLoggedIn && profile?.mbti?.length === 4
+    !isGuestMode && isLoggedIn && profile?.mbti?.length === 4
       ? (profile.mbti.split('') as string[])
       : [null, null, null, null]
 
@@ -100,7 +102,7 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
     setSubmitError(null)
 
     try {
-      if (isLoggedIn) {
+      if (!isGuestMode && isLoggedIn) {
         await userMutation.mutateAsync({
           id: gathering.id,
           data: {
@@ -150,11 +152,11 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
     }
   }
 
-  const isPending = isLoggedIn ? userMutation.isPending : guestMutation.isPending
+  const isPending = !isGuestMode && isLoggedIn ? userMutation.isPending : guestMutation.isPending
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-      {!isLoggedIn ? (
+      {isGuestMode ? (
         <Card className="p-4 bg-tag-bg border border-tag-bg">
           <div className="flex items-start gap-2.5">
             <AlertTriangle size={18} className="text-primary mt-0.5 shrink-0" />
@@ -188,7 +190,7 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
         </div>
 
         <div className="flex flex-col gap-4">
-          {!isLoggedIn && (
+          {isGuestMode && (
             <>
               <Input
                 label="이름*"
@@ -307,7 +309,7 @@ export default function GuestApplicationForm({ gathering }: GuestApplicationForm
             />
           </div>
 
-          {isLoggedIn ? (
+          {!isGuestMode && isLoggedIn ? (
             <div>
               <label className="text-sm font-medium text-foreground block mb-3">
                 유입 경로 <span className="font-normal text-tag-text">(선택)</span>

@@ -57,4 +57,38 @@ test.describe('회원 - 게더링 신청', () => {
     await page.getByRole('button', { name: '내 신청 내역 확인하기' }).click()
     await expect(page).toHaveURL('/mypage')
   })
+
+  test('로그인 상태여도 type=guest 신청은 비회원 신청 폼으로 동작한다', async ({ page }) => {
+    await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}/applications/guest`, (route) => {
+      route.fulfill({
+        json: {
+          success: true,
+          message: 'OK',
+          data: {
+            id: 'guest-app-while-logged-in',
+            bookingNumber: 'WH260602GUEST',
+            gatheringId: MOCK_GATHERING_ID,
+            status: 'PENDING',
+            createdAt: '2026-05-12T10:00:00',
+          },
+        },
+      })
+    })
+
+    await page.goto(`/gatherings/${MOCK_GATHERING_ID}/apply?type=guest`)
+
+    await expect(page.getByText('비로그인 신청은 마일리지가 적립되지 않아요.')).toBeVisible()
+    await expect(page.getByPlaceholder('실명을 입력해주세요')).toBeVisible()
+    await expect(page.getByPlaceholder('01012345678')).toBeVisible()
+    await expect(page.getByText(/마일리지가 적립돼요/)).toHaveCount(0)
+
+    await page.getByPlaceholder('실명을 입력해주세요').fill('로그인비회원')
+    await page.getByPlaceholder('01012345678').fill('01022223333')
+    await page.getByRole('button', { name: '여성' }).click()
+    await page.getByPlaceholder('나이를 입력해주세요').fill('29')
+    await page.getByRole('button', { name: '신청 완료하기' }).click()
+
+    await expect(page).toHaveURL(`/gatherings/${MOCK_GATHERING_ID}/apply/complete?bookingNumber=WH260602GUEST`)
+    await expect(page.getByText('WH260602GUEST')).toBeVisible()
+  })
 })
