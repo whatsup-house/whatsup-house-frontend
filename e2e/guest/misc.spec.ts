@@ -17,17 +17,18 @@ test.describe('비회원 - 보조 화면', () => {
     await setupGuestContext(page)
   })
 
-  test('게더링 목록에서 지도 뷰로 전환한다', async ({ page }) => {
+  test('게더링 목록에서 지도 뷰 진입점이 노출되지 않는다', async ({ page }) => {
     await page.route('**/api/gatherings**', (route) => {
       route.fulfill({ json: apiRes([mockGathering]) })
     })
 
     await page.goto('/gatherings')
-    await page.getByRole('button', { name: '지도' }).click()
 
-    await expect(page.getByText('지도 연동 예정')).toBeVisible()
-    await expect(page.getByText('이 지역 예정 게더링 1개')).toBeVisible()
-    await captureFullPage(page, 'e2e/screenshots/guest/07-gathering-list-map.png')
+    await expect(page.getByRole('button', { name: /지도로 보기|지도/ })).toHaveCount(0)
+    await expect(page.getByText('지도 연동 예정')).toHaveCount(0)
+    await expect(page.getByText('이 지역 예정 게더링')).toHaveCount(0)
+    await expect(page.getByText(/열리는 게더링/)).toBeVisible()
+    await captureFullPage(page, 'e2e/screenshots/guest/07-gathering-list-calendar-only.png')
   })
 
   test('소셜 준비 화면을 확인한다', async ({ page }) => {

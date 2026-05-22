@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { captureFullPage } from '../fixtures/screenshot'
-import { setupAdminContext, mockAdminGatherings, mockLocations, MOCK_GATHERING_ID } from '../fixtures/mocks'
+import { setupAdminContext, mockAdminGatherings, mockLocations } from '../fixtures/mocks'
 
 // ADMIN-02: 게더링 관리 CRUD + 상태 변경
 test.describe('관리자 - 게더링 관리', () => {

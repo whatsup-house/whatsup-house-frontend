@@ -1,15 +1,9 @@
 import Link from 'next/link'
 import { MapPin, Clock, CalendarDays } from 'lucide-react'
-import dayjs from 'dayjs'
 import Badge from '@/components/ui/Badge'
+import AppImage from '@/components/ui/AppImage'
 import type { GatheringListItem } from '@/lib/api/types'
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
-
-function formatEventDate(date: string): string {
-  const d = dayjs(date)
-  return `${d.month() + 1}월 ${d.date()}일 (${WEEKDAYS[d.day()]})`
-}
+import { formatKoreanShortDate } from '@/lib/utils/date'
 
 interface GatheringCardProps {
   gathering: GatheringListItem
@@ -28,7 +22,7 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
         {/* 썸네일 */}
         <div className="relative w-full aspect-video bg-tag-bg">
           {thumbnailUrl ? (
-            <img src={thumbnailUrl} alt={title} className="w-full h-full object-cover" />
+            <AppImage src={thumbnailUrl} alt={title} className="object-cover" sizes="(max-width: 390px) 100vw, 390px" />
           ) : (
             <div className="w-full h-full bg-tag-bg" />
           )}
@@ -49,7 +43,7 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
           <div className="flex flex-col gap-1 text-sm text-tag-text mb-3">
             <div className="flex items-center gap-1.5">
               <CalendarDays size={13} />
-              <span>{formatEventDate(eventDate)}</span>
+              <span>{formatKoreanShortDate(eventDate)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock size={13} />
