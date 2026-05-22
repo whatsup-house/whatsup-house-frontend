@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { setupGuestContext, setupUserContext, mockGatheringApis, MOCK_GATHERING_ID } from '../fixtures/mocks'
+import { setupGuestContext, mockGatheringApis, MOCK_GATHERING_ID } from '../fixtures/mocks'
 
 // AUTH-U-06: 인증 가드 및 리다이렉트
 test.describe('인증 가드', () => {
