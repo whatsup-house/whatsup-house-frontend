@@ -33,6 +33,7 @@ export default function GatheringDateSheet({
 
   const dateMap = new Map<string, GatheringListItem>()
   gatherings.forEach((g) => {
+    if (g.id === currentGatheringId) return
     dateMap.set(g.eventDate, g)
   })
 
@@ -116,7 +117,7 @@ export default function GatheringDateSheet({
 
             const g = dateMap.get(cell.dateStr)
             const isCurrent = cell.dateStr === currentEventDate
-            const isHighlighted = !!g
+            const isHighlighted = isCurrent || !!g
 
             let circleClass = 'text-tag-text/40'
             if (isHighlighted) {
@@ -133,7 +134,7 @@ export default function GatheringDateSheet({
               <button
                 key={cell.dateStr}
                 onClick={() => isHighlighted && handleDayClick(cell.dateStr)}
-                disabled={!isHighlighted}
+                disabled={!isHighlighted || isCurrent}
                 className="flex flex-col items-center justify-center min-h-[44px] gap-0.5 disabled:pointer-events-none"
               >
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${circleClass}`}>
