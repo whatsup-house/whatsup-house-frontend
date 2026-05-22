@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useCreateReview } from '@/lib/hooks/useReview'
+import { useUploadImage } from '@/lib/hooks/useUploadImage'
+import ImageUploadField from '@/components/ui/ImageUploadField'
 import type { ReviewType } from '@/lib/api/types'
 
 const MAX_CHARS = 300
@@ -43,8 +45,11 @@ export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWr
   const [tab, setTab] = useState<ReviewType>('TEXT')
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(5)
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+
+  const { upload, isUploading } = useUploadImage()
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -56,14 +61,33 @@ export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWr
     const reward = mileageEarned > 0 ? ` +${mileageEarned}M 적립` : ''
     showToast(base + reward)
     setContent('')
+    setUploadedImageUrl(null)
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPreviewUrl(null)
     setRating(5)
   })
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setPreviewUrl(URL.createObjectURL(file))
+  const handleImageConfirm = async (blob: Blob) => {
+    // 로컬 미리보기 즉시 표시
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    const localUrl = URL.createObjectURL(blob)
+    setPreviewUrl(localUrl)
+    setUploadedImageUrl(null)
+
+    try {
+      const serverUrl = await upload(blob, 'review.jpg')
+      setUploadedImageUrl(serverUrl)
+    } catch {
+      showToast('이미지 업로드에 실패했어요. 다시 시도해주세요.')
+      URL.revokeObjectURL(localUrl)
+      setPreviewUrl(null)
+    }
+  }
+
+  const handleImageClear = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setPreviewUrl(null)
+    setUploadedImageUrl(null)
   }
 
   const handleSubmit = () => {
@@ -72,11 +96,11 @@ export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWr
       type: tab,
       content,
       rating,
-      imageUrl: tab === 'PHOTO' ? previewUrl : null,
+      imageUrl: tab === 'PHOTO' ? uploadedImageUrl : null,
     })
   }
 
-  const canSubmit = content.trim().length > 0 && !isPending
+  const canSubmit = content.trim().length > 0 && !isPending && !isUploading
 
   return (
     <div className="mt-5 bg-card rounded-2xl border border-tag-bg/40 p-4">
@@ -103,28 +127,17 @@ export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWr
 
       {/* 사진 업로드 (PHOTO 탭) */}
       {tab === 'PHOTO' && (
-        <label className="block w-full mb-3 cursor-pointer">
-          <input
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={handleImageChange}
+        <div className="mb-3">
+          <ImageUploadField
+            previewUrl={previewUrl}
+            cropRatio="4:3"
+            cropContext="review"
+            onConfirm={handleImageConfirm}
+            onClear={handleImageClear}
+            isUploading={isUploading}
+            aspectClassName="aspect-[4/3]"
           />
-          <div className="w-full aspect-video rounded-xl border-2 border-dashed border-tag-bg/60 overflow-hidden flex items-center justify-center bg-tag-bg/30">
-            {previewUrl ? (
-              <img src={previewUrl} alt="업로드 사진" className="w-full h-full object-cover" />
-            ) : (
-              <div className="flex flex-col items-center gap-1 text-tag-text text-sm">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <span className="text-xs">사진 추가</span>
-              </div>
-            )}
-          </div>
-        </label>
+        </div>
       )}
 
       {/* 텍스트 입력 */}
@@ -155,7 +168,7 @@ export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWr
         disabled={!canSubmit}
         className="w-full py-3 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-40 transition-opacity"
       >
-        {isPending ? '등록 중...' : '후기 등록'}
+        {isPending ? '등록 중...' : isUploading ? '이미지 업로드 중...' : '후기 등록'}
       </button>
 
       {/* 토스트 */}

@@ -11,8 +11,10 @@ import {
   useDeleteHomeReview,
   useToggleHomeReview,
 } from '@/lib/hooks/useAdminHomeReview'
+import { useUploadImage } from '@/lib/hooks/useUploadImage'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
+import ImageUploadField from '@/components/ui/ImageUploadField'
 
 const schema = z.object({
   authorName: z.string().min(1, '작성자명을 입력해주세요'),
@@ -36,16 +38,19 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [isActive, setIsActive] = useState(review?.isActive ?? true)
   const [trackedReviewId, setTrackedReviewId] = useState(review?.id ?? null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(review?.avatarUrl ?? null)
 
   if ((review?.id ?? null) !== trackedReviewId) {
     setTrackedReviewId(review?.id ?? null)
     setIsActive(review?.isActive ?? true)
+    setAvatarPreviewUrl(review?.avatarUrl ?? null)
   }
 
   const { mutate: create, isPending: isCreating } = useCreateHomeReview(onSuccess)
   const { mutate: update, isPending: isUpdating } = useUpdateHomeReview(onSuccess)
   const { mutate: remove, isPending: isDeleting } = useDeleteHomeReview()
   const { mutate: toggle, isPending: isToggling } = useToggleHomeReview()
+  const { upload, isUploading } = useUploadImage()
   const isPending = isCreating || isUpdating
 
   const {
@@ -72,6 +77,28 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
     }
   }, [review, setValue, reset])
 
+  const handleAvatarConfirm = async (blob: Blob) => {
+    if (avatarPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(avatarPreviewUrl)
+    const localUrl = URL.createObjectURL(blob)
+    setAvatarPreviewUrl(localUrl)
+    setValue('avatarUrl', '')
+
+    try {
+      const serverUrl = await upload(blob, 'avatar.jpg')
+      setAvatarPreviewUrl(serverUrl)
+      setValue('avatarUrl', serverUrl)
+    } catch {
+      setAvatarPreviewUrl(review?.avatarUrl ?? null)
+      setValue('avatarUrl', review?.avatarUrl ?? '')
+    }
+  }
+
+  const handleAvatarClear = () => {
+    if (avatarPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(avatarPreviewUrl)
+    setAvatarPreviewUrl(null)
+    setValue('avatarUrl', '')
+  }
+
   const onSubmit = (values: FormValues) => {
     const data = {
       authorName: values.authorName,
@@ -91,9 +118,7 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
   const handleToggle = () => {
     if (!review) return
     toggle(review.id, {
-      onSuccess: () => {
-        setIsActive((prev) => !prev)
-      },
+      onSuccess: () => setIsActive((prev) => !prev),
     })
   }
 
@@ -125,11 +150,26 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
               {...register('authorName')}
             />
 
-            <Input
-              label="프로필 이미지 URL"
-              placeholder="https://example.com/avatar.jpg"
-              {...register('avatarUrl')}
-            />
+            {/* 아바타 이미지 업로드 (1:1 크롭) */}
+            <div className="flex items-start gap-4">
+              <div className="w-20 h-20 shrink-0">
+                <ImageUploadField
+                  label="프로필 이미지"
+                  previewUrl={avatarPreviewUrl}
+                  cropRatio="1:1"
+                  cropContext="avatar"
+                  onConfirm={handleAvatarConfirm}
+                  onClear={handleAvatarClear}
+                  isUploading={isUploading}
+                  aspectClassName="aspect-square"
+                  rounded
+                />
+              </div>
+              <p className="text-xs text-tag-text mt-6 leading-relaxed">
+                정사각형으로 크롭됩니다.<br />
+                미설정 시 기본 이모지가 표시됩니다.
+              </p>
+            </div>
 
             <Input
               label="게더링 제목 *"
@@ -178,7 +218,6 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
 
         {/* 하단 액션 */}
         <div className="border-t border-tag-bg">
-          {/* 노출 토글 + 삭제 (수정 모드일 때만) */}
           {isEdit && !deleteConfirm && (
             <div className="flex gap-2 px-6 pt-4 pb-0">
               <button
@@ -203,7 +242,6 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
             </div>
           )}
 
-          {/* 삭제 확인 */}
           {deleteConfirm && (
             <div className="px-6 pt-4 pb-0">
               <p className="text-xs text-tag-text text-center mb-2">삭제하면 복구할 수 없습니다. 계속할까요?</p>
@@ -227,17 +265,17 @@ export function HomeReviewFormPanel({ review, onClose, onSuccess }: HomeReviewFo
             </div>
           )}
 
-          {/* 저장/취소 */}
           <div className="flex gap-3 px-6 py-4">
             <Button variant="ghost" type="button" onClick={onClose} className="flex-1">취소</Button>
             <Button
               variant="primary"
               type="button"
               isLoading={isPending}
+              disabled={isUploading}
               onClick={handleSubmit(onSubmit)}
               className="flex-1"
             >
-              저장하기
+              {isUploading ? '업로드 중...' : '저장하기'}
             </Button>
           </div>
         </div>
