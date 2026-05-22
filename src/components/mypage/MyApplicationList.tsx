@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs'
+import AppImage from '@/components/ui/AppImage'
 import { useMyApplicationsMe, useCancelApplication } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import type { ApplicationStatus } from '@/lib/api/types'
@@ -94,12 +95,13 @@ export default function MyApplicationList() {
           {applications.map((item) => (
             <div key={item.id} className="bg-card rounded-card p-4">
               <div className="flex gap-3">
-                <div className="w-14 h-14 rounded-[10px] overflow-hidden shrink-0 bg-tag-bg">
+                <div className="relative w-14 h-14 rounded-[10px] overflow-hidden shrink-0 bg-tag-bg">
                   {item.gathering.thumbnailUrl ? (
-                    <img
+                    <AppImage
                       src={item.gathering.thumbnailUrl}
                       alt={item.gathering.title}
-                      className="w-full h-full object-cover"
+                      className="object-cover"
+                      sizes="56px"
                     />
                   ) : (
                     <div className="w-full h-full bg-tag-bg" />
