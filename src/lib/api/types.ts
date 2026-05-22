@@ -294,22 +294,30 @@ export interface AdminHeroCarouselSlide {
   id: string
   type: HeroSlideType
   imageUrl: string
-  label: string
-  sub: string | null
-  date: string | null
+  title: string
+  content: string | null
+  dateLabel: string | null
   gatheringId: string | null
-  displayOrder: number
+  sortOrder: number
   isActive: boolean
 }
 
 export interface AdminHeroCarouselSlideRequest {
   type: HeroSlideType
   imageUrl: string
-  label: string
-  sub?: string
-  date?: string
+  title: string
+  content?: string
+  dateLabel?: string
   gatheringId?: string
-  displayOrder: number
+  sortOrder: number
+}
+
+// 이미지 업로드
+export type CropRatio = '4:3' | '9:16' | '1:1'
+export type CropContext = 'review' | 'carousel' | 'avatar'
+
+export interface ImageUploadResponse {
+  imageUrl: string
 }
 
 export interface AdminHomeReview {

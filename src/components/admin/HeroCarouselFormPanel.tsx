@@ -11,17 +11,19 @@ import {
   useDeleteCarouselSlide,
   useToggleCarouselSlide,
 } from '@/lib/hooks/useAdminHeroCarousel'
+import { useUploadImage } from '@/lib/hooks/useUploadImage'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
+import ImageUploadField from '@/components/ui/ImageUploadField'
 
 const schema = z.object({
   type: z.enum(['GATHERING', 'CALENDAR', 'STORY']),
-  imageUrl: z.string().min(1, '이미지 URL을 입력해주세요'),
-  label: z.string().min(1, '라벨 텍스트를 입력해주세요'),
-  sub: z.string().optional(),
-  date: z.string().optional(),
+  imageUrl: z.string().min(1, '이미지를 업로드하거나 URL을 입력해주세요'),
+  title: z.string().min(1, '제목 텍스트를 입력해주세요'),
+  content: z.string().optional(),
+  dateLabel: z.string().optional(),
   gatheringId: z.string().optional(),
-  displayOrder: z.number({ error: '순서를 입력해주세요' }).int().min(1, '1 이상이어야 합니다'),
+  sortOrder: z.number({ error: '순서를 입력해주세요' }).int().min(1, '1 이상이어야 합니다'),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -42,11 +44,13 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
   const isEdit = !!slide
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [isActive, setIsActive] = useState(slide?.isActive ?? true)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(slide?.imageUrl ?? null)
 
   const { mutate: create, isPending: isCreating } = useCreateCarouselSlide(onSuccess)
   const { mutate: update, isPending: isUpdating } = useUpdateCarouselSlide(onSuccess)
   const { mutate: remove, isPending: isDeleting } = useDeleteCarouselSlide()
   const { mutate: toggle, isPending: isToggling } = useToggleCarouselSlide()
+  const { upload, isUploading } = useUploadImage()
   const isPending = isCreating || isUpdating
 
   const {
@@ -58,7 +62,7 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { type: 'GATHERING', displayOrder: 1 },
+    defaultValues: { type: 'GATHERING', sortOrder: 1 },
   })
 
   const typeValue = watch('type')
@@ -67,27 +71,51 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
     if (slide) {
       setValue('type', slide.type)
       setValue('imageUrl', slide.imageUrl)
-      setValue('label', slide.label)
-      setValue('sub', slide.sub ?? '')
-      setValue('date', slide.date ?? '')
+      setValue('title', slide.title)
+      setValue('content', slide.content ?? '')
+      setValue('dateLabel', slide.dateLabel ?? '')
       setValue('gatheringId', slide.gatheringId ?? '')
-      setValue('displayOrder', slide.displayOrder)
+      setValue('sortOrder', slide.sortOrder)
       setIsActive(slide.isActive)
+      setImagePreviewUrl(slide.imageUrl)
     } else {
-      reset({ type: 'GATHERING', displayOrder: 1 })
+      reset({ type: 'GATHERING', sortOrder: 1 })
       setIsActive(true)
+      setImagePreviewUrl(null)
     }
   }, [slide, setValue, reset])
+
+  const handleImageConfirm = async (blob: Blob) => {
+    if (imagePreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(imagePreviewUrl)
+    const localUrl = URL.createObjectURL(blob)
+    setImagePreviewUrl(localUrl)
+    setValue('imageUrl', '')
+
+    try {
+      const serverUrl = await upload(blob, 'carousel.jpg')
+      setImagePreviewUrl(serverUrl)
+      setValue('imageUrl', serverUrl)
+    } catch {
+      setImagePreviewUrl(slide?.imageUrl ?? null)
+      setValue('imageUrl', slide?.imageUrl ?? '')
+    }
+  }
+
+  const handleImageClear = () => {
+    if (imagePreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(imagePreviewUrl)
+    setImagePreviewUrl(null)
+    setValue('imageUrl', '')
+  }
 
   const onSubmit = (values: FormValues) => {
     const data = {
       type: values.type,
       imageUrl: values.imageUrl,
-      label: values.label,
-      sub: values.sub || undefined,
-      date: values.date || undefined,
+      title: values.title,
+      content: values.content || undefined,
+      dateLabel: values.dateLabel || undefined,
       gatheringId: values.gatheringId || undefined,
-      displayOrder: values.displayOrder,
+      sortOrder: values.sortOrder,
     }
     if (isEdit) {
       update({ id: slide.id, data })
@@ -99,9 +127,7 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
   const handleToggle = () => {
     if (!slide) return
     toggle(slide.id, {
-      onSuccess: () => {
-        setIsActive((prev) => !prev)
-      },
+      onSuccess: () => setIsActive((prev) => !prev),
     })
   }
 
@@ -126,6 +152,7 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="flex flex-col gap-4">
 
+            {/* 슬라이드 타입 */}
             <div>
               <label className="text-sm font-medium text-foreground block mb-1">슬라이드 타입 *</label>
               <select
@@ -138,25 +165,35 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
               </select>
             </div>
 
-            <Input
-              label="이미지 URL *"
-              placeholder="https://example.com/image.jpg"
-              error={errors.imageUrl?.message}
-              {...register('imageUrl')}
-            />
+            {/* 이미지 업로드 (9:16 크롭) */}
+            <div>
+              <ImageUploadField
+                label="슬라이드 이미지 *"
+                previewUrl={imagePreviewUrl}
+                cropRatio="9:16"
+                cropContext="carousel"
+                onConfirm={handleImageConfirm}
+                onClear={handleImageClear}
+                isUploading={isUploading}
+                aspectClassName="aspect-[9/16]"
+              />
+              {errors.imageUrl && (
+                <p className="text-xs text-red-500 mt-1">{errors.imageUrl.message}</p>
+              )}
+            </div>
 
             <Input
-              label="라벨 (메인 텍스트) *"
+              label="제목 (메인 텍스트) *"
               placeholder="슬라이드에 표시될 제목"
-              error={errors.label?.message}
-              {...register('label')}
+              error={errors.title?.message}
+              {...register('title')}
             />
 
             {typeValue === 'STORY' && (
               <Input
                 label="서브 텍스트"
                 placeholder="예: 와썹하우스"
-                {...register('sub')}
+                {...register('content')}
               />
             )}
 
@@ -165,7 +202,7 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
                 <Input
                   label="날짜 텍스트"
                   placeholder="예: 5월 21일 수"
-                  {...register('date')}
+                  {...register('dateLabel')}
                 />
                 <Input
                   label="게더링 ID"
@@ -179,8 +216,8 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
               label="노출 순서 *"
               type="number"
               min={1}
-              error={errors.displayOrder?.message}
-              {...register('displayOrder', { valueAsNumber: true })}
+              error={errors.sortOrder?.message}
+              {...register('sortOrder', { valueAsNumber: true })}
             />
 
           </div>
@@ -188,7 +225,6 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
 
         {/* 하단 액션 */}
         <div className="border-t border-tag-bg">
-          {/* 노출 토글 + 삭제 (수정 모드일 때만) */}
           {isEdit && !deleteConfirm && (
             <div className="flex gap-2 px-6 pt-4 pb-0">
               <button
@@ -213,7 +249,6 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
             </div>
           )}
 
-          {/* 삭제 확인 */}
           {deleteConfirm && (
             <div className="px-6 pt-4 pb-0">
               <p className="text-xs text-tag-text text-center mb-2">삭제하면 복구할 수 없습니다. 계속할까요?</p>
@@ -237,17 +272,17 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
             </div>
           )}
 
-          {/* 저장/취소 */}
           <div className="flex gap-3 px-6 py-4">
             <Button variant="ghost" type="button" onClick={onClose} className="flex-1">취소</Button>
             <Button
               variant="primary"
               type="button"
               isLoading={isPending}
+              disabled={isUploading}
               onClick={handleSubmit(onSubmit)}
               className="flex-1"
             >
-              저장하기
+              {isUploading ? '업로드 중...' : '저장하기'}
             </Button>
           </div>
         </div>

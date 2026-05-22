@@ -1,9 +1,25 @@
 import type { Page } from '@playwright/test'
-import { MOCK_HERO_CAROUSEL_SLIDES } from '@/lib/hooks/useAdminHeroCarousel'
-import { MOCK_ADMIN_HOME_REVIEWS } from '@/lib/hooks/useAdminHomeReview'
+import type { AdminHeroCarouselSlide, AdminHomeReview } from '@/lib/api/types'
 
-// 훅 파일의 mock 데이터를 그대로 재export해서 spec 파일에서도 동일한 데이터 참조 가능
-export { MOCK_HERO_CAROUSEL_SLIDES, MOCK_ADMIN_HOME_REVIEWS }
+// ─── Admin Mock 데이터 (E2E 인터셉트용) ────────────────────────────────────────
+
+export const MOCK_HERO_CAROUSEL_SLIDES: AdminHeroCarouselSlide[] = [
+  { id: '1', type: 'CALENDAR',  imageUrl: '/home/home-1.png', title: '5월 게더링 일정',         content: null,           dateLabel: null,       gatheringId: null,                                     sortOrder: 1, isActive: true },
+  { id: '2', type: 'GATHERING', imageUrl: '/home/home-2.png', title: '퇴근 게더링',             content: null,           dateLabel: '5월 14일 목', gatheringId: 'c2000000-0000-0000-0000-000000000001', sortOrder: 2, isActive: true },
+  { id: '3', type: 'GATHERING', imageUrl: '/home/home-4.png', title: '대학생 게더링',           content: null,           dateLabel: '5월 17일 토', gatheringId: 'c2000000-0000-0000-0000-000000000002', sortOrder: 3, isActive: true },
+  { id: '4', type: 'GATHERING', imageUrl: '/home/home-3.png', title: '경찰과 도둑',             content: null,           dateLabel: '5월 25일 일', gatheringId: 'c2000000-0000-0000-0000-000000000004', sortOrder: 4, isActive: true },
+  { id: '5', type: 'GATHERING', imageUrl: '/home/home-6.png', title: '썬데이 러닝 클럽 (SRC)', content: null,           dateLabel: '5월 18일 일', gatheringId: 'c2000000-0000-0000-0000-000000000003', sortOrder: 5, isActive: true },
+  { id: '6', type: 'STORY',     imageUrl: '/home/home-5.png', title: '우리 젊다',               content: 'Whatsup house', dateLabel: null,      gatheringId: null,                                     sortOrder: 6, isActive: true },
+]
+
+export const MOCK_ADMIN_HOME_REVIEWS: AdminHomeReview[] = [
+  { id: 'r1', authorName: '예림',   avatarUrl: '/review/review1.JPG', gatheringTitle: '퇴근 게더링',            content: '퇴근하고 팜팜발리에서 처음 만난 분들인데 이렇게 편안할 줄 몰랐어요.',                   rating: 5, displayOrder: 1, isActive: true },
+  { id: 'r2', authorName: '지은이', avatarUrl: '/review/review2.JPG', gatheringTitle: '퇴근 게더링',            content: '혼자 가기 망설였는데 다들 너무 자연스럽게 받아줘서 금방 친해졌어요.',                   rating: 5, displayOrder: 2, isActive: true },
+  { id: 'r3', authorName: '수아',   avatarUrl: '/review/review3.JPG', gatheringTitle: '대학생 게더링',          content: '학교도 전공도 다른 사람들이랑 이렇게 이야기가 잘 통할 줄 몰랐어요.',                     rating: 5, displayOrder: 3, isActive: true },
+  { id: 'r4', authorName: '민준정', avatarUrl: '/review/review4.JPG', gatheringTitle: '대학생 게더링',          content: '서울대입구역 근처에서 이런 모임이 있는 줄 몰랐어요.',                                    rating: 4, displayOrder: 4, isActive: true },
+  { id: 'r5', authorName: '나연강', avatarUrl: '/review/review5.JPG', gatheringTitle: '썬데이 러닝 클럽 (SRC)', content: '혼자 달리기는 힘들었는데 함께 뛰니까 너무 즐거웠어요.',                                rating: 5, displayOrder: 5, isActive: true },
+  { id: 'r6', authorName: '도현임', avatarUrl: '/review/review6.JPG', gatheringTitle: '썬데이 러닝 클럽 (SRC)', content: '페이스 맞춰주는 분위기가 너무 좋았어요.',                                            rating: 5, displayOrder: 6, isActive: true },
+]
 
 // ─── E2E 전용 Mock Data ────────────────────────────────────────────────────────
 // DB 시드 및 프론트엔드 컴포넌트 내부 mock과 동일한 ID/데이터를 사용한다.
@@ -296,16 +312,7 @@ export const mockAllReviewsPage = {
 
 export const mockHeroCarouselSlides = MOCK_HERO_CAROUSEL_SLIDES
   .filter((slide) => slide.isActive)
-  .map((slide) => ({
-    id: slide.id,
-    type: slide.type,
-    imageUrl: slide.imageUrl,
-    title: slide.label,
-    content: slide.sub,
-    dateLabel: slide.date,
-    gatheringId: slide.gatheringId,
-    sortOrder: slide.displayOrder,
-  }))
+  .map(({ isActive: _, ...slide }) => slide)
 
 export const mockCuratedGatherings = mockAdminGatherings.map((gathering, index) => ({
   id: gathering.id,

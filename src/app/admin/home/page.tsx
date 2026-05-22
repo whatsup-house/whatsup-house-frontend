@@ -28,7 +28,7 @@ export default function AdminHomePage() {
   const { data: slides = [], isLoading: slidesLoading } = useAdminCarouselSlides()
   const { data: reviews = [], isLoading: reviewsLoading } = useAdminHomeReviews()
 
-  const sortedSlides = [...slides].sort((a, b) => a.displayOrder - b.displayOrder)
+  const sortedSlides = [...slides].sort((a, b) => a.sortOrder - b.sortOrder)
   const sortedReviews = [...reviews].sort((a, b) => a.displayOrder - b.displayOrder)
 
   return (
@@ -150,7 +150,7 @@ function SlideCard({ slide, onClick }: SlideCardProps) {
       {slide.imageUrl && (
         <img
           src={slide.imageUrl}
-          alt={slide.label}
+          alt={slide.title}
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
         />
@@ -164,15 +164,15 @@ function SlideCard({ slide, onClick }: SlideCardProps) {
         <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-bold mb-1 ${TYPE_COLOR[slide.type]}`}>
           {TYPE_LABEL[slide.type]}
         </span>
-        <p className="text-[11px] font-bold leading-snug line-clamp-2">{slide.label}</p>
-        {(slide.sub || slide.date) && (
-          <p className="text-[9px] opacity-75 mt-0.5">{slide.sub ?? slide.date}</p>
+        <p className="text-[11px] font-bold leading-snug line-clamp-2">{slide.title}</p>
+        {(slide.content || slide.dateLabel) && (
+          <p className="text-[9px] opacity-75 mt-0.5">{slide.content ?? slide.dateLabel}</p>
         )}
       </div>
 
       {/* 순서 배지 */}
       <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/50 text-white text-[10px] font-bold flex items-center justify-center">
-        {slide.displayOrder}
+        {slide.sortOrder}
       </div>
 
       {/* 비노출 배지 */}

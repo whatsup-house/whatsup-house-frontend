@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const GUEST_ONLY_ROUTES = ['/login', '/register', '/onboarding']
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const accessToken = request.cookies.get('accessToken')
 
