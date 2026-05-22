@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle, Calendar, MapPin, CreditCard, Hash, Copy, Check } from 'lucide-react'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
-import dayjs from 'dayjs'
+import { formatKoreanFullDate, formatTime } from '@/lib/utils/date'
 
 function ApplyCompleteContent({ id }: { id: string }) {
   const router = useRouter()
@@ -29,8 +29,8 @@ function ApplyCompleteContent({ id }: { id: string }) {
     )
   }
 
-  const formattedDate = dayjs(gathering.eventDate).format('YYYY년 M월 D일 (ddd)')
-  const formattedTime = gathering.startTime?.slice(0, 5) ?? ''
+  const formattedDate = formatKoreanFullDate(gathering.eventDate)
+  const formattedTime = formatTime(gathering.startTime)
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
