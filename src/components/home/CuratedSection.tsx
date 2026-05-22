@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Flame } from 'lucide-react'
+import AppImage from '@/components/ui/AppImage'
 import { useCuratedGatherings } from '@/lib/hooks/useHome'
 
 export default function CuratedSection() {
@@ -41,26 +42,28 @@ export default function CuratedSection() {
         <span className="text-[15px] font-bold text-foreground">이번 주 가장 많이 본 게더링</span>
       </div>
       <div className="flex flex-col gap-3">
-        {gatherings.map((item) => (
+        {gatherings.map((item, index) => (
           <button
             key={item.id}
             type="button"
+            aria-label={`${index + 1}위 ${item.title}`}
             className="flex items-center gap-3 bg-card rounded-2xl p-2.5 border border-tag-bg/40 text-left w-full"
             onClick={() => router.push(`/gatherings/${item.id}`)}
           >
             <span
               className={`w-7 text-center text-lg font-bold flex-shrink-0 ${
-                item.curatedRank === 0 ? 'text-primary' : 'text-tag-text'
+                index === 0 ? 'text-primary' : 'text-tag-text'
               }`}
             >
-              {item.curatedRank + 1}
+              {index + 1}
             </span>
             <div className="relative w-12 h-12 flex-shrink-0 bg-tag-bg rounded-xl overflow-hidden">
               {item.thumbnailUrl && (
-                <img
+                <AppImage
                   src={item.thumbnailUrl}
                   alt={item.title}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="object-cover"
+                  sizes="48px"
                 />
               )}
             </div>

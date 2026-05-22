@@ -22,9 +22,20 @@ test.describe('비회원 - 게더링 탐색', () => {
     await expect(page).toHaveURL('/')
     await expect(page.getByText('이번 주 가장 많이 본 게더링')).toBeVisible()
     await expect(page.getByText('퇴근 게더링').first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /^1위 퇴근 게더링/ })).toBeVisible()
     await expect(page.getByText('다녀온 사람들의 후기')).toBeVisible()
     await expect(page.getByText('지은이')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/guest/01-home.png')
+  })
+
+  test('하단 내비게이션은 소셜 없이 3개 탭만 표시한다', async ({ page }) => {
+    await page.goto('/')
+
+    const bottomNav = page.locator('nav')
+    await expect(bottomNav.getByText('홈')).toBeVisible()
+    await expect(bottomNav.getByText('게더링')).toBeVisible()
+    await expect(bottomNav.getByText('마이')).toBeVisible()
+    await expect(bottomNav.getByText('소셜')).toHaveCount(0)
   })
 
   test('게더링 목록을 조회하고 상세 페이지로 이동한다', async ({ page }) => {
@@ -56,6 +67,7 @@ test.describe('비회원 - 게더링 탐색', () => {
     })
 
     await page.goto('/gatherings')
+    await expect(page.getByRole('button', { name: /지도로 보기|지도/ })).toHaveCount(0)
     await captureFullPage(page, 'e2e/screenshots/guest/02-gathering-list-calendar.png')
 
     // 날짜 셀 클릭 (현재 월에 dot 있는 날)
