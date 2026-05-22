@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, Badge } from '@/components/ui'
+import AppImage from '@/components/ui/AppImage'
 import GatheringReviewSection from './GatheringReviewSection'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
-import dayjs from 'dayjs'
+import { formatDuration, formatKoreanFullDate, formatTimeRange } from '@/lib/utils/date'
 
 interface GatheringDetailProps {
   gathering: GatheringDetailType
@@ -25,19 +26,9 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const handlePrevPhoto = () => setPhotoIndex((i) => (i - 1 + photos.length) % photos.length)
   const handleNextPhoto = () => setPhotoIndex((i) => (i + 1) % photos.length)
 
-  const formattedDate = dayjs(eventDate).format('YYYY년 M월 D일 dddd')
-  const formattedStartTime = startTime?.slice(0, 5) ?? ''
-  const formattedEndTime = endTime?.slice(0, 5) ?? ''
-
-  // 소요시간 계산
-  const startMinutes = startTime ? parseInt(startTime.slice(0, 2)) * 60 + parseInt(startTime.slice(3, 5)) : 0
-  const endMinutes = endTime ? parseInt(endTime.slice(0, 2)) * 60 + parseInt(endTime.slice(3, 5)) : 0
-  const durationMinutes = endMinutes - startMinutes
-  const durationHours = Math.floor(durationMinutes / 60)
-  const durationMins = durationMinutes % 60
-  const durationStr = durationMins > 0
-    ? `${durationHours}시간 ${durationMins}분`
-    : `${durationHours}시간`
+  const formattedDate = formatKoreanFullDate(eventDate)
+  const timeRange = formatTimeRange(startTime, endTime)
+  const durationStr = formatDuration(startTime, endTime)
 
   return (
     <div className="bg-card">
@@ -46,7 +37,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
         {/* 이미지 슬라이더 */}
         <div className="relative w-full aspect-[390/260] bg-tag-bg overflow-hidden">
           {photos.length > 0 ? (
-            <img src={photos[photoIndex]} alt={`${title} ${photoIndex + 1}`} className="w-full h-full object-cover" />
+            <AppImage src={photos[photoIndex]} alt={`${title} ${photoIndex + 1}`} className="object-cover" sizes="(max-width: 390px) 100vw, 390px" />
           ) : (
             <div className="w-full h-full bg-gradient-to-b from-tag-bg to-background" />
           )}
@@ -130,7 +121,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <div>
                 <p className="text-xs text-tag-text mb-0.5">시간</p>
                 <p className="text-sm font-semibold text-foreground">
-                  오후 {formattedStartTime} - {formattedEndTime} ({durationStr})
+                  {timeRange}{durationStr ? ` (${durationStr})` : ''}
                 </p>
               </div>
             </div>
