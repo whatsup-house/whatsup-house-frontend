@@ -2,26 +2,28 @@ import { test, expect } from '@playwright/test'
 import { captureFullPage } from '../fixtures/screenshot'
 import {
   setupAdminContext,
+  mockAdminHomeApis,
   MOCK_HERO_CAROUSEL_SLIDES,
   MOCK_ADMIN_HOME_REVIEWS,
 } from '../fixtures/mocks'
 
 // ADMIN-04: 홈화면 관리 - 히어로 캐러셀
 // ADMIN-05: 홈화면 관리 - 홈 후기
-// 참고: 두 훅은 API 호출 없이 Promise.resolve(mockData)로 동작하므로
-//       page.route() 모킹이 필요 없다.
-//       assertion은 훅 파일에서 export한 원본 데이터를 직접 참조한다.
+// 참고: 두 훅(useAdminCarouselSlides / useAdminHomeReviews)은 실제 API를 호출하므로
+//       /api/admin/hero-carousel, /api/admin/home-reviews 를 page.route()로 인터셉트한다.
+//       assertion은 mocks.ts에서 export한 원본 데이터를 직접 참조한다.
 test.describe('관리자 - 홈화면 관리', () => {
   test.beforeEach(async ({ page }) => {
     await setupAdminContext(page)
+    await mockAdminHomeApis(page)
   })
 
   // ── 히어로 캐러셀 ──────────────────────────────────────────────────────────
 
   test('히어로 캐러셀 슬라이드 목록이 표시된다', async ({ page }) => {
     await page.goto('/admin/home')
-    // 훅의 MOCK_HERO_CAROUSEL_SLIDES[0].label을 직접 참조 → 데이터 변경 시 자동 반영
-    await expect(page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].label)).toBeVisible()
+    // 훅의 MOCK_HERO_CAROUSEL_SLIDES[0].title을 직접 참조 → 데이터 변경 시 자동 반영
+    await expect(page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].title)).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/admin/home-01-carousel-list.png')
   })
 
@@ -43,9 +45,9 @@ test.describe('관리자 - 홈화면 관리', () => {
 
   test('슬라이드 노출/비노출을 토글한다', async ({ page }) => {
     await page.goto('/admin/home')
-    await expect(page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].label)).toBeVisible()
+    await expect(page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].title)).toBeVisible()
 
-    await page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].label).first().click({ force: true })
+    await page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].title).first().click({ force: true })
     const toggleBtn = page.getByRole('button', { name: /노출|비노출|활성|비활성/ }).first()
     await expect(toggleBtn).toBeVisible()
     await toggleBtn.click()
@@ -55,7 +57,7 @@ test.describe('관리자 - 홈화면 관리', () => {
   test('슬라이드를 삭제한다', async ({ page }) => {
     await page.goto('/admin/home')
 
-    await page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].label).first().click({ force: true })
+    await page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].title).first().click({ force: true })
     const deleteBtn = page.getByRole('button', { name: /삭제/ }).first()
     await expect(deleteBtn).toBeVisible()
     await deleteBtn.click()
