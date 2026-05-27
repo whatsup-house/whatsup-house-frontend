@@ -55,7 +55,7 @@ test.describe('후기 페이지', () => {
     await captureFullPage(page, 'e2e/screenshots/user/reviews-03-loaded.png')
   })
 
-  test('로그인 상태에서 후기 필터와 내 후기만 토글을 사용한다', async ({ page }) => {
+  test('로그인 상태에서 게더링·정렬 필터를 사용한다', async ({ page }) => {
     await setupUserContext(page)
     await page.route('**/api/reviews**', (route) => {
       route.fulfill({ json: apiRes(mockAllReviewsPage) })
@@ -71,9 +71,8 @@ test.describe('후기 페이지', () => {
 
     await page.getByRole('button', { name: '퇴근 게더링' }).click()
     await page.getByRole('button', { name: '최신순' }).click()
-    await page.getByRole('button', { name: '내 후기만' }).click()
     await expect(page.getByText(mockGatheringReviews[0].reviewContent)).toBeVisible()
-    await captureFullPage(page, 'e2e/screenshots/user/reviews-05-my-review-only.png')
+    await captureFullPage(page, 'e2e/screenshots/user/reviews-05-filtered.png')
   })
 
   test('참석 완료 회원은 게더링 상세에서 후기를 작성한다', async ({ page }) => {
@@ -95,13 +94,38 @@ test.describe('후기 페이지', () => {
         ]),
       })
     })
+    // 게더링별 후기 GET 페이지
     await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}/reviews**`, (route) => {
+      route.fulfill({
+        json: apiRes({
+          content: [mockGatheringReviews[1]],
+          page: 0,
+          size: 10,
+          totalElements: 1,
+          totalPages: 1,
+        }),
+      })
+    })
+    // 후기 등록은 /api/reviews POST 로 변경됨 (applicationId 기반)
+    await page.route('**/api/reviews', (route) => {
       if (route.request().method() === 'POST') {
-        route.fulfill({ json: apiRes({ reviewId: 'rev-new', mileageEarned: 500 }) })
-      } else {
         route.fulfill({
-          json: apiRes({ content: [mockGatheringReviews[1]], page: 0, size: 10, totalElements: 1, totalPages: 1 }),
+          json: apiRes({
+            reviewId: 'rev-new',
+            userId: 'b1000000-0000-0000-0000-000000000002',
+            nickname: '지은이',
+            applicationId: mockApplications[0].id,
+            gatheringId: MOCK_GATHERING_ID,
+            gatheringTitle: '퇴근 게더링',
+            reviewType: 'PHOTO',
+            reviewContent: '편안하고 좋은 시간이었어요.',
+            likeCount: 0,
+            images: [],
+            createdAt: '2026-05-20T10:00:00',
+          }),
         })
+      } else {
+        route.continue()
       }
     })
 
@@ -114,6 +138,7 @@ test.describe('후기 페이지', () => {
     await captureFullPage(page, 'e2e/screenshots/user/reviews-07-write-photo-tab.png')
 
     await page.getByRole('button', { name: '후기 등록' }).click()
+    // 마일리지 적립 메시지는 mockGathering.mileageReward(500) 기준으로 노출됨
     await expect(page.getByText('후기가 등록됐어요! +500M 적립')).toBeVisible()
     await page.screenshot({ path: 'e2e/screenshots/user/reviews-08-write-complete.png' })
   })

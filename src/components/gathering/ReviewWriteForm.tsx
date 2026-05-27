@@ -9,7 +9,7 @@ import type { ReviewType } from '@/lib/api/types'
 const MAX_CHARS = 300
 
 interface ReviewWriteFormProps {
-  gatheringId: string
+  applicationId: string
   mileageReward?: number
 }
 
@@ -41,27 +41,27 @@ function StarRating({ rating, onChange }: { rating: number; onChange: (v: number
   )
 }
 
-export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWriteFormProps) {
+export default function ReviewWriteForm({ applicationId, mileageReward }: ReviewWriteFormProps) {
   const [tab, setTab] = useState<ReviewType>('TEXT')
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(5)
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
+  const [uploadedImageTempPath, setUploadedImageTempPath] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
-  const { upload, isUploading } = useUploadImage()
+  const { uploadWithTempPath, isUploading } = useUploadImage()
 
   const showToast = (msg: string) => {
     setToast(msg)
     setTimeout(() => setToast(null), 3000)
   }
 
-  const { mutate, isPending } = useCreateReview(gatheringId, (mileageEarned) => {
+  const { mutate, isPending } = useCreateReview(() => {
     const base = '후기가 등록됐어요!'
-    const reward = mileageEarned > 0 ? ` +${mileageEarned}M 적립` : ''
+    const reward = (mileageReward ?? 0) > 0 ? ` +${mileageReward}M 적립` : ''
     showToast(base + reward)
     setContent('')
-    setUploadedImageUrl(null)
+    setUploadedImageTempPath(null)
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPreviewUrl(null)
     setRating(5)
@@ -72,11 +72,12 @@ export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWr
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     const localUrl = URL.createObjectURL(blob)
     setPreviewUrl(localUrl)
-    setUploadedImageUrl(null)
+    setUploadedImageTempPath(null)
 
     try {
-      const serverUrl = await upload(blob, 'review.jpg')
-      setUploadedImageUrl(serverUrl)
+      const result = await uploadWithTempPath(blob, 'review.jpg')
+      setUploadedImageTempPath(result.tempPath)
+      setPreviewUrl(result.previewUrl)
     } catch {
       showToast('이미지 업로드에 실패했어요. 다시 시도해주세요.')
       URL.revokeObjectURL(localUrl)
@@ -87,16 +88,15 @@ export default function ReviewWriteForm({ gatheringId, mileageReward }: ReviewWr
   const handleImageClear = () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPreviewUrl(null)
-    setUploadedImageUrl(null)
+    setUploadedImageTempPath(null)
   }
 
   const handleSubmit = () => {
     if (!content.trim()) return
     mutate({
-      type: tab,
-      content,
-      rating,
-      imageUrl: tab === 'PHOTO' ? uploadedImageUrl : null,
+      applicationId,
+      reviewContent: content,
+      imageTempPaths: tab === 'PHOTO' && uploadedImageTempPath ? [uploadedImageTempPath] : [],
     })
   }
 

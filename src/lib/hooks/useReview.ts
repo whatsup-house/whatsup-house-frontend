@@ -1,15 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createReview, deleteReview, fetchAllReviews, fetchGatheringReviewsPage, toggleReviewLike } from '@/lib/api/review'
+import { createReview, deleteReview, fetchAllReviews, fetchGatheringReviewsPage, fetchMyReviews, toggleReviewLike } from '@/lib/api/review'
 import type { ReviewCreateRequest } from '@/lib/api/types'
 
 export function useAllReviews(
   sort: 'LATEST' | 'LIKES',
   page: number,
   gatheringId?: string,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ['reviews', 'all', sort, page, gatheringId],
     queryFn: () => fetchAllReviews(sort, page, 10, gatheringId),
+    enabled,
   })
 }
 
@@ -17,24 +19,31 @@ export function useGatheringReviews(
   gatheringId: string,
   sort: 'LATEST' | 'LIKES',
   page: number,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ['gathering', gatheringId, 'reviews', sort, page],
     queryFn: () => fetchGatheringReviewsPage(gatheringId, sort, page),
-    enabled: !!gatheringId,
+    enabled: enabled && !!gatheringId,
   })
 }
 
-export function useCreateReview(
-  gatheringId: string,
-  onSuccess?: (mileageEarned: number) => void,
-) {
+export function useMyReviews(sort: 'LATEST' | 'LIKES', page: number, enabled = true) {
+  return useQuery({
+    queryKey: ['reviews', 'me', sort, page],
+    queryFn: () => fetchMyReviews(sort, page),
+    enabled,
+  })
+}
+
+export function useCreateReview(onSuccess?: () => void) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: ReviewCreateRequest) => createReview(gatheringId, data),
+    mutationFn: (data: ReviewCreateRequest) => createReview(data),
     onSuccess: (result) => {
-      qc.invalidateQueries({ queryKey: ['gathering', gatheringId, 'reviews'] })
-      onSuccess?.(result.mileageEarned)
+      qc.invalidateQueries({ queryKey: ['gathering', result.gatheringId, 'reviews'] })
+      qc.invalidateQueries({ queryKey: ['reviews'] })
+      onSuccess?.()
     },
   })
 }
