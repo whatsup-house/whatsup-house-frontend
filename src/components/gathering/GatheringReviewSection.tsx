@@ -65,7 +65,8 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
 
   const { data: attendedApps } = useMyApplicationsMe('ATTENDED', isLoggedIn)
-  const hasAttended = attendedApps?.some((app) => app.gathering.id === gatheringId) ?? false
+  const attendedApplication = attendedApps?.find((app) => app.gathering.id === gatheringId)
+  const hasAttended = !!attendedApplication
 
   const { data, isLoading } = useGatheringReviews(gatheringId, sort, page)
 
@@ -135,8 +136,8 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
       <Pagination page={page} totalPages={totalPages} onChange={handlePageChange} />
 
       {/* ATTENDED + 미작성 → 후기 작성 폼 */}
-      {hasAttended && !hasMyReview && (
-        <ReviewWriteForm gatheringId={gatheringId} mileageReward={mileageReward} />
+      {hasAttended && !hasMyReview && attendedApplication && (
+        <ReviewWriteForm applicationId={attendedApplication.id} mileageReward={mileageReward} />
       )}
 
       {/* ATTENDED + 기작성 안내 */}

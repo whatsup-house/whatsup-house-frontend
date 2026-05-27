@@ -28,10 +28,10 @@ function GatheringDropdown({ value, onChange, options }: {
   }, [])
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative min-w-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-tag-bg/60 bg-card text-sm font-semibold text-tag-text max-w-[220px]"
+        className="flex w-full items-center gap-1.5 px-3 py-2 rounded-full border border-tag-bg/60 bg-card text-sm font-semibold text-tag-text max-w-[220px]"
       >
         <span className="truncate">{current?.title ?? '전체 게더링'}</span>
         <ChevronDown size={14} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -103,10 +103,9 @@ function Pagination({ page, totalPages, onChange }: {
 }
 
 export default function AllReviewList() {
-  const { isLoggedIn, userId } = useAuthStore()
+  const { isLoggedIn } = useAuthStore()
   const [sort, setSort] = useState<SortType>('LIKES')
   const [gatheringId, setGatheringId] = useState<string | undefined>(undefined)
-  const [myReviewOnly, setMyReviewOnly] = useState(false)
   const [page, setPage] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
@@ -115,9 +114,9 @@ export default function AllReviewList() {
   const { data, isLoading } = useAllReviews(sort, page, gatheringId)
 
   const gatheringOptions = (gatheringsData ?? []).map((g) => ({ id: g.id, title: g.title }))
+  const gatheringTitleById = new Map(gatheringOptions.map((g) => [g.id, g.title]))
 
-  const allReviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.reviewId))
-  const reviews = myReviewOnly ? allReviews.filter((r) => r.userId === userId) : allReviews
+  const reviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.reviewId))
   const totalPages = data?.totalPages ?? 0
 
   const showToast = (msg: string) => {
@@ -142,25 +141,21 @@ export default function AllReviewList() {
 
   return (
     <div className="relative px-4 py-5">
-      {/* 헤더 */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-1 h-5 bg-primary rounded-full" />
-        <h1 className="text-base font-bold text-foreground">전체 후기</h1>
-      </div>
-
-      {/* 필터 바: 게더링 드롭다운(좌) + 정렬 탭(우) */}
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <GatheringDropdown
-          value={gatheringId ?? 'all'}
-          onChange={handleGathering}
-          options={gatheringOptions}
-        />
+      {/* 필터 바: 게더링 드롭다운 + 정렬 탭 */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="min-w-0 flex-1">
+          <GatheringDropdown
+            value={gatheringId ?? 'all'}
+            onChange={handleGathering}
+            options={gatheringOptions}
+          />
+        </div>
         <div className="flex gap-2 shrink-0">
           {(['LIKES', 'LATEST'] as const).map((s) => (
             <button
               key={s}
               onClick={() => handleSort(s)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              className={`px-2.5 py-1.5 text-sm font-medium rounded-full transition-colors ${
                 sort === s ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
               }`}
             >
@@ -169,22 +164,6 @@ export default function AllReviewList() {
           ))}
         </div>
       </div>
-
-      {/* 내 후기만 필터 (로그인 시) */}
-      {isLoggedIn && (
-        <div className="mb-4">
-          <button
-            onClick={() => setMyReviewOnly((o) => !o)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-colors ${
-              myReviewOnly
-                ? 'bg-primary text-white border-primary'
-                : 'bg-card text-tag-text border-tag-bg/60'
-            }`}
-          >
-            내 후기만
-          </button>
-        </div>
-      )}
 
       {/* 로딩 */}
       {isLoading && (
@@ -202,7 +181,10 @@ export default function AllReviewList() {
       {reviews.map((review) => (
         <ReviewCard
           key={review.reviewId}
-          review={review}
+          review={{
+            ...review,
+            gatheringTitle: review.gatheringTitle ?? gatheringTitleById.get(review.gatheringId),
+          }}
           isLoggedIn={isLoggedIn}
           showGatheringTitle
           onToast={showToast}

@@ -140,6 +140,9 @@ export default function ReviewCard({
     })
   }
 
+  const authorName = review.nickname ?? '익명'
+  const gatheringTitle = review.gatheringTitle ?? '게더링'
+
   return (
     <>
       <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden mb-3.5">
@@ -156,7 +159,11 @@ export default function ReviewCard({
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-tag-text">{dayjs(review.createdAt).format('YYYY.MM.DD')} 작성</p>
+            <p className="text-[11px] text-tag-text truncate">
+              <span>{authorName}</span>
+              <span className="mx-1">·</span>
+              {dayjs(review.createdAt).format('YYYY.MM.DD')} 작성
+            </p>
           </div>
           {isMyReview && (
             <div ref={menuRef} className="relative">
@@ -190,7 +197,7 @@ export default function ReviewCard({
             >
               <div className="w-0.5 h-3.5 bg-primary rounded-full shrink-0" />
               <span className="text-xs font-semibold text-foreground truncate">
-                게더링 보기
+                {gatheringTitle}
               </span>
             </Link>
           </div>

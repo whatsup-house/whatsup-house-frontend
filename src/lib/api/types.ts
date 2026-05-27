@@ -194,8 +194,10 @@ export interface ReviewImageItem {
 export interface ReviewItem {
   reviewId: string
   userId: string
+  nickname?: string
   applicationId: string
   gatheringId: string
+  gatheringTitle?: string
   reviewType: ReviewType
   reviewContent: string
   likeCount: number
@@ -317,7 +319,8 @@ export type CropRatio = '4:3' | '9:16' | '1:1'
 export type CropContext = 'review' | 'carousel' | 'avatar'
 
 export interface ImageUploadResponse {
-  imageUrl: string
+  tempPath: string
+  previewUrl: string
 }
 
 export interface AdminHomeReview {
@@ -341,19 +344,22 @@ export interface AdminHomeReviewRequest {
 }
 
 export interface ReviewCreateRequest {
-  type: ReviewType
-  content: string
-  imageUrl?: string | null
-  rating: number
+  applicationId: string
+  reviewContent: string
+  imageTempPaths?: string[]
 }
 
 export interface ReviewCreateResponse {
-  id: string
-  type: ReviewType
-  content: string
-  imageUrl: string | null
-  rating: number
-  mileageEarned: number
+  reviewId: string
+  userId: string
+  nickname?: string
+  applicationId: string
+  gatheringId: string
+  gatheringTitle?: string
+  reviewType: ReviewType
+  reviewContent: string
+  likeCount: number
+  images: ReviewImageItem[]
   createdAt: string
 }
 

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { uploadImage } from '@/lib/api/upload'
+import type { ImageUploadResponse } from '@/lib/api/types'
 
 interface UseUploadImageResult {
   upload: (blob: Blob, filename?: string) => Promise<string>
+  uploadWithTempPath: (blob: Blob, filename?: string) => Promise<ImageUploadResponse>
   isUploading: boolean
   error: string | null
   reset: () => void
@@ -12,12 +14,11 @@ export function useUploadImage(): UseUploadImageResult {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const upload = async (blob: Blob, filename?: string): Promise<string> => {
+  const uploadWithTempPath = async (blob: Blob, filename?: string): Promise<ImageUploadResponse> => {
     setIsUploading(true)
     setError(null)
     try {
-      const url = await uploadImage(blob, filename)
-      return url
+      return await uploadImage(blob, filename)
     } catch (err) {
       const msg = err instanceof Error ? err.message : '이미지 업로드에 실패했습니다'
       setError(msg)
@@ -27,10 +28,15 @@ export function useUploadImage(): UseUploadImageResult {
     }
   }
 
+  const upload = async (blob: Blob, filename?: string): Promise<string> => {
+    const result = await uploadWithTempPath(blob, filename)
+    return result.previewUrl
+  }
+
   const reset = () => {
     setIsUploading(false)
     setError(null)
   }
 
-  return { upload, isUploading, error, reset }
+  return { upload, uploadWithTempPath, isUploading, error, reset }
 }
