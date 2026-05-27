@@ -18,7 +18,8 @@ export const MOCK_ADMIN_HOME_REVIEWS: AdminHomeReview[] = [
   { id: 'r3', authorName: '수아',   avatarUrl: '/review/review3.JPG', gatheringTitle: '대학생 게더링',          content: '학교도 전공도 다른 사람들이랑 이렇게 이야기가 잘 통할 줄 몰랐어요.',                     rating: 5, displayOrder: 3, isActive: true },
   { id: 'r4', authorName: '민준정', avatarUrl: '/review/review4.JPG', gatheringTitle: '대학생 게더링',          content: '서울대입구역 근처에서 이런 모임이 있는 줄 몰랐어요.',                                    rating: 4, displayOrder: 4, isActive: true },
   { id: 'r5', authorName: '나연강', avatarUrl: '/review/review5.JPG', gatheringTitle: '썬데이 러닝 클럽 (SRC)', content: '혼자 달리기는 힘들었는데 함께 뛰니까 너무 즐거웠어요.',                                rating: 5, displayOrder: 5, isActive: true },
-  { id: 'r6', authorName: '도현임', avatarUrl: '/review/review6.JPG', gatheringTitle: '썬데이 러닝 클럽 (SRC)', content: '페이스 맞춰주는 분위기가 너무 좋았어요.',                                            rating: 5, displayOrder: 6, isActive: true },
+  { id: 'r6', authorName: '도현임', avatarUrl: '/review/review6.JPG', gatheringTitle: '썬데이 러닝 클럽 (SRC)', content: '페이스 맞춰주는 분위기가 너무 좋았어요.',                                            rating: 5, displayOrder: 6, isActive: true  },
+  { id: 'r7', authorName: '태양오', avatarUrl: '/review/review1.JPG', gatheringTitle: '대학생 게더링',          content: '미공개 처리 테스트용 비활성 후기.',                                                  rating: 4, displayOrder: 7, isActive: false },
 ]
 
 // ─── E2E 전용 Mock Data ────────────────────────────────────────────────────────
@@ -426,5 +427,31 @@ export async function mockHomeApis(page: Page) {
 export async function mockReviewApis(page: Page) {
   await page.route('**/api/reviews**', (route) =>
     route.fulfill({ json: apiRes(mockAllReviewsPage) })
+  )
+}
+
+export async function mockAdminHomeApis(page: Page) {
+  // 히어로 캐러셀 — 컬렉션
+  await page.route('**/api/admin/hero-carousel', (route) => {
+    if (route.request().method() === 'GET') {
+      return route.fulfill({ json: apiRes({ slides: MOCK_HERO_CAROUSEL_SLIDES }) })
+    }
+    return route.fulfill({ json: apiRes(MOCK_HERO_CAROUSEL_SLIDES[0]) })
+  })
+  // 히어로 캐러셀 — 개별 항목(수정/삭제/토글)
+  await page.route('**/api/admin/hero-carousel/**', (route) =>
+    route.fulfill({ json: apiRes(MOCK_HERO_CAROUSEL_SLIDES[0]) })
+  )
+
+  // 홈 후기 — 컬렉션
+  await page.route('**/api/admin/home-reviews', (route) => {
+    if (route.request().method() === 'GET') {
+      return route.fulfill({ json: apiRes({ reviews: MOCK_ADMIN_HOME_REVIEWS }) })
+    }
+    return route.fulfill({ json: apiRes(MOCK_ADMIN_HOME_REVIEWS[0]) })
+  })
+  // 홈 후기 — 개별 항목(수정/삭제/토글)
+  await page.route('**/api/admin/home-reviews/**', (route) =>
+    route.fulfill({ json: apiRes(MOCK_ADMIN_HOME_REVIEWS[0]) })
   )
 }
