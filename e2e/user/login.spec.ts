@@ -10,10 +10,20 @@ test.describe('회원 - 로그인', () => {
   test('로그인 화면을 확인한다', async ({ page }) => {
     await page.goto('/login')
 
+    const title = page.getByRole('heading', { name: '로그인' })
     await expect(page.getByAltText('와썹하우스')).toBeVisible()
     await expect(page.getByText('해가 지는 선선한 저녁에 만나요')).toBeVisible()
     await expect(page.getByPlaceholder('이메일 주소')).toBeVisible()
-    await expect(page.getByPlaceholder('비밀번호 입력')).toBeVisible()
+    const password = page.getByPlaceholder('비밀번호 입력')
+    await expect(password).toBeVisible()
+    await expect(title).toBeVisible()
+    await expect(title).toHaveCSS('text-align', 'left')
+
+    await password.fill('Password1!')
+    await page.getByRole('button', { name: '비밀번호 보기' }).click()
+    await expect(password).toHaveAttribute('type', 'text')
+    await page.getByRole('button', { name: '비밀번호 숨기기' }).click()
+    await expect(password).toHaveAttribute('type', 'password')
     await captureFullPage(page, 'e2e/screenshots/user/login-01-form.png')
   })
 

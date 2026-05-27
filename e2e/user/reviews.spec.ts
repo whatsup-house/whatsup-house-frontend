@@ -23,7 +23,7 @@ test.describe('후기 페이지', () => {
       route.fulfill({ json: apiRes(mockHomeReviews) })
     )
     await page.goto('/')
-    await expect(page.getByText(mockHomeReviews[0].nickname)).toBeVisible()
+    await expect(page.getByText(mockHomeReviews[0].nickname).first()).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/reviews-01-home-section.png')
   })
 

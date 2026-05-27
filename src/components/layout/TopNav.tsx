@@ -19,8 +19,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/onboarding': '온보딩',
 }
 
-const ROOT_PATHS = new Set(['/', '/gatherings', '/mypage'])
-
 function getTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
   if (pathname.endsWith('/apply/complete')) return '신청 완료'
@@ -48,16 +46,16 @@ export default function TopNav() {
     return null
   }
 
-  const canGoBack = !ROOT_PATHS.has(pathname)
+  const canGoBack = stack.length > 1
   const title = getTitle(pathname)
 
   const handleBack = () => {
     if (stack.length > 1) {
       back()
       router.back()
-      return
+    } else {
+      router.push(getFallbackPath(pathname))
     }
-    router.push(getFallbackPath(pathname))
   }
 
   return (

@@ -24,7 +24,7 @@ test.describe('비회원 - 게더링 탐색', () => {
     await expect(page.getByText('퇴근 게더링').first()).toBeVisible()
     await expect(page.getByRole('button', { name: /^1위 퇴근 게더링/ })).toBeVisible()
     await expect(page.getByText('다녀온 사람들의 후기')).toBeVisible()
-    await expect(page.getByText('지은이')).toBeVisible()
+    await expect(page.getByText('지은이').first()).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/guest/01-home.png')
   })
 
@@ -36,6 +36,17 @@ test.describe('비회원 - 게더링 탐색', () => {
     await expect(bottomNav.getByText('게더링')).toBeVisible()
     await expect(bottomNav.getByText('마이')).toBeVisible()
     await expect(bottomNav.getByText('소셜')).toHaveCount(0)
+  })
+
+  test('하단 내비게이션 이동 후 헤더 뒤로가기로 이전 탭에 복귀한다', async ({ page }) => {
+    await page.goto('/')
+
+    await page.getByRole('link', { name: /게더링/ }).click()
+    await expect(page).toHaveURL('/gatherings')
+    await expect(page.getByLabel('뒤로가기')).toBeVisible()
+
+    await page.getByLabel('뒤로가기').click()
+    await expect(page).toHaveURL('/')
   })
 
   test('게더링 목록을 조회하고 상세 페이지로 이동한다', async ({ page }) => {

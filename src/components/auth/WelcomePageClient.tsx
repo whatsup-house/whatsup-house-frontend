@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -11,6 +12,10 @@ export default function WelcomePageClient() {
   const returnUrl = searchParams.get('returnUrl')
   const redirectTo = safeReturnUrl(returnUrl)
   const loginHref = returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login'
+
+  useEffect(() => {
+    localStorage.setItem('whatsup-has-seen-welcome', 'true')
+  }, [])
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-foreground text-white">

@@ -1,13 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle, ChevronLeft } from 'lucide-react'
+import { AlertCircle, ChevronLeft, Eye, EyeOff } from 'lucide-react'
 import { useLogin } from '@/lib/hooks/useAuth'
+import { useNavigationStore } from '@/lib/store/navigationStore'
 import { safeReturnUrl } from '@/lib/utils/url'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
@@ -21,10 +23,11 @@ type LoginFormValues = z.infer<typeof loginSchema>
 export default function LoginPageClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [showPassword, setShowPassword] = useState(false)
+  const { stack, back } = useNavigationStore()
   const rawReturnUrl = searchParams.get('returnUrl')
   const returnUrl = safeReturnUrl(rawReturnUrl)
   const loginMutation = useLogin(returnUrl)
-  const welcomeHref = rawReturnUrl ? `/welcome?returnUrl=${encodeURIComponent(rawReturnUrl)}` : '/welcome'
 
   const {
     register,
@@ -38,6 +41,15 @@ export default function LoginPageClient() {
     loginMutation.mutate(data)
   }
 
+  const handleBack = () => {
+    if (stack.length > 1) {
+      back()
+      router.back()
+      return
+    }
+    router.back()
+  }
+
   const hasLoginError = loginMutation.isError
 
   return (
@@ -47,14 +59,13 @@ export default function LoginPageClient() {
         <div className="flex h-14 items-center justify-between px-1">
           <button
             type="button"
-            onClick={() => router.push(welcomeHref)}
+            onClick={handleBack}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground"
             aria-label="뒤로가기"
           >
             <ChevronLeft size={22} />
           </button>
-          <h1 className="text-base font-bold text-foreground">로그인</h1>
-          <div className="h-11 w-11" />
+          <h1 className="flex-1 text-left text-base font-bold text-foreground">로그인</h1>
         </div>
       </header>
 
@@ -90,15 +101,25 @@ export default function LoginPageClient() {
 
             <label className="flex flex-col gap-1.5">
               <span className="ml-1 text-xs font-medium text-tag-text">비밀번호</span>
-              <input
-                type="password"
-                placeholder="비밀번호 입력"
-                autoComplete="current-password"
-                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
-                  errors.password || hasLoginError ? 'border-primary' : 'border-tag-bg'
-                }`}
-                {...register('password')}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="비밀번호 입력"
+                  autoComplete="current-password"
+                  className={`w-full rounded-[10px] border bg-card px-4 py-3.5 pr-12 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
+                    errors.password || hasLoginError ? 'border-primary' : 'border-tag-bg'
+                  }`}
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 flex min-h-[36px] min-w-[36px] -translate-y-1/2 items-center justify-center text-tag-text"
+                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </label>
           </div>
 

@@ -65,6 +65,9 @@ apiClient.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError)
       useAuthStore.getState().logout()
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem('whatsup-auth-expired', 'true')
+      }
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         const returnUrl = encodeURIComponent(window.location.pathname)
         window.location.href = `/login?returnUrl=${returnUrl}`

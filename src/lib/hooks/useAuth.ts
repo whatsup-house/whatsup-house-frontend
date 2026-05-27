@@ -37,6 +37,8 @@ export function useLogin(returnUrl: string = '/') {
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       login(email, password),
     onSuccess: (data) => {
+      sessionStorage.removeItem('whatsup-auth-expired')
+      localStorage.setItem('whatsup-has-seen-welcome', 'true')
       storeLogin(data.user.id, data.user.nickname, data.user.admin)
       router.push(returnUrl)
     },
@@ -59,6 +61,8 @@ export function useRegisterAndLogin() {
       return login(data.email, data.password)
     },
     onSuccess: (loginData) => {
+      sessionStorage.removeItem('whatsup-auth-expired')
+      localStorage.setItem('whatsup-has-seen-welcome', 'true')
       storeLogin(loginData.user.id, loginData.user.nickname, loginData.user.admin)
       router.push('/')
     },

@@ -61,4 +61,28 @@ test.describe('인증 가드', () => {
     await expect(page).toHaveURL('/mypage')
     await page.screenshot({ path: 'e2e/screenshots/user/auth-guard-return-url.png' })
   })
+
+  test('로그인 페이지 뒤로가기는 이전 페이지로 돌아간다', async ({ page }) => {
+    await setupGuestContext(page)
+    await mockGatheringApis(page)
+
+    await page.goto('/gatherings')
+    await page.goto('/login?returnUrl=%2Fgatherings')
+    await page.getByLabel('뒤로가기').click()
+
+    await expect(page).toHaveURL('/gatherings')
+  })
+
+  test('만료된 refresh token은 로그인 페이지로 이동시킨다', async ({ page }) => {
+    await page.route('**/api/users/me', (route) =>
+      route.fulfill({ status: 401, json: { success: false, message: '인증 필요', data: null } })
+    )
+    await page.route('**/api/auth/refresh', (route) =>
+      route.fulfill({ status: 401, json: { success: false, message: 'refresh 만료', data: null } })
+    )
+
+    await page.goto('/mypage')
+
+    await expect(page).toHaveURL('/login?returnUrl=%2Fmypage')
+  })
 })

@@ -32,7 +32,7 @@ test.describe('비회원 - 신청 내역 조회', () => {
 
     await page.goto('/applications/check')
     await expect(page.getByText('신청 내역 조회')).toBeVisible()
-    await expect(page.getByRole('button', { name: '뒤로가기' })).toBeVisible()
+    await expect(page.getByRole('button', { name: '뒤로가기' })).toHaveCount(0)
     await captureFullPage(page, 'e2e/screenshots/guest/check-01-form.png')
 
     await page.getByPlaceholder('WH260421A3F2').fill('WH260601Z9X8')
