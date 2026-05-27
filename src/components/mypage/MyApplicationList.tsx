@@ -92,8 +92,32 @@ export default function MyApplicationList() {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {applications.map((item) => (
-            <div key={item.id} className="bg-card rounded-card p-4">
+          {applications.map((item) => {
+            const isConfirmed = item.status === 'CONFIRMED'
+            return (
+            <div
+              key={item.id}
+              className={`bg-card rounded-card p-4 ${
+                isConfirmed ? 'cursor-pointer transition-colors hover:bg-card/80' : ''
+              }`}
+              onClick={
+                isConfirmed
+                  ? () => router.push(`/gatherings/${item.gathering.id}/apply/confirmed`)
+                  : undefined
+              }
+              role={isConfirmed ? 'button' : undefined}
+              tabIndex={isConfirmed ? 0 : undefined}
+              onKeyDown={
+                isConfirmed
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        router.push(`/gatherings/${item.gathering.id}/apply/confirmed`)
+                      }
+                    }
+                  : undefined
+              }
+            >
               <div className="flex gap-3">
                 <div className="relative w-14 h-14 rounded-[10px] overflow-hidden shrink-0 bg-tag-bg">
                   {item.gathering.thumbnailUrl ? (
@@ -124,7 +148,10 @@ export default function MyApplicationList() {
               </div>
 
               {(item.status === 'PENDING' || item.status === 'CONFIRMED') && (
-                <div className="mt-3 pt-3 border-t border-tag-bg/50">
+                <div
+                  className="mt-3 pt-3 border-t border-tag-bg/50"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {confirmingId === item.id ? (
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs text-tag-text">정말 취소할까요?</p>
@@ -155,7 +182,8 @@ export default function MyApplicationList() {
                 </div>
               )}
             </div>
-          ))}
+          )
+          })}
         </div>
       )}
     </div>

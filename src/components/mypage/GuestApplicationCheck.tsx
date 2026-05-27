@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -36,32 +37,63 @@ interface ResultCardProps {
 }
 
 function ResultCard({ result }: ResultCardProps) {
+  const router = useRouter()
   const formattedDate = dayjs(result.gathering.eventDate).format('YYYY년 M월 D일 (ddd)')
+  const isConfirmed = result.status === 'CONFIRMED'
+
+  const goToConfirmed = () => {
+    router.push(
+      `/gatherings/${result.gathering.id}/apply/confirmed?bookingNumber=${result.bookingNumber}`,
+    )
+  }
 
   return (
-    <Card className="w-full p-5 mt-6">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-xs text-tag-text">신청 내역</p>
-        <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[result.status]}`}>
-          {STATUS_LABEL[result.status]}
-        </span>
-      </div>
-
-      <h2 className="text-base font-bold text-foreground mb-3">{result.gathering.title}</h2>
-
-      <div className="flex items-center gap-2 mb-4">
-        <Calendar size={14} className="text-tag-text shrink-0" />
-        <p className="text-sm text-tag-text">{formattedDate}</p>
-      </div>
-
-      <div className="bg-primary-light rounded-card px-4 py-3 flex items-center gap-2">
-        <Hash size={14} className="text-primary shrink-0" />
-        <div>
-          <p className="text-xs text-tag-text">예약번호</p>
-          <p className="text-sm font-bold text-primary tracking-wider">{result.bookingNumber}</p>
+    <div
+      className={`mt-6 ${isConfirmed ? 'cursor-pointer transition-opacity hover:opacity-90' : ''}`}
+      onClick={isConfirmed ? goToConfirmed : undefined}
+      role={isConfirmed ? 'button' : undefined}
+      tabIndex={isConfirmed ? 0 : undefined}
+      onKeyDown={
+        isConfirmed
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                goToConfirmed()
+              }
+            }
+          : undefined
+      }
+    >
+      <Card className="w-full p-5">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs text-tag-text">신청 내역</p>
+          <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[result.status]}`}>
+            {STATUS_LABEL[result.status]}
+          </span>
         </div>
-      </div>
-    </Card>
+
+        <h2 className="text-base font-bold text-foreground mb-3">{result.gathering.title}</h2>
+
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar size={14} className="text-tag-text shrink-0" />
+          <p className="text-sm text-tag-text">{formattedDate}</p>
+        </div>
+
+        <div className="bg-primary-light rounded-card px-4 py-3 flex items-center gap-2">
+          <Hash size={14} className="text-primary shrink-0" />
+          <div>
+            <p className="text-xs text-tag-text">예약번호</p>
+            <p className="text-sm font-bold text-primary tracking-wider">{result.bookingNumber}</p>
+          </div>
+        </div>
+
+        {isConfirmed && (
+          <p className="text-xs text-primary text-center mt-4">
+            카드를 누르면 예약 확정 페이지로 이동해요
+          </p>
+        )}
+      </Card>
+    </div>
   )
 }
 
