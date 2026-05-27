@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Calendar, MapPin, Hash } from 'lucide-react'
 import { useApplicationByToken } from '@/lib/hooks/useApplications'
 import { Card, LoadingSpinner } from '@/components/ui'
@@ -26,6 +27,7 @@ interface TokenApplicationCheckProps {
 }
 
 export default function TokenApplicationCheck({ token }: TokenApplicationCheckProps) {
+  const router = useRouter()
   const { data, isLoading, isError } = useApplicationByToken(token)
 
   if (isLoading) {
@@ -59,48 +61,78 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
 
   const formattedDate = dayjs(data.gathering.eventDate).format('YYYY년 M월 D일 (ddd)')
   const startTime = data.gathering.startTime?.slice(0, 5)
+  const isConfirmed = data.status === 'CONFIRMED'
+
+  const goToConfirmed = () => {
+    router.push(
+      `/gatherings/${data.gathering.id}/apply/confirmed?bookingNumber=${data.bookingNumber}`,
+    )
+  }
 
   return (
     <div className="px-5 py-8">
       <h1 className="text-xl font-bold text-foreground mb-2">신청 내역</h1>
       <p className="text-sm text-tag-text mb-6">아래에서 신청 정보를 확인하세요</p>
 
-      <Card className="w-full p-5">
-        <div className="flex items-center justify-between mb-4">
-          {data.applicantName && (
-            <p className="text-sm font-medium text-foreground">{data.applicantName}</p>
-          )}
-          <span className={`text-xs font-medium px-2 py-1 rounded-full ml-auto ${STATUS_STYLE[data.status]}`}>
-            {STATUS_LABEL[data.status]}
-          </span>
-        </div>
-
-        <h2 className="text-base font-bold text-foreground mb-4">{data.gathering.title}</h2>
-
-        <div className="flex flex-col gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <Calendar size={14} className="text-tag-text shrink-0" />
-            <p className="text-sm text-tag-text">
-              {formattedDate}{startTime ? ` ${startTime}` : ''}
-            </p>
+      <div
+        className={isConfirmed ? 'cursor-pointer transition-opacity hover:opacity-90' : ''}
+        onClick={isConfirmed ? goToConfirmed : undefined}
+        role={isConfirmed ? 'button' : undefined}
+        tabIndex={isConfirmed ? 0 : undefined}
+        onKeyDown={
+          isConfirmed
+            ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  goToConfirmed()
+                }
+              }
+            : undefined
+        }
+      >
+        <Card className="w-full p-5">
+          <div className="flex items-center justify-between mb-4">
+            {data.applicantName && (
+              <p className="text-sm font-medium text-foreground">{data.applicantName}</p>
+            )}
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ml-auto ${STATUS_STYLE[data.status]}`}>
+              {STATUS_LABEL[data.status]}
+            </span>
           </div>
 
-          {data.gathering.locationName && (
+          <h2 className="text-base font-bold text-foreground mb-4">{data.gathering.title}</h2>
+
+          <div className="flex flex-col gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <MapPin size={14} className="text-tag-text shrink-0" />
-              <p className="text-sm text-tag-text">{data.gathering.locationName}</p>
+              <Calendar size={14} className="text-tag-text shrink-0" />
+              <p className="text-sm text-tag-text">
+                {formattedDate}{startTime ? ` ${startTime}` : ''}
+              </p>
             </div>
-          )}
-        </div>
 
-        <div className="bg-primary-light rounded-card px-4 py-3 flex items-center gap-2">
-          <Hash size={14} className="text-primary shrink-0" />
-          <div>
-            <p className="text-xs text-tag-text">예약번호</p>
-            <p className="text-sm font-bold text-primary tracking-wider">{data.bookingNumber}</p>
+            {data.gathering.locationName && (
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-tag-text shrink-0" />
+                <p className="text-sm text-tag-text">{data.gathering.locationName}</p>
+              </div>
+            )}
           </div>
-        </div>
-      </Card>
+
+          <div className="bg-primary-light rounded-card px-4 py-3 flex items-center gap-2">
+            <Hash size={14} className="text-primary shrink-0" />
+            <div>
+              <p className="text-xs text-tag-text">예약번호</p>
+              <p className="text-sm font-bold text-primary tracking-wider">{data.bookingNumber}</p>
+            </div>
+          </div>
+
+          {isConfirmed && (
+            <p className="text-xs text-primary text-center mt-4">
+              카드를 누르면 예약 확정 페이지로 이동해요
+            </p>
+          )}
+        </Card>
+      </div>
 
       <div className="mt-8 flex flex-col gap-3 items-center">
         <Link href="/login" className="text-sm text-primary underline">

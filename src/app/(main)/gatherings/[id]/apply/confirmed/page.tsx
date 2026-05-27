@@ -6,7 +6,7 @@ import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { LoadingSpinner } from '@/components/ui'
 import ApplicationResultView from '@/components/gathering/ApplicationResultView'
 
-function ApplyCompleteContent({ id }: { id: string }) {
+function ApplyConfirmedContent({ id }: { id: string }) {
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
   const { data: gathering, isLoading } = useGatheringDetail(id)
@@ -22,13 +22,13 @@ function ApplyCompleteContent({ id }: { id: string }) {
   return (
     <ApplicationResultView
       gathering={gathering}
-      mode="completed"
+      mode="confirmed"
       bookingNumber={bookingNumber}
     />
   )
 }
 
-export default function ApplyCompletePage({
+export default function ApplyConfirmedPage({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -42,7 +42,7 @@ export default function ApplyCompletePage({
         </div>
       }
     >
-      <ApplyCompleteContent id={id} />
+      <ApplyConfirmedContent id={id} />
     </Suspense>
   )
 }

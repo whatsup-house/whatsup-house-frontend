@@ -54,20 +54,22 @@ test.describe('비회원 - 게더링 신청', () => {
     // 5. 신청 완료하기
     await page.getByRole('button', { name: '신청 완료하기' }).click()
 
-    // 6. 완료 페이지 확인
+    // 6. 완료 페이지 확인 (호스트 승인 단계 안내)
     await expect(page).toHaveURL(`/gatherings/${MOCK_GATHERING_ID}/apply/complete?bookingNumber=WH260601Z9X8`)
     await expect(page.getByText('신청이 완료됐어요!')).toBeVisible()
+    await expect(page.getByText('호스트가 확인 후 예약 확정을 알려드릴게요')).toBeVisible()
     await expect(page.getByText('WH260601Z9X8')).toBeVisible()
-    await expect(page.getByRole('button', { name: '예약 내역 조회하기' })).toBeVisible()
+    // 현장 결제 안내 멘트는 완료 화면에서 노출되지 않아야 한다
+    await expect(page.getByText('참가비는 당일 현장에서 결제해주세요')).toHaveCount(0)
+    // 입금 계좌 안내는 확정 페이지에서만 노출되어야 한다
+    await expect(page.getByText('우리은행 1002-157-849052')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: '예약번호로 신청 상태 조회하기' })).toBeVisible()
     await expect(page.getByText('홈으로 돌아가기')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/guest/apply-05-complete.png')
 
     // 7. 예약번호 복사 버튼 존재 확인 (clipboard API는 테스트 환경에서 제한될 수 있음)
     await expect(page.getByRole('button', { name: '복사' })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/guest/apply-06-copied.png')
-
-    // 8. 예약 내역 조회 버튼
-    await expect(page.getByRole('button', { name: '예약 내역 조회하기' })).toBeVisible()
   })
 
   test('필수 항목 미입력 시 제출이 막힌다', async ({ page }) => {
