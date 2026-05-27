@@ -83,7 +83,7 @@ export default function ImageUploadField({
           />
 
           <div
-            className={`relative border-2 border-dashed border-tag-bg/60 bg-tag-bg/20 flex items-center justify-center ${containerClass}`}
+            className={`relative border-2 border-dashed border-tag-bg/60 bg-background/40 flex items-center justify-center ${containerClass}`}
           >
             {/* 현재 이미지 미리보기 */}
             {previewUrl && (
@@ -101,23 +101,56 @@ export default function ImageUploadField({
               </div>
             )}
 
-            {/* 빈 상태 아이콘 */}
+            {/* 빈 상태 — rounded(아바타)는 작은 아이콘만, 그 외는 풀 룩 */}
             {!previewUrl && !isUploading && (
-              <div className="flex flex-col items-center gap-1.5 text-tag-text">
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <span className="text-xs">사진 선택</span>
-              </div>
+              rounded ? (
+                <div className="flex flex-col items-center gap-1.5 text-tag-text">
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  <span className="text-xs">사진 선택</span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2.5 px-4">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-light flex items-center justify-center">
+                    <svg
+                      width="28"
+                      height="28"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-primary"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="3" ry="3" />
+                      <circle cx="9" cy="9.5" r="1.5" />
+                      <path d="M21 16l-4.5-5.5L9.5 18" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                    사진 불러오기
+                  </span>
+                  {cropRatio && (
+                    <div className="flex items-center gap-1.5 text-[11.5px] text-tag-text whitespace-nowrap">
+                      <span className="px-1.5 py-0.5 rounded bg-tag-bg text-tag-text text-[10px] font-bold tracking-wide">
+                        {cropRatio}
+                      </span>
+                      <span>비율로 보여져요</span>
+                    </div>
+                  )}
+                </div>
+              )
             )}
 
             {/* 호버 편집 힌트 (이미지 있을 때) */}
