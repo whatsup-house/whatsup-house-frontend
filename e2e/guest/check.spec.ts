@@ -41,7 +41,8 @@ test.describe('비회원 - 신청 내역 조회', () => {
 
     await page.getByRole('button', { name: '조회하기' }).click()
     await expect(page.getByText('봄날 감성 게더링')).toBeVisible()
-    await expect(page.getByText('확정')).toBeVisible()
+    // KAN-147에서 "예약 확정 페이지로 이동해요" 안내가 추가되어 '확정'이 중복 매칭되므로 exact 사용
+    await expect(page.getByText('확정', { exact: true })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/guest/check-03-result.png')
   })
 
