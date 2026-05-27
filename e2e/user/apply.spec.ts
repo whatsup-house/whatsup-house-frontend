@@ -44,17 +44,19 @@ test.describe('회원 - 게더링 신청', () => {
 
     await captureFullPage(page, 'e2e/screenshots/user/apply-04-form-filled.png')
 
-    // 5. 신청 완료
+    // 5. 신청 완료 (호스트 승인 안내)
     await page.getByRole('button', { name: '신청 완료하기' }).click()
     await expect(page).toHaveURL(`/gatherings/${MOCK_GATHERING_ID}/apply/complete`)
     await expect(page.getByText('신청이 완료됐어요!')).toBeVisible()
+    await expect(page.getByText('호스트가 확인 후 예약 확정을 알려드릴게요')).toBeVisible()
+    await expect(page.getByText('참가비는 당일 현장에서 결제해주세요')).toHaveCount(0)
 
-    // 회원 신청은 예약번호 없이 "내 신청 내역 확인하기" 버튼
-    await expect(page.getByRole('button', { name: '내 신청 내역 확인하기' })).toBeVisible()
+    // 회원 신청은 예약번호 없이 "마이페이지에서 확정 여부 확인하기" 버튼
+    await expect(page.getByRole('button', { name: '마이페이지에서 확정 여부 확인하기' })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/apply-05-complete.png')
 
-    // 6. 내 신청 내역으로 이동
-    await page.getByRole('button', { name: '내 신청 내역 확인하기' }).click()
+    // 6. 마이페이지로 이동
+    await page.getByRole('button', { name: '마이페이지에서 확정 여부 확인하기' }).click()
     await expect(page).toHaveURL('/mypage')
   })
 
