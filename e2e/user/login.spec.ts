@@ -7,17 +7,14 @@ test.describe('회원 - 로그인', () => {
     await setupGuestContext(page)
   })
 
-  test('로그인 화면과 비밀번호 보기 토글을 확인한다', async ({ page }) => {
+  test('로그인 화면을 확인한다', async ({ page }) => {
     await page.goto('/login')
 
-    await expect(page.getByText('Whatsup House')).toBeVisible()
+    await expect(page.getByAltText('와썹하우스')).toBeVisible()
+    await expect(page.getByText('해가 지는 선선한 저녁에 만나요')).toBeVisible()
+    await expect(page.getByPlaceholder('이메일 주소')).toBeVisible()
+    await expect(page.getByPlaceholder('비밀번호 입력')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/login-01-form.png')
-
-    const password = page.getByPlaceholder('비밀번호를 입력해주세요')
-    await password.fill('Password1!')
-    await page.locator('form').locator('button').filter({ has: page.locator('svg') }).first().click()
-    await expect(password).toHaveAttribute('type', 'text')
-    await page.screenshot({ path: 'e2e/screenshots/user/login-02-password-visible.png' })
   })
 
   test('로그인 입력값 검증과 실패 메시지를 표시한다', async ({ page }) => {
@@ -33,10 +30,10 @@ test.describe('회원 - 로그인', () => {
         json: { success: false, message: '이메일 또는 비밀번호를 확인해주세요.', data: null },
       })
     })
-    await page.getByPlaceholder('이메일 주소를 입력해주세요').fill('user1@test.com')
-    await page.getByPlaceholder('비밀번호를 입력해주세요').fill('wrong-password')
+    await page.getByPlaceholder('이메일 주소').fill('user1@test.com')
+    await page.getByPlaceholder('비밀번호 입력').fill('wrong-password')
     await page.getByRole('button', { name: '로그인' }).click()
-    await expect(page.getByText('이메일 또는 비밀번호를 확인해주세요.')).toBeVisible()
+    await expect(page.getByText('아이디 또는 비밀번호를 확인해주세요.')).toBeVisible()
     await page.screenshot({ path: 'e2e/screenshots/user/login-04-failed.png' })
   })
 
@@ -71,8 +68,8 @@ test.describe('회원 - 로그인', () => {
     })
 
     await page.goto('/login?returnUrl=%2Fmypage')
-    await page.getByPlaceholder('이메일 주소를 입력해주세요').fill('user1@test.com')
-    await page.getByPlaceholder('비밀번호를 입력해주세요').fill('Password1!')
+    await page.getByPlaceholder('이메일 주소').fill('user1@test.com')
+    await page.getByPlaceholder('비밀번호 입력').fill('Password1!')
     await page.getByRole('button', { name: '로그인' }).click()
 
     await expect(page).toHaveURL('/mypage')

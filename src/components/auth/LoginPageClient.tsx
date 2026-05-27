@@ -42,7 +42,7 @@ export default function LoginPageClient() {
 
   return (
     <main className="min-h-screen bg-background">
-      <AuthOnlyRedirect />
+      <AuthOnlyRedirect redirectTo={returnUrl} />
       <header className="sticky top-0 z-30 border-b border-tag-bg/60 bg-background">
         <div className="flex h-14 items-center justify-between px-1">
           <button

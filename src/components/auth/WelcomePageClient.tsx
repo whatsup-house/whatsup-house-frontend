@@ -3,16 +3,18 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { safeReturnUrl } from '@/lib/utils/url'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
 export default function WelcomePageClient() {
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
+  const redirectTo = safeReturnUrl(returnUrl)
   const loginHref = returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login'
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-foreground text-white">
-      <AuthOnlyRedirect />
+      <AuthOnlyRedirect redirectTo={redirectTo} />
       <Image
         src="/assets/host-1.jpg"
         alt="와썹하우스 호스트"

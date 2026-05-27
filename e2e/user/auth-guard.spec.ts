@@ -52,8 +52,8 @@ test.describe('인증 가드', () => {
 
     // returnUrl이 포함된 로그인 페이지
     await page.goto('/login?returnUrl=%2Fmypage')
-    await page.getByPlaceholder('이메일 주소를 입력해주세요').fill('test@test.kr')
-    await page.getByPlaceholder('비밀번호를 입력해주세요').fill('Password1!')
+    await page.getByPlaceholder('이메일 주소').fill('test@test.kr')
+    await page.getByPlaceholder('비밀번호 입력').fill('Password1!')
 
     loggedIn = true
     await page.getByRole('button', { name: '로그인' }).click()
