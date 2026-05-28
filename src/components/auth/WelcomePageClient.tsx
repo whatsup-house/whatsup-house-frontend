@@ -3,19 +3,26 @@
 import { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { safeReturnUrl } from '@/lib/utils/url'
+import { getLegacyWelcomeSeen, markWelcomeSeen } from '@/lib/utils/welcomeCookie'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
 export default function WelcomePageClient() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
   const redirectTo = safeReturnUrl(returnUrl)
   const loginHref = returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login'
 
   useEffect(() => {
-    localStorage.setItem('whatsup-has-seen-welcome', 'true')
-  }, [])
+    const hadLegacyWelcomeSeen = getLegacyWelcomeSeen()
+    markWelcomeSeen()
+
+    if (hadLegacyWelcomeSeen) {
+      router.replace(redirectTo)
+    }
+  }, [redirectTo, router])
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-foreground text-white">
