@@ -124,7 +124,7 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
 
       {/* 리뷰 목록 — 가로 스크롤 */}
       {reviews.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-4 px-4 items-stretch">
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 items-stretch">
           {reviews.map((review) => (
             <div key={review.reviewId} className="flex-none w-[260px] snap-start">
               <HorizontalReviewCard review={review} />
