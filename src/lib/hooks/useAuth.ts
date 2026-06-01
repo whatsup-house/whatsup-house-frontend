@@ -6,6 +6,7 @@ import { login, logout as logoutApi, register, checkNickname, fetchMyProfile, up
 import { useAuthStore } from '@/lib/store/authStore'
 import { useRouter } from 'next/navigation'
 import type { RegisterRequest, ProfileUpdateRequest } from '@/lib/api/types'
+import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
 
 export function useInitAuth() {
   const { login: storeLogin, logout: storeLogout } = useAuthStore()
@@ -38,7 +39,7 @@ export function useLogin(returnUrl: string = '/') {
       login(email, password),
     onSuccess: (data) => {
       sessionStorage.removeItem('whatsup-auth-expired')
-      localStorage.setItem('whatsup-has-seen-welcome', 'true')
+      markWelcomeSeen()
       storeLogin(data.user.id, data.user.nickname, data.user.admin)
       router.push(returnUrl)
     },
@@ -62,7 +63,7 @@ export function useRegisterAndLogin() {
     },
     onSuccess: (loginData) => {
       sessionStorage.removeItem('whatsup-auth-expired')
-      localStorage.setItem('whatsup-has-seen-welcome', 'true')
+      markWelcomeSeen()
       storeLogin(loginData.user.id, loginData.user.nickname, loginData.user.admin)
       router.push('/')
     },

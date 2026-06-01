@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { safeReturnUrl } from '@/lib/utils/url'
+import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
 export default function WelcomePageClient() {
@@ -14,7 +15,8 @@ export default function WelcomePageClient() {
   const loginHref = returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login'
 
   useEffect(() => {
-    localStorage.setItem('whatsup-has-seen-welcome', 'true')
+    // 랜딩을 본 시점에 쿠키 기록 → 다음 방문부터 proxy가 랜딩을 건너뜀
+    markWelcomeSeen()
   }, [])
 
   return (

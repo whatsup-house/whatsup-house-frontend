@@ -374,9 +374,14 @@ function apiRes<T>(data: T) {
 }
 
 export async function setupGuestContext(page: Page) {
-  await page.addInitScript(() => {
-    localStorage.setItem('whatsup-has-seen-welcome', 'true')
-  })
+  await page.context().addCookies([
+    {
+      name: 'wh_seen_welcome',
+      value: '1',
+      url: 'http://localhost:3000',
+      sameSite: 'Lax',
+    },
+  ])
   await page.route('**/api/users/me', (route) =>
     route.fulfill({ status: 401, json: { success: false, message: '인증 필요', data: null } })
   )

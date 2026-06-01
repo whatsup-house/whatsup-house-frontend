@@ -85,4 +85,26 @@ test.describe('인증 가드', () => {
 
     await expect(page).toHaveURL('/login?returnUrl=%2Fmypage')
   })
+
+  test('홈 진입 시 만료된 refresh token은 랜딩보다 로그인 페이지를 우선한다', async ({ page }) => {
+    await page.context().addCookies([
+      {
+        name: 'refreshToken',
+        value: 'expired-refresh-token',
+        url: 'http://localhost:3000',
+        httpOnly: true,
+        sameSite: 'Lax',
+      },
+    ])
+    await page.route('**/api/users/me', (route) =>
+      route.fulfill({ status: 401, json: { success: false, message: '인증 필요', data: null } })
+    )
+    await page.route('**/api/auth/refresh', (route) =>
+      route.fulfill({ status: 401, json: { success: false, message: 'refresh 만료', data: null } })
+    )
+
+    await page.goto('/')
+
+    await expect(page).toHaveURL('/login?returnUrl=%2F')
+  })
 })
