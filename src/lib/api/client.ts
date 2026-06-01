@@ -40,7 +40,8 @@ apiClient.interceptors.response.use(
     if (
       error.response?.status !== 401 ||
       original._retry ||
-      original.url?.includes('/api/auth/refresh')
+      original.url?.includes('/api/auth/refresh') ||
+      original.url?.includes('/api/users/me')
     ) {
       return Promise.reject(error)
     }
