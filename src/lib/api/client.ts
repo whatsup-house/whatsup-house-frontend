@@ -64,8 +64,13 @@ apiClient.interceptors.response.use(
       return apiClient(original)
     } catch (refreshError) {
       processQueue(refreshError)
+      // 리프레시 실패 = 세션 종료. 단 "원래 로그인 상태였던 사용자"만 로그인 페이지로 보낸다.
+      // 비로그인 게스트의 /api/users/me 401(로그인 여부 probe)은 정상 흐름이므로
+      // 리다이렉트하지 않는다 → 공유 링크로 들어온 게스트가 상세에 머묾.
+      // (authStore는 메모리 전용이라 게스트는 항상 isLoggedIn=false)
+      const wasLoggedIn = useAuthStore.getState().isLoggedIn
       useAuthStore.getState().logout()
-      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      if (wasLoggedIn && typeof window !== 'undefined' && window.location.pathname !== '/login') {
         const returnUrl = encodeURIComponent(window.location.pathname)
         window.location.href = `/login?returnUrl=${returnUrl}`
       }
