@@ -7,7 +7,7 @@ import type { HomeReviewItem } from '@/lib/api/types'
 
 function HomeReviewCard({ review }: { review: HomeReviewItem }) {
   return (
-    <div className="flex-none w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden snap-start">
+    <Link href={`/reviews?highlight=${review.reviewId}`} className="flex-none w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden snap-start active:opacity-70 transition-opacity">
       <div className="relative w-full aspect-square bg-tag-bg flex items-center justify-center overflow-hidden">
         {review.thumbnailImageUrl ? (
           <AppImage
@@ -32,7 +32,7 @@ function HomeReviewCard({ review }: { review: HomeReviewItem }) {
         <p className="text-[10px] text-tag-text font-medium truncate mb-1">{review.gatheringTitle}</p>
         <p className="text-xs text-tag-text leading-relaxed line-clamp-2">{review.reviewContent}</p>
       </div>
-    </div>
+    </Link>
   )
 }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import ReviewCard from './ReviewCard'
 import { useAuthStore } from '@/lib/store/authStore'
@@ -104,6 +105,8 @@ function Pagination({ page, totalPages, onChange }: {
 
 export default function AllReviewList() {
   const { isLoggedIn } = useAuthStore()
+  const searchParams = useSearchParams()
+  const highlightId = searchParams.get('highlight')
   const [sort, setSort] = useState<SortType>('LIKES')
   const [gatheringId, setGatheringId] = useState<string | undefined>(undefined)
   const [page, setPage] = useState(0)
@@ -115,6 +118,12 @@ export default function AllReviewList() {
 
   const gatheringOptions = (gatheringsData ?? []).map((g) => ({ id: g.id, title: g.title }))
   const gatheringTitleById = new Map(gatheringOptions.map((g) => [g.id, g.title]))
+
+  useEffect(() => {
+    if (!highlightId || isLoading) return
+    const el = document.getElementById(`review-${highlightId}`)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [highlightId, isLoading])
 
   const reviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.reviewId))
   const totalPages = data?.totalPages ?? 0
@@ -179,17 +188,18 @@ export default function AllReviewList() {
 
       {/* 카드 목록 */}
       {reviews.map((review) => (
-        <ReviewCard
-          key={review.reviewId}
-          review={{
-            ...review,
-            gatheringTitle: review.gatheringTitle ?? gatheringTitleById.get(review.gatheringId),
-          }}
-          isLoggedIn={isLoggedIn}
-          showGatheringTitle
-          onToast={showToast}
-          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
-        />
+        <div key={review.reviewId} id={`review-${review.reviewId}`}>
+          <ReviewCard
+            review={{
+              ...review,
+              gatheringTitle: review.gatheringTitle ?? gatheringTitleById.get(review.gatheringId),
+            }}
+            isLoggedIn={isLoggedIn}
+            showGatheringTitle
+            onToast={showToast}
+            onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
+          />
+        </div>
       ))}
 
       {/* 페이지네이션 */}
