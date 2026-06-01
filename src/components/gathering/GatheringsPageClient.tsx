@@ -22,7 +22,7 @@ export default function GatheringsPageClient() {
 
   return (
     <div className="min-h-screen bg-background pb-6">
-      <div className="mb-5">
+      <div className="pt-4 mb-5">
         <CalendarView
           year={currentYear}
           month={currentMonth}

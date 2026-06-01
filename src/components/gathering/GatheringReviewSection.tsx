@@ -121,19 +121,21 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
         </p>
       )}
 
-      {/* 리뷰 목록 */}
-      {reviews.map((review) => (
-        <ReviewCard
-          key={review.reviewId}
-          review={review}
-          isLoggedIn={isLoggedIn}
-          onToast={showToast}
-          onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
-        />
-      ))}
-
-      {/* 페이지네이션 */}
-      <Pagination page={page} totalPages={totalPages} onChange={handlePageChange} />
+      {/* 리뷰 목록 — 가로 스크롤 */}
+      {reviews.length > 0 && (
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-4 px-4">
+          {reviews.map((review) => (
+            <div key={review.reviewId} className="flex-none w-[280px] snap-start">
+              <ReviewCard
+                review={review}
+                isLoggedIn={isLoggedIn}
+                onToast={showToast}
+                onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ATTENDED + 미작성 → 후기 작성 폼 */}
       {hasAttended && !hasMyReview && attendedApplication && (

@@ -22,6 +22,22 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
 
   const photos = photoUrls && photoUrls.length > 0 ? photoUrls : (thumbnailUrl ? [thumbnailUrl] : [])
   const [photoIndex, setPhotoIndex] = useState(0)
+  const [shareToast, setShareToast] = useState(false)
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+    } catch {
+      const el = document.createElement('input')
+      el.value = window.location.href
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    }
+    setShareToast(true)
+    setTimeout(() => setShareToast(false), 2500)
+  }
 
   const handlePrevPhoto = () => setPhotoIndex((i) => (i - 1 + photos.length) % photos.length)
   const handleNextPhoto = () => setPhotoIndex((i) => (i + 1) % photos.length)
@@ -31,6 +47,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const durationStr = formatDuration(startTime, endTime)
 
   return (
+    <>
     <div className="bg-card">
       {/* 헤더 */}
       <div className="relative">
@@ -45,6 +62,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
           {/* 헤더 오버레이 */}
           <div className="absolute top-0 left-0 right-0 flex items-center justify-end px-4 py-3">
             <button
+              onClick={handleShare}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm min-h-[44px] min-w-[44px]"
               aria-label="공유하기"
             >
@@ -236,5 +254,12 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
         </div>
       </div>
     </div>
+
+    {shareToast && (
+      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-foreground/90 text-white text-sm px-4 py-2.5 rounded-full shadow-lg z-50 whitespace-nowrap pointer-events-none">
+        링크가 복사되었습니다
+      </div>
+    )}
+    </>
   )
 }
