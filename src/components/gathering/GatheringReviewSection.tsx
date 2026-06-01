@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import dayjs from 'dayjs'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
 import { useGatheringReviews } from '@/lib/hooks/useReview'
-import ReviewCard from './ReviewCard'
+import AppImage from '@/components/ui/AppImage'
 import ReviewWriteForm from './ReviewWriteForm'
+import type { ReviewItem } from '@/lib/api/types'
 
 type ReviewSort = 'LATEST' | 'LIKES'
 
@@ -14,45 +16,51 @@ interface GatheringReviewSectionProps {
   mileageReward?: number
 }
 
-function Pagination({ page, totalPages, onChange }: {
-  page: number
-  totalPages: number
-  onChange: (p: number) => void
-}) {
-  if (totalPages <= 1) return null
+function HorizontalReviewCard({ review }: { review: ReviewItem }) {
+  const hasPhoto = review.reviewType === 'PHOTO' && !!review.images?.[0]?.imageUrl
+
   return (
-    <div className="flex items-center justify-center gap-1 py-5">
-      <button
-        onClick={() => onChange(page - 1)}
-        disabled={page === 0}
-        aria-label="이전 페이지"
-        className="w-8 h-8 rounded-full flex items-center justify-center text-foreground bg-card shadow-sm disabled:opacity-40 disabled:bg-transparent disabled:shadow-none"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-      </button>
-      {Array.from({ length: totalPages }, (_, i) => (
-        <button
-          key={i}
-          onClick={() => onChange(i)}
-          className={`w-8 h-8 rounded-full text-sm font-bold transition-colors ${
-            i === page ? 'bg-primary text-white' : 'text-tag-text'
-          }`}
-        >
-          {i + 1}
-        </button>
-      ))}
-      <button
-        onClick={() => onChange(page + 1)}
-        disabled={page === totalPages - 1}
-        aria-label="다음 페이지"
-        className="w-8 h-8 rounded-full flex items-center justify-center text-foreground bg-card shadow-sm disabled:opacity-40 disabled:bg-transparent disabled:shadow-none"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
-      </button>
+    <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden flex flex-col">
+      {/* 이미지 영역 — 항상 고정 비율 */}
+      <div className="relative w-full aspect-[4/3] bg-tag-bg overflow-hidden shrink-0">
+        {hasPhoto ? (
+          <AppImage
+            src={review.images![0].imageUrl}
+            alt=""
+            className="object-cover"
+            sizes="260px"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-tag-bg to-background flex items-center justify-center">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-tag-text/30">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+        )}
+        {review.reviewType === 'PHOTO' && (
+          <span className="absolute top-2 left-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary-light text-primary">
+            📷 포토리뷰
+          </span>
+        )}
+      </div>
+
+      {/* 텍스트 영역 */}
+      <div className="flex flex-col flex-1 px-3 pt-2.5 pb-3 min-h-[110px]">
+        <p className="text-[11px] text-tag-text mb-1.5">
+          <span className="font-medium">{review.nickname ?? '익명'}</span>
+          <span className="mx-1">·</span>
+          {dayjs(review.createdAt).format('MM.DD')}
+        </p>
+        <p className="text-xs text-tag-text leading-relaxed line-clamp-3 flex-1">
+          {review.reviewContent}
+        </p>
+        <div className="flex items-center gap-1 mt-2">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tag-text/50">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <span className="text-xs text-tag-text/60">{review.likeCount}</span>
+        </div>
+      </div>
     </div>
   )
 }
@@ -62,7 +70,6 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
   const [sort, setSort] = useState<ReviewSort>('LIKES')
   const [page, setPage] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
-  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
 
   const { data: attendedApps } = useMyApplicationsMe('ATTENDED', isLoggedIn)
   const attendedApplication = attendedApps?.find((app) => app.gathering.id === gatheringId)
@@ -70,19 +77,13 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
 
   const { data, isLoading } = useGatheringReviews(gatheringId, sort, page)
 
-  const reviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.reviewId))
+  const reviews = data?.content ?? []
   const totalElements = data?.totalElements ?? 0
-  const totalPages = data?.totalPages ?? 0
   const hasMyReview = isLoggedIn && reviews.some((r) => r.userId === userId)
 
   const showToast = (msg: string) => {
     setToast(msg)
     setTimeout(() => setToast(null), 2500)
-  }
-
-  const handlePageChange = (p: number) => {
-    setPage(p)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -123,15 +124,10 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
 
       {/* 리뷰 목록 — 가로 스크롤 */}
       {reviews.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-4 px-4">
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-4 px-4 items-stretch">
           {reviews.map((review) => (
-            <div key={review.reviewId} className="flex-none w-[280px] snap-start">
-              <ReviewCard
-                review={review}
-                isLoggedIn={isLoggedIn}
-                onToast={showToast}
-                onDeleted={() => setDeletedIds((prev) => new Set([...prev, review.reviewId]))}
-              />
+            <div key={review.reviewId} className="flex-none w-[260px] snap-start">
+              <HorizontalReviewCard review={review} />
             </div>
           ))}
         </div>
