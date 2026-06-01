@@ -122,6 +122,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
 
   return (
     <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
+      <div className="max-w-[390px] mx-auto">
       <header className="sticky top-0 z-10 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
@@ -321,6 +322,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
           저장하기
         </Button>
       </form>
+      </div>
     </div>
   )
 }
