@@ -27,7 +27,7 @@ export default function GatheringsPageClient() {
           year={currentYear}
           month={currentMonth}
           selectedDate={selectedDate}
-          dotDates={calendarDots}
+          dots={calendarDots}
           onSelectDate={setSelectedDate}
           onChangeMonth={handleChangeMonth}
         />

@@ -5,6 +5,9 @@ export interface ApiResponse<T> {
   data: T
 }
 
+// 게더링 상태
+export type GatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+
 // 게더링 타입
 export interface GatheringListItem {
   id: string
@@ -15,7 +18,7 @@ export interface GatheringListItem {
   endTime: string
   price: number
   maxAttendees: number
-  status: 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+  status: GatheringStatus
   thumbnailUrl: string | null
   location: {
     id: string
@@ -30,6 +33,12 @@ export interface GatheringDetail extends GatheringListItem {
   mileageReward?: number
   averageRating?: number | null
   reviewCount?: number
+}
+
+// 달력 dot 표시용 (날짜별 대표 게더링 상태)
+export interface CalendarDot {
+  date: string           // YYYY-MM-DD
+  status: GatheringStatus
 }
 
 // 인증 타입

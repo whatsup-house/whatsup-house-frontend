@@ -356,7 +356,7 @@ export default function AdminApplicationsPage() {
           year={currentYear}
           month={currentMonth}
           selectedDate={selectedDate}
-          dotDates={calendarDots}
+          dotDates={calendarDots.map((d) => d.date)}
           onSelectDate={handleSelectDate}
           onChangeMonth={handleChangeMonth}
         />
