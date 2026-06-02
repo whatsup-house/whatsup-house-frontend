@@ -36,12 +36,12 @@ apiClient.interceptors.response.use(
     // - 401이 아닌 에러
     // - 이미 재시도한 요청 (_retry)
     // - /api/auth/refresh 자체의 실패 (무한루프 방지)
-    // - /api/users/me: useInitAuth에서 비로그인 여부 판단하는 경로
+    //   ※ /api/users/me는 제외하지 않는다 — 그 401이 "access 만료 → 리프레시" 신호이며,
+    //     제외하면 복귀 사용자(만료 access + 유효 refresh)의 자동 로그인이 깨진다 (KAN-113).
     if (
       error.response?.status !== 401 ||
       original._retry ||
-      original.url?.includes('/api/auth/refresh') ||
-      original.url?.includes('/api/users/me')
+      original.url?.includes('/api/auth/refresh')
     ) {
       return Promise.reject(error)
     }
@@ -65,8 +65,13 @@ apiClient.interceptors.response.use(
       return apiClient(original)
     } catch (refreshError) {
       processQueue(refreshError)
+      // 리프레시 실패 = 세션 종료. 단 "원래 로그인 상태였던 사용자"만 로그인 페이지로 보낸다.
+      // 비로그인 게스트의 /api/users/me 401(로그인 여부 probe)은 정상 흐름이므로
+      // 리다이렉트하지 않는다 → 공유 링크로 들어온 게스트가 상세에 머묾.
+      // (authStore는 메모리 전용이라 게스트는 항상 isLoggedIn=false)
+      const wasLoggedIn = useAuthStore.getState().isLoggedIn
       useAuthStore.getState().logout()
-      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      if (wasLoggedIn && typeof window !== 'undefined' && window.location.pathname !== '/login') {
         const returnUrl = encodeURIComponent(window.location.pathname)
         window.location.href = `/login?returnUrl=${returnUrl}`
       }
