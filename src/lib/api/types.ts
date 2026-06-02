@@ -23,6 +23,7 @@ export interface GatheringListItem {
   location: {
     id: string
     name: string
+    address?: string | null
     naverMapUrl?: string | null
     kakaoMapUrl?: string | null
     mapUrl?: string | null   // 기존 하위 호환 필드

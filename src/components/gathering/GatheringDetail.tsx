@@ -156,7 +156,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
                   {location && (
                     <div className="flex items-center gap-1.5 shrink-0">
                       <a
-                        href={getNaverMapUrl(location, locationAddress)}
+                        href={getNaverMapUrl(location, location.address ?? locationAddress)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-primary font-medium min-h-[44px] px-2.5 flex items-center rounded-full border border-tag-bg"
@@ -164,7 +164,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
                         네이버지도
                       </a>
                       <a
-                        href={getKakaoMapUrl(location, locationAddress)}
+                        href={getKakaoMapUrl(location, location.address ?? locationAddress)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-primary font-medium min-h-[44px] px-2.5 flex items-center rounded-full border border-tag-bg"
