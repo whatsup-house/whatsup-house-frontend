@@ -10,13 +10,15 @@ export function useRequireAuth() {
   const pathname = usePathname()
 
   const requireAuth = useCallback((returnUrl?: string): boolean => {
+    if (!isInitialized) return false
+
     if (!isLoggedIn) {
       const target = returnUrl ?? pathname
       router.push(`/login?returnUrl=${encodeURIComponent(target)}`)
       return false
     }
     return true
-  }, [isLoggedIn, pathname, router])
+  }, [isInitialized, isLoggedIn, pathname, router])
 
   return { isLoggedIn, isInitialized, requireAuth }
 }

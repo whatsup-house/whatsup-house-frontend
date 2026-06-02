@@ -37,7 +37,7 @@ function MyTabIcon({ avatarUrl, animalType }: { avatarUrl?: string | null; anima
 export default function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const { isLoggedIn, requireAuth } = useRequireAuth()
+  const { isLoggedIn, isInitialized, requireAuth } = useRequireAuth()
   const { data: profile } = useMyProfile()
 
   if (HIDDEN_PATTERNS.some((pattern) => pattern.test(pathname))) {
@@ -67,9 +67,10 @@ export default function BottomNav() {
                 onClick={() => {
                   if (requireAuth(item.href)) router.push(item.href)
                 }}
+                disabled={!isInitialized}
                 className={`flex flex-col items-center gap-1 text-xs ${
                   isActive ? 'text-primary' : 'text-tag-text'
-                }`}
+                } disabled:opacity-60`}
               >
                 {isLoggedIn ? (
                   <MyTabIcon avatarUrl={profile?.avatarUrl} animalType={profile?.animalType} />
