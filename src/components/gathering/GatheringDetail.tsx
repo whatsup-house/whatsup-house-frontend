@@ -7,6 +7,7 @@ import AppImage from '@/components/ui/AppImage'
 import GatheringReviewSection from './GatheringReviewSection'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import { formatDuration, formatKoreanFullDate, formatTimeRange } from '@/lib/utils/date'
+import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
 
 interface GatheringDetailProps {
   gathering: GatheringDetailType
@@ -116,7 +117,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
         {/* 제목 */}
         <div className="mb-3">
           <div className="mb-2">
-            <Badge variant={status} />
+            <Badge variant={getEffectiveStatus(status, eventDate)} />
           </div>
           <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
         </div>

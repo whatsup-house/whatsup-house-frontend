@@ -4,6 +4,7 @@ import Badge from '@/components/ui/Badge'
 import AppImage from '@/components/ui/AppImage'
 import type { GatheringListItem } from '@/lib/api/types'
 import { formatKoreanShortDate } from '@/lib/utils/date'
+import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
 
 interface GatheringCardProps {
   gathering: GatheringListItem
@@ -16,6 +17,9 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
     status, location,
   } = gathering
 
+  // 과거 모집중 게더링은 진행 완료로 보정해 표시 (KAN-164)
+  const effectiveStatus = getEffectiveStatus(status, eventDate)
+
   return (
     <Link href={`/gatherings/${id}`}>
       <div className="rounded-card bg-card shadow-sm overflow-hidden">
@@ -26,11 +30,11 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
           ) : (
             <div className="w-full h-full bg-tag-bg" />
           )}
-          {status !== 'OPEN' && (
+          {effectiveStatus !== 'OPEN' && (
             <div className="absolute inset-0 bg-black/40" />
           )}
           <div className="absolute top-3 right-3">
-            <Badge variant={status} />
+            <Badge variant={effectiveStatus} />
           </div>
         </div>
 

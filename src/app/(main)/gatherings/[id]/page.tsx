@@ -8,6 +8,7 @@ import { LoadingSpinner, ApiErrorMessage, Button } from '@/components/ui'
 import GatheringDetail from '@/components/gathering/GatheringDetail'
 import ApplyModal from '@/components/gathering/ApplyModal'
 import GatheringDateSheet from '@/components/gathering/GatheringDateSheet'
+import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
 
 export default function GatheringDetailPage({
   params,
@@ -41,7 +42,8 @@ export default function GatheringDetailPage({
     )
   }
 
-  const isRecruiting = gathering.status === 'OPEN'
+  // 과거 모집중 게더링은 진행 완료로 보정해 신청하기 CTA를 숨긴다 (KAN-164)
+  const isRecruiting = getEffectiveStatus(gathering.status, gathering.eventDate) === 'OPEN'
   const today = new Date().toISOString().split('T')[0]
   const hasFutureDates = sameNameGatherings?.some(
     g => g.id !== gathering.id && g.eventDate > today
