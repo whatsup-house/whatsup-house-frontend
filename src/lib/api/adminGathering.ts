@@ -41,6 +41,9 @@ export interface LocationItem {
   maxCapacity: number
   features: string[] | null
   contractStatus: string
+  naverMapUrl?: string | null
+  kakaoMapUrl?: string | null
+  mapUrl?: string | null   // 기존 하위 호환 필드
 }
 
 export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'ATTENDED'

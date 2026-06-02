@@ -25,6 +25,8 @@ type LocationFormData = {
   maxCapacity: number
   contractStatus: string
   featuresText?: string
+  naverMapUrl?: string
+  kakaoMapUrl?: string
 }
 
 function LocationModal({
@@ -45,6 +47,8 @@ function LocationModal({
           maxCapacity: location.maxCapacity,
           contractStatus: location.contractStatus,
           featuresText: location.features?.join(', ') ?? '',
+          naverMapUrl: location.naverMapUrl ?? '',
+          kakaoMapUrl: location.kakaoMapUrl ?? '',
         }
       : { contractStatus: 'ACTIVE' },
   })
@@ -67,6 +71,9 @@ function LocationModal({
       features: raw.featuresText
         ? raw.featuresText.split(',').map((f) => f.trim()).filter(Boolean)
         : null,
+      // 빈 문자열은 undefined로 전송해 저장 오류를 방지한다.
+      naverMapUrl: raw.naverMapUrl?.trim() || undefined,
+      kakaoMapUrl: raw.kakaoMapUrl?.trim() || undefined,
     })
   }
 
@@ -95,6 +102,8 @@ function LocationModal({
               </select>
             </div>
             <Input label="특징 (쉼표 구분)" placeholder="루프탑,주차가능,노키즈존" {...register('featuresText')} />
+            <Input label="네이버지도 URL" placeholder="https://map.naver.com/..." {...register('naverMapUrl')} />
+            <Input label="카카오지도 URL" placeholder="https://map.kakao.com/..." {...register('kakaoMapUrl')} />
             <div className="flex gap-3 mt-2">
               <Button variant="ghost" type="button" onClick={onClose} className="flex-1">취소</Button>
               <Button variant="primary" type="submit" isLoading={isPending} className="flex-1">저장하기</Button>
@@ -141,17 +150,17 @@ export default function AdminLocationsPage() {
         <table className="w-full">
           <thead>
             <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
-              {['장소명', '주소', '최대 수용', '계약 상태', '특징', '액션'].map((col) => (
+              {['장소명', '주소', '최대 수용', '계약 상태', '특징', '지도', '액션'].map((col) => (
                 <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {isLoading && (
-              <tr><td colSpan={6} className="py-12 text-center"><LoadingSpinner /></td></tr>
+              <tr><td colSpan={7} className="py-12 text-center"><LoadingSpinner /></td></tr>
             )}
             {!isLoading && locations.length === 0 && (
-              <tr><td colSpan={6} className="py-12 text-center text-sm text-[#767676]">등록된 장소가 없습니다.</td></tr>
+              <tr><td colSpan={7} className="py-12 text-center text-sm text-[#767676]">등록된 장소가 없습니다.</td></tr>
             )}
             {locations.map((loc) => (
               <tr key={loc.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
@@ -165,6 +174,17 @@ export default function AdminLocationsPage() {
                 </td>
                 <td className="px-4 py-3 text-[13px] text-[#767676]">
                   {loc.features?.join(', ') ?? '-'}
+                </td>
+                <td className="px-4 py-3 text-[13px]">
+                  <div className="flex items-center gap-2">
+                    {loc.naverMapUrl && (
+                      <a href={loc.naverMapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">네이버</a>
+                    )}
+                    {loc.kakaoMapUrl && (
+                      <a href={loc.kakaoMapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">카카오</a>
+                    )}
+                    {!loc.naverMapUrl && !loc.kakaoMapUrl && <span className="text-tag-text">-</span>}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3 text-[13px]">
