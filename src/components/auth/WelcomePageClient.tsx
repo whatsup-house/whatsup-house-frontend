@@ -2,8 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { safeReturnUrl } from '@/lib/utils/url'
+import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
 export default function WelcomePageClient() {
@@ -11,6 +13,10 @@ export default function WelcomePageClient() {
   const returnUrl = searchParams.get('returnUrl')
   const redirectTo = safeReturnUrl(returnUrl)
   const loginHref = returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login'
+
+  useEffect(() => {
+    markWelcomeSeen()
+  }, [])
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-foreground text-white">
@@ -49,7 +55,8 @@ export default function WelcomePageClient() {
           회원가입
         </Link>
         <Link
-          href="/?guest=1"
+          href="/"
+          onClick={markWelcomeSeen}
           className="self-center px-2 py-3 text-[13px] font-medium text-white/80 underline decoration-white/40 underline-offset-4"
         >
           비회원으로 시작하기

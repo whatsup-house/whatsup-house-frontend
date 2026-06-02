@@ -8,6 +8,7 @@ import GatheringReviewSection from './GatheringReviewSection'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import { formatDuration, formatKoreanFullDate, formatTimeRange } from '@/lib/utils/date'
 import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
+import { getNaverMapUrl, getKakaoMapUrl } from '@/lib/utils/mapUrl'
 
 interface GatheringDetailProps {
   gathering: GatheringDetailType
@@ -15,7 +16,7 @@ interface GatheringDetailProps {
 
 export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const {
-    title, status, eventDate, startTime, endTime, location,
+    title, status, eventDate, startTime, endTime, location, locationAddress,
     price, maxAttendees, thumbnailUrl,
     description, howToRun, photoUrls, mileageReward,
     reviewCount,
@@ -150,11 +151,28 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-tag-text mb-0.5">장소</p>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-foreground">{location?.name}</p>
-                  <button className="text-xs text-primary font-medium min-h-[44px] flex items-center">
-                    지도 보기
-                  </button>
+                  {location && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <a
+                        href={getNaverMapUrl(location, location.address ?? locationAddress)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary font-medium min-h-[44px] px-2.5 flex items-center rounded-full border border-tag-bg"
+                      >
+                        네이버지도
+                      </a>
+                      <a
+                        href={getKakaoMapUrl(location, location.address ?? locationAddress)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary font-medium min-h-[44px] px-2.5 flex items-center rounded-full border border-tag-bg"
+                      >
+                        카카오지도
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
