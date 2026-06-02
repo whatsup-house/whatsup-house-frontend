@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/tjmedia/Downloads/와썹하우스/whatsup-house-frontend/.codex/hooks/post-edit-lint.sh'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/tjmedia/Downloads/와썹하우스/whatsup-house-frontend/.codex/hooks/stop-uncommitted-check.sh'"
+          }
+        ]
+      }
+    ]
+  }
+}
