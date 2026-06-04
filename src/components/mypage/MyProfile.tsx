@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { Pencil } from 'lucide-react'
+import Link from 'next/link'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import Button from '@/components/ui/Button'
+import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 
 const GENDER_LABELS: Record<string, string> = {
   MALE: '남성',
@@ -23,17 +26,18 @@ function ProfileRow({ label, value }: { label: string; value: string | null | un
 
 export default function MyProfile() {
   const router = useRouter()
-  const { isLoggedIn, hydrated } = useRequireAuth()
+  const { isLoggedIn, isInitialized } = useRequireAuth()
   const { data: profile, isLoading } = useMyProfile()
   const logout = useLogout()
+  const [showEdit, setShowEdit] = useState(false)
 
   useEffect(() => {
-    if (hydrated && !isLoggedIn) {
+    if (isInitialized && !isLoggedIn) {
       router.replace('/login?returnUrl=/mypage')
     }
-  }, [hydrated, isLoggedIn, router])
+  }, [isInitialized, isLoggedIn, router])
 
-  if (!hydrated || !isLoggedIn || isLoading) {
+  if (!isInitialized || !isLoggedIn || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-sm text-tag-text">불러오는 중...</p>
@@ -50,16 +54,21 @@ export default function MyProfile() {
   }
 
   return (
+    <>
+    {showEdit && (
+      <ProfileEditOverlay profile={profile} onClose={() => setShowEdit(false)} />
+    )}
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
-        <div className="px-4 py-4">
-          <h1 className="text-base font-bold text-foreground text-center">마이페이지</h1>
-        </div>
-      </header>
-
       <div className="px-6 py-6 flex flex-col gap-4">
         {/* 프로필 요약 */}
-        <div className="bg-card rounded-card p-5 flex flex-col items-center gap-3">
+        <div className="bg-card rounded-card p-5 flex flex-col items-center gap-3 relative">
+          <button
+            onClick={() => setShowEdit(true)}
+            className="absolute top-4 right-4 min-w-[36px] min-h-[36px] flex items-center justify-center text-tag-text"
+            aria-label="프로필 수정"
+          >
+            <Pencil size={16} />
+          </button>
           <div className="w-16 h-16 rounded-full bg-tag-bg flex items-center justify-center text-2xl">
             🐾
           </div>
@@ -69,11 +78,15 @@ export default function MyProfile() {
               <p className="text-sm text-tag-text mt-1">{profile.bio}</p>
             )}
           </div>
-          <div className="bg-tag-bg rounded-full px-4 py-1.5">
+          <Link
+            href="/mypage/mileage"
+            className="bg-tag-bg rounded-full px-4 py-1.5 flex items-center gap-1"
+          >
             <span className="text-sm font-semibold text-foreground">
-              {profile.mileage.toLocaleString()} 마일리지
+              {(profile.mileage ?? 0).toLocaleString()} 마일리지
             </span>
-          </div>
+            <span className="text-xs text-tag-text">›</span>
+          </Link>
         </div>
 
         {/* 상세 정보 */}
@@ -121,5 +134,6 @@ export default function MyProfile() {
         </Button>
       </div>
     </div>
+    </>
   )
 }

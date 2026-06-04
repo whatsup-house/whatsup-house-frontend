@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminGatheringApi, AdminGatheringListItem } from '@/lib/api/adminGathering'
+import { useQuery } from '@tanstack/react-query'
+import { adminGatheringApi, AdminGatheringListItem, ApplicationStatus } from '@/lib/api/adminGathering'
+import { useAdminApplications, useUpdateApplicationStatus, useDeleteApplication } from '@/lib/hooks/useAdminGathering'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
@@ -185,28 +186,26 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
   )
 }
 
+const APP_STATUS_LABEL: Record<string, string> = {
+  PENDING: '대기',
+  CONFIRMED: '확정',
+  ATTENDED: '출석',
+}
+const APP_STATUS_STYLE: Record<string, string> = {
+  PENDING: 'bg-[#F5F5F5] text-[#767676]',
+  CONFIRMED: 'bg-[#E3F2FD] text-[#1976D2]',
+  ATTENDED: 'bg-[#E8F5E9] text-[#4CAF50]',
+}
+const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
+  PENDING: 'CONFIRMED',
+  CONFIRMED: 'ATTENDED',
+}
+
 // ─── 참가자 테이블 ──────────────────────────────────────────────────────
 function ParticipantTable({ gatheringId }: { gatheringId: string }) {
-  const queryClient = useQueryClient()
-
-  const { data: participants = [], isLoading } = useQuery({
-    queryKey: ['admin', 'applications', gatheringId],
-    queryFn: () => adminGatheringApi.getApplications(gatheringId),
-    enabled: !!gatheringId,
-  })
-
-  const { mutate: updateAttendance } = useMutation({
-    mutationFn: ({ id, attended }: { id: string; attended: boolean }) =>
-      adminGatheringApi.updateAttendance(id, attended),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['admin', 'applications', gatheringId] }),
-  })
-
-  const { mutate: deleteApplication } = useMutation({
-    mutationFn: adminGatheringApi.deleteApplication,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['admin', 'applications', gatheringId] }),
-  })
+  const { data: participants = [], isLoading } = useAdminApplications(gatheringId)
+  const { mutate: changeStatus } = useUpdateApplicationStatus(gatheringId)
+  const { mutate: deleteApplication, isPending: isDeleting, variables: deletingId } = useDeleteApplication(gatheringId)
 
   if (isLoading) {
     return <div className="flex justify-center py-12"><LoadingSpinner /></div>
@@ -221,31 +220,38 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
     )
   }
 
+  const confirmedCount = participants.filter((p) => p.status === 'CONFIRMED').length
   const attendedCount = participants.filter((p) => p.status === 'ATTENDED').length
 
   return (
     <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
       <div className="px-4 py-3 border-b border-[#F0EBE8] flex items-center gap-3">
         <span className="text-sm font-bold text-[#1A1A1A]">총 {participants.length}명 신청</span>
+        {confirmedCount > 0 && (
+          <span className="px-2 py-0.5 bg-[#E3F2FD] text-[#1976D2] rounded-full text-xs font-medium">
+            확정 {confirmedCount}명
+          </span>
+        )}
         {attendedCount > 0 && (
           <span className="px-2 py-0.5 bg-[#E8F5E9] text-[#4CAF50] rounded-full text-xs font-medium">
-            참석 {attendedCount}명 확인
+            출석 {attendedCount}명
           </span>
         )}
       </div>
       <table className="w-full">
         <thead>
           <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
-            {['이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '출석', '삭제'].map((col) => (
+            {['예약번호', '이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '상태', '삭제'].map((col) => (
               <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {participants.map((p) => {
-            const isAttended = p.status === 'ATTENDED'
+            const nextStatus = NEXT_APP_STATUS[p.status]
             return (
               <tr key={p.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
+                <td className="px-4 py-3 text-[12px] text-[#767676] whitespace-nowrap">{p.bookingNumber ?? '-'}</td>
                 <td className="px-4 py-3 font-medium text-[14px]">{p.name}</td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-0.5 rounded-full text-xs ${p.isGuest ? 'bg-[#FFF3E0] text-[#FF9800]' : 'bg-[#E3F2FD] text-[#1976D2]'}`}>
@@ -267,22 +273,36 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                   {dayjs(p.createdAt).format('M/D HH:mm')}
                 </td>
                 <td className="px-4 py-3">
-                  <button
-                    onClick={() => updateAttendance({ id: p.id, attended: !isAttended })}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${isAttended ? 'bg-[#4CAF50]' : 'bg-[#E0E0E0]'}`}
-                  >
-                    <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${isAttended ? 'translate-x-5' : 'translate-x-1'}`} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${APP_STATUS_STYLE[p.status] ?? ''}`}>
+                      {APP_STATUS_LABEL[p.status] ?? p.status}
+                    </span>
+                    {nextStatus && (
+                      <button
+                        onClick={() => changeStatus({ id: p.id, status: nextStatus })}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        {nextStatus === 'CONFIRMED' ? '확정' : '출석'}
+                      </button>
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
-                  <button
-                    onClick={() => {
-                      if (confirm(`${p.name}님을 삭제할까요?`)) deleteApplication(p.id)
-                    }}
-                    className="text-red-500 text-[13px] hover:underline"
-                  >
-                    삭제
-                  </button>
+                  {p.status === 'ATTENDED' ? (
+                    <span className="text-[12px] text-[#BBBBBB]">반려 불가</span>
+                  ) : isDeleting && deletingId === p.id ? (
+                    <span className="text-[12px] text-[#767676]">삭제 중…</span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (confirm('이 신청을 반려하시겠습니까?')) deleteApplication(p.id)
+                      }}
+                      disabled={isDeleting}
+                      className="text-red-500 text-[13px] hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      반려
+                    </button>
+                  )}
                 </td>
               </tr>
             )
@@ -336,7 +356,7 @@ export default function AdminApplicationsPage() {
           year={currentYear}
           month={currentMonth}
           selectedDate={selectedDate}
-          dotDates={calendarDots}
+          dotDates={calendarDots.map((d) => d.date)}
           onSelectDate={handleSelectDate}
           onChangeMonth={handleChangeMonth}
         />

@@ -1,4 +1,5 @@
-type GatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
+import type { GatheringStatus } from '@/lib/api/types'
+
 type AttendanceStatus = 'ATTENDED' | 'PENDING'
 type BadgeVariant = GatheringStatus | AttendanceStatus
 
@@ -9,7 +10,7 @@ interface BadgeProps {
 const BADGE_CONFIG: Record<BadgeVariant, { label: string; className: string }> = {
   OPEN:       { label: '모집중', className: 'bg-green-100 text-green-700' },
   CLOSED:     { label: '마감',   className: 'bg-gray-100 text-gray-500' },
-  COMPLETED:  { label: '완료',   className: 'bg-blue-100 text-blue-700' },
+  COMPLETED:  { label: '진행 완료', className: 'bg-blue-100 text-blue-700' },
   CANCELLED:  { label: '취소',   className: 'bg-red-100 text-red-500' },
   ATTENDED:   { label: '참석완료', className: 'bg-teal-100 text-teal-700' },
   PENDING:    { label: '대기중', className: 'bg-yellow-100 text-yellow-700' },

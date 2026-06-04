@@ -2,20 +2,31 @@
 
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import type { CalendarDot } from '@/lib/api/types'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
+
+// 달력 점 색상 분기 (KAN-164)
+// 취소: 날짜 무관 비활성(회색) / 과거: 진행 완료(회색) / 예정·모집중: primary
+function dotColorClass(dot: CalendarDot | undefined, today: string, isSelected: boolean): string {
+  if (!dot) return 'bg-transparent'
+  if (isSelected) return 'bg-white'
+  if (dot.status === 'CANCELLED') return 'bg-gray-300'
+  if (dot.date < today) return 'bg-gray-300'
+  return 'bg-primary'
+}
 
 interface CalendarViewProps {
   year: number
   month: number
   selectedDate: string   // YYYY-MM-DD
-  dotDates: string[]     // 게더링이 있는 날짜 목록
+  dots: CalendarDot[]     // 게더링이 있는 날짜 + 대표 상태
   onSelectDate: (date: string) => void
   onChangeMonth: (year: number, month: number) => void
 }
 
 export default function CalendarView({
-  year, month, selectedDate, dotDates, onSelectDate, onChangeMonth,
+  year, month, selectedDate, dots, onSelectDate, onChangeMonth,
 }: CalendarViewProps) {
   const firstDay = dayjs(`${year}-${String(month).padStart(2, '0')}-01`)
   const startDayOfWeek = firstDay.day()
@@ -70,7 +81,7 @@ export default function CalendarView({
           const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
           const isSelected = dateStr === selectedDate
           const isToday = dateStr === today
-          const hasDot = dotDates.includes(dateStr)
+          const dot = dots.find((d) => d.date === dateStr)
           const isSunday = idx % 7 === 0
 
           return (
@@ -89,7 +100,7 @@ export default function CalendarView({
               >
                 {day}
               </span>
-              <span className={`w-1.5 h-1.5 rounded-full ${hasDot ? (isSelected ? 'bg-white' : 'bg-primary') : 'bg-transparent'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${dotColorClass(dot, today, isSelected)}`} />
             </button>
           )
         })}

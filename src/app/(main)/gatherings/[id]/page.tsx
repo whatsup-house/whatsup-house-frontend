@@ -2,11 +2,13 @@
 
 import { useState, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGatheringDetail } from '@/lib/hooks/useGatherings'
+import { useGatheringDetail, useGatheringsByTitle } from '@/lib/hooks/useGatherings'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { LoadingSpinner, ApiErrorMessage, Button } from '@/components/ui'
 import GatheringDetail from '@/components/gathering/GatheringDetail'
 import ApplyModal from '@/components/gathering/ApplyModal'
+import GatheringDateSheet from '@/components/gathering/GatheringDateSheet'
+import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
 
 export default function GatheringDetailPage({
   params,
@@ -17,7 +19,9 @@ export default function GatheringDetailPage({
   const router = useRouter()
   const { isLoggedIn, requireAuth } = useRequireAuth()
   const { data: gathering, isLoading, isError, refetch } = useGatheringDetail(id)
+  const { data: sameNameGatherings } = useGatheringsByTitle(gathering?.title ?? '')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDateSheetOpen, setIsDateSheetOpen] = useState(false)
 
   if (isLoading) {
     return (
@@ -38,19 +42,24 @@ export default function GatheringDetailPage({
     )
   }
 
-  const isRecruiting = gathering.status === 'OPEN'
+  // 과거 모집중 게더링은 진행 완료로 보정해 신청하기 CTA를 숨긴다 (KAN-164)
+  const isRecruiting = getEffectiveStatus(gathering.status, gathering.eventDate) === 'OPEN'
+  const today = new Date().toISOString().split('T')[0]
+  const hasFutureDates = sameNameGatherings?.some(
+    g => g.id !== gathering.id && g.eventDate > today
+  ) ?? false
 
   const handleApplyClick = () => {
-    if (isLoggedIn) {
-      router.push(`/gatherings/${id}/apply?type=user`)
-    } else {
-      setIsModalOpen(true)
-    }
+    setIsModalOpen(true)
   }
 
   const handleLoginApply = () => {
     setIsModalOpen(false)
-    requireAuth(`/gatherings/${id}`)
+    if (isLoggedIn) {
+      router.push(`/gatherings/${id}/apply`)
+    } else {
+      requireAuth(`/gatherings/${id}`)
+    }
   }
 
   const handleGuestApply = () => {
@@ -70,15 +79,34 @@ export default function GatheringDetailPage({
             <p className="text-xs text-tag-text">참가비</p>
             <p className="text-lg font-bold text-foreground">{gathering.price.toLocaleString()}원</p>
           </div>
-          <Button
-            variant="primary"
-            size="default"
-            className="px-8"
-            disabled={!isRecruiting}
-            onClick={handleApplyClick}
-          >
-            {isRecruiting ? '신청하기' : '마감'}
-          </Button>
+          {isRecruiting ? (
+            <Button
+              variant="primary"
+              size="default"
+              className="px-8"
+              onClick={handleApplyClick}
+            >
+              신청하기
+            </Button>
+          ) : hasFutureDates ? (
+            <Button
+              variant="outlined"
+              size="default"
+              className="px-6"
+              onClick={() => setIsDateSheetOpen(true)}
+            >
+              다른 날짜 보기
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              size="default"
+              className="px-6"
+              disabled
+            >
+              운영 종료
+            </Button>
+          )}
         </div>
       </div>
 
@@ -89,6 +117,15 @@ export default function GatheringDetailPage({
         onClose={() => setIsModalOpen(false)}
         onLoginApply={handleLoginApply}
         onGuestApply={handleGuestApply}
+      />
+
+      {/* 다른 날짜 보기 바텀 시트 */}
+      <GatheringDateSheet
+        title={gathering.title}
+        currentGatheringId={gathering.id}
+        currentEventDate={gathering.eventDate}
+        isOpen={isDateSheetOpen}
+        onClose={() => setIsDateSheetOpen(false)}
       />
     </div>
   )

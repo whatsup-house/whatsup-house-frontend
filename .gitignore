@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/e2e/test-results
+/e2e/report
+/e2e/screenshots
 
 # next.js
 /.next/
@@ -39,3 +42,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude
+.claude/credentials.json

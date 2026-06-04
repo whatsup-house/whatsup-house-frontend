@@ -1,61 +1,71 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle } from 'lucide-react'
-import { Card } from '@/components/ui'
+import { useState } from 'react'
+import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Card, Badge } from '@/components/ui'
+import AppImage from '@/components/ui/AppImage'
+import GatheringReviewSection from './GatheringReviewSection'
+import MapLinkButton from './MapLinkButton'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
-import dayjs from 'dayjs'
+import { formatDuration, formatKoreanFullDate, formatTimeRange } from '@/lib/utils/date'
+import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
+import { getNaverMapUrl, getKakaoMapUrl } from '@/lib/utils/mapUrl'
 
 interface GatheringDetailProps {
   gathering: GatheringDetailType
 }
 
 export default function GatheringDetail({ gathering }: GatheringDetailProps) {
-  const router = useRouter()
-
   const {
-    title, eventDate, startTime, endTime, location,
+    title, status, eventDate, startTime, endTime, location, locationAddress,
     price, maxAttendees, thumbnailUrl,
-    description, howToRun,
+    description, howToRun, photoUrls, mileageReward,
     reviewCount,
   } = gathering
 
-  const formattedDate = dayjs(eventDate).format('YYYY년 M월 D일 dddd')
-  const formattedStartTime = startTime?.slice(0, 5) ?? ''
-  const formattedEndTime = endTime?.slice(0, 5) ?? ''
+  const photos = photoUrls && photoUrls.length > 0 ? photoUrls : (thumbnailUrl ? [thumbnailUrl] : [])
+  const [photoIndex, setPhotoIndex] = useState(0)
+  const [shareToast, setShareToast] = useState(false)
 
-  // 소요시간 계산
-  const startMinutes = startTime ? parseInt(startTime.slice(0, 2)) * 60 + parseInt(startTime.slice(3, 5)) : 0
-  const endMinutes = endTime ? parseInt(endTime.slice(0, 2)) * 60 + parseInt(endTime.slice(3, 5)) : 0
-  const durationMinutes = endMinutes - startMinutes
-  const durationHours = Math.floor(durationMinutes / 60)
-  const durationMins = durationMinutes % 60
-  const durationStr = durationMins > 0
-    ? `${durationHours}시간 ${durationMins}분`
-    : `${durationHours}시간`
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+    } catch {
+      const el = document.createElement('input')
+      el.value = window.location.href
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    }
+    setShareToast(true)
+    setTimeout(() => setShareToast(false), 2500)
+  }
+
+  const handlePrevPhoto = () => setPhotoIndex((i) => (i - 1 + photos.length) % photos.length)
+  const handleNextPhoto = () => setPhotoIndex((i) => (i + 1) % photos.length)
+
+  const formattedDate = formatKoreanFullDate(eventDate)
+  const timeRange = formatTimeRange(startTime, endTime)
+  const durationStr = formatDuration(startTime, endTime)
 
   return (
+    <>
     <div className="bg-card">
       {/* 헤더 */}
       <div className="relative">
-        {/* 썸네일 */}
-        <div className="relative w-full aspect-[390/260] bg-tag-bg">
-          {thumbnailUrl ? (
-            <img src={thumbnailUrl} alt={title} className="w-full h-full object-cover" />
+        {/* 이미지 슬라이더 */}
+        <div className="relative w-full aspect-[390/260] bg-tag-bg overflow-hidden">
+          {photos.length > 0 ? (
+            <AppImage src={photos[photoIndex]} alt={`${title} ${photoIndex + 1}`} className="object-cover" sizes="(max-width: 390px) 100vw, 390px" />
           ) : (
             <div className="w-full h-full bg-gradient-to-b from-tag-bg to-background" />
           )}
 
           {/* 헤더 오버레이 */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3">
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-end px-4 py-3">
             <button
-              onClick={() => router.back()}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm min-h-[44px] min-w-[44px]"
-              aria-label="뒤로가기"
-            >
-              <ArrowLeft size={20} className="text-white" />
-            </button>
-            <button
+              onClick={handleShare}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm min-h-[44px] min-w-[44px]"
               aria-label="공유하기"
             >
@@ -63,11 +73,43 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             </button>
           </div>
 
-          {/* 와썹하우스 주최 뱃지 */}
-          <div className="absolute bottom-3 left-4">
+          {/* 슬라이더 화살표 (2장 이상) */}
+          {photos.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevPhoto}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm"
+                aria-label="이전 사진"
+              >
+                <ChevronLeft size={18} className="text-white" />
+              </button>
+              <button
+                onClick={handleNextPhoto}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm"
+                aria-label="다음 사진"
+              >
+                <ChevronRight size={18} className="text-white" />
+              </button>
+            </>
+          )}
+
+          {/* 하단 영역: 뱃지 + 도트 인디케이터 */}
+          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
             <span className="bg-primary text-white text-xs font-medium px-3 py-1.5 rounded-full">
               와썹하우스 주최
             </span>
+            {photos.length > 1 && (
+              <div className="flex items-center gap-1.5 mr-1">
+                {photos.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPhotoIndex(i)}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${i === photoIndex ? 'bg-white' : 'bg-white/40'}`}
+                    aria-label={`${i + 1}번 사진`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -75,7 +117,12 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
       {/* 본문 영역 */}
       <div className="px-4 pt-5 pb-4">
         {/* 제목 */}
-        <h1 className="text-xl font-bold text-foreground leading-tight mb-3">{title}</h1>
+        <div className="mb-3">
+          <div className="mb-2">
+            <Badge variant={getEffectiveStatus(status, eventDate)} />
+          </div>
+          <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
+        </div>
 
         {/* 정보 카드 */}
         <Card className="p-4 mb-6 border border-tag-bg/50">
@@ -95,7 +142,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <div>
                 <p className="text-xs text-tag-text mb-0.5">시간</p>
                 <p className="text-sm font-semibold text-foreground">
-                  오후 {formattedStartTime} - {formattedEndTime} ({durationStr})
+                  {timeRange}{durationStr ? ` (${durationStr})` : ''}
                 </p>
               </div>
             </div>
@@ -105,12 +152,24 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-tag-text mb-0.5">장소</p>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">{location?.name}</p>
-                  <button className="text-xs text-primary font-medium min-h-[44px] flex items-center">
-                    지도 보기
-                  </button>
-                </div>
+                <p className="text-sm font-semibold text-foreground">{location?.name}</p>
+                {(location?.address ?? locationAddress) && (
+                  <p className="text-xs text-tag-text mt-0.5 break-keep">
+                    {location?.address ?? locationAddress}
+                  </p>
+                )}
+                {location && (
+                  <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                    <MapLinkButton
+                      provider="naver"
+                      href={getNaverMapUrl(location, location.address ?? locationAddress)}
+                    />
+                    <MapLinkButton
+                      provider="kakao"
+                      href={getKakaoMapUrl(location, location.address ?? locationAddress)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -135,6 +194,17 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
                 </p>
               </div>
             </div>
+
+            {/* 마일리지 적립 */}
+            {mileageReward != null && mileageReward > 0 && (
+              <div className="flex items-start gap-3">
+                <Gift size={18} className="text-tag-text mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-tag-text mb-0.5">마일리지 적립</p>
+                  <p className="text-sm font-semibold text-primary">+{mileageReward.toLocaleString()}M</p>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -186,44 +256,25 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
 
         {/* 후기 섹션 */}
         <div className="mb-2">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-1 h-5 bg-primary rounded-full" />
-            <h2 className="text-base font-bold text-foreground">참가자 후기</h2>
-          </div>
-
-          {(reviewCount ?? 0) > 0 ? (
-            <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide">
-              {/* 후기 카드 예시 (실제 후기 데이터 연결시 교체) */}
-              <Card className="min-w-[200px] max-w-[200px] p-4 shrink-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-tag-bg" />
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">참가자</p>
-                    <p className="text-[10px] text-tag-text">2024.05.20</p>
-                  </div>
-                </div>
-                <p className="text-xs text-tag-text leading-relaxed line-clamp-3">
-                  &quot;분위기가 너무 좋았어요. 다음에도 참여하고 싶습니다!&quot;
-                </p>
-              </Card>
-              <Card className="min-w-[200px] max-w-[200px] p-4 shrink-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-tag-bg" />
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">참가자</p>
-                    <p className="text-[10px] text-tag-text">2024.05.18</p>
-                  </div>
-                </div>
-                <p className="text-xs text-tag-text leading-relaxed line-clamp-3">
-                  &quot;편안한 분위기에서 좋은 사람들과 시간을 보낼 수 있었습니다.&quot;
-                </p>
-              </Card>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-primary rounded-full" />
+              <h2 className="text-base font-bold text-foreground">참가자 후기</h2>
             </div>
-          ) : (
-            <p className="text-sm text-tag-text py-4">아직 후기가 없어요.</p>
-          )}
+            {(reviewCount ?? 0) > 0 && (
+              <span className="text-sm text-tag-text">{reviewCount}개</span>
+            )}
+          </div>
+          <GatheringReviewSection gatheringId={gathering.id} mileageReward={gathering.mileageReward} />
         </div>
       </div>
     </div>
+
+    {shareToast && (
+      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-foreground/90 text-white text-sm px-4 py-2.5 rounded-full shadow-lg z-50 whitespace-nowrap pointer-events-none">
+        링크가 복사되었습니다
+      </div>
+    )}
+    </>
   )
 }

@@ -1,10 +1,33 @@
 'use client'
 
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { login, logout as logoutApi, register, checkNickname, fetchMyProfile } from '@/lib/api/auth'
+import { useEffect } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { login, logout as logoutApi, register, checkNickname, fetchMyProfile, updateMyProfile } from '@/lib/api/auth'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useRouter } from 'next/navigation'
-import type { RegisterRequest } from '@/lib/api/types'
+import type { RegisterRequest, ProfileUpdateRequest } from '@/lib/api/types'
+
+export function useInitAuth() {
+  const { login: storeLogin, logout: storeLogout } = useAuthStore()
+
+  const query = useQuery({
+    queryKey: ['auth-me'],
+    queryFn: fetchMyProfile,
+    staleTime: Infinity,
+    retry: false,
+    throwOnError: false,
+  })
+
+  useEffect(() => {
+    if (query.isSuccess && query.data) {
+      storeLogin(query.data.id, query.data.nickname, query.data.admin ?? false)
+    } else if (query.isError) {
+      storeLogout()
+    }
+  }, [query.isSuccess, query.isError, query.data, storeLogin, storeLogout])
+
+  return query
+}
 
 export function useLogin(returnUrl: string = '/') {
   const { login: storeLogin } = useAuthStore()
@@ -14,7 +37,7 @@ export function useLogin(returnUrl: string = '/') {
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       login(email, password),
     onSuccess: (data) => {
-      storeLogin(data.accessToken, data.user.id, data.user.nickname, data.user.admin)
+      storeLogin(data.user.id, data.user.nickname, data.user.admin)
       router.push(returnUrl)
     },
   })
@@ -36,7 +59,7 @@ export function useRegisterAndLogin() {
       return login(data.email, data.password)
     },
     onSuccess: (loginData) => {
-      storeLogin(loginData.accessToken, loginData.user.id, loginData.user.nickname, loginData.user.admin)
+      storeLogin(loginData.user.id, loginData.user.nickname, loginData.user.admin)
       router.push('/')
     },
   })
@@ -54,10 +77,20 @@ export function useCheckNickname(nickname: string) {
 export function useMyProfile() {
   const { isLoggedIn } = useAuthStore()
   return useQuery({
-    queryKey: ['my-profile'],
+    queryKey: ['user', 'me'],
     queryFn: fetchMyProfile,
     enabled: isLoggedIn,
-    staleTime: 1000 * 60 * 5, // 5분
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: ProfileUpdateRequest) => updateMyProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', 'me'] })
+    },
   })
 }
 

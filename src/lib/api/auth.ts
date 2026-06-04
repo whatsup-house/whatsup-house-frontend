@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, LoginResponse, RegisterRequest, RegisterResponse, UserProfile } from './types'
+import type { ApiResponse, LoginResponse, RegisterRequest, RegisterResponse, UserProfile, ProfileUpdateRequest } from './types'
 
 // 로그인
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
@@ -24,6 +24,12 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
 // 내 프로필 조회
 export const fetchMyProfile = async (): Promise<UserProfile> => {
   const response = await apiClient.get<ApiResponse<UserProfile>>('/api/users/me')
+  return response.data.data
+}
+
+// 내 프로필 수정
+export const updateMyProfile = async (data: ProfileUpdateRequest): Promise<UserProfile> => {
+  const response = await apiClient.put<ApiResponse<UserProfile>>('/api/users/me', data)
   return response.data.data
 }
 

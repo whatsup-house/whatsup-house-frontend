@@ -41,10 +41,16 @@ export interface LocationItem {
   maxCapacity: number
   features: string[] | null
   contractStatus: string
+  naverMapUrl?: string | null
+  kakaoMapUrl?: string | null
+  mapUrl?: string | null   // 기존 하위 호환 필드
 }
+
+export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'ATTENDED'
 
 export interface AdminApplicationItem {
   id: string
+  bookingNumber?: string
   name: string
   phone: string | null
   gender: string | null
@@ -53,7 +59,7 @@ export interface AdminApplicationItem {
   mbti: string | null
   intro: string | null
   referralSource: string | null
-  status: string
+  status: ApplicationStatus
   createdAt: string
   isGuest: boolean
 }
@@ -118,6 +124,13 @@ export const adminGatheringApi = {
     return res.data.data ?? []
   },
 
+  getApplicationsByGathering: async (gatheringId: string): Promise<AdminApplicationItem[]> => {
+    const res = await apiClient.get<ApiResponse<AdminApplicationItem[]>>(
+      `/api/admin/applications?gatheringId=${gatheringId}`
+    )
+    return res.data.data ?? []
+  },
+
   updateAttendance: async (applicationId: string, attended: boolean) => {
     const res = await apiClient.patch<ApiResponse<unknown>>(
       `/api/admin/applications/${applicationId}/attend`,
@@ -128,5 +141,13 @@ export const adminGatheringApi = {
 
   deleteApplication: async (applicationId: string) => {
     await apiClient.delete(`/api/admin/applications/${applicationId}`)
+  },
+
+  updateApplicationStatus: async (applicationId: string, status: ApplicationStatus) => {
+    const res = await apiClient.patch<ApiResponse<unknown>>(
+      `/api/admin/applications/${applicationId}/status`,
+      { status }
+    )
+    return res.data.data
   },
 }

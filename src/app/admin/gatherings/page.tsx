@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGatheringApi, AdminGatheringListItem } from '@/lib/api/adminGathering'
+import type { AdminGatheringStatus } from '@/lib/api/admin'
+import { useUpdateGatheringStatus } from '@/lib/hooks/useAdminGathering'
 import { GatheringFormPanel } from '@/components/admin/GatheringFormPanel'
 import { LoadingSpinner, Pagination } from '@/components/ui'
 import dayjs from 'dayjs'
@@ -19,9 +21,23 @@ const STATUS_LABEL: Record<string, string> = {
 }
 const STATUS_STYLE: Record<string, string> = {
   RECRUITING: 'bg-[#FDECEA] text-[#C8392B]',
+  OPEN: 'bg-[#FDECEA] text-[#C8392B]',
   CLOSED: 'bg-[#F5F5F5] text-[#767676]',
   COMPLETED: 'bg-[#E8F5E9] text-[#4CAF50]',
   CANCELLED: 'bg-[#FEF3F3] text-red-500',
+}
+
+const NEXT_STATUSES: Record<string, { value: AdminGatheringStatus; label: string }[]> = {
+  OPEN: [
+    { value: 'CLOSED', label: '모집 마감' },
+    { value: 'CANCELLED', label: '취소' },
+  ],
+  CLOSED: [
+    { value: 'COMPLETED', label: '진행 완료' },
+    { value: 'CANCELLED', label: '취소' },
+  ],
+  COMPLETED: [],
+  CANCELLED: [],
 }
 
 export default function AdminGatheringsPage() {
@@ -44,6 +60,15 @@ export default function AdminGatheringsPage() {
     mutationFn: adminGatheringApi.delete,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'gatherings'] }),
   })
+
+  const { mutate: changeStatus } = useUpdateGatheringStatus()
+
+  const handleStatusChange = (g: AdminGatheringListItem, nextStatus: AdminGatheringStatus) => {
+    const label = NEXT_STATUSES[g.status]?.find((s) => s.value === nextStatus)?.label ?? nextStatus
+    if (confirm(`"${g.title}"의 상태를 '${label}'으로 변경할까요?`)) {
+      changeStatus({ id: g.id, status: nextStatus })
+    }
+  }
 
   const handleOpenEdit = (g: AdminGatheringListItem) => {
     setEditingGathering(g)
@@ -123,12 +148,14 @@ export default function AdminGatheringsPage() {
               )}
               {gatherings.map((g) => {
                 const fillRate = g.capacity > 0 ? g.currentApplicants / g.capacity : 0
+                const isReadOnly = g.status === 'COMPLETED' || g.status === 'CANCELLED'
                 return (
                   <tr key={g.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
                     <td className="px-4 py-3 max-w-[220px]">
                       <button
-                        onClick={() => handleOpenEdit(g)}
-                        className="font-medium text-[14px] text-[#1A1A1A] hover:text-primary text-left truncate block w-full"
+                        onClick={() => !isReadOnly && handleOpenEdit(g)}
+                        disabled={isReadOnly}
+                        className="font-medium text-[14px] text-[#1A1A1A] hover:text-primary text-left truncate block w-full disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {g.title}
                       </button>
@@ -164,16 +191,36 @@ export default function AdminGatheringsPage() {
                       <div className="flex items-center gap-3 text-[13px]">
                         <button
                           onClick={() => handleOpenEdit(g)}
-                          className="text-primary hover:underline"
+                          disabled={isReadOnly}
+                          className="text-primary hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+                          title={isReadOnly ? '완료/취소된 게더링은 수정할 수 없습니다' : undefined}
                         >
                           수정
                         </button>
-                        <button
-                          onClick={() => handleDelete(g.id, g.title)}
-                          className="text-red-500 hover:underline"
-                        >
-                          취소
-                        </button>
+                        {(NEXT_STATUSES[g.status]?.length ?? 0) > 0 ? (
+                          <select
+                            defaultValue=""
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                handleStatusChange(g, e.target.value as AdminGatheringStatus)
+                                e.target.value = ''
+                              }
+                            }}
+                            className="text-[#767676] text-[12px] border border-[#E0E0E0] rounded-[6px] px-2 py-1 cursor-pointer hover:border-primary focus:outline-none"
+                          >
+                            <option value="" disabled>상태 변경</option>
+                            {NEXT_STATUSES[g.status]?.map((opt) => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <button
+                            onClick={() => handleDelete(g.id, g.title)}
+                            className="text-red-500 hover:underline"
+                          >
+                            삭제
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

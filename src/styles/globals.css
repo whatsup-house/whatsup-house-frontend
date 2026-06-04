@@ -10,8 +10,11 @@
   --color-tag-bg: #F0EBE8;
   --color-tag-text: #5C4033;
   --color-foreground: #171717;
+  --color-mileage-earn: #2D7A4F;
 
   --font-pretendard: 'Pretendard', sans-serif;
+  --font-brand-kr: var(--font-gowun-batang), serif;
+  --font-brand-script: var(--font-allura), cursive;
 
   --radius-card: 16px;
   --radius-button: 28px;
@@ -22,6 +25,14 @@ body {
   background-color: var(--color-background);
   font-family: var(--font-pretendard);
   color: var(--color-foreground);
+}
+
+.font-brand-kr {
+  font-family: var(--font-gowun-batang), serif;
+}
+
+.font-brand-script {
+  font-family: var(--font-allura), cursive;
 }
 
 /* 모바일 페이지 레이아웃 */

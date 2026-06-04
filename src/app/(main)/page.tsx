@@ -1,72 +1,34 @@
-'use client'
+import type { Metadata } from 'next'
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
+import { makeQueryClient } from '@/lib/utils/queryClient'
+import { prefetchHomeQueries } from '@/lib/hooks/useHome'
+import HeroCarousel from '@/components/home/HeroCarousel'
+import CuratedSection from '@/components/home/CuratedSection'
+import ReviewsSection from '@/components/home/ReviewsSection'
 
-import { useState } from 'react'
-import dayjs from 'dayjs'
-import { Bell } from 'lucide-react'
-import ViewToggle from '@/components/gathering/ViewToggle'
-import CalendarView from '@/components/gathering/CalendarView'
-import MapView from '@/components/gathering/MapView'
-import GatheringList from '@/components/gathering/GatheringList'
-import { useGatherings, useCalendarDots } from '@/lib/hooks/useGatherings'
+export const metadata: Metadata = {
+  title: '와썹하우스 | 1인 가구 소셜 게더링 플랫폼',
+  description: '혼자 사는 2030 청년을 위한 소규모 오프라인 소셜 게더링. 새로운 인연을 만나보세요.',
+  openGraph: {
+    title: '와썹하우스',
+    description: '혼자 사는 2030 청년을 위한 소규모 오프라인 소셜 게더링.',
+    type: 'website',
+  },
+}
 
-type View = 'calendar' | 'map'
+export const dynamic = 'force-dynamic'
 
-export default function MainHomePage() {
-  const today = dayjs()
-  const [view, setView] = useState<View>('calendar')
-  const [selectedDate, setSelectedDate] = useState(today.format('YYYY-MM-DD'))
-  const [currentYear, setCurrentYear] = useState(today.year())
-  const [currentMonth, setCurrentMonth] = useState(today.month() + 1)
-
-  const { data: gatherings, isLoading, isError, refetch } = useGatherings(selectedDate)
-  const { data: calendarDots = [] } = useCalendarDots(currentYear, currentMonth)
-
-  const handleChangeMonth = (year: number, month: number) => {
-    setCurrentYear(year)
-    setCurrentMonth(month)
-  }
+export default async function HomePage() {
+  const queryClient = makeQueryClient()
+  await prefetchHomeQueries(queryClient)
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      <header className="flex items-center justify-between px-4 py-4">
-        <h1 className="text-lg font-bold text-foreground">와썹하우스</h1>
-        <button className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
-          <Bell size={22} className="text-foreground" />
-        </button>
-      </header>
-
-      <div className="mb-4">
-        <ViewToggle view={view} onChange={setView} />
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <div className="min-h-screen bg-background pb-6">
+        <HeroCarousel />
+        <CuratedSection />
+        <ReviewsSection />
       </div>
-
-      {view === 'calendar' ? (
-        <>
-          <div className="mb-5">
-            <CalendarView
-              year={currentYear}
-              month={currentMonth}
-              selectedDate={selectedDate}
-              dotDates={calendarDots}
-              onSelectDate={setSelectedDate}
-              onChangeMonth={handleChangeMonth}
-            />
-          </div>
-          <GatheringList
-            date={selectedDate}
-            gatherings={gatherings}
-            isLoading={isLoading}
-            isError={isError}
-            onRetry={refetch}
-          />
-        </>
-      ) : (
-        <MapView
-          gatherings={gatherings ?? []}
-          isLoading={isLoading}
-          isError={isError}
-          onRetry={refetch}
-        />
-      )}
-    </div>
+    </HydrationBoundary>
   )
 }
