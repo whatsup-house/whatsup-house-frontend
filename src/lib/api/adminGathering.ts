@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse } from './types'
+import type { ApiResponse, AdminApplicationDetail } from './types'
 
 export interface AdminGatheringListItem {
   id: string
@@ -129,6 +129,14 @@ export const adminGatheringApi = {
       `/api/admin/applications?gatheringId=${gatheringId}`
     )
     return res.data.data ?? []
+  },
+
+  // 신청 상세 (EAV 답변 포함)
+  getApplicationDetail: async (applicationId: string): Promise<AdminApplicationDetail> => {
+    const res = await apiClient.get<ApiResponse<AdminApplicationDetail>>(
+      `/api/admin/applications/${applicationId}`
+    )
+    return res.data.data
   },
 
   updateAttendance: async (applicationId: string, attended: boolean) => {

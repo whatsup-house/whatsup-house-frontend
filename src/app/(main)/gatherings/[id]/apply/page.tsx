@@ -4,7 +4,7 @@ import { use } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { LoadingSpinner, ApiErrorMessage } from '@/components/ui'
-import GuestApplicationForm from '@/components/gathering/GuestApplicationForm'
+import DynamicApplicationForm from '@/components/gathering/DynamicApplicationForm'
 import AppImage from '@/components/ui/AppImage'
 import { formatKoreanNumericDate, formatTime } from '@/lib/utils/date'
 
@@ -65,7 +65,7 @@ export default function ApplyPage({
           </div>
         </div>
 
-        <GuestApplicationForm gathering={gathering} forceGuest={forceGuest} />
+        <DynamicApplicationForm gathering={gathering} forceGuest={forceGuest} />
       </div>
     </div>
   )
