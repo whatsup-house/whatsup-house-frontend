@@ -5,6 +5,7 @@ import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift
 import { Card, Badge } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
 import GatheringReviewSection from './GatheringReviewSection'
+import MapLinkButton from './MapLinkButton'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import { formatDuration, formatKoreanFullDate, formatTimeRange } from '@/lib/utils/date'
 import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
@@ -151,29 +152,24 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-xs text-tag-text mb-0.5">장소</p>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-foreground">{location?.name}</p>
-                  {location && (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <a
-                        href={getNaverMapUrl(location, location.address ?? locationAddress)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-primary font-medium min-h-[44px] px-2.5 flex items-center rounded-full border border-tag-bg"
-                      >
-                        네이버지도
-                      </a>
-                      <a
-                        href={getKakaoMapUrl(location, location.address ?? locationAddress)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-primary font-medium min-h-[44px] px-2.5 flex items-center rounded-full border border-tag-bg"
-                      >
-                        카카오지도
-                      </a>
-                    </div>
-                  )}
-                </div>
+                <p className="text-sm font-semibold text-foreground">{location?.name}</p>
+                {(location?.address ?? locationAddress) && (
+                  <p className="text-xs text-tag-text mt-0.5 break-keep">
+                    {location?.address ?? locationAddress}
+                  </p>
+                )}
+                {location && (
+                  <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                    <MapLinkButton
+                      provider="naver"
+                      href={getNaverMapUrl(location, location.address ?? locationAddress)}
+                    />
+                    <MapLinkButton
+                      provider="kakao"
+                      href={getKakaoMapUrl(location, location.address ?? locationAddress)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
