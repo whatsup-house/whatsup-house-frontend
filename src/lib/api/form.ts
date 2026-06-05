@@ -16,6 +16,22 @@ export const fetchGatheringForm = async (gatheringId: string): Promise<Gathering
 
 // ===== 관리자 신청폼 질문 관리 =====
 
+// 백엔드는 boolean isMatchingField를 Jackson 규칙상 "matchingField"로 직렬화한다.
+type RawAdminQuestion = Omit<FormQuestionAdminItem, 'isMatchingField'> & { matchingField: boolean }
+
+// 질문 목록 조회 (매칭 설정 포함)
+export const fetchAdminFormQuestions = async (
+  gatheringId: string,
+): Promise<FormQuestionAdminItem[]> => {
+  const response = await apiClient.get<ApiResponse<RawAdminQuestion[]>>(
+    `/api/admin/gatherings/${gatheringId}/form/questions`,
+  )
+  return (response.data.data ?? []).map(({ matchingField, ...rest }) => ({
+    ...rest,
+    isMatchingField: matchingField,
+  }))
+}
+
 // 질문 추가
 export const addFormQuestion = async (
   gatheringId: string,

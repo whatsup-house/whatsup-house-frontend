@@ -532,7 +532,11 @@ export interface FormQuestionAdminItem {
   questionKey: string
   type: QuestionType
   label: string
+  placeholder: string | null
+  required: boolean
   displayOrder: number
+  options: QuestionOptions | null
+  validation: Record<string, unknown> | null
   isMatchingField: boolean
   systemReserved: boolean
   matchingStrategy: MatchingStrategy | null

@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import type { AdminGatheringListItem, GatheringCreateRequest } from '@/lib/api/adminGathering'
+import type { AdminGatheringListItem, GatheringCreateRequest, GatheringType } from '@/lib/api/adminGathering'
 import { useAdminLocations, useCreateGathering, useUpdateGathering } from '@/lib/hooks/useAdminGathering'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
@@ -39,6 +39,9 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
   const { mutate: createGathering, isPending: isCreating } = useCreateGathering(onSuccess)
   const { mutate: updateGathering, isPending: isUpdating } = useUpdateGathering(onSuccess)
   const isPending = isCreating || isUpdating
+
+  // 게더링 유형 (생성 시에만 설정 가능, 수정은 백엔드에서 무시)
+  const [gatheringType, setGatheringType] = useState<GatheringType>('REGULAR')
 
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -85,7 +88,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
     if (isEdit) {
       updateGathering({ id: gathering.id, data })
     } else {
-      createGathering(data)
+      createGathering({ ...data, gatheringType })
     }
   }
 
@@ -100,6 +103,39 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="flex flex-col gap-4">
+            {!isEdit && (
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-1">게더링 유형 *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { value: 'REGULAR', label: '일반', desc: '신청만 받음' },
+                    { value: 'RANDOM_TABLE', label: '우연한 식탁', desc: '자동매칭' },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setGatheringType(opt.value)}
+                      className={`flex flex-col items-start px-4 py-3 rounded-input border text-left transition-colors ${
+                        gatheringType === opt.value
+                          ? 'border-primary bg-primary-light'
+                          : 'border-tag-bg bg-card'
+                      }`}
+                    >
+                      <span className={`text-sm font-semibold ${gatheringType === opt.value ? 'text-primary' : 'text-foreground'}`}>
+                        {opt.label}
+                      </span>
+                      <span className="text-xs text-tag-text mt-0.5">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
+                {gatheringType === 'RANDOM_TABLE' && (
+                  <p className="text-xs text-tag-text mt-1.5">
+                    생성 후 신청폼에서 매칭 질문(나이·성별·관심사 등)을 추가하면 자동매칭을 사용할 수 있어요.
+                  </p>
+                )}
+              </div>
+            )}
+
             <Input
               label="게더링명 *"
               placeholder="게더링 이름을 입력해주세요"

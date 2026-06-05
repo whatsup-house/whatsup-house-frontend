@@ -161,7 +161,7 @@ export default function AdminGatheringsPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3 text-[13px] text-[#767676] whitespace-nowrap">
-                      {dayjs(g.date).format('M/D')} {g.startTime.slice(0, 5)}
+                      {dayjs(g.date).format('M/D')} {g.startTime?.slice(0, 5) ?? ''}
                     </td>
                     <td className="px-4 py-3 text-[13px] text-[#767676] max-w-[120px] truncate">
                       {g.locationName ?? '-'}

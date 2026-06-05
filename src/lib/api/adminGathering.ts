@@ -18,6 +18,8 @@ export interface AdminGatheringListItem {
   activityTags?: string[] | null
 }
 
+export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
+
 export interface GatheringCreateRequest {
   title: string
   description: string
@@ -32,6 +34,7 @@ export interface GatheringCreateRequest {
   moodTags?: string[]
   activityTags?: string[]
   mileageReward?: number
+  gatheringType?: GatheringType   // 생성 시에만 반영됨 (수정은 백엔드에서 무시)
 }
 
 export interface LocationItem {

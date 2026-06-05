@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchGatheringForm,
+  fetchAdminFormQuestions,
   addFormQuestion,
   updateFormQuestion,
   deleteFormQuestion,
@@ -17,6 +18,15 @@ export function useGatheringForm(gatheringId: string) {
   })
 }
 
+// 관리자용 질문 목록 (매칭 설정 포함)
+export function useAdminFormQuestions(gatheringId: string) {
+  return useQuery({
+    queryKey: ['admin', 'form-questions', gatheringId],
+    queryFn: () => fetchAdminFormQuestions(gatheringId),
+    enabled: !!gatheringId,
+  })
+}
+
 // 관리자 질문 추가
 export function useAddFormQuestion(gatheringId: string) {
   const queryClient = useQueryClient()
@@ -24,6 +34,7 @@ export function useAddFormQuestion(gatheringId: string) {
     mutationFn: (data: FormQuestionUpsertRequest) => addFormQuestion(gatheringId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gathering', gatheringId, 'form'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'form-questions', gatheringId] })
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -40,6 +51,7 @@ export function useUpdateFormQuestion(gatheringId: string) {
       updateFormQuestion(questionId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gathering', gatheringId, 'form'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'form-questions', gatheringId] })
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -55,6 +67,7 @@ export function useDeleteFormQuestion(gatheringId: string) {
     mutationFn: (questionId: string) => deleteFormQuestion(questionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gathering', gatheringId, 'form'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'form-questions', gatheringId] })
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
