@@ -229,6 +229,11 @@ export interface ReviewDeleteResponse {
   deleted: boolean
 }
 
+export interface ReviewLocateResponse {
+  reviewId: string
+  page: number
+}
+
 export interface GatheringReviewPageResponse {
   content: ReviewItem[]
   page: number
