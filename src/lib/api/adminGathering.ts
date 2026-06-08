@@ -136,6 +136,16 @@ export const adminGatheringApi = {
     await apiClient.patch(`/api/admin/gatherings/${id}/status`, { status })
   },
 
+  // 홈 큐레이션 노출 토글 (KAN-190)
+  setCuration: async (id: string, isCurated: boolean) => {
+    await apiClient.patch(`/api/admin/gatherings/${id}/curation`, { isCurated })
+  },
+
+  // 큐레이션 노출 순서 변경 (앞에서부터 1위)
+  reorderCurated: async (gatheringIds: string[]) => {
+    await apiClient.put('/api/admin/gatherings/curated/order', { gatheringIds })
+  },
+
   delete: async (id: string) => {
     await apiClient.delete(`/api/admin/gatherings/${id}`)
   },
