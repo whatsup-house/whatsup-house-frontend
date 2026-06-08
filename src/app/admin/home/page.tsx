@@ -25,8 +25,8 @@ export default function AdminHomePage() {
   const [carouselPanel, setCarouselPanel] = useState<AdminHeroCarouselSlide | 'new' | null>(null)
   const [reviewPanel, setReviewPanel] = useState<AdminHomeReview | 'new' | null>(null)
 
-  const { data: slides = [], isLoading: slidesLoading } = useAdminCarouselSlides()
-  const { data: reviews = [], isLoading: reviewsLoading } = useAdminHomeReviews()
+  const { data: slides = [], isLoading: slidesLoading, isError: slidesError } = useAdminCarouselSlides()
+  const { data: reviews = [], isLoading: reviewsLoading, isError: reviewsError } = useAdminHomeReviews()
 
   const sortedSlides = [...slides].sort((a, b) => a.sortOrder - b.sortOrder)
   const sortedReviews = [...reviews].sort((a, b) => a.displayOrder - b.displayOrder)
@@ -67,6 +67,10 @@ export default function AdminHomePage() {
 
         {slidesLoading ? (
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
+        ) : slidesError ? (
+          <div className="flex items-center justify-center h-32 border border-dashed border-red-200 rounded-card text-sm text-red-500">
+            캐러셀을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+          </div>
         ) : sortedSlides.length === 0 ? (
           <div className="flex items-center justify-center h-32 border border-dashed border-tag-bg rounded-card text-sm text-tag-text">
             슬라이드가 없습니다. 우측 상단 버튼으로 추가하세요.
@@ -96,6 +100,10 @@ export default function AdminHomePage() {
 
         {reviewsLoading ? (
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
+        ) : reviewsError ? (
+          <div className="flex items-center justify-center h-32 border border-dashed border-red-200 rounded-card text-sm text-red-500">
+            후기를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+          </div>
         ) : sortedReviews.length === 0 ? (
           <div className="flex items-center justify-center h-32 border border-dashed border-tag-bg rounded-card text-sm text-tag-text">
             후기가 없습니다. 우측 상단 버튼으로 추가하세요.

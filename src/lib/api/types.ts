@@ -317,12 +317,13 @@ export interface AdminHeroCarouselSlide {
   isActive: boolean
 }
 
+// 백엔드 캐러셀 생성/수정 요청. 이미지는 업로드 결과의 tempPath로 전달한다.
+// (수정 시 tempPath 생략하면 기존 이미지 유지 — KAN-182/183). dateLabel은 백엔드가 게더링에서 파생.
 export interface AdminHeroCarouselSlideRequest {
   type: HeroSlideType
-  imageUrl: string
+  tempPath?: string
   title: string
   content?: string
-  dateLabel?: string
   gatheringId?: string
   sortOrder: number
 }

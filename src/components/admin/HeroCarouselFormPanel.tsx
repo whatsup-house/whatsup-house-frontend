@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import type { AdminHeroCarouselSlide, HeroSlideType } from '@/lib/api/types'
+import type { AdminHeroCarouselSlide, AdminHeroCarouselSlideRequest, HeroSlideType } from '@/lib/api/types'
 import {
   useCreateCarouselSlide,
   useUpdateCarouselSlide,
@@ -18,10 +18,9 @@ import ImageUploadField from '@/components/ui/ImageUploadField'
 
 const schema = z.object({
   type: z.enum(['GATHERING', 'CALENDAR', 'STORY']),
-  imageUrl: z.string().min(1, '이미지를 업로드하거나 URL을 입력해주세요'),
+  imageUrl: z.string().min(1, '이미지를 업로드해주세요'),
   title: z.string().min(1, '제목 텍스트를 입력해주세요'),
   content: z.string().optional(),
-  dateLabel: z.string().optional(),
   gatheringId: z.string().optional(),
   sortOrder: z.number({ error: '순서를 입력해주세요' }).int().min(1, '1 이상이어야 합니다'),
 })
@@ -45,12 +44,14 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [isActive, setIsActive] = useState(slide?.isActive ?? true)
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(slide?.imageUrl ?? null)
+  // 새로 업로드한 이미지의 tempPath. 없으면(수정 시) 백엔드가 기존 이미지를 유지한다. (KAN-182/183)
+  const [tempPath, setTempPath] = useState<string | null>(null)
 
   const { mutate: create, isPending: isCreating } = useCreateCarouselSlide(onSuccess)
   const { mutate: update, isPending: isUpdating } = useUpdateCarouselSlide(onSuccess)
   const { mutate: remove, isPending: isDeleting } = useDeleteCarouselSlide()
   const { mutate: toggle, isPending: isToggling } = useToggleCarouselSlide()
-  const { upload, isUploading } = useUploadImage()
+  const { uploadWithTempPath, isUploading } = useUploadImage()
   const isPending = isCreating || isUpdating
 
   const {
@@ -73,15 +74,16 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
       setValue('imageUrl', slide.imageUrl)
       setValue('title', slide.title)
       setValue('content', slide.content ?? '')
-      setValue('dateLabel', slide.dateLabel ?? '')
       setValue('gatheringId', slide.gatheringId ?? '')
       setValue('sortOrder', slide.sortOrder)
       setIsActive(slide.isActive)
       setImagePreviewUrl(slide.imageUrl)
+      setTempPath(null)
     } else {
       reset({ type: 'GATHERING', sortOrder: 1 })
       setIsActive(true)
       setImagePreviewUrl(null)
+      setTempPath(null)
     }
   }, [slide, setValue, reset])
 
@@ -92,12 +94,14 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
     setValue('imageUrl', '')
 
     try {
-      const serverUrl = await upload(blob, 'carousel.jpg')
-      setImagePreviewUrl(serverUrl)
-      setValue('imageUrl', serverUrl)
+      const result = await uploadWithTempPath(blob, 'carousel.jpg')
+      setImagePreviewUrl(result.previewUrl)
+      setValue('imageUrl', result.previewUrl)
+      setTempPath(result.tempPath)
     } catch {
       setImagePreviewUrl(slide?.imageUrl ?? null)
       setValue('imageUrl', slide?.imageUrl ?? '')
+      setTempPath(null)
     }
   }
 
@@ -105,17 +109,18 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
     if (imagePreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(imagePreviewUrl)
     setImagePreviewUrl(null)
     setValue('imageUrl', '')
+    setTempPath(null)
   }
 
   const onSubmit = (values: FormValues) => {
-    const data = {
+    // 이미지는 tempPath로 전송. 수정 시 새 이미지가 없으면 생략하여 기존 이미지를 유지한다.
+    const data: AdminHeroCarouselSlideRequest = {
       type: values.type,
-      imageUrl: values.imageUrl,
       title: values.title,
       content: values.content || undefined,
-      dateLabel: values.dateLabel || undefined,
       gatheringId: values.gatheringId || undefined,
       sortOrder: values.sortOrder,
+      ...(tempPath ? { tempPath } : {}),
     }
     if (isEdit) {
       update({ id: slide.id, data })
@@ -126,9 +131,10 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
 
   const handleToggle = () => {
     if (!slide) return
-    toggle(slide.id, {
-      onSuccess: () => setIsActive((prev) => !prev),
-    })
+    toggle(
+      { id: slide.id, isActive: !isActive },
+      { onSuccess: () => setIsActive((prev) => !prev) },
+    )
   }
 
   const handleDelete = () => {
@@ -198,18 +204,11 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
             )}
 
             {typeValue === 'GATHERING' && (
-              <>
-                <Input
-                  label="날짜 텍스트"
-                  placeholder="예: 5월 21일 수"
-                  {...register('dateLabel')}
-                />
-                <Input
-                  label="게더링 ID"
-                  placeholder="연결할 게더링 UUID"
-                  {...register('gatheringId')}
-                />
-              </>
+              <Input
+                label="게더링 ID"
+                placeholder="연결할 게더링 UUID (날짜는 게더링에서 자동 표시)"
+                {...register('gatheringId')}
+              />
             )}
 
             <Input
