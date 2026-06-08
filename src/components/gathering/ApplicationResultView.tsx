@@ -91,14 +91,14 @@ export default function ApplicationResultView({
               <div>
                 <p className="text-xs text-tag-text">참가비</p>
                 <p className="text-sm font-medium text-foreground">
-                  {gathering.price.toLocaleString()}원
+                  {(gathering.price ?? 0).toLocaleString()}원
                 </p>
               </div>
             </div>
           </div>
         </Card>
 
-        {mode === 'confirmed' && <PaymentAccountCard price={gathering.price} />}
+        {mode === 'confirmed' && <PaymentAccountCard price={gathering.price ?? 0} />}
 
         <div className="w-full flex flex-col gap-3 mt-4">
           {bookingNumber ? (
