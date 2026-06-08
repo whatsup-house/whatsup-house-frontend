@@ -337,24 +337,28 @@ export interface ImageUploadResponse {
   previewUrl: string
 }
 
+// 홈 노출 관리 대상 = 실제 작성된 리뷰. (KAN-184)
+// 백엔드는 임의 후기 생성/수정을 지원하지 않고, 실제 리뷰의 홈 노출 여부/순서만 관리한다.
 export interface AdminHomeReview {
-  id: string
-  content: string
-  authorName: string
-  avatarUrl: string | null
+  reviewId: string
+  nickname: string
+  reviewContent: string
+  likeCount: number
   gatheringTitle: string
-  rating: number
-  displayOrder: number
-  isActive: boolean
+  imageUrl: string | null      // 리뷰 첫 이미지
+  homeFeatured: boolean
+  homeDisplayOrder: number | null
+  createdAt: string
 }
 
-export interface AdminHomeReviewRequest {
-  content: string
-  authorName: string
-  avatarUrl?: string
-  gatheringTitle: string
-  rating: number
-  displayOrder?: number
+export interface ReviewHomeFeaturedRequest {
+  isHomeFeatured: boolean
+  homeDisplayOrder?: number
+}
+
+export interface ReviewHomeOrderItem {
+  reviewId: string
+  homeDisplayOrder: number
 }
 
 export interface ReviewCreateRequest {

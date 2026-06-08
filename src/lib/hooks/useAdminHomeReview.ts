@@ -1,59 +1,42 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AdminHomeReviewRequest } from '@/lib/api/types'
 import {
   fetchAdminHomeReviews,
-  createHomeReview,
-  updateHomeReview,
+  setReviewHomeFeatured,
+  reorderHomeReviews,
   deleteHomeReview,
-  toggleHomeReview,
 } from '@/lib/api/adminHomeReview'
+import type { ReviewHomeFeaturedRequest, ReviewHomeOrderItem } from '@/lib/api/types'
+
+const KEY = ['admin', 'home-reviews']
 
 export function useAdminHomeReviews() {
   return useQuery({
-    queryKey: ['admin', 'home-reviews'],
+    queryKey: KEY,
     queryFn: fetchAdminHomeReviews,
   })
 }
 
-export function useCreateHomeReview(onSuccess: () => void) {
+export function useSetReviewHomeFeatured() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: AdminHomeReviewRequest) => createHomeReview(data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'home-reviews'] })
-      onSuccess()
-    },
+    mutationFn: ({ reviewId, data }: { reviewId: string; data: ReviewHomeFeaturedRequest }) =>
+      setReviewHomeFeatured(reviewId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   })
 }
 
-export function useUpdateHomeReview(onSuccess: () => void) {
+export function useReorderHomeReviews() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: AdminHomeReviewRequest }) =>
-      updateHomeReview(id, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'home-reviews'] })
-      onSuccess()
-    },
+    mutationFn: (items: ReviewHomeOrderItem[]) => reorderHomeReviews(items),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   })
 }
 
 export function useDeleteHomeReview() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => deleteHomeReview(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'home-reviews'] })
-    },
-  })
-}
-
-export function useToggleHomeReview() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) => toggleHomeReview(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin', 'home-reviews'] })
-    },
+    mutationFn: (reviewId: string) => deleteHomeReview(reviewId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   })
 }
