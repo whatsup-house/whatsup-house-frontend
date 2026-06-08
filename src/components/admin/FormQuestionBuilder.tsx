@@ -51,6 +51,11 @@ const PRESETS: Preset[] = [
 
 const HARD_KEYS = ['budget', 'available_dates', 'age']
 
+// 자유 질문용 안정 식별자. (KAN-191) question key는 화면에 노출하지 않으므로 자동 생성한다.
+function autoQuestionKey(): string {
+  return `q_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+}
+
 interface FormQuestionBuilderProps {
   gatheringId: string
   gatheringTitle?: string
@@ -169,7 +174,6 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const addQuestion = useAddFormQuestion(gatheringId)
   const updateQuestion = useUpdateFormQuestion(gatheringId)
   const isEdit = !!initial
-  const isReserved = initial?.systemReserved ?? false
 
   const [state, setState] = useState<EditorState>(() => ({
     label: initial?.label ?? '',
@@ -198,13 +202,16 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const handleSave = () => {
     setError(null)
     if (!state.label.trim()) return setError('질문 라벨을 입력해주세요.')
-    if (!state.questionKey.trim()) return setError('question key를 입력해주세요.')
     const choices = state.choicesText.split(/[\n,]/).map((c) => c.trim()).filter(Boolean)
     if (isChoice && choices.length === 0) return setError('선택형 질문은 보기를 1개 이상 입력해주세요.')
     if (state.isMatchingField && !state.matchingStrategy) return setError('매칭 항목은 매칭 방식을 선택해주세요.')
 
+    // question key는 화면에 노출하지 않는다. 기존 질문/프리셋은 지정된 key를 유지하고,
+    // 자유 질문은 자동 생성한다. (KAN-191)
+    const questionKey = state.questionKey.trim() || autoQuestionKey()
+
     const payload: FormQuestionUpsertRequest = {
-      questionKey: state.questionKey.trim(),
+      questionKey,
       type: state.type,
       label: state.label.trim(),
       placeholder: state.placeholder.trim() || undefined,
@@ -260,19 +267,14 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             <input value={state.label} onChange={(e) => set('label', e.target.value)} placeholder="예: 나이를 알려주세요" className={inputCls} />
           </Field>
 
-          {/* key + 타입 */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="question key *" hint={isReserved ? '기본 질문은 변경 불가' : '매칭 항목은 고정 key 필요'}>
-              <input value={state.questionKey} onChange={(e) => set('questionKey', e.target.value)} disabled={isReserved} placeholder="예: age" className={`${inputCls} ${isReserved ? 'bg-[#F5F5F5] text-[#999]' : ''}`} />
-            </Field>
-            <Field label="유형 *">
-              <select value={state.type} onChange={(e) => set('type', e.target.value as QuestionType)} className={inputCls}>
-                {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
-                  <option key={t} value={t}>{TYPE_LABEL[t]}</option>
-                ))}
-              </select>
-            </Field>
-          </div>
+          {/* 유형 (question key는 화면에 노출하지 않고 프리셋/자동으로 지정됨 — KAN-191) */}
+          <Field label="유형 *">
+            <select value={state.type} onChange={(e) => set('type', e.target.value as QuestionType)} className={inputCls}>
+              {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
+                <option key={t} value={t}>{TYPE_LABEL[t]}</option>
+              ))}
+            </select>
+          </Field>
 
           {/* 선택지 */}
           {isChoice && (
