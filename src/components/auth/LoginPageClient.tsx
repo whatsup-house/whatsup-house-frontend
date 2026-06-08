@@ -23,6 +23,7 @@ export default function LoginPageClient() {
   const searchParams = useSearchParams()
   const rawReturnUrl = searchParams.get('returnUrl')
   const returnUrl = safeReturnUrl(rawReturnUrl)
+  const isWithdrawn = searchParams.get('withdrawn') === '1'
   const loginMutation = useLogin(returnUrl)
   const welcomeHref = rawReturnUrl ? `/welcome?returnUrl=${encodeURIComponent(rawReturnUrl)}` : '/welcome'
 
@@ -74,6 +75,12 @@ export default function LoginPageClient() {
         </section>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
+          {isWithdrawn && (
+            <div className="mb-4 rounded-card bg-card px-4 py-3 text-center text-xs font-medium text-tag-text">
+              회원탈퇴가 완료되었습니다.
+            </div>
+          )}
+
           <div className="flex flex-col gap-2.5">
             <label className="flex flex-col gap-1.5">
               <span className="ml-1 text-xs font-medium text-tag-text">이메일</span>
@@ -114,22 +121,24 @@ export default function LoginPageClient() {
                 <AlertCircle size={13} />
                 <span>아이디 또는 비밀번호를 확인해주세요.</span>
               </div>
-              <button
-                type="button"
+              <Link
+                href="/password-reset"
                 className="self-end text-xs font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
               >
                 비밀번호를 잊으셨나요?
-              </button>
+              </Link>
             </div>
           )}
 
           {!hasLoginError && (
-            <button
-              type="button"
-              className="mt-2 self-end text-xs font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
-            >
-              비밀번호를 잊으셨나요?
-            </button>
+            <div className="mt-2 flex justify-end gap-3 text-xs font-medium text-tag-text">
+              <Link href="/find-email" className="underline decoration-tag-text/40 underline-offset-4">
+                아이디 찾기
+              </Link>
+              <Link href="/password-reset" className="underline decoration-tag-text/40 underline-offset-4">
+                비밀번호 재설정
+              </Link>
+            </div>
           )}
 
           <button
