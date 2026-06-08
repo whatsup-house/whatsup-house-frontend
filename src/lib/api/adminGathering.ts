@@ -1,21 +1,34 @@
 import apiClient from './client'
 import type { ApiResponse, AdminApplicationDetail } from './types'
 
+// 화면 표시 모델. 백엔드 목록 응답을 getAll에서 이 형태로 매핑한다. (KAN-185)
 export interface AdminGatheringListItem {
   id: string
   title: string
-  date: string
+  date: string                 // 백엔드 eventDate 매핑
   startTime: string
   endTime: string
   locationName: string | null
   price: number
-  capacity: number
-  currentApplicants: number
-  applicantCount?: number   // 기존 admin.ts 호환
+  capacity: number             // 백엔드 maxAttendees 매핑
+  currentApplicants: number    // 백엔드 applicantCount 매핑
+  applicantCount?: number
   status: string
-  thumbnailUrl?: string | null
-  moodTags?: string[] | null
-  activityTags?: string[] | null
+  thumbnailUrl?: string | null // 목록 응답엔 없음(폼 호환용, 항상 비어옴)
+}
+
+// 백엔드 관리자 게더링 목록 응답 원본 (AdminGatheringResponse)
+interface RawAdminGathering {
+  id: string
+  title: string
+  eventDate: string
+  startTime: string | null
+  endTime: string | null
+  locationName: string | null
+  price: number | null
+  maxAttendees: number
+  status: string
+  applicantCount: number
 }
 
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
@@ -35,6 +48,23 @@ export interface GatheringCreateRequest {
   activityTags?: string[]
   mileageReward?: number
   gatheringType?: GatheringType   // 생성 시에만 반영됨 (수정은 백엔드에서 무시)
+}
+
+// 폼 모델(date/capacity)을 백엔드 요청 계약(eventDate/maxAttendees)으로 변환한다. (KAN-185)
+// 백엔드가 받지 않는 필드(howToRun/moodTags/activityTags/mileageReward)는 보내지 않는다.
+function toGatheringRequestBody(data: GatheringCreateRequest) {
+  return {
+    title: data.title,
+    description: data.description,
+    locationId: data.locationId,
+    eventDate: data.date,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    price: data.price,
+    maxAttendees: data.capacity,
+    thumbnailUrl: data.thumbnailUrl,
+    gatheringType: data.gatheringType,
+  }
 }
 
 export interface LocationItem {
@@ -73,23 +103,32 @@ export const adminGatheringApi = {
     if (status) params.append('status', status)
     if (date) params.append('date', date)
     const query = params.toString()
-    const res = await apiClient.get<ApiResponse<AdminGatheringListItem[]>>(
+    const res = await apiClient.get<ApiResponse<RawAdminGathering[]>>(
       `/api/admin/gatherings${query ? `?${query}` : ''}`
     )
-    // currentApplicants 없으면 applicantCount로 fallback
+    // 백엔드 eventDate/maxAttendees/applicantCount를 화면 모델(date/capacity/currentApplicants)로 매핑. (KAN-185)
     return (res.data.data ?? []).map((g) => ({
-      ...g,
-      currentApplicants: g.currentApplicants ?? g.applicantCount ?? 0,
+      id: g.id,
+      title: g.title,
+      date: g.eventDate,
+      startTime: g.startTime ?? '',
+      endTime: g.endTime ?? '',
+      locationName: g.locationName,
+      price: g.price ?? 0,
+      capacity: g.maxAttendees,
+      currentApplicants: g.applicantCount ?? 0,
+      applicantCount: g.applicantCount,
+      status: g.status,
     }))
   },
 
   create: async (data: GatheringCreateRequest) => {
-    const res = await apiClient.post<ApiResponse<unknown>>('/api/admin/gatherings', data)
+    const res = await apiClient.post<ApiResponse<unknown>>('/api/admin/gatherings', toGatheringRequestBody(data))
     return res.data.data
   },
 
   update: async (id: string, data: GatheringCreateRequest) => {
-    const res = await apiClient.put<ApiResponse<unknown>>(`/api/admin/gatherings/${id}`, data)
+    const res = await apiClient.put<ApiResponse<unknown>>(`/api/admin/gatherings/${id}`, toGatheringRequestBody(data))
     return res.data.data
   },
 
@@ -102,8 +141,20 @@ export const adminGatheringApi = {
   },
 
   getLocations: async (): Promise<LocationItem[]> => {
-    const res = await apiClient.get<ApiResponse<LocationItem[]>>('/api/admin/locations')
-    return res.data.data ?? []
+    // 목록 조회는 클라이언트 엔드포인트로 이동됨(KAN-161). 관리자 컨트롤러는 쓰기 전용.
+    // 클라이언트 응답에 없는 관리자 필드(수용/계약상태/특징)는 기본값으로 채워 렌더 크래시를 막는다.
+    const res = await apiClient.get<ApiResponse<Partial<LocationItem>[]>>('/api/locations')
+    return (res.data.data ?? []).map((l) => ({
+      id: l.id ?? '',
+      name: l.name ?? '',
+      address: l.address ?? '',
+      maxCapacity: l.maxCapacity ?? 0,
+      features: l.features ?? [],
+      contractStatus: l.contractStatus ?? '',
+      naverMapUrl: l.naverMapUrl ?? null,
+      kakaoMapUrl: l.kakaoMapUrl ?? null,
+      mapUrl: l.mapUrl ?? null,
+    }))
   },
 
   createLocation: async (data: Partial<LocationItem>) => {
