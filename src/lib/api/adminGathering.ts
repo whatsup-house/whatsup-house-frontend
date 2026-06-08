@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse } from './types'
+import type { ApiResponse, AdminApplicationDetail } from './types'
 
 export interface AdminGatheringListItem {
   id: string
@@ -18,6 +18,8 @@ export interface AdminGatheringListItem {
   activityTags?: string[] | null
 }
 
+export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
+
 export interface GatheringCreateRequest {
   title: string
   description: string
@@ -32,6 +34,7 @@ export interface GatheringCreateRequest {
   moodTags?: string[]
   activityTags?: string[]
   mileageReward?: number
+  gatheringType?: GatheringType   // 생성 시에만 반영됨 (수정은 백엔드에서 무시)
 }
 
 export interface LocationItem {
@@ -128,6 +131,14 @@ export const adminGatheringApi = {
       `/api/admin/applications?gatheringId=${gatheringId}`
     )
     return res.data.data ?? []
+  },
+
+  // 신청 상세 (EAV 답변 포함)
+  getApplicationDetail: async (applicationId: string): Promise<AdminApplicationDetail> => {
+    const res = await apiClient.get<ApiResponse<AdminApplicationDetail>>(
+      `/api/admin/applications/${applicationId}`
+    )
+    return res.data.data
   },
 
   updateAttendance: async (applicationId: string, attended: boolean) => {

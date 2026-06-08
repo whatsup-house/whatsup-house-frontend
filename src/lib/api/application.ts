@@ -1,5 +1,47 @@
 import apiClient from './client'
-import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse } from './types'
+import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationSubmitResponse, ApplicationDetail } from './types'
+
+// 회원 동적 신청 (EAV 답변 배열) — JWT 필요
+export const submitDynamicApplication = async (
+  gatheringId: string,
+  data: DynamicApplicationRequest,
+): Promise<ApplicationSubmitResponse> => {
+  const response = await apiClient.post<ApiResponse<ApplicationSubmitResponse>>(
+    `/api/gatherings/${gatheringId}/applications`,
+    data,
+  )
+  return response.data.data
+}
+
+// 비회원 동적 신청 (EAV 답변 배열)
+export const submitDynamicGuestApplication = async (
+  gatheringId: string,
+  data: DynamicApplicationRequest,
+): Promise<ApplicationSubmitResponse> => {
+  const response = await apiClient.post<ApiResponse<ApplicationSubmitResponse>>(
+    `/api/gatherings/${gatheringId}/applications/guest`,
+    data,
+  )
+  return response.data.data
+}
+
+// 내 신청 상세 (답변 포함) — 회원
+export const fetchMyApplicationDetail = async (id: string): Promise<ApplicationDetail> => {
+  const response = await apiClient.get<ApiResponse<ApplicationDetail>>(`/api/applications/${id}`)
+  return response.data.data
+}
+
+// 비회원 신청 상세 (답변 포함) — 전화번호 + 예약번호
+export const fetchGuestApplicationDetail = async (
+  phone: string,
+  bookingNumber: string,
+): Promise<ApplicationDetail> => {
+  const response = await apiClient.get<ApiResponse<ApplicationDetail>>(
+    '/api/applications/check',
+    { params: { phone, bookingNumber } },
+  )
+  return response.data.data
+}
 
 export const fetchMyApplications = async (): Promise<ApplicationListItem[]> => {
   const response = await apiClient.get<ApiResponse<ApplicationListItem[]>>('/api/applications')

@@ -427,3 +427,178 @@ export interface MileageHistoryPageResponse {
   totalElements: number
   totalPages: number
 }
+
+// ===== 신청폼 (EAV 동적 폼) =====
+
+// 질문 타입 (백엔드 QuestionType enum과 1:1)
+export type QuestionType =
+  | 'SHORT_TEXT'
+  | 'LONG_TEXT'
+  | 'SINGLE_CHOICE'
+  | 'MULTI_CHOICE'
+  | 'NUMBER'
+  | 'MBTI_INPUT'
+
+// 선택형 질문 보기. 백엔드 jsonb는 자유 구조라 choices 키 컨벤션을 사용한다.
+export interface QuestionOptions {
+  choices?: string[]
+  [key: string]: unknown
+}
+
+// 동적 신청폼 질문 (GET /api/gatherings/{id}/form)
+export interface FormQuestionDetail {
+  questionId: string
+  questionKey: string
+  type: QuestionType
+  label: string
+  placeholder: string | null
+  required: boolean
+  displayOrder: number
+  options: QuestionOptions | null
+  validation: Record<string, unknown> | null
+  systemReserved: boolean   // name/phone 등 시스템 예약 질문 (회원은 계정값 사용)
+}
+
+// 게더링 신청폼 전체
+export interface GatheringForm {
+  formId: string
+  gatheringId: string | null
+  guideText: string | null
+  questions: FormQuestionDetail[]
+}
+
+// 답변 1건 (EAV value). value는 질문 타입에 따라 string | number | string[]
+export interface AnswerItem {
+  questionId: string
+  value: string | number | string[]
+}
+
+// 동적 신청 요청 body (회원/비회원 공통)
+export interface DynamicApplicationRequest {
+  answers: AnswerItem[]
+}
+
+// 신청 생성 응답
+export interface ApplicationSubmitResponse {
+  id: string
+  bookingNumber: string
+  gatheringId: string
+  status: ApplicationStatus
+  createdAt: string
+}
+
+// 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
+export interface AnswerView {
+  questionKey: string
+  label: string
+  value: string | number | string[] | null
+}
+
+// 신청 상세 (회원 GET /api/applications/{id}, 비회원 GET /api/applications/check)
+export interface ApplicationDetail {
+  id: string
+  bookingNumber: string
+  name: string | null
+  phone: string | null
+  status: ApplicationStatus
+  gathering: {
+    id: string
+    title: string
+    eventDate: string
+    startTime: string | null
+  }
+  createdAt: string
+  answers: AnswerView[]
+}
+
+// ===== 신청폼 관리 (관리자) =====
+
+export type MatchingStrategy = 'SAME' | 'DIVERSE' | 'OVERLAP'
+
+// 질문 추가/수정 요청 (POST/PUT /api/admin/.../form/questions)
+export interface FormQuestionUpsertRequest {
+  questionKey: string
+  type: QuestionType
+  label: string
+  placeholder?: string
+  required: boolean
+  displayOrder: number
+  options?: QuestionOptions
+  validation?: Record<string, unknown>
+  isMatchingField: boolean
+  matchingStrategy?: MatchingStrategy
+  matchingWeight?: number
+}
+
+// 질문 관리 응답
+export interface FormQuestionAdminItem {
+  questionId: string
+  questionKey: string
+  type: QuestionType
+  label: string
+  placeholder: string | null
+  required: boolean
+  displayOrder: number
+  options: QuestionOptions | null
+  validation: Record<string, unknown> | null
+  isMatchingField: boolean
+  systemReserved: boolean
+  matchingStrategy: MatchingStrategy | null
+  matchingWeight: number | null
+}
+
+// ===== 자동매칭 (관리자) =====
+
+export type MatchingGroupStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
+
+// 자동매칭 실행 결과 (POST /api/admin/gatherings/{id}/matching)
+export interface MatchingRunResult {
+  gatheringId: string
+  algorithmVersion: string
+  confirmedCount: number
+  groupCount: number
+  matchedCount: number
+  unmatchedCount: number
+}
+
+// 매칭 멤버 1명
+export interface MatchingMemberView {
+  memberId: string | null     // 미배정자는 null
+  applicationId: string
+  name: string | null
+  phone: string | null
+  seatOrder: number | null
+  manualAssign: boolean
+}
+
+// 매칭 그룹 1개
+export interface MatchingGroupView {
+  groupId: string
+  eventDate: string
+  status: MatchingGroupStatus
+  groupScore: number | null
+  groupSize: number
+  restaurantName: string | null
+  restaurantAddress: string | null
+  members: MatchingMemberView[]
+}
+
+// 매칭 결과 조회 (GET /api/admin/gatherings/{id}/matching)
+export interface MatchingResult {
+  gatheringId: string
+  groups: MatchingGroupView[]
+  unmatched: MatchingMemberView[]
+}
+
+// 관리자 신청 상세 (답변 포함) — GET /api/admin/applications/{id}
+export interface AdminApplicationDetail {
+  id: string
+  bookingNumber: string
+  name: string | null
+  phone: string | null
+  status: ApplicationStatus
+  gatheringId: string
+  userId: string | null
+  createdAt: string
+  answers: AnswerView[]
+}
