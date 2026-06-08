@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { adminUserApi } from '@/lib/api/adminUser'
+import { adminUserApi, type UserAccountStatus } from '@/lib/api/adminUser'
 
-export function useAdminUsers(keyword: string, page: number) {
+export function useAdminUsers(search: string, page: number) {
   return useQuery({
-    queryKey: ['admin', 'users', keyword, page],
-    queryFn: () => adminUserApi.getUsers(keyword || undefined, page),
+    queryKey: ['admin', 'users', search, page],
+    queryFn: () => adminUserApi.getUsers(search || undefined, page),
     staleTime: 1000 * 30,
   })
 }
@@ -19,7 +19,7 @@ export function useAdminUserDetail(id: string) {
 export function useUpdateUserStatus(userId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (suspend: boolean) => adminUserApi.updateStatus(userId, suspend),
+    mutationFn: (status: UserAccountStatus) => adminUserApi.updateStatus(userId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', userId] })

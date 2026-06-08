@@ -254,33 +254,45 @@ export interface AdminDashboardGathering {
 }
 
 export interface AdminUserApplicationItem {
-  id: string
-  gatheringTitle?: string
+  applicationId: string
+  bookingNumber: string
+  gatheringTitle: string | null
   status: string
   createdAt: string
-  isGuest: boolean
 }
 
+// 백엔드 회원 목록 응답(UserListResponse) 기준. 상세 전용 필드는 포함하지 않는다. (KAN-187)
 export interface AdminUserListItem {
   id: string
-  nickname: string
-  name: string | null
-  phone: string | null
   email: string
+  nickname: string
+  phone: string | null
+  admin: boolean
+  mileage: number
+  totalApplications: number
+  attendedCount: number
+  createdAt: string
+}
+
+// 백엔드 회원 상세 응답(UserDetailResponse) 기준. (KAN-188)
+export interface AdminUserDetail {
+  id: string
+  email: string
+  name: string | null
+  nickname: string
+  phone: string | null
   gender: string | null
   age: number | null
   job: string | null
   mbti: string | null
-  createdAt: string
-  applicationCount: number
+  intro: string | null
+  instagramId: string | null
+  admin: boolean
   mileage: number
-  accountStatus: string
-}
-
-export interface AdminUserDetail extends AdminUserListItem {
-  bio: string | null
-  animalType: string | null
-  interests: string[] | null
+  accountStatus: 'ACTIVE' | 'SUSPENDED'
+  totalApplications: number
+  attendedCount: number
+  createdAt: string
   applicationHistory: AdminUserApplicationItem[]
 }
 
