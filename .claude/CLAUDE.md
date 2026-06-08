@@ -20,7 +20,7 @@
 - **스타일링**: Tailwind CSS v4
 - **서버 상태**: TanStack React Query v5
 - **클라이언트 상태**: Zustand v5 (persist)
-- **HTTP 클라이언트**: Axios (interceptor로 JWT 자동 첨부)
+- **HTTP 클라이언트**: Axios (HttpOnly 쿠키 기반 인증, `withCredentials`로 자동 전송)
 - **폼**: React Hook Form + Zod
 - **아이콘**: Lucide React
 - **날짜**: dayjs
@@ -84,7 +84,7 @@ components/         → 훅만 호출, API 함수 직접 import 금지
 ### 상태 관리 구분
 
 - **React Query**: 서버에서 오는 데이터 (게더링 목록, 유저 프로필 등)
-- **Zustand**: 클라이언트 전용 상태 (로그인 여부, accessToken 등)
+- **Zustand**: 클라이언트 전용 상태 (로그인 여부, isAdmin 등 — 토큰은 HttpOnly 쿠키라 저장하지 않음)
 - 서버 데이터를 Zustand에 넣거나, 클라이언트 상태를 React Query로 관리하지 않는다.
 
 ### 'use client' 사용 기준

@@ -46,8 +46,8 @@ export interface CalendarDot {
 }
 
 // 인증 타입
+// access/refresh 토큰은 HttpOnly 쿠키로 발급되어 응답 body에는 사용자 정보만 담긴다. (KAN-189)
 export interface LoginResponse {
-  accessToken: string
   user: {
     id: string
     email: string
