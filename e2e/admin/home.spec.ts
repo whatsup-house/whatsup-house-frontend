@@ -68,17 +68,14 @@ test.describe('관리자 - 홈화면 관리', () => {
 
   test('홈 후기 목록이 표시된다', async ({ page }) => {
     await page.goto('/admin/home')
-    // 훅의 MOCK_ADMIN_HOME_REVIEWS[0].authorName을 직접 참조
-    await expect(page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].authorName)).toBeVisible()
+    await expect(page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].nickname)).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/admin/home-07-review-list.png')
   })
 
-  test('비활성 후기도 관리 목록에 표시된다', async ({ page }) => {
+  test('홈 노출 후기의 게더링명이 표시된다', async ({ page }) => {
     await page.goto('/admin/home')
-    // isActive: false인 항목(태양오)도 관리 화면에서는 노출되어야 함
-    const inactiveReview = MOCK_ADMIN_HOME_REVIEWS.find((r) => !r.isActive)!
-    await expect(page.getByText(inactiveReview.authorName)).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/admin/home-08-review-inactive.png' })
+    await expect(page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].gatheringTitle).first()).toBeVisible()
+    await page.screenshot({ path: 'e2e/screenshots/admin/home-08-review-gathering-title.png' })
   })
 
   test('홈 후기를 추가한다', async ({ page }) => {
@@ -103,14 +100,14 @@ test.describe('관리자 - 홈화면 관리', () => {
   test('홈 후기를 수정한다', async ({ page }) => {
     await page.goto('/admin/home')
     // hover 오버레이가 클릭을 가로막으므로 force 옵션 사용
-    await page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].authorName).first().click({ force: true })
+    await page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].nickname).first().click({ force: true })
     await captureFullPage(page, 'e2e/screenshots/admin/home-12-review-edit-panel.png')
   })
 
   test('홈 후기 노출/비노출을 토글한다', async ({ page }) => {
     await page.goto('/admin/home')
 
-    await page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].authorName).first().click({ force: true })
+    await page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].nickname).first().click({ force: true })
     const toggleBtn = page.getByRole('button', { name: /노출|비노출/ }).first()
     await expect(toggleBtn).toBeVisible()
     await toggleBtn.click()
