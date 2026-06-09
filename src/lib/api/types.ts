@@ -78,6 +78,41 @@ export interface RegisterResponse {
   createdAt: string
 }
 
+export interface FindEmailRequest {
+  name: string
+  phone: string
+}
+
+export interface FindEmailResponse {
+  maskedEmail: string
+}
+
+export interface PasswordResetRequest {
+  email: string
+}
+
+export interface PasswordResetRequestResponse {
+  accepted: boolean
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string
+  newPassword: string
+}
+
+export interface PasswordResetConfirmResponse {
+  reset: boolean
+}
+
+export interface UserWithdrawRequest {
+  password: string
+}
+
+export interface UserWithdrawResponse {
+  withdrawn: boolean
+  deleted: 'Y'
+}
+
 // 신청 관련 타입
 export type Gender = 'MALE' | 'FEMALE'
 export type ReferralSource = 'INSTAGRAM' | 'FRIEND' | 'BLOG' | 'OTHER'
