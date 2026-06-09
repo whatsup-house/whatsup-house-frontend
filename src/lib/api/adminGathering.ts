@@ -115,7 +115,7 @@ export const adminGatheringApi = {
   getAll: async (status?: string, date?: string): Promise<AdminGatheringListItem[]> => {
     const params = new URLSearchParams()
     if (status) params.append('status', status)
-    if (date) params.append('date', date)
+    if (date) params.append('eventDate', date)
     const query = params.toString()
     const res = await apiClient.get<ApiResponse<RawAdminGathering[]>>(
       `/api/admin/gatherings${query ? `?${query}` : ''}`
