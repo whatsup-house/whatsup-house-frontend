@@ -121,25 +121,17 @@ export default function LoginPageClient() {
                 <AlertCircle size={13} />
                 <span>아이디 또는 비밀번호를 확인해주세요.</span>
               </div>
-              <Link
-                href="/password-reset"
-                className="self-end text-xs font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
-              >
-                비밀번호를 잊으셨나요?
-              </Link>
             </div>
           )}
 
-          {!hasLoginError && (
-            <div className="mt-2 flex justify-end gap-3 text-xs font-medium text-tag-text">
-              <Link href="/find-email" className="underline decoration-tag-text/40 underline-offset-4">
-                아이디 찾기
-              </Link>
-              <Link href="/password-reset" className="underline decoration-tag-text/40 underline-offset-4">
-                비밀번호 재설정
-              </Link>
-            </div>
-          )}
+          <div className="mt-2 flex justify-end gap-3 text-xs font-medium text-tag-text">
+            <Link href="/find-email" className="underline decoration-tag-text/40 underline-offset-4">
+              아이디 찾기
+            </Link>
+            <Link href="/password-reset" className="underline decoration-tag-text/40 underline-offset-4">
+              비밀번호 찾기
+            </Link>
+          </div>
 
           <button
             type="submit"
