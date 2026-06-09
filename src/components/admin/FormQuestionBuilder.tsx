@@ -28,7 +28,7 @@ const TYPE_LABEL: Record<QuestionType, string> = {
 const STRATEGY_LABEL: Record<MatchingStrategy, string> = {
   SAME: '비슷하게',
   DIVERSE: '다양하게',
-  OVERLAP: '겹치게',
+  OVERLAP: '많이 겹치게',
 }
 
 const CHOICE_TYPES: QuestionType[] = ['SINGLE_CHOICE', 'MULTI_CHOICE']
@@ -54,6 +54,15 @@ const HARD_KEYS = ['budget', 'available_dates', 'age']
 // 자유 질문용 안정 식별자. (KAN-191) question key는 화면에 노출하지 않으므로 자동 생성한다.
 function autoQuestionKey(): string {
   return `q_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+}
+
+function getDefaultMatchingStrategy(questionKey: string, type: QuestionType): MatchingStrategy {
+  if (questionKey === 'age') return 'SAME'
+  if (['gender', 'job_category', 'mbti'].includes(questionKey)) return 'DIVERSE'
+  if (['interests', 'available_dates', 'budget'].includes(questionKey)) return 'OVERLAP'
+  if (type === 'NUMBER') return 'SAME'
+  if (type === 'MULTI_CHOICE') return 'OVERLAP'
+  return 'DIVERSE'
 }
 
 interface FormQuestionBuilderProps {
@@ -191,6 +200,26 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const set = <K extends keyof EditorState>(key: K, value: EditorState[K]) =>
     setState((p) => ({ ...p, [key]: value }))
 
+  const handleTypeChange = (type: QuestionType) => {
+    setState((p) => ({
+      ...p,
+      type,
+      matchingStrategy: p.isMatchingField
+        ? getDefaultMatchingStrategy(p.questionKey, type)
+        : p.matchingStrategy,
+    }))
+  }
+
+  const handleMatchingFieldChange = (isMatchingField: boolean) => {
+    setState((p) => ({
+      ...p,
+      isMatchingField,
+      matchingStrategy: isMatchingField && !p.matchingStrategy
+        ? getDefaultMatchingStrategy(p.questionKey, p.type)
+        : p.matchingStrategy,
+    }))
+  }
+
   const applyPreset = (preset: Preset) => {
     setState((p) => ({ ...p, placeholder: '', required: true, matchingWeight: 1, matchingStrategy: '', choicesText: '', ...preset.data }))
     setError(null)
@@ -220,7 +249,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
       options: isChoice ? { choices } : undefined,
       isMatchingField: state.isMatchingField,
       matchingStrategy: state.isMatchingField ? (state.matchingStrategy as MatchingStrategy) : undefined,
-      matchingWeight: state.isMatchingField ? state.matchingWeight : undefined,
+      matchingWeight: state.isMatchingField ? 1 : undefined,
     }
 
     const onDone = { onSuccess: onClose }
@@ -269,7 +298,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
 
           {/* 유형 (question key는 화면에 노출하지 않고 프리셋/자동으로 지정됨 — KAN-191) */}
           <Field label="유형 *">
-            <select value={state.type} onChange={(e) => set('type', e.target.value as QuestionType)} className={inputCls}>
+            <select value={state.type} onChange={(e) => handleTypeChange(e.target.value as QuestionType)} className={inputCls}>
               {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
                 <option key={t} value={t}>{TYPE_LABEL[t]}</option>
               ))}
@@ -299,7 +328,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
           {/* 매칭 */}
           <div className="rounded-[12px] border border-[#F0EBE8] p-3 bg-[#FAF8F6] flex flex-col gap-3">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={state.isMatchingField} onChange={(e) => set('isMatchingField', e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
+              <input type="checkbox" checked={state.isMatchingField} onChange={(e) => handleMatchingFieldChange(e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
               <span className="text-[14px] font-medium text-[#1A1A1A]">매칭에 사용</span>
             </label>
             {isHardKey && (
@@ -310,17 +339,14 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
               </p>
             )}
             {state.isMatchingField && (
-              <div className="grid grid-cols-2 gap-3">
+              <div>
                 <Field label="매칭 방식">
                   <select value={state.matchingStrategy} onChange={(e) => set('matchingStrategy', e.target.value as MatchingStrategy)} className={inputCls}>
                     <option value="">선택</option>
-                    <option value="SAME">비슷하게 (나이)</option>
-                    <option value="DIVERSE">다양하게 (성별/직업)</option>
-                    <option value="OVERLAP">겹치게 (관심사/날짜)</option>
+                    <option value="SAME">비슷하게</option>
+                    <option value="DIVERSE">다양하게</option>
+                    <option value="OVERLAP">많이 겹치게</option>
                   </select>
-                </Field>
-                <Field label="가중치">
-                  <input type="number" step="0.1" min="0" max="9.99" value={state.matchingWeight} onChange={(e) => set('matchingWeight', Number(e.target.value))} className={inputCls} />
                 </Field>
               </div>
             )}
