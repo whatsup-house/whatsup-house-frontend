@@ -79,6 +79,20 @@ export interface LocationItem {
   mapUrl?: string | null   // 기존 하위 호환 필드
 }
 
+// 프론트 장소 모델을 백엔드 계약으로 변환한다. (KAN-194)
+// contractStatus → status(enum ACTIVE/EXPIRED), features → memo. 빈 URL은 생략.
+function toLocationBody(data: Partial<LocationItem>) {
+  return {
+    name: data.name,
+    address: data.address,
+    naverMapUrl: data.naverMapUrl || undefined,
+    kakaoMapUrl: data.kakaoMapUrl || undefined,
+    maxCapacity: data.maxCapacity,
+    status: data.contractStatus || 'ACTIVE',
+    memo: data.features && data.features.length > 0 ? data.features.join(', ') : undefined,
+  }
+}
+
 export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'ATTENDED'
 
 export interface AdminApplicationItem {
@@ -168,12 +182,12 @@ export const adminGatheringApi = {
   },
 
   createLocation: async (data: Partial<LocationItem>) => {
-    const res = await apiClient.post<ApiResponse<unknown>>('/api/admin/locations', data)
+    const res = await apiClient.post<ApiResponse<unknown>>('/api/admin/locations', toLocationBody(data))
     return res.data.data
   },
 
   updateLocation: async (id: string, data: Partial<LocationItem>) => {
-    const res = await apiClient.put<ApiResponse<unknown>>(`/api/admin/locations/${id}`, data)
+    const res = await apiClient.put<ApiResponse<unknown>>(`/api/admin/locations/${id}`, toLocationBody(data))
     return res.data.data
   },
 

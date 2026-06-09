@@ -97,7 +97,6 @@ function LocationModal({
                 {...register('contractStatus')}
               >
                 <option value="ACTIVE">계약중</option>
-                <option value="PENDING">협의중</option>
                 <option value="EXPIRED">만료</option>
               </select>
             </div>
