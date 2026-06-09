@@ -81,36 +81,6 @@ export interface RegisterResponse {
 
 // 신청 관련 타입
 export type Gender = 'MALE' | 'FEMALE'
-export type ReferralSource = 'INSTAGRAM' | 'FRIEND' | 'BLOG' | 'OTHER'
-
-export interface GuestApplicationRequest {
-  name: string
-  phone: string
-  gender: Gender
-  age: number
-  instagramId?: string
-  job?: string
-  mbti?: string
-  intro?: string
-  referrerName?: string
-}
-
-export interface GuestApplicationResponse {
-  id: string
-  bookingNumber: string
-  gatheringId: string
-  status: string
-  createdAt: string
-}
-
-export interface UserApplicationRequest {
-  gender: Gender
-  age: number
-  job?: string
-  mbti?: string
-  intro: string
-  referralSource: ReferralSource
-}
 
 
 // 프로필 수정 요청 타입
