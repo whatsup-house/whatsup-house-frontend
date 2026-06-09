@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import Link from 'next/link'
 import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
+import ReviewImageFallback from '@/components/ui/ReviewImageFallback'
 import { useHomeReviews } from '@/lib/hooks/useHome'
 import type { HomeReviewItem } from '@/lib/api/types'
 
@@ -19,7 +20,7 @@ function HomeReviewCard({ review }: { review: HomeReviewItem }) {
             sizes="200px"
           />
         ) : (
-          <span className="text-4xl">🐾</span>
+          <ReviewImageFallback />
         )}
       </div>
       <div className="p-3">
