@@ -2,10 +2,28 @@
 
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { login, logout as logoutApi, register, checkNickname, fetchMyProfile, updateMyProfile } from '@/lib/api/auth'
+import {
+  checkNickname,
+  confirmPasswordReset,
+  fetchMyProfile,
+  findEmail,
+  login,
+  logout as logoutApi,
+  register,
+  requestPasswordReset,
+  updateMyProfile,
+  withdrawMyAccount,
+} from '@/lib/api/auth'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useRouter } from 'next/navigation'
-import type { RegisterRequest, ProfileUpdateRequest } from '@/lib/api/types'
+import type {
+  FindEmailRequest,
+  PasswordResetConfirmRequest,
+  PasswordResetRequest,
+  ProfileUpdateRequest,
+  RegisterRequest,
+  UserWithdrawRequest,
+} from '@/lib/api/types'
 
 export function useInitAuth() {
   const { login: storeLogin, logout: storeLogout } = useAuthStore()
@@ -65,6 +83,24 @@ export function useRegisterAndLogin() {
   })
 }
 
+export function useFindEmail() {
+  return useMutation({
+    mutationFn: (data: FindEmailRequest) => findEmail(data),
+  })
+}
+
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: (data: PasswordResetRequest) => requestPasswordReset(data),
+  })
+}
+
+export function useConfirmPasswordReset() {
+  return useMutation({
+    mutationFn: (data: PasswordResetConfirmRequest) => confirmPasswordReset(data),
+  })
+}
+
 export function useCheckNickname(nickname: string) {
   return useQuery({
     queryKey: ['nickname-check', nickname],
@@ -103,6 +139,21 @@ export function useLogout() {
     onSettled: () => {
       storeLogout()
       router.push('/')
+    },
+  })
+}
+
+export function useWithdrawAccount() {
+  const { logout: storeLogout } = useAuthStore()
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  return useMutation({
+    mutationFn: (data: UserWithdrawRequest) => withdrawMyAccount(data),
+    onSuccess: () => {
+      storeLogout()
+      queryClient.clear()
+      router.push('/login?withdrawn=1')
     },
   })
 }

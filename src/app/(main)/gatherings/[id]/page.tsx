@@ -77,7 +77,7 @@ export default function GatheringDetailPage({
       <GatheringDetail gathering={gathering} />
 
       {/* 하단 고정 바 */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-card border-t border-tag-bg/50 px-4 py-3 z-40">
+      <div className="fixed bottom-0 inset-x-0 w-full md:left-1/2 md:right-auto md:-translate-x-1/2 md:max-w-[430px] bg-card border-t border-tag-bg/50 px-4 py-3 z-40">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-tag-text">참가비</p>

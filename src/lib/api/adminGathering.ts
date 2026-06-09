@@ -76,7 +76,6 @@ export interface LocationItem {
   contractStatus: string
   naverMapUrl?: string | null
   kakaoMapUrl?: string | null
-  mapUrl?: string | null   // 기존 하위 호환 필드
 }
 
 // 프론트 장소 모델을 백엔드 계약으로 변환한다. (KAN-194)
@@ -177,7 +176,6 @@ export const adminGatheringApi = {
       contractStatus: l.contractStatus ?? '',
       naverMapUrl: l.naverMapUrl ?? null,
       kakaoMapUrl: l.kakaoMapUrl ?? null,
-      mapUrl: l.mapUrl ?? null,
     }))
   },
 

@@ -26,7 +26,6 @@ export interface GatheringListItem {
     address?: string | null
     naverMapUrl?: string | null
     kakaoMapUrl?: string | null
-    mapUrl?: string | null   // 기존 하위 호환 필드
   } | null
 }
 
@@ -77,6 +76,41 @@ export interface RegisterResponse {
   email: string
   nickname: string
   createdAt: string
+}
+
+export interface FindEmailRequest {
+  name: string
+  phone: string
+}
+
+export interface FindEmailResponse {
+  maskedEmail: string
+}
+
+export interface PasswordResetRequest {
+  email: string
+}
+
+export interface PasswordResetRequestResponse {
+  accepted: boolean
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string
+  newPassword: string
+}
+
+export interface PasswordResetConfirmResponse {
+  reset: boolean
+}
+
+export interface UserWithdrawRequest {
+  password: string
+}
+
+export interface UserWithdrawResponse {
+  withdrawn: boolean
+  deleted: 'Y'
 }
 
 // 신청 관련 타입
@@ -197,6 +231,11 @@ export interface ReviewLikeResponse {
 export interface ReviewDeleteResponse {
   reviewId: string
   deleted: boolean
+}
+
+export interface ReviewLocateResponse {
+  reviewId: string
+  page: number
 }
 
 export interface GatheringReviewPageResponse {

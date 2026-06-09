@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
@@ -20,7 +21,10 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
   const hasPhoto = review.reviewType === 'PHOTO' && !!review.images?.[0]?.imageUrl
 
   return (
-    <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden flex flex-col">
+    <Link
+      href={`/reviews?highlight=${review.reviewId}&gathering=${review.gatheringId}`}
+      className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden flex flex-col active:opacity-70 transition-opacity"
+    >
       {/* 이미지 영역 — 항상 고정 비율 */}
       <div className="relative w-full aspect-[4/3] bg-tag-bg overflow-hidden shrink-0">
         {hasPhoto ? (
@@ -61,7 +65,7 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
           <span className="text-xs text-tag-text/60">{review.likeCount}</span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
