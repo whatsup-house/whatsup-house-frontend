@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Flame } from 'lucide-react'
+import { Flame, ChevronLeft, ChevronRight } from 'lucide-react'
 import AppImage from '@/components/ui/AppImage'
 import { useHeroCarousel } from '@/lib/hooks/useHome'
 import type { HeroCarouselSlide } from '@/lib/api/types'
@@ -179,6 +179,24 @@ export default function HeroCarousel() {
           </div>
         ))}
       </div>
+
+      {/* 좌우 이동 버튼 (데스크탑 전용) */}
+      <button
+        type="button"
+        aria-label="이전"
+        onClick={() => { setIdx((i) => Math.max(0, i - 1)); resetTimer() }}
+        className={`absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity lg:flex ${activeIdx > 0 ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+      >
+        <ChevronLeft size={20} />
+      </button>
+      <button
+        type="button"
+        aria-label="다음"
+        onClick={() => { setIdx((i) => Math.min(total - 1, i + 1)); resetTimer() }}
+        className={`absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity lg:flex ${activeIdx < total - 1 ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+      >
+        <ChevronRight size={20} />
+      </button>
 
       {/* 인디케이터 */}
       <div className="absolute bottom-2 inset-x-0 flex justify-center gap-1.5 z-10">

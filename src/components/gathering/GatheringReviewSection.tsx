@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
 import { useGatheringReviews } from '@/lib/hooks/useReview'
 import AppImage from '@/components/ui/AppImage'
+import HScrollButtons from '@/components/ui/HScrollButtons'
+import ReviewImageFallback from '@/components/ui/ReviewImageFallback'
 import ReviewWriteForm from './ReviewWriteForm'
 import type { ReviewItem } from '@/lib/api/types'
 
@@ -35,11 +37,7 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
             sizes="260px"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-tag-bg to-background flex items-center justify-center">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-tag-text/30">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          </div>
+          <ReviewImageFallback />
         )}
         {review.reviewType === 'PHOTO' && (
           <span className="absolute top-2 left-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary-light text-primary">
@@ -74,6 +72,7 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
   const [sort, setSort] = useState<ReviewSort>('LIKES')
   const [page, setPage] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
+  const reviewScrollRef = useRef<HTMLDivElement>(null)
 
   const { data: attendedApps } = useMyApplicationsMe('ATTENDED', isLoggedIn)
   const attendedApplication = attendedApps?.find((app) => app.gathering.id === gatheringId)
@@ -128,12 +127,15 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
 
       {/* 리뷰 목록 — 가로 스크롤 */}
       {reviews.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 items-stretch">
-          {reviews.map((review) => (
-            <div key={review.reviewId} className="flex-none w-[260px] snap-start">
-              <HorizontalReviewCard review={review} />
-            </div>
-          ))}
+        <div className="relative">
+          <div ref={reviewScrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 items-stretch">
+            {reviews.map((review) => (
+              <div key={review.reviewId} className="flex-none w-[260px] snap-start">
+                <HorizontalReviewCard review={review} />
+              </div>
+            ))}
+          </div>
+          <HScrollButtons scrollRef={reviewScrollRef} />
         </div>
       )}
 
