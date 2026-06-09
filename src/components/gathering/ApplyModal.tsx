@@ -48,7 +48,7 @@ export default function ApplyModal({
       />
 
       {/* 바텀시트 */}
-      <div className="relative w-full max-w-[390px] bg-card rounded-t-[24px] px-5 pt-6 pb-8 animate-slide-up">
+      <div className="relative w-full md:max-w-[430px] bg-card rounded-t-[24px] px-5 pt-6 pb-8 animate-slide-up">
         {/* 핸들바 */}
         <div className="flex justify-center mb-4">
           <div className="w-10 h-1 rounded-full bg-tag-bg" />
