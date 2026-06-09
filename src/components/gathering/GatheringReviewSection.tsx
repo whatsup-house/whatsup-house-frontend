@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
 import { useGatheringReviews } from '@/lib/hooks/useReview'
 import AppImage from '@/components/ui/AppImage'
+import HScrollButtons from '@/components/ui/HScrollButtons'
 import ReviewWriteForm from './ReviewWriteForm'
 import type { ReviewItem } from '@/lib/api/types'
 
@@ -74,6 +75,7 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
   const [sort, setSort] = useState<ReviewSort>('LIKES')
   const [page, setPage] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
+  const reviewScrollRef = useRef<HTMLDivElement>(null)
 
   const { data: attendedApps } = useMyApplicationsMe('ATTENDED', isLoggedIn)
   const attendedApplication = attendedApps?.find((app) => app.gathering.id === gatheringId)
@@ -128,12 +130,15 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
 
       {/* 리뷰 목록 — 가로 스크롤 */}
       {reviews.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 items-stretch">
-          {reviews.map((review) => (
-            <div key={review.reviewId} className="flex-none w-[260px] snap-start">
-              <HorizontalReviewCard review={review} />
-            </div>
-          ))}
+        <div className="relative">
+          <div ref={reviewScrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 items-stretch">
+            {reviews.map((review) => (
+              <div key={review.reviewId} className="flex-none w-[260px] snap-start">
+                <HorizontalReviewCard review={review} />
+              </div>
+            ))}
+          </div>
+          <HScrollButtons scrollRef={reviewScrollRef} />
         </div>
       )}
 
