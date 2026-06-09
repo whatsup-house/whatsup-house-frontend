@@ -17,13 +17,17 @@ import type {
 } from '@/lib/api/types'
 
 const TYPE_LABEL: Record<QuestionType, string> = {
-  SHORT_TEXT: '단답형',
-  LONG_TEXT: '장문형',
+  SHORT_TEXT: '주관식',
+  LONG_TEXT: '주관식',
   SINGLE_CHOICE: '단일선택',
   MULTI_CHOICE: '다중선택',
   NUMBER: '숫자',
   MBTI_INPUT: 'MBTI',
 }
+
+// 질문 추가/수정 드롭다운에 노출하는 유형. 단답형·장문형은 '주관식' 하나로 합쳤다.
+// (레거시 LONG_TEXT 질문은 편집 시 SHORT_TEXT로 정규화된다.)
+const TYPE_OPTIONS: QuestionType[] = ['SHORT_TEXT', 'SINGLE_CHOICE', 'MULTI_CHOICE', 'NUMBER', 'MBTI_INPUT']
 
 const STRATEGY_LABEL: Record<MatchingStrategy, string> = {
   SAME: '비슷하게',
@@ -187,7 +191,8 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const [state, setState] = useState<EditorState>(() => ({
     label: initial?.label ?? '',
     questionKey: initial?.questionKey ?? '',
-    type: initial?.type ?? 'SHORT_TEXT',
+    // 단답형·장문형을 '주관식'으로 합쳤으므로 레거시 LONG_TEXT는 SHORT_TEXT로 정규화한다.
+    type: initial?.type === 'LONG_TEXT' ? 'SHORT_TEXT' : (initial?.type ?? 'SHORT_TEXT'),
     placeholder: initial?.placeholder ?? '',
     required: initial?.required ?? true,
     choicesText: (initial?.options?.choices ?? []).join('\n'),
@@ -299,7 +304,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
           {/* 유형 (question key는 화면에 노출하지 않고 프리셋/자동으로 지정됨 — KAN-191) */}
           <Field label="유형 *">
             <select value={state.type} onChange={(e) => handleTypeChange(e.target.value as QuestionType)} className={inputCls}>
-              {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
+              {TYPE_OPTIONS.map((t) => (
                 <option key={t} value={t}>{TYPE_LABEL[t]}</option>
               ))}
             </select>
