@@ -71,7 +71,7 @@ export default function ReviewsSection() {
       </div>
 
       <div className="relative">
-        <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4">
+        <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-pl-4 px-4">
           {isLoading
             ? Array.from({ length: 4 }, (_, i) => <SkeletonCard key={i} />)
             : reviews.map((review) => <HomeReviewCard key={review.reviewId} review={review} />)
