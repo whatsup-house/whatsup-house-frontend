@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { captureFullPage } from '../fixtures/screenshot'
-import { setupUserContext, mockApplications, mockGathering } from '../fixtures/mocks'
+import { setupUserContext, mockApplications, mockGathering, MOCK_CONFIRMED_DATE } from '../fixtures/mocks'
 
 // mockApplications[1]의 CONFIRMED 신청이 속한 게더링
 const CONFIRMED_GATHERING_ID = 'c2000000-0000-0000-0000-000000000003'
@@ -9,7 +9,7 @@ const mockConfirmedGathering = {
   ...mockGathering,
   id: CONFIRMED_GATHERING_ID,
   title: '썬데이 러닝 클럽 (SRC)',
-  eventDate: '2026-05-18',
+  eventDate: MOCK_CONFIRMED_DATE,
   startTime: '08:00:00',
   endTime: '10:00:00',
   price: 5000,
@@ -21,7 +21,7 @@ test.describe('회원 - 예약 확정 화면', () => {
   test.beforeEach(async ({ page, context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await setupUserContext(page)
-    await page.route('**/api/applications/me**', (route) => {
+    await page.route('**/api/applications', (route) => {
       route.fulfill({ json: { success: true, message: 'OK', data: mockApplications } })
     })
     await page.route(`**/api/gatherings/${CONFIRMED_GATHERING_ID}`, (route) =>
@@ -47,7 +47,7 @@ test.describe('회원 - 예약 확정 화면', () => {
 
     // 입금 계좌 정보 노출
     await expect(page.getByText('우리은행 1002-157-849052')).toBeVisible()
-    await expect(page.getByText('와썹하우스')).toBeVisible()
+    await expect(page.locator('main').getByText('와썹하우스')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/confirmed-02-page.png')
 
     // 계좌번호 클릭 → 클립보드 복사 + "복사됨" 피드백

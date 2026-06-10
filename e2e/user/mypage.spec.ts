@@ -7,7 +7,7 @@ import { setupUserContext, mockApplications, mockUserProfile } from '../fixtures
 test.describe('회원 - 마이페이지', () => {
   test.beforeEach(async ({ page }) => {
     await setupUserContext(page)
-    await page.route('**/api/applications/me**', (route) => {
+    await page.route('**/api/applications', (route) => {
       route.fulfill({ json: { success: true, message: 'OK', data: mockApplications } })
     })
   })
@@ -23,7 +23,7 @@ test.describe('회원 - 마이페이지', () => {
     await captureFullPage(page, 'e2e/screenshots/user/mypage-02-applications-all.png')
 
     // 대기중 필터
-    await page.route('**/api/applications/me**', (route) => {
+    await page.route('**/api/applications', (route) => {
       route.fulfill({
         json: { success: true, message: 'OK', data: [mockApplications[0]] },
       })
@@ -33,7 +33,7 @@ test.describe('회원 - 마이페이지', () => {
     await captureFullPage(page, 'e2e/screenshots/user/mypage-03-applications-pending.png')
 
     // 확정 필터
-    await page.route('**/api/applications/me**', (route) => {
+    await page.route('**/api/applications', (route) => {
       route.fulfill({
         json: { success: true, message: 'OK', data: [mockApplications[1]] },
       })

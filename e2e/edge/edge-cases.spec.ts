@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { setupGuestContext, setupUserContext, mockGatheringApis, mockClosedGathering, MOCK_GATHERING_ID, MOCK_CLOSED_GATHERING_ID } from '../fixtures/mocks'
+import { setupGuestContext, setupUserContext, mockGatheringApis, mockClosedGathering, MOCK_GATHERING_ID, MOCK_CLOSED_GATHERING_ID, MOCK_OPEN_DATE } from '../fixtures/mocks'
 
 // EDGE-01~04: 엣지 케이스
 test.describe('엣지 케이스', () => {
@@ -38,7 +38,7 @@ test.describe('엣지 케이스', () => {
   test('EDGE-01: 이미 신청한 게더링에서 상태를 확인한다', async ({ page }) => {
     await setupUserContext(page)
     await mockGatheringApis(page)
-    await page.route('**/api/applications/me**', (route) => {
+    await page.route('**/api/applications', (route) => {
       route.fulfill({
         json: {
           success: true,
@@ -48,7 +48,7 @@ test.describe('엣지 케이스', () => {
               id: 'app-existing',
               bookingNumber: 'WH260501EXIST',
               status: 'CONFIRMED',
-              gathering: { id: MOCK_GATHERING_ID, title: '퇴근 게더링', eventDate: '2026-05-14', thumbnailUrl: '/home/home-2.png' },
+              gathering: { id: MOCK_GATHERING_ID, title: '퇴근 게더링', eventDate: MOCK_OPEN_DATE, thumbnailUrl: '/home/home-2.png' },
               createdAt: '2026-05-01T10:00:00',
             },
           ],

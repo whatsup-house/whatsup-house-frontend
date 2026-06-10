@@ -7,6 +7,7 @@ import {
   mockReviewApis,
   mockGathering,
   MOCK_GATHERING_ID,
+  MOCK_OPEN_DATE,
 } from '../fixtures/mocks'
 
 // AUTH-G-03: 비회원 게더링 탐색
@@ -18,7 +19,7 @@ test.describe('비회원 - 게더링 탐색', () => {
   })
 
   test('홈 화면을 탐색한다', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/?guest=1')
     await expect(page).toHaveURL('/')
     await expect(page.getByText('이번 주 가장 많이 본 게더링')).toBeVisible()
     await expect(page.getByText('퇴근 게더링').first()).toBeVisible()
@@ -29,7 +30,7 @@ test.describe('비회원 - 게더링 탐색', () => {
   })
 
   test('하단 내비게이션은 소셜 없이 3개 탭만 표시한다', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/?guest=1')
 
     const bottomNav = page.locator('nav')
     await expect(bottomNav.getByText('홈')).toBeVisible()
@@ -49,7 +50,7 @@ test.describe('비회원 - 게더링 탐색', () => {
             id: MOCK_GATHERING_ID,
             title: '퇴근 게더링',
             description: '퇴근하고 모여요.',
-            eventDate: '2026-05-14',
+            eventDate: MOCK_OPEN_DATE,
             startTime: '19:00:00',
             endTime: '22:00:00',
             price: 20000,
@@ -61,7 +62,7 @@ test.describe('비회원 - 게더링 탐색', () => {
         ] } })
       } else {
         route.fulfill({ json: { success: true, message: 'OK', data: [
-          { id: MOCK_GATHERING_ID, eventDate: '2026-05-14', status: 'OPEN', title: '퇴근 게더링', description: '', startTime: '19:00:00', endTime: '22:00:00', price: 20000, maxAttendees: 12, thumbnailUrl: null, location: null },
+          { id: MOCK_GATHERING_ID, eventDate: MOCK_OPEN_DATE, status: 'OPEN', title: '퇴근 게더링', description: '', startTime: '19:00:00', endTime: '22:00:00', price: 20000, maxAttendees: 12, thumbnailUrl: null, location: null },
         ] } })
       }
     })

@@ -9,6 +9,7 @@ import {
   mockGathering,
   MOCK_GATHERING_ID,
   mockApplications,
+  MOCK_OPEN_DATE,
 } from '../fixtures/mocks'
 
 function apiRes<T>(data: T) {
@@ -22,7 +23,7 @@ test.describe('후기 페이지', () => {
     await page.route('**/api/home/reviews', (route) =>
       route.fulfill({ json: apiRes(mockHomeReviews) })
     )
-    await page.goto('/')
+    await page.goto('/?guest=1')
     await expect(page.getByText(mockHomeReviews[0].nickname)).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/reviews-01-home-section.png')
   })
@@ -83,13 +84,13 @@ test.describe('후기 페이지', () => {
     await page.route('**/api/gatherings', (route) => {
       route.fulfill({ json: apiRes([mockGathering]) })
     })
-    await page.route('**/api/applications/me**', (route) => {
+    await page.route('**/api/applications', (route) => {
       route.fulfill({
         json: apiRes([
           {
             ...mockApplications[0],
             status: 'ATTENDED',
-            gathering: { ...mockApplications[0].gathering, id: MOCK_GATHERING_ID },
+            gathering: { ...mockApplications[0].gathering, id: MOCK_GATHERING_ID, eventDate: MOCK_OPEN_DATE },
           },
         ]),
       })
@@ -121,7 +122,7 @@ test.describe('후기 페이지', () => {
             reviewContent: '편안하고 좋은 시간이었어요.',
             likeCount: 0,
             images: [],
-            createdAt: '2026-05-20T10:00:00',
+            createdAt: '2026-08-20T10:00:00',
           }),
         })
       } else {
