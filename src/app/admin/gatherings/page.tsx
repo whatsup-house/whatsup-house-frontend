@@ -13,16 +13,16 @@ import dayjs from 'dayjs'
 
 const PAGE_SIZE = 10
 
-const STATUS_OPTIONS = ['전체', 'RECRUITING', 'CLOSED', 'COMPLETED', 'CANCELLED']
+// 백엔드 GatheringStatus enum(OPEN/CLOSED/COMPLETED/CANCELLED)과 값을 맞춘다. (KAN-209)
+const STATUS_OPTIONS = ['전체', 'OPEN', 'CLOSED', 'COMPLETED', 'CANCELLED']
 const STATUS_LABEL: Record<string, string> = {
   전체: '전체',
-  RECRUITING: '모집중',
+  OPEN: '모집중',
   CLOSED: '마감',
   COMPLETED: '진행완료',
   CANCELLED: '취소',
 }
 const STATUS_STYLE: Record<string, string> = {
-  RECRUITING: 'bg-[#FDECEA] text-[#C8392B]',
   OPEN: 'bg-[#FDECEA] text-[#C8392B]',
   CLOSED: 'bg-[#F5F5F5] text-[#767676]',
   COMPLETED: 'bg-[#E8F5E9] text-[#4CAF50]',
