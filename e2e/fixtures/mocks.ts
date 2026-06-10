@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { AdminHeroCarouselSlide, AdminHomeReview } from '@/lib/api/types'
+import type { AdminHeroCarouselSlide, AdminHomeReview, GatheringForm } from '@/lib/api/types'
 
 // ─── Admin Mock 데이터 (E2E 인터셉트용) ────────────────────────────────────────
 
@@ -27,12 +27,15 @@ export const MOCK_ADMIN_HOME_REVIEWS: AdminHomeReview[] = [
 // DB seed의 gatherings 테이블 UUID
 export const MOCK_GATHERING_ID = 'c2000000-0000-0000-0000-000000000001'
 export const MOCK_CLOSED_GATHERING_ID = 'c2000000-0000-0000-0000-000000000002'
+export const MOCK_OPEN_DATE = '2026-08-14'
+export const MOCK_CLOSED_DATE = '2026-08-17'
+export const MOCK_CONFIRMED_DATE = '2026-08-18'
 
 export const mockGathering = {
   id: MOCK_GATHERING_ID,
   title: '퇴근 게더링',
   description: '퇴근 후 가볍게. 팜팜발리에서 하루의 피로를 풀고 새로운 사람들과 솔직한 이야기를 나눠요. 음료와 간단한 안주가 포함됩니다.',
-  eventDate: '2026-05-14',
+  eventDate: MOCK_OPEN_DATE,
   startTime: '19:30:00',
   endTime: '21:30:00',
   price: 20000,
@@ -53,7 +56,7 @@ export const mockClosedGathering = {
   id: MOCK_CLOSED_GATHERING_ID,
   title: '대학생 게더링',
   status: 'CLOSED',
-  eventDate: '2026-05-17',
+  eventDate: MOCK_CLOSED_DATE,
   startTime: '15:00:00',
   endTime: '17:30:00',
   price: 15000,
@@ -117,7 +120,7 @@ export const mockApplications = [
     gathering: {
       id: MOCK_GATHERING_ID,
       title: '퇴근 게더링',
-      eventDate: '2026-05-14',
+      eventDate: MOCK_OPEN_DATE,
       thumbnailUrl: '/home/home-2.png',
     },
     createdAt: '2026-05-10T10:00:00',
@@ -129,7 +132,7 @@ export const mockApplications = [
     gathering: {
       id: 'c2000000-0000-0000-0000-000000000003',
       title: '썬데이 러닝 클럽 (SRC)',
-      eventDate: '2026-05-18',
+      eventDate: MOCK_CONFIRMED_DATE,
       thumbnailUrl: '/home/home-1.png',
     },
     createdAt: '2026-04-28T15:00:00',
@@ -141,7 +144,7 @@ export const mockAdminGatherings = [
   {
     id: MOCK_GATHERING_ID,
     title: '퇴근 게더링',
-    date: '2026-05-14',
+    date: MOCK_OPEN_DATE,
     startTime: '19:30:00',
     endTime: '21:30:00',
     locationName: '팜팜발리',
@@ -157,7 +160,7 @@ export const mockAdminGatherings = [
   {
     id: MOCK_CLOSED_GATHERING_ID,
     title: '대학생 게더링',
-    date: '2026-05-17',
+    date: MOCK_CLOSED_DATE,
     startTime: '15:00:00',
     endTime: '17:30:00',
     locationName: '서울대입구역',
@@ -352,7 +355,7 @@ export const mockDashboardGatherings = [
   {
     id: MOCK_GATHERING_ID,
     title: '퇴근 게더링',
-    eventDate: '2026-05-14',
+    eventDate: MOCK_OPEN_DATE,
     startTime: '19:30:00',
     endTime: '21:30:00',
     locationName: '팜팜발리',
@@ -365,6 +368,98 @@ export const mockDashboardGatherings = [
     status: 'OPEN',
   },
 ]
+
+export const mockGatheringForm: GatheringForm = {
+  formId: 'form-e2e-001',
+  gatheringId: MOCK_GATHERING_ID,
+  guideText: null,
+  questions: [
+    {
+      questionId: 'q-name',
+      questionKey: 'name',
+      type: 'SHORT_TEXT',
+      label: '이름',
+      placeholder: '실명을 입력해주세요',
+      required: true,
+      displayOrder: 1,
+      options: null,
+      validation: null,
+      systemReserved: true,
+    },
+    {
+      questionId: 'q-phone',
+      questionKey: 'phone',
+      type: 'SHORT_TEXT',
+      label: '연락처',
+      placeholder: '01012345678',
+      required: true,
+      displayOrder: 2,
+      options: null,
+      validation: null,
+      systemReserved: true,
+    },
+    {
+      questionId: 'q-email',
+      questionKey: 'email',
+      type: 'SHORT_TEXT',
+      label: '이메일',
+      placeholder: 'example@email.com',
+      required: true,
+      displayOrder: 3,
+      options: null,
+      validation: null,
+      systemReserved: true,
+    },
+    {
+      questionId: 'q-gender',
+      questionKey: 'gender',
+      type: 'SINGLE_CHOICE',
+      label: '성별',
+      placeholder: null,
+      required: true,
+      displayOrder: 4,
+      options: { choices: ['남성', '여성'] },
+      validation: null,
+      systemReserved: false,
+    },
+    {
+      questionId: 'q-age',
+      questionKey: 'age',
+      type: 'NUMBER',
+      label: '나이',
+      placeholder: '나이를 입력해주세요',
+      required: true,
+      displayOrder: 5,
+      options: null,
+      validation: null,
+      systemReserved: false,
+    },
+    {
+      questionId: 'q-mbti',
+      questionKey: 'mbti',
+      type: 'MBTI_INPUT',
+      label: 'MBTI',
+      placeholder: null,
+      required: false,
+      displayOrder: 6,
+      options: null,
+      validation: null,
+      systemReserved: false,
+    },
+    {
+      questionId: 'q-referral',
+      questionKey: 'referral_source',
+      type: 'SINGLE_CHOICE',
+      label: '유입 경로',
+      placeholder: null,
+      required: false,
+      displayOrder: 7,
+      options: { choices: ['인스타그램', '지인 추천', '검색'] },
+      validation: null,
+      systemReserved: false,
+    },
+  ],
+}
 
 // ─── API Route Interceptors ───────────────────────────────────────────────────
 
@@ -403,6 +498,9 @@ export async function mockGatheringApis(page: Page) {
   await page.route('**/api/gatherings', (route) =>
     route.fulfill({ json: apiRes([mockGathering, mockClosedGathering]) })
   )
+  await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}/form`, (route) =>
+    route.fulfill({ json: apiRes(mockGatheringForm) })
+  )
   await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}`, (route) =>
     route.fulfill({ json: apiRes(mockGathering) })
   )
@@ -430,27 +528,33 @@ export async function mockReviewApis(page: Page) {
 }
 
 export async function mockAdminHomeApis(page: Page) {
+  const rawSlides = MOCK_HERO_CAROUSEL_SLIDES.map(({ isActive, ...slide }) => ({
+    ...slide,
+    active: isActive,
+  }))
+  const rawReviews = MOCK_ADMIN_HOME_REVIEWS.map(({ imageUrl, ...review }) => ({
+    ...review,
+    images: imageUrl ? [{ imageUrl }] : [],
+  }))
+
   // 히어로 캐러셀 — 컬렉션
-  await page.route('**/api/admin/hero-carousel', (route) => {
+  await page.route('**/api/admin/carousel', (route) => {
     if (route.request().method() === 'GET') {
-      return route.fulfill({ json: apiRes({ slides: MOCK_HERO_CAROUSEL_SLIDES }) })
+      return route.fulfill({ json: apiRes(rawSlides) })
     }
-    return route.fulfill({ json: apiRes(MOCK_HERO_CAROUSEL_SLIDES[0]) })
+    return route.fulfill({ json: apiRes(rawSlides[0]) })
   })
   // 히어로 캐러셀 — 개별 항목(수정/삭제/토글)
-  await page.route('**/api/admin/hero-carousel/**', (route) =>
-    route.fulfill({ json: apiRes(MOCK_HERO_CAROUSEL_SLIDES[0]) })
+  await page.route('**/api/admin/carousel/**', (route) =>
+    route.fulfill({ json: apiRes(rawSlides[0]) })
   )
 
-  // 홈 후기 — 컬렉션
-  await page.route('**/api/admin/home-reviews', (route) => {
-    if (route.request().method() === 'GET') {
-      return route.fulfill({ json: apiRes({ reviews: MOCK_ADMIN_HOME_REVIEWS }) })
+  // 홈 후기 — 컬렉션/개별 항목(노출 해제/삭제)
+  await page.route('**/api/admin/reviews**', (route) => {
+    const { pathname } = new URL(route.request().url())
+    if (route.request().method() === 'GET' && pathname.endsWith('/api/admin/reviews')) {
+      return route.fulfill({ json: apiRes({ content: rawReviews }) })
     }
-    return route.fulfill({ json: apiRes(MOCK_ADMIN_HOME_REVIEWS[0]) })
+    return route.fulfill({ json: apiRes(rawReviews[0]) })
   })
-  // 홈 후기 — 개별 항목(수정/삭제/토글)
-  await page.route('**/api/admin/home-reviews/**', (route) =>
-    route.fulfill({ json: apiRes(MOCK_ADMIN_HOME_REVIEWS[0]) })
-  )
 }

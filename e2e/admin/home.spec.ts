@@ -10,7 +10,7 @@ import {
 // ADMIN-04: 홈화면 관리 - 히어로 캐러셀
 // ADMIN-05: 홈화면 관리 - 홈 후기
 // 참고: 두 훅(useAdminCarouselSlides / useAdminHomeReviews)은 실제 API를 호출하므로
-//       /api/admin/hero-carousel, /api/admin/home-reviews 를 page.route()로 인터셉트한다.
+//       /api/admin/carousel, /api/admin/reviews 를 page.route()로 인터셉트한다.
 //       assertion은 mocks.ts에서 export한 원본 데이터를 직접 참조한다.
 test.describe('관리자 - 홈화면 관리', () => {
   test.beforeEach(async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('관리자 - 홈화면 관리', () => {
     await expect(page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].title)).toBeVisible()
 
     await page.getByText(MOCK_HERO_CAROUSEL_SLIDES[0].title).first().click({ force: true })
-    const toggleBtn = page.getByRole('button', { name: /노출|비노출|활성|비활성/ }).first()
+    const toggleBtn = page.getByRole('button', { name: /비노출로 변경|노출로 변경/ })
     await expect(toggleBtn).toBeVisible()
     await toggleBtn.click()
     await page.screenshot({ path: 'e2e/screenshots/admin/home-05-carousel-toggled.png' })
@@ -78,37 +78,27 @@ test.describe('관리자 - 홈화면 관리', () => {
     await page.screenshot({ path: 'e2e/screenshots/admin/home-08-review-gathering-title.png' })
   })
 
-  test('홈 후기를 추가한다', async ({ page }) => {
+  test('홈 후기는 관리자 홈에서 직접 추가하지 않는다', async ({ page }) => {
     await page.goto('/admin/home')
 
-    const addBtn = page.getByRole('button', { name: /후기 추가/ })
-    await addBtn.click()
-    await captureFullPage(page, 'e2e/screenshots/admin/home-09-review-add-panel.png')
-
-    const authorInput = page.getByPlaceholder('닉네임 또는 이름')
-    await authorInput.fill('테스트유저')
-
-    const contentInput = page.getByPlaceholder('홈 화면에 노출될 후기 내용을 입력해주세요')
-    await contentInput.fill('정말 좋았어요!')
-
-    await captureFullPage(page, 'e2e/screenshots/admin/home-10-review-add-filled.png')
-
-    await page.getByRole('button', { name: '저장하기' }).last().click()
-    await page.screenshot({ path: 'e2e/screenshots/admin/home-11-review-added.png' })
+    await expect(page.getByText('리뷰 추가는 사용자가 작성하며')).toBeVisible()
+    await expect(page.getByRole('button', { name: /후기 추가/ })).toHaveCount(0)
+    await captureFullPage(page, 'e2e/screenshots/admin/home-09-review-no-direct-add.png')
   })
 
-  test('홈 후기를 수정한다', async ({ page }) => {
+  test('홈 후기는 관리자 홈에서 직접 수정하지 않는다', async ({ page }) => {
     await page.goto('/admin/home')
-    // hover 오버레이가 클릭을 가로막으므로 force 옵션 사용
-    await page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].nickname).first().click({ force: true })
-    await captureFullPage(page, 'e2e/screenshots/admin/home-12-review-edit-panel.png')
+
+    await expect(page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].nickname)).toBeVisible()
+    await expect(page.getByPlaceholder('홈 화면에 노출될 후기 내용을 입력해주세요')).toHaveCount(0)
+    await captureFullPage(page, 'e2e/screenshots/admin/home-12-review-no-edit-panel.png')
   })
 
-  test('홈 후기 노출/비노출을 토글한다', async ({ page }) => {
+  test('홈 후기 노출을 해제한다', async ({ page }) => {
     await page.goto('/admin/home')
 
-    await page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].nickname).first().click({ force: true })
-    const toggleBtn = page.getByRole('button', { name: /노출|비노출/ }).first()
+    await expect(page.getByText(MOCK_ADMIN_HOME_REVIEWS[0].nickname)).toBeVisible()
+    const toggleBtn = page.getByRole('button', { name: '노출 해제' }).first()
     await expect(toggleBtn).toBeVisible()
     await toggleBtn.click()
     await page.screenshot({ path: 'e2e/screenshots/admin/home-13-review-toggled.png' })

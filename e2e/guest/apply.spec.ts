@@ -46,6 +46,7 @@ test.describe('비회원 - 게더링 신청', () => {
     // 4. 신청 폼 작성
     await page.getByPlaceholder('실명을 입력해주세요').fill('홍길동')
     await page.getByPlaceholder('01012345678').fill('01099998888')
+    await page.getByPlaceholder('example@email.com').fill('guest@test.kr')
     await page.getByRole('button', { name: '남성' }).click()
     await page.getByPlaceholder('나이를 입력해주세요').fill('28')
 
@@ -78,10 +79,11 @@ test.describe('비회원 - 게더링 신청', () => {
     // 성별 선택 없이 바로 제출
     await page.getByPlaceholder('실명을 입력해주세요').fill('홍길동')
     await page.getByPlaceholder('01012345678').fill('01099998888')
+    await page.getByPlaceholder('example@email.com').fill('guest@test.kr')
     await page.getByPlaceholder('나이를 입력해주세요').fill('28')
     await page.getByRole('button', { name: '신청 완료하기' }).click()
 
-    await expect(page.getByText('성별을 선택해주세요.')).toBeVisible()
+    await expect(page.getByText('필수 항목이에요.')).toBeVisible()
     await page.screenshot({ path: 'e2e/screenshots/guest/apply-error-gender.png' })
   })
 })
