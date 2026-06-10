@@ -78,6 +78,18 @@ export interface LocationItem {
   kakaoMapUrl?: string | null
 }
 
+// 백엔드 관리자 장소 목록 응답 원본 (AdminLocationResponse, KAN-208)
+interface RawAdminLocation {
+  id: string
+  name: string
+  address: string
+  naverMapUrl: string | null
+  kakaoMapUrl: string | null
+  maxCapacity: number | null
+  status: string | null
+  memo: string | null
+}
+
 // 프론트 장소 모델을 백엔드 계약으로 변환한다. (KAN-194)
 // contractStatus → status(enum ACTIVE/EXPIRED), features → memo. 빈 URL은 생략.
 function toLocationBody(data: Partial<LocationItem>) {
@@ -164,16 +176,16 @@ export const adminGatheringApi = {
   },
 
   getLocations: async (): Promise<LocationItem[]> => {
-    // 목록 조회는 클라이언트 엔드포인트로 이동됨(KAN-161). 관리자 컨트롤러는 쓰기 전용.
-    // 클라이언트 응답에 없는 관리자 필드(수용/계약상태/특징)는 기본값으로 채워 렌더 크래시를 막는다.
-    const res = await apiClient.get<ApiResponse<Partial<LocationItem>[]>>('/api/locations')
+    // 관리자 목록 API 사용 — 공개 응답에 없는 운영 필드(수용/계약상태/메모)를 포함한다. (KAN-208)
+    const res = await apiClient.get<ApiResponse<RawAdminLocation[]>>('/api/admin/locations')
     return (res.data.data ?? []).map((l) => ({
-      id: l.id ?? '',
-      name: l.name ?? '',
-      address: l.address ?? '',
+      id: l.id,
+      name: l.name,
+      address: l.address,
       maxCapacity: l.maxCapacity ?? 0,
-      features: l.features ?? [],
-      contractStatus: l.contractStatus ?? '',
+      // 백엔드 memo(쉼표 구분 문자열)를 화면 모델 features 배열로 변환
+      features: l.memo ? l.memo.split(',').map((f) => f.trim()).filter(Boolean) : [],
+      contractStatus: l.status ?? 'ACTIVE',
       naverMapUrl: l.naverMapUrl ?? null,
       kakaoMapUrl: l.kakaoMapUrl ?? null,
     }))
