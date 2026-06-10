@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, Lock, X, GripVertical } from 'lucide-react'
+import { Plus, Pencil, Trash2, Lock, X, ChevronUp, ChevronDown } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import {
   useAdminFormQuestions,
@@ -74,12 +74,41 @@ interface FormQuestionBuilderProps {
   gatheringTitle?: string
 }
 
+// 질문 항목을 수정 API 요청 본문으로 변환한다 (순서 변경 시 displayOrder만 교체).
+function toUpsertPayload(q: FormQuestionAdminItem, displayOrder: number): FormQuestionUpsertRequest {
+  return {
+    questionKey: q.questionKey,
+    type: q.type,
+    label: q.label,
+    placeholder: q.placeholder ?? undefined,
+    required: q.required,
+    displayOrder,
+    options: q.options ?? undefined,
+    validation: q.validation ?? undefined,
+    isMatchingField: q.isMatchingField,
+    matchingStrategy: q.matchingStrategy ?? undefined,
+    matchingWeight: q.isMatchingField ? 1 : undefined,
+  }
+}
+
 export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: FormQuestionBuilderProps) {
   const { data: questions = [], isLoading } = useAdminFormQuestions(gatheringId)
   const deleteQuestion = useDeleteFormQuestion(gatheringId)
+  const updateQuestion = useUpdateFormQuestion(gatheringId)
   const [editing, setEditing] = useState<FormQuestionAdminItem | 'new' | null>(null)
 
   const nextOrder = questions.length > 0 ? Math.max(...questions.map((q) => q.displayOrder)) + 1 : 0
+
+  // 인접 질문과 순서 교환. 예약질문(이름/연락처)도 위치를 자유롭게 옮길 수 있다. (KAN-210)
+  // displayOrder가 중복돼도 화면 인덱스를 기준으로 양쪽을 정규화해 안정적으로 교환된다.
+  const moveQuestion = (index: number, dir: -1 | 1) => {
+    const target = index + dir
+    if (target < 0 || target >= questions.length || updateQuestion.isPending) return
+    const a = questions[index]
+    const b = questions[target]
+    updateQuestion.mutate({ questionId: a.questionId, data: toUpsertPayload(a, target) })
+    updateQuestion.mutate({ questionId: b.questionId, data: toUpsertPayload(b, index) })
+  }
 
   if (isLoading) {
     return <div className="flex justify-center py-16"><LoadingSpinner size="lg" /></div>
@@ -111,9 +140,26 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
           </div>
         ) : (
           <div className="divide-y divide-[#F0EBE8]">
-            {questions.map((q) => (
+            {questions.map((q, index) => (
               <div key={q.questionId} className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F0EB] transition-colors">
-                <GripVertical size={16} className="text-[#CCC] shrink-0" />
+                <div className="flex flex-col shrink-0">
+                  <button
+                    onClick={() => moveQuestion(index, -1)}
+                    disabled={index === 0 || updateQuestion.isPending}
+                    className="text-[#999] hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="위로 이동"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
+                  <button
+                    onClick={() => moveQuestion(index, 1)}
+                    disabled={index === questions.length - 1 || updateQuestion.isPending}
+                    className="text-[#999] hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="아래로 이동"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[14px] font-medium text-[#1A1A1A]">{q.label}</span>
@@ -130,7 +176,6 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
                       </span>
                     )}
                   </div>
-                  <span className="text-[12px] text-[#999]">key: {q.questionKey}</span>
                 </div>
                 <button onClick={() => setEditing(q)} className="text-[#767676] hover:text-[#1A1A1A] p-1.5" title="수정">
                   <Pencil size={15} />
@@ -324,10 +369,18 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             </Field>
           )}
 
-          {/* 필수 */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={state.required} onChange={(e) => set('required', e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
-            <span className="text-[14px] text-[#1A1A1A]">필수 응답</span>
+          {/* 필수 — 기본 질문(이름/연락처/이메일)은 신청자 식별에 필요해 항상 필수다. (KAN-210) */}
+          <label className={`flex items-center gap-2 ${initial?.systemReserved ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+            <input
+              type="checkbox"
+              checked={initial?.systemReserved ? true : state.required}
+              disabled={!!initial?.systemReserved}
+              onChange={(e) => set('required', e.target.checked)}
+              className="w-4 h-4 accent-[#C8392B]"
+            />
+            <span className="text-[14px] text-[#1A1A1A]">
+              필수 응답{initial?.systemReserved ? ' (기본 질문은 항상 필수)' : ''}
+            </span>
           </label>
 
           {/* 매칭 */}
