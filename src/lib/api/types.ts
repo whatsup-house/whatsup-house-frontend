@@ -323,6 +323,8 @@ export interface HeroCarouselSlide {
   content: string | null
   dateLabel: string | null
   gatheringId: string | null
+  // 연결된 게더링의 유효 상태(과거 OPEN은 COMPLETED 보정). GATHERING 타입에만 존재. (KAN-211)
+  gatheringStatus: GatheringStatus | null
   sortOrder: number
 }
 
