@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import dayjs from 'dayjs'
-import { Users, Star, UserX, CheckCircle2, Sparkles } from 'lucide-react'
+import { Users, UserX, CheckCircle2, Sparkles } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ApplicationAnswersModal from './ApplicationAnswersModal'
 import {
@@ -102,10 +102,11 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
           {/* 그룹 그리드 */}
           {groups.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {groups.map((group) => (
+              {groups.map((group, index) => (
                 <GroupCard
                   key={group.groupId}
                   group={group}
+                  groupIndex={index}
                   allGroups={groups}
                   onMemberClick={setSelectedApplicationId}
                   onMove={(memberId, targetGroupId) => moveMember.mutate({ memberId, targetGroupId })}
@@ -147,6 +148,7 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
 // ─── 그룹 카드 ──────────────────────────────────────────────────────────
 interface GroupCardProps {
   group: MatchingGroupView
+  groupIndex: number
   allGroups: MatchingGroupView[]
   onMemberClick: (applicationId: string) => void
   onMove: (memberId: string, targetGroupId: string) => void
@@ -155,12 +157,13 @@ interface GroupCardProps {
   onSaveRestaurant: (groupId: string, name: string, address: string) => void
 }
 
-function GroupCard({ group, allGroups, onMemberClick, onMove, onExclude, onConfirm, onSaveRestaurant }: GroupCardProps) {
+function GroupCard({ group, groupIndex, allGroups, onMemberClick, onMove, onExclude, onConfirm, onSaveRestaurant }: GroupCardProps) {
   const [restaurantName, setRestaurantName] = useState(group.restaurantName ?? '')
   const [restaurantAddress, setRestaurantAddress] = useState(group.restaurantAddress ?? '')
 
   const otherGroups = allGroups.filter((g) => g.groupId !== group.groupId)
-  const score = group.groupScore != null ? Number(group.groupScore).toFixed(2) : '-'
+  const fitPercent = formatFitPercent(group.groupScore)
+  const groupLabel = getGroupLabel(groupIndex)
   const isConfirmed = group.status === 'CONFIRMED'
   const restaurantDirty =
     restaurantName !== (group.restaurantName ?? '') || restaurantAddress !== (group.restaurantAddress ?? '')
@@ -171,6 +174,9 @@ function GroupCard({ group, allGroups, onMemberClick, onMove, onExclude, onConfi
       <div className="px-4 py-3 border-b border-[#F0EBE8] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="font-bold text-[14px] text-[#1A1A1A]">
+            {groupLabel}
+          </span>
+          <span className="text-[12px] text-[#767676]">
             {dayjs(group.eventDate).format('M월 D일')}
           </span>
           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${GROUP_STATUS_STYLE[group.status] ?? ''}`}>
@@ -178,9 +184,8 @@ function GroupCard({ group, allGroups, onMemberClick, onMove, onExclude, onConfi
           </span>
         </div>
         <div className="flex items-center gap-3 text-xs text-[#767676]">
-          <span className="inline-flex items-center gap-1">
-            <Star size={12} className="text-[#FF9800]" />
-            {score}
+          <span>
+            {fitPercent != null ? `매칭적합도 ${fitPercent}%` : '적합도 계산 전'}
           </span>
           <span className="inline-flex items-center gap-1">
             <Users size={12} />
@@ -215,13 +220,13 @@ function GroupCard({ group, allGroups, onMemberClick, onMove, onExclude, onConfi
                     onChange={(e) => {
                       if (e.target.value && m.memberId) onMove(m.memberId, e.target.value)
                     }}
-                    className="text-[11px] text-[#767676] border border-[#F0EBE8] rounded px-1 py-1 bg-white cursor-pointer max-w-[90px]"
+                    className="text-[11px] text-[#767676] border border-[#F0EBE8] rounded px-1 py-1 bg-white cursor-pointer max-w-[180px]"
                     title="다른 그룹으로 이동"
                   >
                     <option value="">이동</option>
                     {otherGroups.map((g) => (
                       <option key={g.groupId} value={g.groupId}>
-                        {dayjs(g.eventDate).format('M/D')} 그룹
+                        {formatMoveOption(g, allGroups)}
                       </option>
                     ))}
                   </select>
@@ -281,6 +286,25 @@ function GroupCard({ group, allGroups, onMemberClick, onMove, onExclude, onConfi
   )
 }
 
+function getGroupLabel(index: number) {
+  return `그룹 ${index + 1}`
+}
+
+function formatFitPercent(score: number | null) {
+  if (score == null) return null
+  return Math.round(Number(score) * 100)
+}
+
+function formatMoveOption(group: MatchingGroupView, allGroups: MatchingGroupView[]) {
+  const index = allGroups.findIndex((g) => g.groupId === group.groupId)
+  const names = group.members
+    .map((member) => member.name)
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(', ')
+  return `${getGroupLabel(index)} · ${dayjs(group.eventDate).format('M/D')}${names ? ` · ${names}` : ''}`
+}
+
 // ─── 미배정 목록 ────────────────────────────────────────────────────────
 interface UnmatchedListProps {
   members: MatchingMemberView[]
@@ -314,13 +338,13 @@ function UnmatchedList({ members, groups, onMemberClick, onAssign }: UnmatchedLi
                 onChange={(e) => {
                   if (e.target.value) onAssign(e.target.value, m.applicationId)
                 }}
-                className="text-[11px] text-[#767676] border border-[#F0EBE8] rounded px-1 py-1 bg-white cursor-pointer max-w-[110px]"
+                className="text-[11px] text-[#767676] border border-[#F0EBE8] rounded px-1 py-1 bg-white cursor-pointer max-w-[180px]"
                 title="그룹에 배정"
               >
                 <option value="">그룹 배정</option>
                 {groups.map((g) => (
                   <option key={g.groupId} value={g.groupId}>
-                    {dayjs(g.eventDate).format('M/D')} 그룹
+                    {formatMoveOption(g, groups)}
                   </option>
                 ))}
               </select>

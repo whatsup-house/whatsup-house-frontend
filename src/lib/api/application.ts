@@ -49,10 +49,9 @@ export const fetchMyApplications = async (): Promise<ApplicationListItem[]> => {
 }
 
 export const fetchApplicationsMe = async (status?: ApplicationStatus): Promise<ApplicationListItem[]> => {
-  const response = await apiClient.get<ApiResponse<ApplicationListItem[]>>('/api/applications/me', {
-    params: status ? { status } : undefined,
-  })
-  return response.data.data
+  const response = await apiClient.get<ApiResponse<ApplicationListItem[]>>('/api/applications')
+  const applications = response.data.data ?? []
+  return status ? applications.filter((application) => application.status === status) : applications
 }
 
 export const cancelApplication = async (id: string): Promise<void> => {

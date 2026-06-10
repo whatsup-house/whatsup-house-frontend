@@ -4,23 +4,25 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGatheringApi, AdminGatheringListItem } from '@/lib/api/adminGathering'
 import type { AdminGatheringStatus } from '@/lib/api/admin'
-import { useUpdateGatheringStatus } from '@/lib/hooks/useAdminGathering'
+import { useUpdateGatheringStatus, useSetCuration } from '@/lib/hooks/useAdminGathering'
+import { useCuratedGatherings } from '@/lib/hooks/useHome'
 import { GatheringFormPanel } from '@/components/admin/GatheringFormPanel'
 import { LoadingSpinner, Pagination } from '@/components/ui'
+import { Star } from 'lucide-react'
 import dayjs from 'dayjs'
 
 const PAGE_SIZE = 10
 
-const STATUS_OPTIONS = ['전체', 'RECRUITING', 'CLOSED', 'COMPLETED', 'CANCELLED']
+// 백엔드 GatheringStatus enum(OPEN/CLOSED/COMPLETED/CANCELLED)과 값을 맞춘다. (KAN-209)
+const STATUS_OPTIONS = ['전체', 'OPEN', 'CLOSED', 'COMPLETED', 'CANCELLED']
 const STATUS_LABEL: Record<string, string> = {
   전체: '전체',
-  RECRUITING: '모집중',
+  OPEN: '모집중',
   CLOSED: '마감',
   COMPLETED: '진행완료',
   CANCELLED: '취소',
 }
 const STATUS_STYLE: Record<string, string> = {
-  RECRUITING: 'bg-[#FDECEA] text-[#C8392B]',
   OPEN: 'bg-[#FDECEA] text-[#C8392B]',
   CLOSED: 'bg-[#F5F5F5] text-[#767676]',
   COMPLETED: 'bg-[#E8F5E9] text-[#4CAF50]',
@@ -52,6 +54,11 @@ export default function AdminGatheringsPage() {
     queryFn: () =>
       adminGatheringApi.getAll(statusFilter === '전체' ? undefined : statusFilter),
   })
+
+  // 큐레이션 현재 상태는 공개 큐레이션 목록에서 파생한다. (KAN-190, 목록 응답에 isCurated가 없음)
+  const { data: curated = [] } = useCuratedGatherings()
+  const curatedIds = new Set(curated.map((c) => c.id))
+  const { mutate: setCuration } = useSetCuration()
 
   const totalPages = Math.ceil(allGatherings.length / PAGE_SIZE)
   const gatherings = allGatherings.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
@@ -126,7 +133,7 @@ export default function AdminGatheringsPage() {
           <table className="w-full">
             <thead>
               <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
-                {['게더링명', '날짜/시간', '장소', '참가비', '신청현황', '상태', '액션'].map((col) => (
+                {['게더링명', '날짜/시간', '장소', '참가비', '신청현황', '상태', '큐레이션', '액션'].map((col) => (
                   <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
                 ))}
               </tr>
@@ -134,14 +141,14 @@ export default function AdminGatheringsPage() {
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center">
+                  <td colSpan={8} className="py-12 text-center">
                     <LoadingSpinner />
                   </td>
                 </tr>
               )}
               {!isLoading && gatherings.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-sm text-[#767676]">
+                  <td colSpan={8} className="py-12 text-center text-sm text-[#767676]">
                     게더링이 없습니다.
                   </td>
                 </tr>
@@ -149,6 +156,7 @@ export default function AdminGatheringsPage() {
               {gatherings.map((g) => {
                 const fillRate = g.capacity > 0 ? g.currentApplicants / g.capacity : 0
                 const isReadOnly = g.status === 'COMPLETED' || g.status === 'CANCELLED'
+                const isCurated = curatedIds.has(g.id)
                 return (
                   <tr key={g.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
                     <td className="px-4 py-3 max-w-[220px]">
@@ -186,6 +194,20 @@ export default function AdminGatheringsPage() {
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_STYLE[g.status] ?? ''}`}>
                         {STATUS_LABEL[g.status] ?? g.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => setCuration({ id: g.id, isCurated: !isCurated })}
+                        title={isCurated ? '홈 큐레이션 노출 해제' : '홈 큐레이션 노출'}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[12px] border transition-colors ${
+                          isCurated
+                            ? 'border-primary text-primary bg-primary/5'
+                            : 'border-[#E0E0E0] text-[#767676] hover:border-primary'
+                        }`}
+                      >
+                        <Star size={12} className={isCurated ? 'fill-primary' : ''} />
+                        {isCurated ? '노출중' : '노출'}
+                      </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3 text-[13px]">

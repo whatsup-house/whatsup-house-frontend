@@ -102,3 +102,20 @@ export function useUpdateApplicationStatus(gatheringId: string) {
     },
   })
 }
+
+// 홈 큐레이션 노출 토글 (KAN-190)
+export function useSetCuration() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, isCurated }: { id: string; isCurated: boolean }) =>
+      adminGatheringApi.setCuration(id, isCurated),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'gatherings'] })
+      queryClient.invalidateQueries({ queryKey: ['home', 'curated'] })
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      alert(msg || '큐레이션 변경 중 오류가 발생했어요.')
+    },
+  })
+}

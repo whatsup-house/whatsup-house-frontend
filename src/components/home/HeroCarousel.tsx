@@ -157,10 +157,13 @@ export default function HeroCarousel() {
               )}
               {slide.type === 'GATHERING' && (
                 <>
-                  <span className="inline-flex items-center gap-1 bg-primary text-white rounded-full px-2.5 py-0.5 text-[10px] font-bold mb-1.5">
-                    <Flame size={12} />
-                    모집중
-                  </span>
+                  {/* 완료/마감/취소된 게더링 슬라이드엔 모집중 뱃지를 표시하지 않는다. (KAN-211) */}
+                  {slide.gatheringStatus === 'OPEN' && (
+                    <span className="inline-flex items-center gap-1 bg-primary text-white rounded-full px-2.5 py-0.5 text-[10px] font-bold mb-1.5">
+                      <Flame size={12} />
+                      모집중
+                    </span>
+                  )}
                   <p className="text-xl font-bold mb-1">{slide.title}</p>
                   {slide.dateLabel && <p className="text-xs opacity-90">{slide.dateLabel}</p>}
                 </>

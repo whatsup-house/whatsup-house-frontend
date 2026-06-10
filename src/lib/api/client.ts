@@ -2,6 +2,8 @@ import axios from 'axios'
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/lib/store/authStore'
 
+// 인증은 HttpOnly 쿠키(accessToken/refreshToken) 기반이다. (KAN-189)
+// 별도로 Authorization 헤더를 붙이지 않고, withCredentials로 쿠키를 자동 전송한다.
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
   timeout: 10000,

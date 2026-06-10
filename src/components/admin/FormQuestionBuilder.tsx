@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, Lock, X, GripVertical } from 'lucide-react'
+import { Plus, Pencil, Trash2, Lock, X, ChevronUp, ChevronDown } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import {
   useAdminFormQuestions,
@@ -17,18 +17,22 @@ import type {
 } from '@/lib/api/types'
 
 const TYPE_LABEL: Record<QuestionType, string> = {
-  SHORT_TEXT: '단답형',
-  LONG_TEXT: '장문형',
+  SHORT_TEXT: '주관식',
+  LONG_TEXT: '주관식',
   SINGLE_CHOICE: '단일선택',
   MULTI_CHOICE: '다중선택',
   NUMBER: '숫자',
   MBTI_INPUT: 'MBTI',
 }
 
+// 질문 추가/수정 드롭다운에 노출하는 유형. 단답형·장문형은 '주관식' 하나로 합쳤다.
+// (레거시 LONG_TEXT 질문은 편집 시 SHORT_TEXT로 정규화된다.)
+const TYPE_OPTIONS: QuestionType[] = ['SHORT_TEXT', 'SINGLE_CHOICE', 'MULTI_CHOICE', 'NUMBER', 'MBTI_INPUT']
+
 const STRATEGY_LABEL: Record<MatchingStrategy, string> = {
   SAME: '비슷하게',
   DIVERSE: '다양하게',
-  OVERLAP: '겹치게',
+  OVERLAP: '많이 겹치게',
 }
 
 const CHOICE_TYPES: QuestionType[] = ['SINGLE_CHOICE', 'MULTI_CHOICE']
@@ -51,17 +55,60 @@ const PRESETS: Preset[] = [
 
 const HARD_KEYS = ['budget', 'available_dates', 'age']
 
+// 자유 질문용 안정 식별자. (KAN-191) question key는 화면에 노출하지 않으므로 자동 생성한다.
+function autoQuestionKey(): string {
+  return `q_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+}
+
+function getDefaultMatchingStrategy(questionKey: string, type: QuestionType): MatchingStrategy {
+  if (questionKey === 'age') return 'SAME'
+  if (['gender', 'job_category', 'mbti'].includes(questionKey)) return 'DIVERSE'
+  if (['interests', 'available_dates', 'budget'].includes(questionKey)) return 'OVERLAP'
+  if (type === 'NUMBER') return 'SAME'
+  if (type === 'MULTI_CHOICE') return 'OVERLAP'
+  return 'DIVERSE'
+}
+
 interface FormQuestionBuilderProps {
   gatheringId: string
   gatheringTitle?: string
 }
 
+// 질문 항목을 수정 API 요청 본문으로 변환한다 (순서 변경 시 displayOrder만 교체).
+function toUpsertPayload(q: FormQuestionAdminItem, displayOrder: number): FormQuestionUpsertRequest {
+  return {
+    questionKey: q.questionKey,
+    type: q.type,
+    label: q.label,
+    placeholder: q.placeholder ?? undefined,
+    required: q.required,
+    displayOrder,
+    options: q.options ?? undefined,
+    validation: q.validation ?? undefined,
+    isMatchingField: q.isMatchingField,
+    matchingStrategy: q.matchingStrategy ?? undefined,
+    matchingWeight: q.isMatchingField ? 1 : undefined,
+  }
+}
+
 export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: FormQuestionBuilderProps) {
   const { data: questions = [], isLoading } = useAdminFormQuestions(gatheringId)
   const deleteQuestion = useDeleteFormQuestion(gatheringId)
+  const updateQuestion = useUpdateFormQuestion(gatheringId)
   const [editing, setEditing] = useState<FormQuestionAdminItem | 'new' | null>(null)
 
   const nextOrder = questions.length > 0 ? Math.max(...questions.map((q) => q.displayOrder)) + 1 : 0
+
+  // 인접 질문과 순서 교환. 예약질문(이름/연락처)도 위치를 자유롭게 옮길 수 있다. (KAN-210)
+  // displayOrder가 중복돼도 화면 인덱스를 기준으로 양쪽을 정규화해 안정적으로 교환된다.
+  const moveQuestion = (index: number, dir: -1 | 1) => {
+    const target = index + dir
+    if (target < 0 || target >= questions.length || updateQuestion.isPending) return
+    const a = questions[index]
+    const b = questions[target]
+    updateQuestion.mutate({ questionId: a.questionId, data: toUpsertPayload(a, target) })
+    updateQuestion.mutate({ questionId: b.questionId, data: toUpsertPayload(b, index) })
+  }
 
   if (isLoading) {
     return <div className="flex justify-center py-16"><LoadingSpinner size="lg" /></div>
@@ -93,9 +140,26 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
           </div>
         ) : (
           <div className="divide-y divide-[#F0EBE8]">
-            {questions.map((q) => (
+            {questions.map((q, index) => (
               <div key={q.questionId} className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F0EB] transition-colors">
-                <GripVertical size={16} className="text-[#CCC] shrink-0" />
+                <div className="flex flex-col shrink-0">
+                  <button
+                    onClick={() => moveQuestion(index, -1)}
+                    disabled={index === 0 || updateQuestion.isPending}
+                    className="text-[#999] hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="위로 이동"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
+                  <button
+                    onClick={() => moveQuestion(index, 1)}
+                    disabled={index === questions.length - 1 || updateQuestion.isPending}
+                    className="text-[#999] hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="아래로 이동"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[14px] font-medium text-[#1A1A1A]">{q.label}</span>
@@ -112,7 +176,6 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
                       </span>
                     )}
                   </div>
-                  <span className="text-[12px] text-[#999]">key: {q.questionKey}</span>
                 </div>
                 <button onClick={() => setEditing(q)} className="text-[#767676] hover:text-[#1A1A1A] p-1.5" title="수정">
                   <Pencil size={15} />
@@ -169,12 +232,12 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const addQuestion = useAddFormQuestion(gatheringId)
   const updateQuestion = useUpdateFormQuestion(gatheringId)
   const isEdit = !!initial
-  const isReserved = initial?.systemReserved ?? false
 
   const [state, setState] = useState<EditorState>(() => ({
     label: initial?.label ?? '',
     questionKey: initial?.questionKey ?? '',
-    type: initial?.type ?? 'SHORT_TEXT',
+    // 단답형·장문형을 '주관식'으로 합쳤으므로 레거시 LONG_TEXT는 SHORT_TEXT로 정규화한다.
+    type: initial?.type === 'LONG_TEXT' ? 'SHORT_TEXT' : (initial?.type ?? 'SHORT_TEXT'),
     placeholder: initial?.placeholder ?? '',
     required: initial?.required ?? true,
     choicesText: (initial?.options?.choices ?? []).join('\n'),
@@ -187,6 +250,26 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const set = <K extends keyof EditorState>(key: K, value: EditorState[K]) =>
     setState((p) => ({ ...p, [key]: value }))
 
+  const handleTypeChange = (type: QuestionType) => {
+    setState((p) => ({
+      ...p,
+      type,
+      matchingStrategy: p.isMatchingField
+        ? getDefaultMatchingStrategy(p.questionKey, type)
+        : p.matchingStrategy,
+    }))
+  }
+
+  const handleMatchingFieldChange = (isMatchingField: boolean) => {
+    setState((p) => ({
+      ...p,
+      isMatchingField,
+      matchingStrategy: isMatchingField && !p.matchingStrategy
+        ? getDefaultMatchingStrategy(p.questionKey, p.type)
+        : p.matchingStrategy,
+    }))
+  }
+
   const applyPreset = (preset: Preset) => {
     setState((p) => ({ ...p, placeholder: '', required: true, matchingWeight: 1, matchingStrategy: '', choicesText: '', ...preset.data }))
     setError(null)
@@ -198,13 +281,16 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const handleSave = () => {
     setError(null)
     if (!state.label.trim()) return setError('질문 라벨을 입력해주세요.')
-    if (!state.questionKey.trim()) return setError('question key를 입력해주세요.')
     const choices = state.choicesText.split(/[\n,]/).map((c) => c.trim()).filter(Boolean)
     if (isChoice && choices.length === 0) return setError('선택형 질문은 보기를 1개 이상 입력해주세요.')
     if (state.isMatchingField && !state.matchingStrategy) return setError('매칭 항목은 매칭 방식을 선택해주세요.')
 
+    // question key는 화면에 노출하지 않는다. 기존 질문/프리셋은 지정된 key를 유지하고,
+    // 자유 질문은 자동 생성한다. (KAN-191)
+    const questionKey = state.questionKey.trim() || autoQuestionKey()
+
     const payload: FormQuestionUpsertRequest = {
-      questionKey: state.questionKey.trim(),
+      questionKey,
       type: state.type,
       label: state.label.trim(),
       placeholder: state.placeholder.trim() || undefined,
@@ -213,7 +299,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
       options: isChoice ? { choices } : undefined,
       isMatchingField: state.isMatchingField,
       matchingStrategy: state.isMatchingField ? (state.matchingStrategy as MatchingStrategy) : undefined,
-      matchingWeight: state.isMatchingField ? state.matchingWeight : undefined,
+      matchingWeight: state.isMatchingField ? 1 : undefined,
     }
 
     const onDone = { onSuccess: onClose }
@@ -260,19 +346,14 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             <input value={state.label} onChange={(e) => set('label', e.target.value)} placeholder="예: 나이를 알려주세요" className={inputCls} />
           </Field>
 
-          {/* key + 타입 */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="question key *" hint={isReserved ? '기본 질문은 변경 불가' : '매칭 항목은 고정 key 필요'}>
-              <input value={state.questionKey} onChange={(e) => set('questionKey', e.target.value)} disabled={isReserved} placeholder="예: age" className={`${inputCls} ${isReserved ? 'bg-[#F5F5F5] text-[#999]' : ''}`} />
-            </Field>
-            <Field label="유형 *">
-              <select value={state.type} onChange={(e) => set('type', e.target.value as QuestionType)} className={inputCls}>
-                {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
-                  <option key={t} value={t}>{TYPE_LABEL[t]}</option>
-                ))}
-              </select>
-            </Field>
-          </div>
+          {/* 유형 (question key는 화면에 노출하지 않고 프리셋/자동으로 지정됨 — KAN-191) */}
+          <Field label="유형 *">
+            <select value={state.type} onChange={(e) => handleTypeChange(e.target.value as QuestionType)} className={inputCls}>
+              {TYPE_OPTIONS.map((t) => (
+                <option key={t} value={t}>{TYPE_LABEL[t]}</option>
+              ))}
+            </select>
+          </Field>
 
           {/* 선택지 */}
           {isChoice && (
@@ -288,16 +369,24 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             </Field>
           )}
 
-          {/* 필수 */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={state.required} onChange={(e) => set('required', e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
-            <span className="text-[14px] text-[#1A1A1A]">필수 응답</span>
+          {/* 필수 — 기본 질문(이름/연락처/이메일)은 신청자 식별에 필요해 항상 필수다. (KAN-210) */}
+          <label className={`flex items-center gap-2 ${initial?.systemReserved ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+            <input
+              type="checkbox"
+              checked={initial?.systemReserved ? true : state.required}
+              disabled={!!initial?.systemReserved}
+              onChange={(e) => set('required', e.target.checked)}
+              className="w-4 h-4 accent-[#C8392B]"
+            />
+            <span className="text-[14px] text-[#1A1A1A]">
+              필수 응답{initial?.systemReserved ? ' (기본 질문은 항상 필수)' : ''}
+            </span>
           </label>
 
           {/* 매칭 */}
           <div className="rounded-[12px] border border-[#F0EBE8] p-3 bg-[#FAF8F6] flex flex-col gap-3">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={state.isMatchingField} onChange={(e) => set('isMatchingField', e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
+              <input type="checkbox" checked={state.isMatchingField} onChange={(e) => handleMatchingFieldChange(e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
               <span className="text-[14px] font-medium text-[#1A1A1A]">매칭에 사용</span>
             </label>
             {isHardKey && (
@@ -308,17 +397,14 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
               </p>
             )}
             {state.isMatchingField && (
-              <div className="grid grid-cols-2 gap-3">
+              <div>
                 <Field label="매칭 방식">
                   <select value={state.matchingStrategy} onChange={(e) => set('matchingStrategy', e.target.value as MatchingStrategy)} className={inputCls}>
                     <option value="">선택</option>
-                    <option value="SAME">비슷하게 (나이)</option>
-                    <option value="DIVERSE">다양하게 (성별/직업)</option>
-                    <option value="OVERLAP">겹치게 (관심사/날짜)</option>
+                    <option value="SAME">비슷하게</option>
+                    <option value="DIVERSE">다양하게</option>
+                    <option value="OVERLAP">많이 겹치게</option>
                   </select>
-                </Field>
-                <Field label="가중치">
-                  <input type="number" step="0.1" min="0" max="9.99" value={state.matchingWeight} onChange={(e) => set('matchingWeight', Number(e.target.value))} className={inputCls} />
                 </Field>
               </div>
             )}

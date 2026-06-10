@@ -50,6 +50,10 @@ export default function GatheringDetailPage({
   ) ?? false
 
   const handleApplyClick = () => {
+    if (isLoggedIn) {
+      router.push(`/gatherings/${id}/apply`)
+      return
+    }
     setIsModalOpen(true)
   }
 
