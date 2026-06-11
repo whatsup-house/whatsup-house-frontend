@@ -147,16 +147,6 @@ export default function MyProfile() {
           </Button>
         )}
 
-        {/* 비밀번호 변경 (KAN-223) */}
-        <Button
-          variant="outlined"
-          size="lg"
-          className="w-full"
-          onClick={() => setShowPasswordChange(true)}
-        >
-          비밀번호 변경
-        </Button>
-
         {/* 로그아웃 */}
         <Button
           variant="outlined"
@@ -168,13 +158,23 @@ export default function MyProfile() {
           로그아웃
         </Button>
 
-        <button
-          type="button"
-          onClick={() => setShowWithdraw(true)}
-          className="min-h-[44px] text-sm font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
-        >
-          회원탈퇴
-        </button>
+        <div className="flex min-h-[44px] items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => setShowPasswordChange(true)}
+            className="text-sm font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
+          >
+            비밀번호 변경
+          </button>
+          <span className="h-3 w-px bg-tag-bg" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setShowWithdraw(true)}
+            className="text-sm font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
+          >
+            회원탈퇴
+          </button>
+        </div>
       </div>
     </div>
     </>
