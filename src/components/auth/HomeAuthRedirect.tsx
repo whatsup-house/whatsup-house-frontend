@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store/authStore'
 import { hasSeenWelcome, markWelcomeSeen } from '@/lib/utils/welcomeCookie'
+import { isDesktopViewport } from '@/lib/utils/viewport'
 
 export default function HomeAuthRedirect() {
   const pathname = usePathname()
@@ -21,6 +22,9 @@ export default function HomeAuthRedirect() {
     }
 
     if (hasSeenWelcome()) return
+
+    // 웰컴 랜딩은 모바일 전용. 데스크탑(lg↑)은 바로 홈을 보여준다.
+    if (isDesktopViewport()) return
 
     router.replace(`/welcome?returnUrl=${encodeURIComponent(pathname)}`)
   }, [isInitialized, isLoggedIn, pathname, router])
