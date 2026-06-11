@@ -76,6 +76,14 @@ export const updateMyProfile = async (data: ProfileUpdateRequest): Promise<UserP
   return response.data.data
 }
 
+// 비밀번호 변경 (KAN-223)
+export const changeMyPassword = async (data: {
+  currentPassword: string
+  newPassword: string
+}): Promise<void> => {
+  await apiClient.patch('/api/users/me/password', data)
+}
+
 // 회원탈퇴
 export const withdrawMyAccount = async (data: UserWithdrawRequest): Promise<UserWithdrawResponse> => {
   const response = await apiClient.delete<ApiResponse<UserWithdrawResponse>>('/api/users/me', {
@@ -88,6 +96,14 @@ export const withdrawMyAccount = async (data: UserWithdrawRequest): Promise<User
 export const checkNickname = async (nickname: string): Promise<boolean> => {
   const response = await apiClient.get<ApiResponse<{ available: boolean }>>(
     `/api/users/check-nickname?nickname=${encodeURIComponent(nickname)}`
+  )
+  return response.data.data.available
+}
+
+// 이메일 중복 확인 (true = 사용 가능)
+export const checkEmail = async (email: string): Promise<boolean> => {
+  const response = await apiClient.get<ApiResponse<{ available: boolean }>>(
+    `/api/users/check-email?email=${encodeURIComponent(email)}`
   )
   return response.data.data.available
 }

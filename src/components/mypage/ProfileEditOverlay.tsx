@@ -39,9 +39,10 @@ interface ProfileEditOverlayProps {
 export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOverlayProps) {
   const updateMutation = useUpdateProfile()
 
-  const [gender, setGender] = useState<Gender | null>(
-    (profile.gender as Gender | null) ?? null
-  )
+  // 성별은 mbti와 동일하게 'profile 값 + 사용자 override' 파생으로 둔다.
+  // 그래야 profile이 나중에 채워져도 기존 성별이 유지된다(초기화 방지). (KAN-222)
+  const [userGender, setUserGender] = useState<Gender | null>(null)
+  const gender = userGender ?? ((profile.gender as Gender | null) ?? null)
   const [userMbti, setUserMbti] = useState<(string | null)[] | null>(null)
   const [interests, setInterests] = useState<string[]>(profile.interests ?? [])
   const [interestInput, setInterestInput] = useState('')
@@ -165,7 +166,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => { setGender(option.value); setGenderError(null) }}
+                    onClick={() => { setUserGender(option.value); setGenderError(null) }}
                     className={`flex-1 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
                       gender === option.value
                         ? 'bg-primary text-white'
