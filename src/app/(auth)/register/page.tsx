@@ -11,6 +11,7 @@ import { useCheckNickname } from '@/lib/hooks/useAuth'
 import type { Gender } from '@/lib/api/types'
 
 export const REGISTER_SESSION_KEY = 'register-step1'
+export const REGISTER_EMAIL_ERROR_KEY = 'register-email-error'
 
 const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).+$/
 
@@ -63,6 +64,8 @@ export default function RegisterPage() {
     control,
     handleSubmit,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
@@ -95,10 +98,16 @@ export default function RegisterPage() {
       if (saved.gender) setValue('gender', saved.gender)
       if (saved.age != null) setValue('age', String(saved.age))
       if (saved.phone) setValue('phone', saved.phone)
+
+      const emailError = sessionStorage.getItem(REGISTER_EMAIL_ERROR_KEY)
+      if (emailError) {
+        setError('email', { type: 'server', message: emailError })
+        sessionStorage.removeItem(REGISTER_EMAIL_ERROR_KEY)
+      }
     } catch {
       // 손상된 세션 값은 무시
     }
-  }, [setValue])
+  }, [setValue, setError])
 
   const {
     data: nicknameAvailable,
@@ -118,6 +127,7 @@ export default function RegisterPage() {
     if (!allRequired) return
     if (nicknameAvailable === false) return
     if (debouncedNickname.length >= 2 && isCheckingNickname) return
+    clearErrors('email')
 
     sessionStorage.setItem(REGISTER_SESSION_KEY, JSON.stringify({
       email: data.email,
@@ -202,7 +212,7 @@ export default function RegisterPage() {
               ) : nicknameAvailable === true ? (
                 <p className="text-xs text-green-600 pl-1">사용 가능한 닉네임입니다</p>
               ) : nicknameAvailable === false ? (
-                <p className="text-xs text-primary pl-1">중복된 닉네임입니다</p>
+                <p className="text-xs text-primary pl-1">이미 사용 중인 닉네임이에요</p>
               ) : null
             )}
           </div>

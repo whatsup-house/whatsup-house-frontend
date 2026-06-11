@@ -7,7 +7,7 @@ import { Button } from '@/components/ui'
 import { useRegisterAndLogin } from '@/lib/hooks/useAuth'
 import { useToastStore } from '@/lib/store/toastStore'
 import type { Gender } from '@/lib/api/types'
-import { REGISTER_SESSION_KEY } from '../register/page'
+import { REGISTER_EMAIL_ERROR_KEY, REGISTER_SESSION_KEY } from '../register/page'
 
 const MBTI_ROWS = [
   ['E', 'S', 'T', 'J'],
@@ -22,6 +22,13 @@ const JOB_OPTIONS = [
 ]
 
 const INTEREST_OPTIONS = ['감성', '독서', '음악', '자연', '요리', '운동', '여행', '영화', '미술', '사진']
+
+function getErrorMessage(error: unknown): string | null {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return null
+  const response = (error as { response?: { data?: { message?: unknown } } }).response
+  const message = response?.data?.message
+  return typeof message === 'string' ? message : null
+}
 
 interface Step1Data {
   email: string
@@ -103,7 +110,13 @@ export default function OnboardingPage() {
           // 가입 완료 후 홈으로 이동하더라도 전역 토스트로 완료를 알린다. (KAN-227)
           showToast('회원가입이 완료되었습니다.')
         },
-        onError: () => {
+        onError: (error) => {
+          const message = getErrorMessage(error)
+          if (message?.includes('이메일')) {
+            sessionStorage.setItem(REGISTER_EMAIL_ERROR_KEY, '이미 사용 중인 이메일이에요')
+            router.push('/register')
+            return
+          }
           setFormError('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
         },
       }
