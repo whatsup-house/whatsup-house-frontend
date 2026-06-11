@@ -51,7 +51,7 @@ export function useDeleteCarouselSlide() {
 export function useToggleCarouselSlide() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => toggleCarouselSlide(id),
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => toggleCarouselSlide(id, isActive),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'hero-carousel'] })
     },

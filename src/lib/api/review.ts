@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, GatheringReviewPageResponse, ReviewCreateRequest, ReviewCreateResponse, ReviewDeleteResponse, ReviewItem, ReviewLikeResponse } from './types'
+import type { ApiResponse, GatheringReviewPageResponse, ReviewCreateRequest, ReviewCreateResponse, ReviewDeleteResponse, ReviewItem, ReviewLikeResponse, ReviewLocateResponse } from './types'
 
 export const fetchGatheringReviews = async (gatheringId: string): Promise<ReviewItem[]> => {
   const response = await apiClient.get<ApiResponse<ReviewItem[]>>(`/api/gatherings/${gatheringId}/reviews`)
@@ -38,6 +38,19 @@ export const fetchAllReviews = async (
   const response = await apiClient.get<ApiResponse<GatheringReviewPageResponse>>(
     '/api/reviews',
     { params: { sort, page, size, ...(gatheringId ? { gatheringId } : {}) } },
+  )
+  return response.data.data
+}
+
+export const locateReview = async (
+  reviewId: string,
+  sort: 'LATEST' | 'LIKES',
+  size = 10,
+  gatheringId?: string,
+): Promise<ReviewLocateResponse | null> => {
+  const response = await apiClient.get<ApiResponse<ReviewLocateResponse | null>>(
+    '/api/reviews/locate',
+    { params: { reviewId, sort, size, ...(gatheringId ? { gatheringId } : {}) } },
   )
   return response.data.data
 }

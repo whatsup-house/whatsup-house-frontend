@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import ReviewCard from './ReviewCard'
 import { useAuthStore } from '@/lib/store/authStore'
-import { useAllReviews } from '@/lib/hooks/useReview'
+import { useAllReviews, useReviewLocate } from '@/lib/hooks/useReview'
 import { useGatheringsAll } from '@/lib/hooks/useGatherings'
 
 type SortType = 'LIKES' | 'LATEST'
@@ -32,7 +32,7 @@ function GatheringDropdown({ value, onChange, options }: {
     <div ref={ref} className="relative min-w-0">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-1.5 px-3 py-2 rounded-full border border-tag-bg/60 bg-card text-sm font-semibold text-tag-text max-w-[220px]"
+        className="flex w-fit items-center gap-1.5 px-3 py-2 rounded-full border border-tag-bg/60 bg-card text-sm font-semibold text-tag-text max-w-[220px]"
       >
         <span className="truncate">{current?.title ?? '전체 게더링'}</span>
         <ChevronDown size={14} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -107,23 +107,34 @@ export default function AllReviewList() {
   const { isLoggedIn } = useAuthStore()
   const searchParams = useSearchParams()
   const highlightId = searchParams.get('highlight')
+  const gatheringParam = searchParams.get('gathering')
   const [sort, setSort] = useState<SortType>('LIKES')
-  const [gatheringId, setGatheringId] = useState<string | undefined>(undefined)
+  const [gatheringId, setGatheringId] = useState<string | undefined>(gatheringParam ?? undefined)
   const [page, setPage] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
+  const [locateApplied, setLocateApplied] = useState(false)
 
   const { data: gatheringsData } = useGatheringsAll()
   const { data, isLoading } = useAllReviews(sort, page, gatheringId)
+  const { data: locateData } = useReviewLocate(highlightId ?? undefined, sort, gatheringId, !!highlightId)
 
   const gatheringOptions = (gatheringsData ?? []).map((g) => ({ id: g.id, title: g.title }))
   const gatheringTitleById = new Map(gatheringOptions.map((g) => [g.id, g.title]))
 
+  // locate 결과로 해당 리뷰가 위치한 페이지로 1회 이동 (렌더 타임 조건부 setState)
+  // 미존재·미배포 시 locateData가 없어 현재 페이지를 유지한다
+  if (!locateApplied && locateData?.page != null) {
+    setLocateApplied(true)
+    if (locateData.page !== page) setPage(locateData.page)
+  }
+
+  // 데이터 로드 후 highlight 리뷰로 스크롤 (해당 페이지에 존재할 때만)
   useEffect(() => {
-    if (!highlightId || isLoading) return
+    if (!highlightId) return
     const el = document.getElementById(`review-${highlightId}`)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }, [highlightId, isLoading])
+  }, [highlightId, data])
 
   const reviews = (data?.content ?? []).filter((r) => !deletedIds.has(r.reviewId))
   const totalPages = data?.totalPages ?? 0
@@ -151,8 +162,8 @@ export default function AllReviewList() {
   return (
     <div className="relative px-4 py-5">
       {/* 필터 바: 게더링 드롭다운 + 정렬 탭 */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className="min-w-0 flex-1">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="min-w-0">
           <GatheringDropdown
             value={gatheringId ?? 'all'}
             onChange={handleGathering}

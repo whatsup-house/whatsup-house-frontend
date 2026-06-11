@@ -1,6 +1,5 @@
-import { useQuery, useMutation, type QueryClient } from '@tanstack/react-query'
-import { fetchGatherings, fetchGatheringsAll, fetchCalendarDots, fetchGatheringDetail, submitGuestApplication, submitUserApplication } from '@/lib/api/gathering'
-import type { GuestApplicationRequest, UserApplicationRequest } from '@/lib/api/types'
+import { useQuery, type QueryClient } from '@tanstack/react-query'
+import { fetchGatherings, fetchGatheringsAll, fetchCalendarDots, fetchGatheringDetail } from '@/lib/api/gathering'
 
 export function useGatheringsAll() {
   return useQuery({
@@ -41,20 +40,6 @@ export function useGatheringDetail(id: string) {
     queryKey: ['gathering', id],
     queryFn: () => fetchGatheringDetail(id),
     enabled: !!id,
-  })
-}
-
-export function useSubmitGuestApplication() {
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: GuestApplicationRequest }) =>
-      submitGuestApplication(id, data),
-  })
-}
-
-export function useSubmitUserApplication() {
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UserApplicationRequest }) =>
-      submitUserApplication(id, data),
   })
 }
 

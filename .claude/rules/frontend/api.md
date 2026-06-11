@@ -65,8 +65,8 @@ export interface GatheringDetail extends GatheringListItem {
 `lib/api/client.ts`는 수정하지 않는다. 이미 다음이 설정되어 있다.
 
 - baseURL: `NEXT_PUBLIC_API_URL` 환경변수 or `http://localhost:8080`
-- 요청 인터셉터: Zustand에서 accessToken 읽어서 Authorization 헤더 자동 첨부
-- 응답 인터셉터: 401 응답 시 `/login`으로 자동 이동
+- 인증: HttpOnly 쿠키 기반. `withCredentials: true`로 쿠키를 자동 전송하며, Authorization 헤더는 사용하지 않는다.
+- 응답 인터셉터: 401 시 `/api/auth/refresh`로 토큰 재발급(쿠키 재설정) 후 재시도, 실패 시 `/login`으로 이동
 
 ---
 

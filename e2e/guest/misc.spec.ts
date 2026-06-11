@@ -6,6 +6,7 @@ import {
   mockClosedGathering,
   MOCK_GATHERING_ID,
   MOCK_CLOSED_GATHERING_ID,
+  MOCK_OPEN_DATE,
 } from '../fixtures/mocks'
 
 function apiRes<T>(data: T) {
@@ -49,7 +50,7 @@ test.describe('비회원 - 보조 화면', () => {
           gathering: {
             id: MOCK_GATHERING_ID,
             title: '퇴근 게더링',
-            eventDate: '2026-05-14',
+            eventDate: MOCK_OPEN_DATE,
             startTime: '19:30:00',
             locationName: '팜팜발리',
           },
@@ -77,7 +78,7 @@ test.describe('비회원 - 보조 화면', () => {
     const futureSameTitle = {
       ...mockClosedGathering,
       id: 'c2000000-0000-0000-0000-000000000099',
-      eventDate: '2026-06-10',
+      eventDate: '2026-08-24',
       status: 'OPEN',
     }
 

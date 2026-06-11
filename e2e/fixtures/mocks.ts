@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { AdminHeroCarouselSlide, AdminHomeReview } from '@/lib/api/types'
+import type { AdminHeroCarouselSlide, AdminHomeReview, GatheringForm } from '@/lib/api/types'
 
 // ─── Admin Mock 데이터 (E2E 인터셉트용) ────────────────────────────────────────
 
@@ -13,13 +13,12 @@ export const MOCK_HERO_CAROUSEL_SLIDES: AdminHeroCarouselSlide[] = [
 ]
 
 export const MOCK_ADMIN_HOME_REVIEWS: AdminHomeReview[] = [
-  { id: 'r1', authorName: '예림',   avatarUrl: '/review/review1.JPG', gatheringTitle: '퇴근 게더링',            content: '퇴근하고 팜팜발리에서 처음 만난 분들인데 이렇게 편안할 줄 몰랐어요.',                   rating: 5, displayOrder: 1, isActive: true },
-  { id: 'r2', authorName: '지은이', avatarUrl: '/review/review2.JPG', gatheringTitle: '퇴근 게더링',            content: '혼자 가기 망설였는데 다들 너무 자연스럽게 받아줘서 금방 친해졌어요.',                   rating: 5, displayOrder: 2, isActive: true },
-  { id: 'r3', authorName: '수아',   avatarUrl: '/review/review3.JPG', gatheringTitle: '대학생 게더링',          content: '학교도 전공도 다른 사람들이랑 이렇게 이야기가 잘 통할 줄 몰랐어요.',                     rating: 5, displayOrder: 3, isActive: true },
-  { id: 'r4', authorName: '민준정', avatarUrl: '/review/review4.JPG', gatheringTitle: '대학생 게더링',          content: '서울대입구역 근처에서 이런 모임이 있는 줄 몰랐어요.',                                    rating: 4, displayOrder: 4, isActive: true },
-  { id: 'r5', authorName: '나연강', avatarUrl: '/review/review5.JPG', gatheringTitle: '썬데이 러닝 클럽 (SRC)', content: '혼자 달리기는 힘들었는데 함께 뛰니까 너무 즐거웠어요.',                                rating: 5, displayOrder: 5, isActive: true },
-  { id: 'r6', authorName: '도현임', avatarUrl: '/review/review6.JPG', gatheringTitle: '썬데이 러닝 클럽 (SRC)', content: '페이스 맞춰주는 분위기가 너무 좋았어요.',                                            rating: 5, displayOrder: 6, isActive: true  },
-  { id: 'r7', authorName: '태양오', avatarUrl: '/review/review1.JPG', gatheringTitle: '대학생 게더링',          content: '미공개 처리 테스트용 비활성 후기.',                                                  rating: 4, displayOrder: 7, isActive: false },
+  { reviewId: 'r1', nickname: '예림',   reviewContent: '퇴근하고 팜팜발리에서 처음 만난 분들인데 이렇게 편안할 줄 몰랐어요.', likeCount: 5, gatheringTitle: '퇴근 게더링',            imageUrl: '/review/review1.JPG', homeFeatured: true, homeDisplayOrder: 1, createdAt: '2026-05-10T10:00:00' },
+  { reviewId: 'r2', nickname: '지은이', reviewContent: '혼자 가기 망설였는데 다들 너무 자연스럽게 받아줘서 금방 친해졌어요.', likeCount: 5, gatheringTitle: '퇴근 게더링',            imageUrl: '/review/review2.JPG', homeFeatured: true, homeDisplayOrder: 2, createdAt: '2026-05-10T10:00:00' },
+  { reviewId: 'r3', nickname: '수아',   reviewContent: '학교도 전공도 다른 사람들이랑 이렇게 이야기가 잘 통할 줄 몰랐어요.', likeCount: 5, gatheringTitle: '대학생 게더링',          imageUrl: '/review/review3.JPG', homeFeatured: true, homeDisplayOrder: 3, createdAt: '2026-05-10T10:00:00' },
+  { reviewId: 'r4', nickname: '민준정', reviewContent: '서울대입구역 근처에서 이런 모임이 있는 줄 몰랐어요.',                  likeCount: 4, gatheringTitle: '대학생 게더링',          imageUrl: '/review/review4.JPG', homeFeatured: true, homeDisplayOrder: 4, createdAt: '2026-05-10T10:00:00' },
+  { reviewId: 'r5', nickname: '나연강', reviewContent: '혼자 달리기는 힘들었는데 함께 뛰니까 너무 즐거웠어요.',                likeCount: 5, gatheringTitle: '썬데이 러닝 클럽 (SRC)', imageUrl: '/review/review5.JPG', homeFeatured: true, homeDisplayOrder: 5, createdAt: '2026-05-10T10:00:00' },
+  { reviewId: 'r6', nickname: '도현임', reviewContent: '페이스 맞춰주는 분위기가 너무 좋았어요.',                              likeCount: 5, gatheringTitle: '썬데이 러닝 클럽 (SRC)', imageUrl: '/review/review6.JPG', homeFeatured: true, homeDisplayOrder: 6, createdAt: '2026-05-10T10:00:00' },
 ]
 
 // ─── E2E 전용 Mock Data ────────────────────────────────────────────────────────
@@ -28,12 +27,15 @@ export const MOCK_ADMIN_HOME_REVIEWS: AdminHomeReview[] = [
 // DB seed의 gatherings 테이블 UUID
 export const MOCK_GATHERING_ID = 'c2000000-0000-0000-0000-000000000001'
 export const MOCK_CLOSED_GATHERING_ID = 'c2000000-0000-0000-0000-000000000002'
+export const MOCK_OPEN_DATE = '2026-08-14'
+export const MOCK_CLOSED_DATE = '2026-08-17'
+export const MOCK_CONFIRMED_DATE = '2026-08-18'
 
 export const mockGathering = {
   id: MOCK_GATHERING_ID,
   title: '퇴근 게더링',
   description: '퇴근 후 가볍게. 팜팜발리에서 하루의 피로를 풀고 새로운 사람들과 솔직한 이야기를 나눠요. 음료와 간단한 안주가 포함됩니다.',
-  eventDate: '2026-05-14',
+  eventDate: MOCK_OPEN_DATE,
   startTime: '19:30:00',
   endTime: '21:30:00',
   price: 20000,
@@ -54,7 +56,7 @@ export const mockClosedGathering = {
   id: MOCK_CLOSED_GATHERING_ID,
   title: '대학생 게더링',
   status: 'CLOSED',
-  eventDate: '2026-05-17',
+  eventDate: MOCK_CLOSED_DATE,
   startTime: '15:00:00',
   endTime: '17:30:00',
   price: 15000,
@@ -118,7 +120,7 @@ export const mockApplications = [
     gathering: {
       id: MOCK_GATHERING_ID,
       title: '퇴근 게더링',
-      eventDate: '2026-05-14',
+      eventDate: MOCK_OPEN_DATE,
       thumbnailUrl: '/home/home-2.png',
     },
     createdAt: '2026-05-10T10:00:00',
@@ -130,7 +132,7 @@ export const mockApplications = [
     gathering: {
       id: 'c2000000-0000-0000-0000-000000000003',
       title: '썬데이 러닝 클럽 (SRC)',
-      eventDate: '2026-05-18',
+      eventDate: MOCK_CONFIRMED_DATE,
       thumbnailUrl: '/home/home-1.png',
     },
     createdAt: '2026-04-28T15:00:00',
@@ -142,7 +144,7 @@ export const mockAdminGatherings = [
   {
     id: MOCK_GATHERING_ID,
     title: '퇴근 게더링',
-    date: '2026-05-14',
+    date: MOCK_OPEN_DATE,
     startTime: '19:30:00',
     endTime: '21:30:00',
     locationName: '팜팜발리',
@@ -158,7 +160,7 @@ export const mockAdminGatherings = [
   {
     id: MOCK_CLOSED_GATHERING_ID,
     title: '대학생 게더링',
-    date: '2026-05-17',
+    date: MOCK_CLOSED_DATE,
     startTime: '15:00:00',
     endTime: '17:30:00',
     locationName: '서울대입구역',
@@ -353,7 +355,7 @@ export const mockDashboardGatherings = [
   {
     id: MOCK_GATHERING_ID,
     title: '퇴근 게더링',
-    eventDate: '2026-05-14',
+    eventDate: MOCK_OPEN_DATE,
     startTime: '19:30:00',
     endTime: '21:30:00',
     locationName: '팜팜발리',
@@ -366,6 +368,98 @@ export const mockDashboardGatherings = [
     status: 'OPEN',
   },
 ]
+
+export const mockGatheringForm: GatheringForm = {
+  formId: 'form-e2e-001',
+  gatheringId: MOCK_GATHERING_ID,
+  guideText: null,
+  questions: [
+    {
+      questionId: 'q-name',
+      questionKey: 'name',
+      type: 'SHORT_TEXT',
+      label: '이름',
+      placeholder: '실명을 입력해주세요',
+      required: true,
+      displayOrder: 1,
+      options: null,
+      validation: null,
+      systemReserved: true,
+    },
+    {
+      questionId: 'q-phone',
+      questionKey: 'phone',
+      type: 'SHORT_TEXT',
+      label: '연락처',
+      placeholder: '01012345678',
+      required: true,
+      displayOrder: 2,
+      options: null,
+      validation: null,
+      systemReserved: true,
+    },
+    {
+      questionId: 'q-email',
+      questionKey: 'email',
+      type: 'SHORT_TEXT',
+      label: '이메일',
+      placeholder: 'example@email.com',
+      required: true,
+      displayOrder: 3,
+      options: null,
+      validation: null,
+      systemReserved: true,
+    },
+    {
+      questionId: 'q-gender',
+      questionKey: 'gender',
+      type: 'SINGLE_CHOICE',
+      label: '성별',
+      placeholder: null,
+      required: true,
+      displayOrder: 4,
+      options: { choices: ['남성', '여성'] },
+      validation: null,
+      systemReserved: false,
+    },
+    {
+      questionId: 'q-age',
+      questionKey: 'age',
+      type: 'NUMBER',
+      label: '나이',
+      placeholder: '나이를 입력해주세요',
+      required: true,
+      displayOrder: 5,
+      options: null,
+      validation: null,
+      systemReserved: false,
+    },
+    {
+      questionId: 'q-mbti',
+      questionKey: 'mbti',
+      type: 'MBTI_INPUT',
+      label: 'MBTI',
+      placeholder: null,
+      required: false,
+      displayOrder: 6,
+      options: null,
+      validation: null,
+      systemReserved: false,
+    },
+    {
+      questionId: 'q-referral',
+      questionKey: 'referral_source',
+      type: 'SINGLE_CHOICE',
+      label: '유입 경로',
+      placeholder: null,
+      required: false,
+      displayOrder: 7,
+      options: { choices: ['인스타그램', '지인 추천', '검색'] },
+      validation: null,
+      systemReserved: false,
+    },
+  ],
+}
 
 // ─── API Route Interceptors ───────────────────────────────────────────────────
 
@@ -404,6 +498,9 @@ export async function mockGatheringApis(page: Page) {
   await page.route('**/api/gatherings', (route) =>
     route.fulfill({ json: apiRes([mockGathering, mockClosedGathering]) })
   )
+  await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}/form`, (route) =>
+    route.fulfill({ json: apiRes(mockGatheringForm) })
+  )
   await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}`, (route) =>
     route.fulfill({ json: apiRes(mockGathering) })
   )
@@ -431,27 +528,33 @@ export async function mockReviewApis(page: Page) {
 }
 
 export async function mockAdminHomeApis(page: Page) {
+  const rawSlides = MOCK_HERO_CAROUSEL_SLIDES.map(({ isActive, ...slide }) => ({
+    ...slide,
+    active: isActive,
+  }))
+  const rawReviews = MOCK_ADMIN_HOME_REVIEWS.map(({ imageUrl, ...review }) => ({
+    ...review,
+    images: imageUrl ? [{ imageUrl }] : [],
+  }))
+
   // 히어로 캐러셀 — 컬렉션
-  await page.route('**/api/admin/hero-carousel', (route) => {
+  await page.route('**/api/admin/carousel', (route) => {
     if (route.request().method() === 'GET') {
-      return route.fulfill({ json: apiRes({ slides: MOCK_HERO_CAROUSEL_SLIDES }) })
+      return route.fulfill({ json: apiRes(rawSlides) })
     }
-    return route.fulfill({ json: apiRes(MOCK_HERO_CAROUSEL_SLIDES[0]) })
+    return route.fulfill({ json: apiRes(rawSlides[0]) })
   })
   // 히어로 캐러셀 — 개별 항목(수정/삭제/토글)
-  await page.route('**/api/admin/hero-carousel/**', (route) =>
-    route.fulfill({ json: apiRes(MOCK_HERO_CAROUSEL_SLIDES[0]) })
+  await page.route('**/api/admin/carousel/**', (route) =>
+    route.fulfill({ json: apiRes(rawSlides[0]) })
   )
 
-  // 홈 후기 — 컬렉션
-  await page.route('**/api/admin/home-reviews', (route) => {
-    if (route.request().method() === 'GET') {
-      return route.fulfill({ json: apiRes({ reviews: MOCK_ADMIN_HOME_REVIEWS }) })
+  // 홈 후기 — 컬렉션/개별 항목(노출 해제/삭제)
+  await page.route('**/api/admin/reviews**', (route) => {
+    const { pathname } = new URL(route.request().url())
+    if (route.request().method() === 'GET' && pathname.endsWith('/api/admin/reviews')) {
+      return route.fulfill({ json: apiRes({ content: rawReviews }) })
     }
-    return route.fulfill({ json: apiRes(MOCK_ADMIN_HOME_REVIEWS[0]) })
+    return route.fulfill({ json: apiRes(rawReviews[0]) })
   })
-  // 홈 후기 — 개별 항목(수정/삭제/토글)
-  await page.route('**/api/admin/home-reviews/**', (route) =>
-    route.fulfill({ json: apiRes(MOCK_ADMIN_HOME_REVIEWS[0]) })
-  )
 }

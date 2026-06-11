@@ -26,7 +26,6 @@ export interface GatheringListItem {
     address?: string | null
     naverMapUrl?: string | null
     kakaoMapUrl?: string | null
-    mapUrl?: string | null   // 기존 하위 호환 필드
   } | null
 }
 
@@ -46,8 +45,8 @@ export interface CalendarDot {
 }
 
 // 인증 타입
+// access/refresh 토큰은 HttpOnly 쿠키로 발급되어 응답 body에는 사용자 정보만 담긴다. (KAN-189)
 export interface LoginResponse {
-  accessToken: string
   user: {
     id: string
     email: string
@@ -79,38 +78,43 @@ export interface RegisterResponse {
   createdAt: string
 }
 
-// 신청 관련 타입
-export type Gender = 'MALE' | 'FEMALE'
-export type ReferralSource = 'INSTAGRAM' | 'FRIEND' | 'BLOG' | 'OTHER'
-
-export interface GuestApplicationRequest {
+export interface FindEmailRequest {
   name: string
   phone: string
-  gender: Gender
-  age: number
-  instagramId?: string
-  job?: string
-  mbti?: string
-  intro?: string
-  referrerName?: string
 }
 
-export interface GuestApplicationResponse {
-  id: string
-  bookingNumber: string
-  gatheringId: string
-  status: string
-  createdAt: string
+export interface FindEmailResponse {
+  maskedEmail: string
 }
 
-export interface UserApplicationRequest {
-  gender: Gender
-  age: number
-  job?: string
-  mbti?: string
-  intro: string
-  referralSource: ReferralSource
+export interface PasswordResetRequest {
+  email: string
 }
+
+export interface PasswordResetRequestResponse {
+  accepted: boolean
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string
+  newPassword: string
+}
+
+export interface PasswordResetConfirmResponse {
+  reset: boolean
+}
+
+export interface UserWithdrawRequest {
+  password: string
+}
+
+export interface UserWithdrawResponse {
+  withdrawn: boolean
+  deleted: 'Y'
+}
+
+// 신청 관련 타입
+export type Gender = 'MALE' | 'FEMALE'
 
 
 // 프로필 수정 요청 타입
@@ -229,6 +233,11 @@ export interface ReviewDeleteResponse {
   deleted: boolean
 }
 
+export interface ReviewLocateResponse {
+  reviewId: string
+  page: number
+}
+
 export interface GatheringReviewPageResponse {
   content: ReviewItem[]
   page: number
@@ -254,33 +263,45 @@ export interface AdminDashboardGathering {
 }
 
 export interface AdminUserApplicationItem {
-  id: string
-  gatheringTitle?: string
+  applicationId: string
+  bookingNumber: string
+  gatheringTitle: string | null
   status: string
   createdAt: string
-  isGuest: boolean
 }
 
+// 백엔드 회원 목록 응답(UserListResponse) 기준. 상세 전용 필드는 포함하지 않는다. (KAN-187)
 export interface AdminUserListItem {
   id: string
-  nickname: string
-  name: string | null
-  phone: string | null
   email: string
+  nickname: string
+  phone: string | null
+  admin: boolean
+  mileage: number
+  totalApplications: number
+  attendedCount: number
+  createdAt: string
+}
+
+// 백엔드 회원 상세 응답(UserDetailResponse) 기준. (KAN-188)
+export interface AdminUserDetail {
+  id: string
+  email: string
+  name: string | null
+  nickname: string
+  phone: string | null
   gender: string | null
   age: number | null
   job: string | null
   mbti: string | null
-  createdAt: string
-  applicationCount: number
+  intro: string | null
+  instagramId: string | null
+  admin: boolean
   mileage: number
-  accountStatus: string
-}
-
-export interface AdminUserDetail extends AdminUserListItem {
-  bio: string | null
-  animalType: string | null
-  interests: string[] | null
+  accountStatus: 'ACTIVE' | 'SUSPENDED'
+  totalApplications: number
+  attendedCount: number
+  createdAt: string
   applicationHistory: AdminUserApplicationItem[]
 }
 
@@ -302,6 +323,8 @@ export interface HeroCarouselSlide {
   content: string | null
   dateLabel: string | null
   gatheringId: string | null
+  // 연결된 게더링의 유효 상태(과거 OPEN은 COMPLETED 보정). GATHERING 타입에만 존재. (KAN-211)
+  gatheringStatus: GatheringStatus | null
   sortOrder: number
 }
 
@@ -317,12 +340,13 @@ export interface AdminHeroCarouselSlide {
   isActive: boolean
 }
 
+// 백엔드 캐러셀 생성/수정 요청. 이미지는 업로드 결과의 tempPath로 전달한다.
+// (수정 시 tempPath 생략하면 기존 이미지 유지 — KAN-182/183). dateLabel은 백엔드가 게더링에서 파생.
 export interface AdminHeroCarouselSlideRequest {
   type: HeroSlideType
-  imageUrl: string
+  tempPath?: string
   title: string
   content?: string
-  dateLabel?: string
   gatheringId?: string
   sortOrder: number
 }
@@ -336,24 +360,28 @@ export interface ImageUploadResponse {
   previewUrl: string
 }
 
+// 홈 노출 관리 대상 = 실제 작성된 리뷰. (KAN-184)
+// 백엔드는 임의 후기 생성/수정을 지원하지 않고, 실제 리뷰의 홈 노출 여부/순서만 관리한다.
 export interface AdminHomeReview {
-  id: string
-  content: string
-  authorName: string
-  avatarUrl: string | null
+  reviewId: string
+  nickname: string
+  reviewContent: string
+  likeCount: number
   gatheringTitle: string
-  rating: number
-  displayOrder: number
-  isActive: boolean
+  imageUrl: string | null      // 리뷰 첫 이미지
+  homeFeatured: boolean
+  homeDisplayOrder: number | null
+  createdAt: string
 }
 
-export interface AdminHomeReviewRequest {
-  content: string
-  authorName: string
-  avatarUrl?: string
-  gatheringTitle: string
-  rating: number
-  displayOrder?: number
+export interface ReviewHomeFeaturedRequest {
+  isHomeFeatured: boolean
+  homeDisplayOrder?: number
+}
+
+export interface ReviewHomeOrderItem {
+  reviewId: string
+  homeDisplayOrder: number
 }
 
 export interface ReviewCreateRequest {
@@ -422,4 +450,179 @@ export interface MileageHistoryPageResponse {
   size: number
   totalElements: number
   totalPages: number
+}
+
+// ===== 신청폼 (EAV 동적 폼) =====
+
+// 질문 타입 (백엔드 QuestionType enum과 1:1)
+export type QuestionType =
+  | 'SHORT_TEXT'
+  | 'LONG_TEXT'
+  | 'SINGLE_CHOICE'
+  | 'MULTI_CHOICE'
+  | 'NUMBER'
+  | 'MBTI_INPUT'
+
+// 선택형 질문 보기. 백엔드 jsonb는 자유 구조라 choices 키 컨벤션을 사용한다.
+export interface QuestionOptions {
+  choices?: string[]
+  [key: string]: unknown
+}
+
+// 동적 신청폼 질문 (GET /api/gatherings/{id}/form)
+export interface FormQuestionDetail {
+  questionId: string
+  questionKey: string
+  type: QuestionType
+  label: string
+  placeholder: string | null
+  required: boolean
+  displayOrder: number
+  options: QuestionOptions | null
+  validation: Record<string, unknown> | null
+  systemReserved: boolean   // name/phone 등 시스템 예약 질문 (회원은 계정값 사용)
+}
+
+// 게더링 신청폼 전체
+export interface GatheringForm {
+  formId: string
+  gatheringId: string | null
+  guideText: string | null
+  questions: FormQuestionDetail[]
+}
+
+// 답변 1건 (EAV value). value는 질문 타입에 따라 string | number | string[]
+export interface AnswerItem {
+  questionId: string
+  value: string | number | string[]
+}
+
+// 동적 신청 요청 body (회원/비회원 공통)
+export interface DynamicApplicationRequest {
+  answers: AnswerItem[]
+}
+
+// 신청 생성 응답
+export interface ApplicationSubmitResponse {
+  id: string
+  bookingNumber: string
+  gatheringId: string
+  status: ApplicationStatus
+  createdAt: string
+}
+
+// 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
+export interface AnswerView {
+  questionKey: string
+  label: string
+  value: string | number | string[] | null
+}
+
+// 신청 상세 (회원 GET /api/applications/{id}, 비회원 GET /api/applications/check)
+export interface ApplicationDetail {
+  id: string
+  bookingNumber: string
+  name: string | null
+  phone: string | null
+  status: ApplicationStatus
+  gathering: {
+    id: string
+    title: string
+    eventDate: string
+    startTime: string | null
+  }
+  createdAt: string
+  answers: AnswerView[]
+}
+
+// ===== 신청폼 관리 (관리자) =====
+
+export type MatchingStrategy = 'SAME' | 'DIVERSE' | 'OVERLAP'
+
+// 질문 추가/수정 요청 (POST/PUT /api/admin/.../form/questions)
+export interface FormQuestionUpsertRequest {
+  questionKey: string
+  type: QuestionType
+  label: string
+  placeholder?: string
+  required: boolean
+  displayOrder: number
+  options?: QuestionOptions
+  validation?: Record<string, unknown>
+  isMatchingField: boolean
+  matchingStrategy?: MatchingStrategy
+  matchingWeight?: number
+}
+
+// 질문 관리 응답
+export interface FormQuestionAdminItem {
+  questionId: string
+  questionKey: string
+  type: QuestionType
+  label: string
+  placeholder: string | null
+  required: boolean
+  displayOrder: number
+  options: QuestionOptions | null
+  validation: Record<string, unknown> | null
+  isMatchingField: boolean
+  systemReserved: boolean
+  matchingStrategy: MatchingStrategy | null
+  matchingWeight: number | null
+}
+
+// ===== 자동매칭 (관리자) =====
+
+export type MatchingGroupStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
+
+// 자동매칭 실행 결과 (POST /api/admin/gatherings/{id}/matching)
+export interface MatchingRunResult {
+  gatheringId: string
+  algorithmVersion: string
+  confirmedCount: number
+  groupCount: number
+  matchedCount: number
+  unmatchedCount: number
+}
+
+// 매칭 멤버 1명
+export interface MatchingMemberView {
+  memberId: string | null     // 미배정자는 null
+  applicationId: string
+  name: string | null
+  phone: string | null
+  seatOrder: number | null
+  manualAssign: boolean
+}
+
+// 매칭 그룹 1개
+export interface MatchingGroupView {
+  groupId: string
+  eventDate: string
+  status: MatchingGroupStatus
+  groupScore: number | null
+  groupSize: number
+  restaurantName: string | null
+  restaurantAddress: string | null
+  members: MatchingMemberView[]
+}
+
+// 매칭 결과 조회 (GET /api/admin/gatherings/{id}/matching)
+export interface MatchingResult {
+  gatheringId: string
+  groups: MatchingGroupView[]
+  unmatched: MatchingMemberView[]
+}
+
+// 관리자 신청 상세 (답변 포함) — GET /api/admin/applications/{id}
+export interface AdminApplicationDetail {
+  id: string
+  bookingNumber: string
+  name: string | null
+  phone: string | null
+  status: ApplicationStatus
+  gatheringId: string
+  userId: string | null
+  createdAt: string
+  answers: AnswerView[]
 }

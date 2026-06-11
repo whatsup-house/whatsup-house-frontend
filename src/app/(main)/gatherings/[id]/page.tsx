@@ -50,6 +50,10 @@ export default function GatheringDetailPage({
   ) ?? false
 
   const handleApplyClick = () => {
+    if (isLoggedIn) {
+      router.push(`/gatherings/${id}/apply`)
+      return
+    }
     setIsModalOpen(true)
   }
 
@@ -68,12 +72,14 @@ export default function GatheringDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-background pb-[72px]">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* 상세 본문 */}
-      <GatheringDetail gathering={gathering} />
+      <div className="flex-1">
+        <GatheringDetail gathering={gathering} />
+      </div>
 
-      {/* 하단 고정 바 */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-card border-t border-tag-bg/50 px-4 py-3 z-40">
+      {/* 하단 고정 바 (앱 카드/뷰포트 하단에 고정) */}
+      <div className="sticky bottom-0 z-40 bg-card border-t border-tag-bg/50 px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-tag-text">참가비</p>

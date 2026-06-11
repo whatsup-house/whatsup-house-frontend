@@ -1,7 +1,10 @@
 'use client'
 
+import { useRef } from 'react'
 import Link from 'next/link'
 import AppImage from '@/components/ui/AppImage'
+import HScrollButtons from '@/components/ui/HScrollButtons'
+import ReviewImageFallback from '@/components/ui/ReviewImageFallback'
 import { useHomeReviews } from '@/lib/hooks/useHome'
 import type { HomeReviewItem } from '@/lib/api/types'
 
@@ -17,7 +20,7 @@ function HomeReviewCard({ review }: { review: HomeReviewItem }) {
             sizes="200px"
           />
         ) : (
-          <span className="text-4xl">🐾</span>
+          <ReviewImageFallback />
         )}
       </div>
       <div className="p-3">
@@ -52,6 +55,7 @@ function SkeletonCard() {
 export default function ReviewsSection() {
   const { data, isLoading } = useHomeReviews()
   const reviews = data ?? []
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   if (!isLoading && reviews.length === 0) return null
 
@@ -67,11 +71,14 @@ export default function ReviewsSection() {
         </Link>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4">
-        {isLoading
-          ? Array.from({ length: 4 }, (_, i) => <SkeletonCard key={i} />)
-          : reviews.map((review) => <HomeReviewCard key={review.reviewId} review={review} />)
-        }
+      <div className="relative">
+        <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-pl-4 px-4">
+          {isLoading
+            ? Array.from({ length: 4 }, (_, i) => <SkeletonCard key={i} />)
+            : reviews.map((review) => <HomeReviewCard key={review.reviewId} review={review} />)
+          }
+        </div>
+        <HScrollButtons scrollRef={scrollRef} />
       </div>
     </div>
   )

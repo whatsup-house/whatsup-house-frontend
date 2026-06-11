@@ -10,8 +10,20 @@ test.describe('회원 - 게더링 신청', () => {
   })
 
   test('로그인 상태에서 게더링에 신청하고 완료 페이지로 이동한다', async ({ page }) => {
-    await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}/applications/user`, (route) => {
-      route.fulfill({ json: { success: true, message: 'OK', data: null } })
+    await page.route(`**/api/gatherings/${MOCK_GATHERING_ID}/applications`, (route) => {
+      route.fulfill({
+        json: {
+          success: true,
+          message: 'OK',
+          data: {
+            id: 'app-new-user',
+            bookingNumber: null,
+            gatheringId: MOCK_GATHERING_ID,
+            status: 'PENDING',
+            createdAt: '2026-08-12T10:00:00',
+          },
+        },
+      })
     })
     await page.route('**/api/users/me', (route) => {
       route.fulfill({ json: { success: true, message: 'OK', data: mockUserProfile } })
@@ -22,13 +34,8 @@ test.describe('회원 - 게더링 신청', () => {
     await expect(page.getByText('퇴근 게더링')).toBeVisible()
     await page.screenshot({ path: 'e2e/screenshots/user/apply-01-detail.png' })
 
-    // 2. 신청하기 → 모달
+    // 2. 로그인 회원은 신청 방법 모달 없이 신청폼으로 바로 이동
     await page.getByRole('button', { name: '신청하기' }).click()
-    await expect(page.getByText('신청 방법을 선택해주세요')).toBeVisible()
-    await page.screenshot({ path: 'e2e/screenshots/user/apply-02-modal.png' })
-
-    // 3. 로그인하고 신청하기
-    await page.getByRole('button', { name: '로그인하고 신청하기' }).click()
     await expect(page).toHaveURL(`/gatherings/${MOCK_GATHERING_ID}/apply`)
     await captureFullPage(page, 'e2e/screenshots/user/apply-03-form.png')
 
@@ -86,6 +93,7 @@ test.describe('회원 - 게더링 신청', () => {
 
     await page.getByPlaceholder('실명을 입력해주세요').fill('로그인비회원')
     await page.getByPlaceholder('01012345678').fill('01022223333')
+    await page.getByPlaceholder('example@email.com').fill('guest-while-user@test.kr')
     await page.getByRole('button', { name: '여성' }).click()
     await page.getByPlaceholder('나이를 입력해주세요').fill('29')
     await page.getByRole('button', { name: '신청 완료하기' }).click()

@@ -8,6 +8,7 @@ import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import Button from '@/components/ui/Button'
 import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
+import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
 
 const GENDER_LABELS: Record<string, string> = {
   MALE: '남성',
@@ -30,6 +31,7 @@ export default function MyProfile() {
   const { data: profile, isLoading } = useMyProfile()
   const logout = useLogout()
   const [showEdit, setShowEdit] = useState(false)
+  const [showWithdraw, setShowWithdraw] = useState(false)
 
   useEffect(() => {
     if (isInitialized && !isLoggedIn) {
@@ -57,6 +59,9 @@ export default function MyProfile() {
     <>
     {showEdit && (
       <ProfileEditOverlay profile={profile} onClose={() => setShowEdit(false)} />
+    )}
+    {showWithdraw && (
+      <WithdrawAccountDialog onClose={() => setShowWithdraw(false)} />
     )}
     <div className="min-h-screen bg-background">
       <div className="px-6 py-6 flex flex-col gap-4">
@@ -132,6 +137,14 @@ export default function MyProfile() {
         >
           로그아웃
         </Button>
+
+        <button
+          type="button"
+          onClick={() => setShowWithdraw(true)}
+          className="min-h-[44px] text-sm font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
+        >
+          회원탈퇴
+        </button>
       </div>
     </div>
     </>

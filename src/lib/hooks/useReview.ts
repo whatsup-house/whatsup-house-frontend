@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createReview, deleteReview, fetchAllReviews, fetchGatheringReviewsPage, fetchMyReviews, toggleReviewLike } from '@/lib/api/review'
+import { createReview, deleteReview, fetchAllReviews, fetchGatheringReviewsPage, fetchMyReviews, locateReview, toggleReviewLike } from '@/lib/api/review'
 import type { ReviewCreateRequest } from '@/lib/api/types'
 
 export function useAllReviews(
@@ -12,6 +12,20 @@ export function useAllReviews(
     queryKey: ['reviews', 'all', sort, page, gatheringId],
     queryFn: () => fetchAllReviews(sort, page, 10, gatheringId),
     enabled,
+  })
+}
+
+export function useReviewLocate(
+  reviewId: string | undefined,
+  sort: 'LATEST' | 'LIKES',
+  gatheringId?: string,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ['reviews', 'locate', reviewId, sort, gatheringId],
+    queryFn: () => locateReview(reviewId!, sort, 10, gatheringId),
+    enabled: enabled && !!reviewId,
+    retry: false,
   })
 }
 

@@ -1,34 +1,36 @@
 import apiClient from './client'
 import type { ApiResponse, AdminHeroCarouselSlide, AdminHeroCarouselSlideRequest } from './types'
 
-interface SlidesResponse {
-  slides: AdminHeroCarouselSlide[]
-}
+// 백엔드는 isActive(boolean)를 Jackson 규칙상 "active"로 직렬화하므로 매핑한다. (KAN-183)
+type RawSlide = Omit<AdminHeroCarouselSlide, 'isActive'> & { active: boolean }
+
+const normalize = ({ active, ...rest }: RawSlide): AdminHeroCarouselSlide => ({
+  ...rest,
+  isActive: active,
+})
 
 export const fetchAdminCarouselSlides = async (): Promise<AdminHeroCarouselSlide[]> => {
-  const response = await apiClient.get<ApiResponse<SlidesResponse>>('/api/admin/hero-carousel')
-  return response.data.data.slides
+  const response = await apiClient.get<ApiResponse<RawSlide[]>>('/api/admin/carousel')
+  return (response.data.data ?? []).map(normalize)
 }
 
-export const createCarouselSlide = async (data: AdminHeroCarouselSlideRequest): Promise<AdminHeroCarouselSlide> => {
-  const response = await apiClient.post<ApiResponse<AdminHeroCarouselSlide>>('/api/admin/hero-carousel', data)
-  return response.data.data
+export const createCarouselSlide = async (data: AdminHeroCarouselSlideRequest): Promise<void> => {
+  await apiClient.post('/api/admin/carousel', data)
 }
 
-export const updateCarouselSlide = async (id: string, data: AdminHeroCarouselSlideRequest): Promise<AdminHeroCarouselSlide> => {
-  const response = await apiClient.put<ApiResponse<AdminHeroCarouselSlide>>(`/api/admin/hero-carousel/${id}`, data)
-  return response.data.data
+export const updateCarouselSlide = async (id: string, data: AdminHeroCarouselSlideRequest): Promise<void> => {
+  await apiClient.put(`/api/admin/carousel/${id}`, data)
 }
 
 export const deleteCarouselSlide = async (id: string): Promise<void> => {
-  await apiClient.delete(`/api/admin/hero-carousel/${id}`)
+  await apiClient.delete(`/api/admin/carousel/${id}`)
 }
 
-export const toggleCarouselSlide = async (id: string): Promise<AdminHeroCarouselSlide> => {
-  const response = await apiClient.patch<ApiResponse<AdminHeroCarouselSlide>>(`/api/admin/hero-carousel/${id}/toggle`)
-  return response.data.data
+// 노출 토글은 반전된 isActive 값을 명시적으로 전송한다.
+export const toggleCarouselSlide = async (id: string, isActive: boolean): Promise<void> => {
+  await apiClient.patch(`/api/admin/carousel/${id}`, { isActive })
 }
 
-export const reorderCarouselSlides = async (orderedIds: string[]): Promise<void> => {
-  await apiClient.patch('/api/admin/hero-carousel/reorder', { orderedIds })
+export const reorderCarouselSlides = async (slideIds: string[]): Promise<void> => {
+  await apiClient.put('/api/admin/carousel/order', { slideIds })
 }

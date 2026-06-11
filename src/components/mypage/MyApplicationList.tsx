@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs'
 import AppImage from '@/components/ui/AppImage'
+import HScrollButtons from '@/components/ui/HScrollButtons'
 import { useMyApplicationsMe, useCancelApplication } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import type { ApplicationStatus } from '@/lib/api/types'
@@ -39,6 +40,7 @@ export default function MyApplicationList() {
   const { data: applications, isLoading } = useMyApplicationsMe(filterStatus, isLoggedIn)
   const cancelMutation = useCancelApplication()
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const tabScrollRef = useRef<HTMLDivElement>(null)
 
   const handleCancelClick = (id: string) => {
     setConfirmingId(id)
@@ -53,23 +55,26 @@ export default function MyApplicationList() {
   return (
     <div>
       {/* 필터 탭 */}
-      <div className="flex gap-2 overflow-x-auto pb-1 mb-4 scrollbar-hide">
-        {FILTER_TABS.map((tab) => (
-          <button
-            key={tab.label}
-            onClick={() => {
-              setFilterStatus(tab.value)
-              setConfirmingId(null)
-            }}
-            className={`shrink-0 text-sm font-medium px-4 py-1.5 rounded-full transition-colors ${
-              filterStatus === tab.value
-                ? 'bg-primary text-white'
-                : 'bg-tag-bg text-tag-text'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="relative mb-4">
+        <div ref={tabScrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {FILTER_TABS.map((tab) => (
+            <button
+              key={tab.label}
+              onClick={() => {
+                setFilterStatus(tab.value)
+                setConfirmingId(null)
+              }}
+              className={`shrink-0 text-sm font-medium px-4 py-1.5 rounded-full transition-colors ${
+                filterStatus === tab.value
+                  ? 'bg-primary text-white'
+                  : 'bg-tag-bg text-tag-text'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <HScrollButtons scrollRef={tabScrollRef} />
       </div>
 
       {isLoading ? (
