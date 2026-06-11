@@ -18,7 +18,7 @@ const allura = Allura({
 export const metadata: Metadata = {
   title: '와썹하우스',
   description: '잔잔한 게 좋은 사람들의 공간',
-  icons: { icon: '/favicon.png' },
+  icons: { icon: '/assets/whatsup-logo.png' },
 }
 
 export default function RootLayout({
