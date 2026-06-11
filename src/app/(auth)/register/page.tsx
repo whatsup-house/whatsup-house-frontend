@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useCheckNickname } from '@/lib/hooks/useAuth'
+import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import type { Gender } from '@/lib/api/types'
 
 export const REGISTER_SESSION_KEY = 'register-step1'
@@ -53,6 +54,7 @@ const TERMS = [
 
 export default function RegisterPage() {
   const router = useRouter()
+  const handleBack = useBackNavigation('/')
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
@@ -115,7 +117,7 @@ export default function RegisterPage() {
       <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
-            onClick={() => router.back()}
+            onClick={handleBack}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="뒤로가기"
           >

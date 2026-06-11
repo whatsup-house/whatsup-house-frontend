@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertCircle, ChevronLeft } from 'lucide-react'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 import { useFindEmail } from '@/lib/hooks/useAuth'
+import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { getApiErrorMessage } from '@/lib/utils/apiError'
 
 const findEmailSchema = z.object({
@@ -18,7 +18,7 @@ const findEmailSchema = z.object({
 type FindEmailFormValues = z.infer<typeof findEmailSchema>
 
 export default function FindEmailPageClient() {
-  const router = useRouter()
+  const handleBack = useBackNavigation('/login')
   const findEmailMutation = useFindEmail()
 
   const {
@@ -48,7 +48,7 @@ export default function FindEmailPageClient() {
         <div className="flex h-14 items-center justify-between px-1">
           <button
             type="button"
-            onClick={() => router.push('/login')}
+            onClick={handleBack}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground"
             aria-label="뒤로가기"
           >
