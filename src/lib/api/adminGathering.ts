@@ -36,6 +36,7 @@ export interface AdminGatheringDetail {
   id: string
   title: string
   description: string | null
+  howToRun?: string[] | null
   eventDate: string
   startTime: string | null
   endTime: string | null
@@ -65,12 +66,12 @@ export interface GatheringCreateRequest {
   gatheringType?: GatheringType   // 생성 시에만 반영됨 (수정은 백엔드에서 무시)
 }
 
-// 폼 모델(date/capacity)을 백엔드 요청 계약(eventDate/maxAttendees)으로 변환한다. (KAN-185)
-// 백엔드가 받지 않는 필드(howToRun/moodTags/activityTags/mileageReward)는 보내지 않는다.
+// 화면 모델(date/capacity)을 백엔드 계약(eventDate/maxAttendees)으로 변환한다. (KAN-185)
 function toGatheringRequestBody(data: GatheringCreateRequest) {
   return {
     title: data.title,
     description: data.description,
+    howToRun: data.howToRun,
     locationId: data.locationId,
     eventDate: data.date,
     startTime: data.startTime,

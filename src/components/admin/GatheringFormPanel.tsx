@@ -87,6 +87,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
   useEffect(() => {
     if (!detail) return
     setValue('description', detail.description ?? '')
+    setValue('howToRunText', detail.howToRun?.join('\n') ?? '')
     setValue('locationId', detail.location?.id ?? '')
     if (detail.startTime) setValue('startTime', detail.startTime.slice(0, 5))
     if (detail.endTime) setValue('endTime', detail.endTime.slice(0, 5))
