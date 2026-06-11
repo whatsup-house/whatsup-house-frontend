@@ -36,7 +36,7 @@ export function useAdminApplicationDetail(applicationId: string | null) {
 export function useRunMatching(gatheringId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => runMatching(gatheringId),
+    mutationFn: (groupSize: number) => runMatching(gatheringId, groupSize),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['matching', gatheringId] })
     },
