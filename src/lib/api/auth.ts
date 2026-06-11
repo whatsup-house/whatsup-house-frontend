@@ -91,3 +91,11 @@ export const checkNickname = async (nickname: string): Promise<boolean> => {
   )
   return response.data.data.available
 }
+
+// 이메일 중복 확인 (true = 사용 가능)
+export const checkEmail = async (email: string): Promise<boolean> => {
+  const response = await apiClient.get<ApiResponse<{ available: boolean }>>(
+    `/api/users/check-email?email=${encodeURIComponent(email)}`
+  )
+  return response.data.data.available
+}
