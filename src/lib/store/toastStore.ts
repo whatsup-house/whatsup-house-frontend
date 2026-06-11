@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 interface ToastState {
   message: string | null
-  variant: 'default' | 'welcome'
+  variant: 'default' | 'welcome' | 'error'
   // 토스트를 띄운다. 페이지 이동(예: 회원가입 완료 후 홈 이동) 후에도 유지된다. (KAN-227)
   show: (message: string, variant?: ToastState['variant']) => void
   clear: () => void
