@@ -127,6 +127,7 @@ export interface ProfileUpdateRequest {
   instagramId?: string
   mbti?: string
   job?: string
+  intro?: string
   bio?: string
   interests?: string[]
 }
@@ -410,10 +411,10 @@ export interface UserProfile {
   nickname: string
   name: string | null
   phone: string | null
-  bio: string | null
+  bio?: string | null
   intro?: string | null
   instagramId?: string | null
-  gender: string | null
+  gender: Gender | null
   age: number | null
   job: string | null
   mbti: string | null

@@ -90,7 +90,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
       age: profile.age ?? undefined,
       instagramId: profile.instagramId ?? '',
       job: profile.job ?? '',
-      bio: profile.bio ?? '',
+      bio: profile.intro ?? profile.bio ?? '',
     })
   }, [profile, reset])
 
@@ -111,7 +111,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
         age: formData.age,
         instagramId: formData.instagramId || undefined,
         job: formData.job || undefined,
-        bio: formData.bio || undefined,
+        intro: formData.bio || undefined,
         mbti: mbtiString ?? undefined,
         interests: interests.length > 0 ? interests : undefined,
       })
