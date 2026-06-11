@@ -7,6 +7,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { useForm } from 'react-hook-form'
+import { useToastStore } from '@/lib/store/toastStore'
 
 const CONTRACT_LABEL: Record<string, string> = {
   ACTIVE: '계약중',
@@ -39,6 +40,7 @@ function LocationModal({
   onSuccess: () => void
 }) {
   const isEdit = !!location
+  const showToast = useToastStore((s) => s.show)
   const { register, handleSubmit } = useForm<LocationFormData>({
     defaultValues: location
       ? {
@@ -59,7 +61,7 @@ function LocationModal({
         ? adminGatheringApi.updateLocation(location!.id, data)
         : adminGatheringApi.createLocation(data),
     onSuccess,
-    onError: () => alert('저장 중 오류가 발생했습니다.'),
+    onError: () => showToast('저장 중 오류가 발생했습니다.', 'error'),
   })
 
   const onSubmit = (raw: LocationFormData) => {

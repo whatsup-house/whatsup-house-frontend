@@ -15,6 +15,7 @@ import type {
   QuestionType,
   MatchingStrategy,
 } from '@/lib/api/types'
+import { useToastStore } from '@/lib/store/toastStore'
 
 const TYPE_LABEL: Record<QuestionType, string> = {
   SHORT_TEXT: '텍스트 답변',
@@ -117,6 +118,7 @@ function toUpsertPayload(q: FormQuestionAdminItem, displayOrder: number): FormQu
 
 export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: FormQuestionBuilderProps) {
   const { data: questions = [], isLoading } = useAdminFormQuestions(gatheringId)
+  const showToast = useToastStore((s) => s.show)
   const deleteQuestion = useDeleteFormQuestion(gatheringId)
   const updateQuestion = useUpdateFormQuestion(gatheringId)
   const [editing, setEditing] = useState<FormQuestionAdminItem | 'new' | null>(null)
@@ -206,7 +208,7 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
                 </button>
                 <button
                   onClick={() => {
-                    if (q.systemReserved) { alert('기본 질문(이름/연락처)은 삭제할 수 없어요.'); return }
+                    if (q.systemReserved) { showToast('기본 질문(이름/연락처)은 삭제할 수 없어요.', 'error'); return }
                     if (confirm(`'${q.label}' 질문을 삭제할까요?`)) deleteQuestion.mutate(q.questionId)
                   }}
                   className={`p-1.5 ${q.systemReserved ? 'text-[#DDD] cursor-not-allowed' : 'text-[#C8392B] hover:bg-[#FDECEA] rounded'}`}
