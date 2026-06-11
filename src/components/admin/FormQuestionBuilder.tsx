@@ -251,13 +251,19 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
     setState((p) => ({ ...p, [key]: value }))
 
   const handleTypeChange = (type: QuestionType) => {
-    setState((p) => ({
-      ...p,
-      type,
-      matchingStrategy: p.isMatchingField
-        ? getDefaultMatchingStrategy(p.questionKey, type)
-        : p.matchingStrategy,
-    }))
+    // 주관식(단답/장문)은 매칭 계산이 불가능하므로 매칭 사용을 강제로 끈다. (KAN-226)
+    const isText = type === 'SHORT_TEXT' || type === 'LONG_TEXT'
+    setState((p) => {
+      const isMatchingField = isText ? false : p.isMatchingField
+      return {
+        ...p,
+        type,
+        isMatchingField,
+        matchingStrategy: isMatchingField
+          ? getDefaultMatchingStrategy(p.questionKey, type)
+          : p.matchingStrategy,
+      }
+    })
   }
 
   const handleMatchingFieldChange = (isMatchingField: boolean) => {
@@ -277,6 +283,8 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
 
   const isChoice = CHOICE_TYPES.includes(state.type)
   const isHardKey = HARD_KEYS.includes(state.questionKey)
+  // 주관식은 매칭에 사용할 수 없다. (KAN-226)
+  const isTextType = state.type === 'SHORT_TEXT' || state.type === 'LONG_TEXT'
 
   const handleSave = () => {
     setError(null)
@@ -383,11 +391,19 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             </span>
           </label>
 
-          {/* 매칭 */}
+          {/* 매칭 — 주관식은 매칭 계산이 불가능해 비활성화한다. (KAN-226) */}
           <div className="rounded-[12px] border border-[#F0EBE8] p-3 bg-[#FAF8F6] flex flex-col gap-3">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={state.isMatchingField} onChange={(e) => handleMatchingFieldChange(e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
-              <span className="text-[14px] font-medium text-[#1A1A1A]">매칭에 사용</span>
+            <label className={`flex items-center gap-2 ${isTextType ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+              <input
+                type="checkbox"
+                checked={state.isMatchingField}
+                disabled={isTextType}
+                onChange={(e) => handleMatchingFieldChange(e.target.checked)}
+                className="w-4 h-4 accent-[#C8392B]"
+              />
+              <span className="text-[14px] font-medium text-[#1A1A1A]">
+                매칭에 사용{isTextType ? ' (주관식은 불가)' : ''}
+              </span>
             </label>
             {isHardKey && (
               <p className="text-[12px] text-[#767676]">
