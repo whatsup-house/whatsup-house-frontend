@@ -6,6 +6,7 @@ import {
   checkNickname,
   checkEmail,
   confirmPasswordReset,
+  changeMyPassword,
   fetchMyProfile,
   findEmail,
   login,
@@ -150,6 +151,14 @@ export function useLogout() {
       storeLogout()
       router.push('/')
     },
+  })
+}
+
+// 비밀번호 변경 (KAN-223)
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      changeMyPassword(data),
   })
 }
 
