@@ -1,14 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import dayjs from 'dayjs'
 import type { AdminGatheringListItem, GatheringCreateRequest, GatheringType } from '@/lib/api/adminGathering'
-import { useAdminLocations, useCreateGathering, useUpdateGathering } from '@/lib/hooks/useAdminGathering'
+import { useAdminLocations, useAdminGatheringDetail, useCreateGathering, useUpdateGathering } from '@/lib/hooks/useAdminGathering'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
+// 날짜는 오늘 이후, 시작 시간은 종료 시간보다 빨라야 한다(백엔드와 동일 정책). (KAN-221)
 const schema = z.object({
   title: z.string().min(1, '게더링명을 입력해주세요'),
   description: z.string().min(1, '게더링 소개를 입력해주세요'),
@@ -22,6 +24,14 @@ const schema = z.object({
   thumbnailUrl: z.string().optional(),
   moodTagsText: z.string().optional(),
   mileageReward: z.number().optional(),
+}).superRefine((val, ctx) => {
+  const today = dayjs().format('YYYY-MM-DD')
+  if (val.date && val.date < today) {
+    ctx.addIssue({ code: 'custom', path: ['date'], message: '게더링 날짜는 오늘 이후로 선택해주세요.' })
+  }
+  if (val.startTime && val.endTime && val.startTime >= val.endTime) {
+    ctx.addIssue({ code: 'custom', path: ['endTime'], message: '시작 시간은 종료 시간보다 빨라야 합니다.' })
+  }
 })
 
 type FormValues = z.infer<typeof schema>
@@ -35,7 +45,10 @@ interface GatheringFormPanelProps {
 export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringFormPanelProps) {
   const isEdit = !!gathering
 
+  const today = useMemo(() => dayjs().format('YYYY-MM-DD'), [])
   const { data: locations } = useAdminLocations()
+  // 수정 시 상세를 조회해 소개/장소 등 목록에 없는 필드까지 prefill 한다. (KAN-220)
+  const { data: detail } = useAdminGatheringDetail(gathering?.id)
   const { mutate: createGathering, isPending: isCreating } = useCreateGathering(onSuccess)
   const { mutate: updateGathering, isPending: isUpdating } = useUpdateGathering(onSuccess)
   const isPending = isCreating || isUpdating
@@ -56,18 +69,29 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
   })
 
   useEffect(() => {
-    if (gathering) {
-      setValue('title', gathering.title)
-      setValue('date', gathering.date)
-      setValue('startTime', gathering.startTime.slice(0, 5))
-      setValue('endTime', gathering.endTime?.slice(0, 5) ?? '')
-      setValue('price', gathering.price)
-      setValue('capacity', gathering.capacity)
-      setValue('thumbnailUrl', gathering.thumbnailUrl ?? '')
-    } else {
+    if (!gathering) {
       reset()
+      return
     }
+    // 목록 데이터로 우선 채우고
+    setValue('title', gathering.title)
+    setValue('date', gathering.date)
+    setValue('startTime', gathering.startTime.slice(0, 5))
+    setValue('endTime', gathering.endTime?.slice(0, 5) ?? '')
+    setValue('price', gathering.price)
+    setValue('capacity', gathering.capacity)
+    setValue('thumbnailUrl', gathering.thumbnailUrl ?? '')
   }, [gathering, setValue, reset])
+
+  // 상세가 도착하면 소개/장소/시간/썸네일을 상세 기준으로 채운다. (KAN-220)
+  useEffect(() => {
+    if (!detail) return
+    setValue('description', detail.description ?? '')
+    setValue('locationId', detail.location?.id ?? '')
+    if (detail.startTime) setValue('startTime', detail.startTime.slice(0, 5))
+    if (detail.endTime) setValue('endTime', detail.endTime.slice(0, 5))
+    setValue('thumbnailUrl', detail.thumbnailUrl ?? '')
+  }, [detail, setValue])
 
   const onSubmit = (values: FormValues) => {
     const data: GatheringCreateRequest = {
@@ -183,6 +207,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
             <Input
               label="날짜 *"
               type="date"
+              min={today}
               error={errors.date?.message}
               {...register('date')}
             />
