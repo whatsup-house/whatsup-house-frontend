@@ -2,12 +2,13 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertCircle, ChevronLeft } from 'lucide-react'
 import { useLogin } from '@/lib/hooks/useAuth'
+import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { safeReturnUrl } from '@/lib/utils/url'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
@@ -19,13 +20,12 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPageClient() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const rawReturnUrl = searchParams.get('returnUrl')
   const returnUrl = safeReturnUrl(rawReturnUrl)
   const isWithdrawn = searchParams.get('withdrawn') === '1'
   const loginMutation = useLogin(returnUrl)
-  const welcomeHref = rawReturnUrl ? `/welcome?returnUrl=${encodeURIComponent(rawReturnUrl)}` : '/welcome'
+  const handleBack = useBackNavigation('/')
 
   const {
     register,
@@ -48,7 +48,7 @@ export default function LoginPageClient() {
         <div className="flex h-14 items-center justify-between px-1">
           <button
             type="button"
-            onClick={() => router.push(welcomeHref)}
+            onClick={handleBack}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground"
             aria-label="뒤로가기"
           >

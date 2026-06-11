@@ -1,8 +1,8 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { ArrowLeft, Bell } from 'lucide-react'
-import { useNavigationStore } from '@/lib/store/navigationStore'
+import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 
 const HIDDEN_PATTERNS: RegExp[] = []
 
@@ -41,8 +41,7 @@ function getFallbackPath(pathname: string): string {
 
 export default function TopNav() {
   const pathname = usePathname()
-  const router = useRouter()
-  const { stack, back } = useNavigationStore()
+  const handleBack = useBackNavigation(getFallbackPath(pathname))
 
   if (HIDDEN_PATTERNS.some((pattern) => pattern.test(pathname))) {
     return null
@@ -50,15 +49,6 @@ export default function TopNav() {
 
   const canGoBack = !ROOT_PATHS.has(pathname)
   const title = getTitle(pathname)
-
-  const handleBack = () => {
-    if (stack.length > 1) {
-      back()
-      router.back()
-      return
-    }
-    router.push(getFallbackPath(pathname))
-  }
 
   return (
     <header className="sticky top-0 z-30 bg-card/85 backdrop-blur-md border-b border-tag-bg">
