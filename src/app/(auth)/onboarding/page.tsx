@@ -107,8 +107,11 @@ export default function OnboardingPage() {
       {
         onSuccess: () => {
           sessionStorage.removeItem(REGISTER_SESSION_KEY)
-          // 가입 완료 후 홈으로 이동하더라도 전역 토스트로 완료를 알린다. (KAN-227)
-          showToast('회원가입이 완료되었습니다.')
+          // 가입 완료 후 홈으로 이동하더라도 전역 안내를 유지한다. (KAN-227)
+          showToast(
+            '와썹하우스에 오신 걸 환영해요\n가입 축하 마일리지 1,000M가 적립되었어요.\n마음에 드는 게더링을 둘러보며 첫 모임을 준비해보세요.',
+            'welcome'
+          )
         },
         onError: (error) => {
           const message = getErrorMessage(error)
