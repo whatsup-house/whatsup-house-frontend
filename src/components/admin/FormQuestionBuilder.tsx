@@ -17,15 +17,15 @@ import type {
 } from '@/lib/api/types'
 
 const TYPE_LABEL: Record<QuestionType, string> = {
-  SHORT_TEXT: '주관식',
-  LONG_TEXT: '주관식',
+  SHORT_TEXT: '텍스트 답변',
+  LONG_TEXT: '텍스트 답변',
   SINGLE_CHOICE: '단일선택',
   MULTI_CHOICE: '다중선택',
   NUMBER: '숫자',
   MBTI_INPUT: 'MBTI',
 }
 
-// 질문 추가/수정 드롭다운에 노출하는 유형. 단답형·장문형은 '주관식' 하나로 합쳤다.
+// 질문 추가/수정 드롭다운에 노출하는 유형. 단답형·장문형은 '텍스트 답변' 하나로 합쳤다.
 // (레거시 LONG_TEXT 질문은 편집 시 SHORT_TEXT로 정규화된다.)
 const TYPE_OPTIONS: QuestionType[] = ['SHORT_TEXT', 'SINGLE_CHOICE', 'MULTI_CHOICE', 'NUMBER', 'MBTI_INPUT']
 
@@ -236,7 +236,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const [state, setState] = useState<EditorState>(() => ({
     label: initial?.label ?? '',
     questionKey: initial?.questionKey ?? '',
-    // 단답형·장문형을 '주관식'으로 합쳤으므로 레거시 LONG_TEXT는 SHORT_TEXT로 정규화한다.
+    // 단답형·장문형을 '텍스트 답변'으로 합쳤으므로 레거시 LONG_TEXT는 SHORT_TEXT로 정규화한다.
     type: initial?.type === 'LONG_TEXT' ? 'SHORT_TEXT' : (initial?.type ?? 'SHORT_TEXT'),
     placeholder: initial?.placeholder ?? '',
     required: initial?.required ?? true,
@@ -251,7 +251,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
     setState((p) => ({ ...p, [key]: value }))
 
   const handleTypeChange = (type: QuestionType) => {
-    // 주관식(단답/장문)은 매칭 계산이 불가능하므로 매칭 사용을 강제로 끈다. (KAN-226)
+    // 텍스트 답변(단답/장문)은 매칭 계산이 불가능하므로 매칭 사용을 강제로 끈다. (KAN-226)
     const isText = type === 'SHORT_TEXT' || type === 'LONG_TEXT'
     setState((p) => {
       const isMatchingField = isText ? false : p.isMatchingField
@@ -283,7 +283,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
 
   const isChoice = CHOICE_TYPES.includes(state.type)
   const isHardKey = HARD_KEYS.includes(state.questionKey)
-  // 주관식은 매칭에 사용할 수 없다. (KAN-226)
+  // 텍스트 답변은 매칭에 사용할 수 없다. (KAN-226)
   const isTextType = state.type === 'SHORT_TEXT' || state.type === 'LONG_TEXT'
 
   const handleSave = () => {
@@ -391,7 +391,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             </span>
           </label>
 
-          {/* 매칭 — 주관식은 매칭 계산이 불가능해 비활성화한다. (KAN-226) */}
+          {/* 매칭 — 텍스트 답변은 매칭 계산이 불가능해 비활성화한다. (KAN-226) */}
           <div className="rounded-[12px] border border-[#F0EBE8] p-3 bg-[#FAF8F6] flex flex-col gap-3">
             <label className={`flex items-center gap-2 ${isTextType ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
               <input
@@ -402,7 +402,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
                 className="w-4 h-4 accent-[#C8392B]"
               />
               <span className="text-[14px] font-medium text-[#1A1A1A]">
-                매칭에 사용{isTextType ? ' (주관식은 불가)' : ''}
+                매칭에 사용{isTextType ? ' (텍스트 답변은 불가)' : ''}
               </span>
             </label>
             {isHardKey && (
