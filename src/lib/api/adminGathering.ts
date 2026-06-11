@@ -31,6 +31,21 @@ interface RawAdminGathering {
   applicantCount: number
 }
 
+// 관리자 게더링 상세 응답 (GET /api/admin/gatherings/{id}). 수정 패널 prefill용. (KAN-220)
+export interface AdminGatheringDetail {
+  id: string
+  title: string
+  description: string | null
+  eventDate: string
+  startTime: string | null
+  endTime: string | null
+  price: number | null
+  maxAttendees: number
+  status: string
+  thumbnailUrl: string | null
+  location: { id: string; name: string; address: string } | null
+}
+
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
 
 export interface GatheringCreateRequest {
@@ -149,6 +164,12 @@ export const adminGatheringApi = {
 
   create: async (data: GatheringCreateRequest) => {
     const res = await apiClient.post<ApiResponse<unknown>>('/api/admin/gatherings', toGatheringRequestBody(data))
+    return res.data.data
+  },
+
+  // 수정 패널 prefill용 상세 조회 (소개/장소 등 목록 응답에 없는 필드 포함). (KAN-220)
+  getById: async (id: string): Promise<AdminGatheringDetail> => {
+    const res = await apiClient.get<ApiResponse<AdminGatheringDetail>>(`/api/admin/gatherings/${id}`)
     return res.data.data
   },
 

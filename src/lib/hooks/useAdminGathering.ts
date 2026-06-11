@@ -41,6 +41,16 @@ export function useAdminLocations() {
   })
 }
 
+// 수정 패널 prefill용 게더링 상세 조회 (KAN-220)
+export function useAdminGatheringDetail(id: string | undefined) {
+  return useQuery({
+    queryKey: ['admin', 'gathering', id],
+    queryFn: () => adminGatheringApi.getById(id as string),
+    enabled: !!id,
+    staleTime: 1000 * 30,
+  })
+}
+
 export function useCreateGathering(onSuccess?: () => void) {
   const queryClient = useQueryClient()
   return useMutation({
