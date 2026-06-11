@@ -10,7 +10,7 @@ import { useAdminLocations, useAdminGatheringDetail, useCreateGathering, useUpda
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
-// 날짜는 오늘 이후, 시작 시간은 종료 시간보다 빨라야 한다(백엔드와 동일 정책). (KAN-221)
+// 날짜는 오늘 포함 이후만 허용한다. 시간 순서 검증은 새벽 종료 케이스를 위해 적용하지 않는다. (KAN-221)
 const schema = z.object({
   title: z.string().min(1, '게더링명을 입력해주세요'),
   description: z.string().min(1, '게더링 소개를 입력해주세요'),
@@ -28,9 +28,6 @@ const schema = z.object({
   const today = dayjs().format('YYYY-MM-DD')
   if (val.date && val.date < today) {
     ctx.addIssue({ code: 'custom', path: ['date'], message: '게더링 날짜는 오늘 이후로 선택해주세요.' })
-  }
-  if (val.startTime && val.endTime && val.startTime >= val.endTime) {
-    ctx.addIssue({ code: 'custom', path: ['endTime'], message: '시작 시간은 종료 시간보다 빨라야 합니다.' })
   }
 })
 
