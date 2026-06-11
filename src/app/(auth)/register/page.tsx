@@ -79,6 +79,27 @@ export default function RegisterPage() {
     return () => clearTimeout(timer)
   }, [nicknameValue])
 
+  // 온보딩에서 '이전'으로 돌아오면 1단계 입력값을 복원한다. 성별도 자동 선택되도록 setValue로 복원. (KAN-229)
+  useEffect(() => {
+    const raw = sessionStorage.getItem(REGISTER_SESSION_KEY)
+    if (!raw) return
+    try {
+      const saved = JSON.parse(raw)
+      if (saved.email) setValue('email', saved.email)
+      if (saved.password) {
+        setValue('password', saved.password)
+        setValue('passwordConfirm', saved.password)
+      }
+      if (saved.name) setValue('name', saved.name)
+      if (saved.nickname) setValue('nickname', saved.nickname)
+      if (saved.gender) setValue('gender', saved.gender)
+      if (saved.age != null) setValue('age', String(saved.age))
+      if (saved.phone) setValue('phone', saved.phone)
+    } catch {
+      // 손상된 세션 값은 무시
+    }
+  }, [setValue])
+
   const {
     data: nicknameAvailable,
     isFetching: isCheckingNickname,
