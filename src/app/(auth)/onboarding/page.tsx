@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useRegisterAndLogin } from '@/lib/hooks/useAuth'
+import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { useToastStore } from '@/lib/store/toastStore'
 import type { Gender } from '@/lib/api/types'
 import { REGISTER_EMAIL_ERROR_KEY, REGISTER_SESSION_KEY } from '../register/page'
@@ -42,6 +43,7 @@ interface Step1Data {
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const handleBack = useBackNavigation('/register')
   const showToast = useToastStore((s) => s.show)
   // SSR/CSR 렌더 결과 불일치(Hydration Error)를 막는다: 마운트 전에는 항상 null을 렌더하고,
   // 마운트 후에만 sessionStorage를 읽어 파생한다. (KAN-219)
@@ -134,7 +136,7 @@ export default function OnboardingPage() {
       <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
-            onClick={() => router.push('/register')}
+            onClick={handleBack}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="뒤로가기"
           >
@@ -240,7 +242,7 @@ export default function OnboardingPage() {
             variant="outlined"
             size="lg"
             className="flex-1"
-            onClick={() => router.push('/register')}
+            onClick={handleBack}
           >
             이전
           </Button>

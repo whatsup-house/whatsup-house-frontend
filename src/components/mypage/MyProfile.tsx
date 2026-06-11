@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil } from 'lucide-react'
+import { Pencil, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import Button from '@/components/ui/Button'
 import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
+import PasswordChangeDialog from '@/components/mypage/PasswordChangeDialog'
 
 const GENDER_LABELS: Record<string, string> = {
   MALE: '남성',
@@ -32,12 +33,20 @@ export default function MyProfile() {
   const logout = useLogout()
   const [showEdit, setShowEdit] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
+  const [showPasswordChange, setShowPasswordChange] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => {
     if (isInitialized && !isLoggedIn) {
       router.replace('/login?returnUrl=/mypage')
     }
   }, [isInitialized, isLoggedIn, router])
+
+  useEffect(() => {
+    if (!notice) return
+    const timer = setTimeout(() => setNotice(null), 2500)
+    return () => clearTimeout(timer)
+  }, [notice])
 
   if (!isInitialized || !isLoggedIn || isLoading) {
     return (
@@ -63,6 +72,12 @@ export default function MyProfile() {
     {showWithdraw && (
       <WithdrawAccountDialog onClose={() => setShowWithdraw(false)} />
     )}
+    {showPasswordChange && (
+      <PasswordChangeDialog
+        onClose={() => setShowPasswordChange(false)}
+        onSuccess={() => setNotice('비밀번호 변경이 완료되었습니다.')}
+      />
+    )}
     <div className="min-h-screen bg-background">
       <div className="px-6 py-6 flex flex-col gap-4">
         {/* 프로필 요약 */}
@@ -79,8 +94,8 @@ export default function MyProfile() {
           </div>
           <div className="text-center">
             <h2 className="text-lg font-bold text-foreground">{profile.nickname}</h2>
-            {profile.bio && (
-              <p className="text-sm text-tag-text mt-1">{profile.bio}</p>
+            {(profile.intro ?? profile.bio) && (
+              <p className="text-sm text-tag-text mt-1">{profile.intro ?? profile.bio}</p>
             )}
           </div>
           <Link
@@ -127,6 +142,21 @@ export default function MyProfile() {
           </div>
         )}
 
+        {/* 관리자 전용 대시보드 이동 (KAN-228) */}
+        {profile.admin && (
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full"
+            onClick={() => router.push('/admin')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <LayoutDashboard size={18} />
+              관리자 대시보드
+            </span>
+          </Button>
+        )}
+
         {/* 로그아웃 */}
         <Button
           variant="outlined"
@@ -138,15 +168,32 @@ export default function MyProfile() {
           로그아웃
         </Button>
 
-        <button
-          type="button"
-          onClick={() => setShowWithdraw(true)}
-          className="min-h-[44px] text-sm font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
-        >
-          회원탈퇴
-        </button>
+        <div className="flex min-h-[44px] items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => setShowPasswordChange(true)}
+            className="text-sm font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
+          >
+            비밀번호 변경
+          </button>
+          <span className="h-3 w-px bg-tag-bg" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setShowWithdraw(true)}
+            className="text-sm font-medium text-tag-text underline decoration-tag-text/40 underline-offset-4"
+          >
+            회원탈퇴
+          </button>
+        </div>
       </div>
     </div>
+    {notice && (
+      <div className="fixed inset-x-0 bottom-8 z-[100] flex justify-center px-6 pointer-events-none">
+        <div className="max-w-[430px] w-full rounded-input bg-foreground/90 text-white text-sm font-medium px-4 py-3 text-center shadow-lg">
+          {notice}
+        </div>
+      </div>
+    )}
     </>
   )
 }

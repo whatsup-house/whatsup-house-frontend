@@ -31,6 +31,22 @@ interface RawAdminGathering {
   applicantCount: number
 }
 
+// 관리자 게더링 상세 응답 (GET /api/admin/gatherings/{id}). 수정 패널 prefill용. (KAN-220)
+export interface AdminGatheringDetail {
+  id: string
+  title: string
+  description: string | null
+  howToRun?: string[] | null
+  eventDate: string
+  startTime: string | null
+  endTime: string | null
+  price: number | null
+  maxAttendees: number
+  status: string
+  thumbnailUrl: string | null
+  location: { id: string; name: string; address: string } | null
+}
+
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
 
 export interface GatheringCreateRequest {
@@ -50,12 +66,12 @@ export interface GatheringCreateRequest {
   gatheringType?: GatheringType   // 생성 시에만 반영됨 (수정은 백엔드에서 무시)
 }
 
-// 폼 모델(date/capacity)을 백엔드 요청 계약(eventDate/maxAttendees)으로 변환한다. (KAN-185)
-// 백엔드가 받지 않는 필드(howToRun/moodTags/activityTags/mileageReward)는 보내지 않는다.
+// 화면 모델(date/capacity)을 백엔드 계약(eventDate/maxAttendees)으로 변환한다. (KAN-185)
 function toGatheringRequestBody(data: GatheringCreateRequest) {
   return {
     title: data.title,
     description: data.description,
+    howToRun: data.howToRun,
     locationId: data.locationId,
     eventDate: data.date,
     startTime: data.startTime,
@@ -149,6 +165,12 @@ export const adminGatheringApi = {
 
   create: async (data: GatheringCreateRequest) => {
     const res = await apiClient.post<ApiResponse<unknown>>('/api/admin/gatherings', toGatheringRequestBody(data))
+    return res.data.data
+  },
+
+  // 수정 패널 prefill용 상세 조회 (소개/장소 등 목록 응답에 없는 필드 포함). (KAN-220)
+  getById: async (id: string): Promise<AdminGatheringDetail> => {
+    const res = await apiClient.get<ApiResponse<AdminGatheringDetail>>(`/api/admin/gatherings/${id}`)
     return res.data.data
   },
 

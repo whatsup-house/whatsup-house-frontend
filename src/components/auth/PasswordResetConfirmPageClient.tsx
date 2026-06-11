@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertCircle, ChevronLeft } from 'lucide-react'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 import { useConfirmPasswordReset } from '@/lib/hooks/useAuth'
+import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { getApiErrorMessage } from '@/lib/utils/apiError'
 
 const passwordResetConfirmSchema = z.object({
@@ -24,7 +25,7 @@ const passwordResetConfirmSchema = z.object({
 type PasswordResetConfirmFormValues = z.infer<typeof passwordResetConfirmSchema>
 
 export default function PasswordResetConfirmPageClient() {
-  const router = useRouter()
+  const handleBack = useBackNavigation('/password-reset')
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
   const confirmMutation = useConfirmPasswordReset()
@@ -60,7 +61,7 @@ export default function PasswordResetConfirmPageClient() {
         <div className="flex h-14 items-center justify-between px-1">
           <button
             type="button"
-            onClick={() => router.push('/password-reset')}
+            onClick={handleBack}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground"
             aria-label="뒤로가기"
           >

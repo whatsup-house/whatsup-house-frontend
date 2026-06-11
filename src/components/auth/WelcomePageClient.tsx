@@ -3,12 +3,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { safeReturnUrl } from '@/lib/utils/url'
 import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
+import { isDesktopViewport } from '@/lib/utils/viewport'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
 export default function WelcomePageClient() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
   const redirectTo = safeReturnUrl(returnUrl)
@@ -18,8 +20,15 @@ export default function WelcomePageClient() {
     markWelcomeSeen()
   }, [])
 
+  // 웰컴 랜딩은 모바일 전용. 데스크탑(lg↑)에서 직접 진입하면 즉시 내보낸다.
+  useEffect(() => {
+    if (isDesktopViewport()) {
+      router.replace(redirectTo)
+    }
+  }, [router, redirectTo])
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-foreground text-white">
+    <main className="relative min-h-screen overflow-hidden bg-foreground text-white lg:hidden">
       <AuthOnlyRedirect redirectTo={redirectTo} />
       <Image
         src="/assets/host-1.jpg"
