@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   checkNickname,
+  checkEmail,
   confirmPasswordReset,
   fetchMyProfile,
   findEmail,
@@ -106,6 +107,15 @@ export function useCheckNickname(nickname: string) {
     queryKey: ['nickname-check', nickname],
     queryFn: () => checkNickname(nickname),
     enabled: nickname.length >= 2,
+    staleTime: 1000 * 10,
+  })
+}
+
+export function useCheckEmail(email: string) {
+  return useQuery({
+    queryKey: ['email-check', email],
+    queryFn: () => checkEmail(email),
+    enabled: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
     staleTime: 1000 * 10,
   })
 }
