@@ -17,15 +17,15 @@ import type {
 } from '@/lib/api/types'
 
 const TYPE_LABEL: Record<QuestionType, string> = {
-  SHORT_TEXT: '주관식',
-  LONG_TEXT: '주관식',
+  SHORT_TEXT: '텍스트 답변',
+  LONG_TEXT: '텍스트 답변',
   SINGLE_CHOICE: '단일선택',
   MULTI_CHOICE: '다중선택',
   NUMBER: '숫자',
   MBTI_INPUT: 'MBTI',
 }
 
-// 질문 추가/수정 드롭다운에 노출하는 유형. 단답형·장문형은 '주관식' 하나로 합쳤다.
+// 질문 추가/수정 드롭다운에 노출하는 유형. 단답형·장문형은 '텍스트 답변' 하나로 합쳤다.
 // (레거시 LONG_TEXT 질문은 편집 시 SHORT_TEXT로 정규화된다.)
 const TYPE_OPTIONS: QuestionType[] = ['SHORT_TEXT', 'SINGLE_CHOICE', 'MULTI_CHOICE', 'NUMBER', 'MBTI_INPUT']
 
@@ -67,6 +67,30 @@ function getDefaultMatchingStrategy(questionKey: string, type: QuestionType): Ma
   if (type === 'NUMBER') return 'SAME'
   if (type === 'MULTI_CHOICE') return 'OVERLAP'
   return 'DIVERSE'
+}
+
+function getAllowedMatchingStrategies(type: QuestionType): MatchingStrategy[] {
+  switch (type) {
+    case 'MULTI_CHOICE':
+      return ['OVERLAP', 'DIVERSE']
+    case 'SINGLE_CHOICE':
+    case 'NUMBER':
+    case 'MBTI_INPUT':
+      return ['SAME', 'DIVERSE']
+    default:
+      return []
+  }
+}
+
+function normalizeMatchingStrategy(
+  questionKey: string,
+  type: QuestionType,
+  strategy: MatchingStrategy | ''
+): MatchingStrategy | '' {
+  const allowed = getAllowedMatchingStrategies(type)
+  if (allowed.length === 0) return ''
+  if (strategy && allowed.includes(strategy)) return strategy
+  return getDefaultMatchingStrategy(questionKey, type)
 }
 
 interface FormQuestionBuilderProps {
@@ -236,7 +260,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const [state, setState] = useState<EditorState>(() => ({
     label: initial?.label ?? '',
     questionKey: initial?.questionKey ?? '',
-    // 단답형·장문형을 '주관식'으로 합쳤으므로 레거시 LONG_TEXT는 SHORT_TEXT로 정규화한다.
+    // 단답형·장문형을 '텍스트 답변'으로 합쳤으므로 레거시 LONG_TEXT는 SHORT_TEXT로 정규화한다.
     type: initial?.type === 'LONG_TEXT' ? 'SHORT_TEXT' : (initial?.type ?? 'SHORT_TEXT'),
     placeholder: initial?.placeholder ?? '',
     required: initial?.required ?? true,
@@ -251,21 +275,27 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
     setState((p) => ({ ...p, [key]: value }))
 
   const handleTypeChange = (type: QuestionType) => {
-    setState((p) => ({
-      ...p,
-      type,
-      matchingStrategy: p.isMatchingField
-        ? getDefaultMatchingStrategy(p.questionKey, type)
-        : p.matchingStrategy,
-    }))
+    // 텍스트 답변(단답/장문)은 매칭 계산이 불가능하므로 매칭 사용을 강제로 끈다. (KAN-226)
+    const isText = type === 'SHORT_TEXT' || type === 'LONG_TEXT'
+    setState((p) => {
+      const isMatchingField = isText ? false : p.isMatchingField
+      return {
+        ...p,
+        type,
+        isMatchingField,
+        matchingStrategy: isMatchingField
+          ? normalizeMatchingStrategy(p.questionKey, type, p.matchingStrategy)
+          : isText ? '' : normalizeMatchingStrategy(p.questionKey, type, p.matchingStrategy),
+      }
+    })
   }
 
   const handleMatchingFieldChange = (isMatchingField: boolean) => {
     setState((p) => ({
       ...p,
       isMatchingField,
-      matchingStrategy: isMatchingField && !p.matchingStrategy
-        ? getDefaultMatchingStrategy(p.questionKey, p.type)
+      matchingStrategy: isMatchingField
+        ? normalizeMatchingStrategy(p.questionKey, p.type, p.matchingStrategy)
         : p.matchingStrategy,
     }))
   }
@@ -277,6 +307,9 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
 
   const isChoice = CHOICE_TYPES.includes(state.type)
   const isHardKey = HARD_KEYS.includes(state.questionKey)
+  // 텍스트 답변은 매칭에 사용할 수 없다. (KAN-226)
+  const isTextType = state.type === 'SHORT_TEXT' || state.type === 'LONG_TEXT'
+  const allowedMatchingStrategies = getAllowedMatchingStrategies(state.type)
 
   const handleSave = () => {
     setError(null)
@@ -284,6 +317,9 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
     const choices = state.choicesText.split(/[\n,]/).map((c) => c.trim()).filter(Boolean)
     if (isChoice && choices.length === 0) return setError('선택형 질문은 보기를 1개 이상 입력해주세요.')
     if (state.isMatchingField && !state.matchingStrategy) return setError('매칭 항목은 매칭 방식을 선택해주세요.')
+    if (state.isMatchingField && !allowedMatchingStrategies.includes(state.matchingStrategy as MatchingStrategy)) {
+      return setError('이 질문 유형에서 사용할 수 없는 매칭 방식입니다.')
+    }
 
     // question key는 화면에 노출하지 않는다. 기존 질문/프리셋은 지정된 key를 유지하고,
     // 자유 질문은 자동 생성한다. (KAN-191)
@@ -383,11 +419,19 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             </span>
           </label>
 
-          {/* 매칭 */}
+          {/* 매칭 — 텍스트 답변은 매칭 계산이 불가능해 비활성화한다. (KAN-226) */}
           <div className="rounded-[12px] border border-[#F0EBE8] p-3 bg-[#FAF8F6] flex flex-col gap-3">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={state.isMatchingField} onChange={(e) => handleMatchingFieldChange(e.target.checked)} className="w-4 h-4 accent-[#C8392B]" />
-              <span className="text-[14px] font-medium text-[#1A1A1A]">매칭에 사용</span>
+            <label className={`flex items-center gap-2 ${isTextType ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+              <input
+                type="checkbox"
+                checked={state.isMatchingField}
+                disabled={isTextType}
+                onChange={(e) => handleMatchingFieldChange(e.target.checked)}
+                className="w-4 h-4 accent-[#C8392B]"
+              />
+              <span className="text-[14px] font-medium text-[#1A1A1A]">
+                매칭에 사용{isTextType ? ' (텍스트 답변은 불가)' : ''}
+              </span>
             </label>
             {isHardKey && (
               <p className="text-[12px] text-[#767676]">
@@ -401,9 +445,9 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
                 <Field label="매칭 방식">
                   <select value={state.matchingStrategy} onChange={(e) => set('matchingStrategy', e.target.value as MatchingStrategy)} className={inputCls}>
                     <option value="">선택</option>
-                    <option value="SAME">비슷하게</option>
-                    <option value="DIVERSE">다양하게</option>
-                    <option value="OVERLAP">많이 겹치게</option>
+                    {allowedMatchingStrategies.map((strategy) => (
+                      <option key={strategy} value={strategy}>{STRATEGY_LABEL[strategy]}</option>
+                    ))}
                   </select>
                 </Field>
               </div>

@@ -7,11 +7,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
-import { useCheckNickname } from '@/lib/hooks/useAuth'
+import { useCheckEmail, useCheckNickname } from '@/lib/hooks/useAuth'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import type { Gender } from '@/lib/api/types'
 
 export const REGISTER_SESSION_KEY = 'register-step1'
+export const REGISTER_EMAIL_ERROR_KEY = 'register-email-error'
 
 const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).+$/
 
@@ -59,18 +60,22 @@ export default function RegisterPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
   const [debouncedNickname, setDebouncedNickname] = useState('')
+  const [debouncedEmail, setDebouncedEmail] = useState('')
 
   const {
     register,
     control,
     handleSubmit,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   const password = useWatch({ control, name: 'password' }) ?? ''
   const passwordConfirmValue = useWatch({ control, name: 'passwordConfirm' }) ?? ''
   const nicknameValue = useWatch({ control, name: 'nickname' }) ?? ''
+  const emailValue = useWatch({ control, name: 'email' }) ?? ''
   const genderValue = useWatch({ control, name: 'gender' })
 
   const passwordValid = password.length >= 8 && PASSWORD_REGEX.test(password)
@@ -81,11 +86,48 @@ export default function RegisterPage() {
     return () => clearTimeout(timer)
   }, [nicknameValue])
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedEmail(emailValue), 300)
+    return () => clearTimeout(timer)
+  }, [emailValue])
+
+  // 온보딩에서 '이전'으로 돌아오면 1단계 입력값을 복원한다. 성별도 자동 선택되도록 setValue로 복원. (KAN-229)
+  useEffect(() => {
+    const raw = sessionStorage.getItem(REGISTER_SESSION_KEY)
+    if (!raw) return
+    try {
+      const saved = JSON.parse(raw)
+      if (saved.email) setValue('email', saved.email)
+      if (saved.password) {
+        setValue('password', saved.password)
+        setValue('passwordConfirm', saved.password)
+      }
+      if (saved.name) setValue('name', saved.name)
+      if (saved.nickname) setValue('nickname', saved.nickname)
+      if (saved.gender) setValue('gender', saved.gender)
+      if (saved.age != null) setValue('age', String(saved.age))
+      if (saved.phone) setValue('phone', saved.phone)
+
+      const emailError = sessionStorage.getItem(REGISTER_EMAIL_ERROR_KEY)
+      if (emailError) {
+        setError('email', { type: 'server', message: emailError })
+        sessionStorage.removeItem(REGISTER_EMAIL_ERROR_KEY)
+      }
+    } catch {
+      // 손상된 세션 값은 무시
+    }
+  }, [setValue, setError])
+
   const {
     data: nicknameAvailable,
     isFetching: isCheckingNickname,
     isError: isNicknameCheckError,
   } = useCheckNickname(debouncedNickname)
+  const {
+    data: emailAvailable,
+    isFetching: isCheckingEmail,
+    isError: isEmailCheckError,
+  } = useCheckEmail(debouncedEmail)
 
   const allRequired = TERMS.filter((t) => t.required).every((t) => checkedTerms[t.id])
   const allChecked = TERMS.every((t) => checkedTerms[t.id])
@@ -98,7 +140,10 @@ export default function RegisterPage() {
   const handleValid = (data: FormValues) => {
     if (!allRequired) return
     if (nicknameAvailable === false) return
+    if (emailAvailable === false) return
     if (debouncedNickname.length >= 2 && isCheckingNickname) return
+    if (isCheckingEmail) return
+    clearErrors('email')
 
     sessionStorage.setItem(REGISTER_SESSION_KEY, JSON.stringify({
       email: data.email,
@@ -183,18 +228,31 @@ export default function RegisterPage() {
               ) : nicknameAvailable === true ? (
                 <p className="text-xs text-green-600 pl-1">사용 가능한 닉네임입니다</p>
               ) : nicknameAvailable === false ? (
-                <p className="text-xs text-primary pl-1">중복된 닉네임입니다</p>
+                <p className="text-xs text-primary pl-1">이미 사용 중인 닉네임이에요</p>
               ) : null
             )}
           </div>
 
-          <Input
-            label="이메일 *"
-            type="email"
-            placeholder="이메일 주소를 입력해주세요"
-            {...register('email')}
-            error={errors.email?.message}
-          />
+          <div className="flex flex-col gap-1">
+            <Input
+              label="이메일 *"
+              type="email"
+              placeholder="이메일 주소를 입력해주세요"
+              {...register('email')}
+              error={errors.email?.message}
+            />
+            {!errors.email && debouncedEmail.length > 0 && (
+              isCheckingEmail ? (
+                <p className="text-xs text-tag-text pl-1">확인 중...</p>
+              ) : isEmailCheckError ? (
+                <p className="text-xs text-tag-text pl-1">중복 확인에 실패했습니다</p>
+              ) : emailAvailable === true ? (
+                <p className="text-xs text-green-600 pl-1">사용 가능한 이메일입니다</p>
+              ) : emailAvailable === false ? (
+                <p className="text-xs text-primary pl-1">이미 사용 중인 이메일이에요</p>
+              ) : null
+            )}
+          </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-foreground">비밀번호 *</label>
@@ -285,7 +343,7 @@ export default function RegisterPage() {
             variant="primary"
             size="lg"
             className="w-full mt-2"
-            disabled={!allRequired || nicknameAvailable === false || (debouncedNickname.length >= 2 && isCheckingNickname)}
+            disabled={!allRequired || nicknameAvailable === false || emailAvailable === false || (debouncedNickname.length >= 2 && isCheckingNickname) || isCheckingEmail}
           >
             다음
           </Button>

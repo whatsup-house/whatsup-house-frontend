@@ -42,6 +42,8 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
   const updateRestaurant = useUpdateMatchingRestaurant(gatheringId)
 
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null)
+  // 그룹당 인원 수 (기본 4명). 매칭 실행 시 백엔드에 전달한다. (KAN-225)
+  const [groupSize, setGroupSize] = useState(4)
 
   const groups = data?.groups ?? []
   const unmatched = data?.unmatched ?? []
@@ -49,10 +51,10 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
   const handleRun = () => {
     const hasResult = groups.length > 0
     const msg = hasResult
-      ? '기존 추천 그룹을 지우고 자동매칭을 다시 실행할까요? (확정된 그룹은 유지됩니다)'
-      : '확정(CONFIRMED) 신청자를 대상으로 자동매칭을 실행할까요?'
+      ? `기존 추천 그룹을 지우고 그룹당 ${groupSize}명으로 자동매칭을 다시 실행할까요? (확정된 그룹은 유지됩니다)`
+      : `확정(CONFIRMED) 신청자를 그룹당 ${groupSize}명으로 자동매칭할까요?`
     if (!confirm(msg)) return
-    runMatching.mutate(undefined, {
+    runMatching.mutate(groupSize, {
       onSuccess: (res) =>
         alert(
           `자동매칭 완료\n· 대상 ${res.confirmedCount}명\n· 그룹 ${res.groupCount}개\n· 배정 ${res.matchedCount}명\n· 미배정 ${res.unmatchedCount}명`,
@@ -80,14 +82,28 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
             그룹 {groups.length}개 · 미배정 {unmatched.length}명
           </span>
         </div>
-        <button
-          onClick={handleRun}
-          disabled={runMatching.isPending}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-input text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
-          <Sparkles size={16} />
-          {runMatching.isPending ? '실행 중…' : groups.length > 0 ? '다시 매칭' : '자동매칭 실행'}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* 그룹당 인원 수 선택 (KAN-225) */}
+          <select
+            value={groupSize}
+            onChange={(e) => setGroupSize(Number(e.target.value))}
+            disabled={runMatching.isPending}
+            title="그룹당 인원 수"
+            className="h-[40px] px-2 border border-[#E0E0E0] rounded-input text-sm text-[#767676] bg-white cursor-pointer focus:outline-none focus:border-primary disabled:opacity-50"
+          >
+            {[2, 3, 4, 5, 6].map((n) => (
+              <option key={n} value={n}>그룹당 {n}명</option>
+            ))}
+          </select>
+          <button
+            onClick={handleRun}
+            disabled={runMatching.isPending}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-input text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            <Sparkles size={16} />
+            {runMatching.isPending ? '실행 중…' : groups.length > 0 ? '다시 매칭' : '자동매칭 실행'}
+          </button>
+        </div>
       </div>
 
       {groups.length === 0 && unmatched.length === 0 ? (
