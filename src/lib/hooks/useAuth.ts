@@ -4,7 +4,9 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   checkNickname,
+  checkEmail,
   confirmPasswordReset,
+  changeMyPassword,
   fetchMyProfile,
   findEmail,
   login,
@@ -110,6 +112,15 @@ export function useCheckNickname(nickname: string) {
   })
 }
 
+export function useCheckEmail(email: string) {
+  return useQuery({
+    queryKey: ['email-check', email],
+    queryFn: () => checkEmail(email),
+    enabled: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    staleTime: 1000 * 10,
+  })
+}
+
 export function useMyProfile() {
   const { isLoggedIn } = useAuthStore()
   return useQuery({
@@ -140,6 +151,14 @@ export function useLogout() {
       storeLogout()
       router.push('/')
     },
+  })
+}
+
+// 비밀번호 변경 (KAN-223)
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      changeMyPassword(data),
   })
 }
 
