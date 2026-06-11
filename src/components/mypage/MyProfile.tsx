@@ -94,8 +94,8 @@ export default function MyProfile() {
           </div>
           <div className="text-center">
             <h2 className="text-lg font-bold text-foreground">{profile.nickname}</h2>
-            {profile.bio && (
-              <p className="text-sm text-tag-text mt-1">{profile.bio}</p>
+            {(profile.intro ?? profile.bio) && (
+              <p className="text-sm text-tag-text mt-1">{profile.intro ?? profile.bio}</p>
             )}
           </div>
           <Link
