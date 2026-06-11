@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil } from 'lucide-react'
+import { Pencil, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import Button from '@/components/ui/Button'
 import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
+import PasswordChangeDialog from '@/components/mypage/PasswordChangeDialog'
 
 const GENDER_LABELS: Record<string, string> = {
   MALE: '남성',
@@ -32,6 +33,7 @@ export default function MyProfile() {
   const logout = useLogout()
   const [showEdit, setShowEdit] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
+  const [showPasswordChange, setShowPasswordChange] = useState(false)
 
   useEffect(() => {
     if (isInitialized && !isLoggedIn) {
@@ -62,6 +64,9 @@ export default function MyProfile() {
     )}
     {showWithdraw && (
       <WithdrawAccountDialog onClose={() => setShowWithdraw(false)} />
+    )}
+    {showPasswordChange && (
+      <PasswordChangeDialog onClose={() => setShowPasswordChange(false)} />
     )}
     <div className="min-h-screen bg-background">
       <div className="px-6 py-6 flex flex-col gap-4">
@@ -126,6 +131,31 @@ export default function MyProfile() {
             </div>
           </div>
         )}
+
+        {/* 관리자 전용 대시보드 이동 (KAN-228) */}
+        {profile.admin && (
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full"
+            onClick={() => router.push('/admin')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <LayoutDashboard size={18} />
+              관리자 대시보드
+            </span>
+          </Button>
+        )}
+
+        {/* 비밀번호 변경 (KAN-223) */}
+        <Button
+          variant="outlined"
+          size="lg"
+          className="w-full"
+          onClick={() => setShowPasswordChange(true)}
+        >
+          비밀번호 변경
+        </Button>
 
         {/* 로그아웃 */}
         <Button
