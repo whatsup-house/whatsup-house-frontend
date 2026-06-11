@@ -69,6 +69,30 @@ function getDefaultMatchingStrategy(questionKey: string, type: QuestionType): Ma
   return 'DIVERSE'
 }
 
+function getAllowedMatchingStrategies(type: QuestionType): MatchingStrategy[] {
+  switch (type) {
+    case 'MULTI_CHOICE':
+      return ['OVERLAP', 'DIVERSE']
+    case 'SINGLE_CHOICE':
+    case 'NUMBER':
+    case 'MBTI_INPUT':
+      return ['SAME', 'DIVERSE']
+    default:
+      return []
+  }
+}
+
+function normalizeMatchingStrategy(
+  questionKey: string,
+  type: QuestionType,
+  strategy: MatchingStrategy | ''
+): MatchingStrategy | '' {
+  const allowed = getAllowedMatchingStrategies(type)
+  if (allowed.length === 0) return ''
+  if (strategy && allowed.includes(strategy)) return strategy
+  return getDefaultMatchingStrategy(questionKey, type)
+}
+
 interface FormQuestionBuilderProps {
   gatheringId: string
   gatheringTitle?: string
@@ -260,8 +284,8 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
         type,
         isMatchingField,
         matchingStrategy: isMatchingField
-          ? getDefaultMatchingStrategy(p.questionKey, type)
-          : p.matchingStrategy,
+          ? normalizeMatchingStrategy(p.questionKey, type, p.matchingStrategy)
+          : isText ? '' : normalizeMatchingStrategy(p.questionKey, type, p.matchingStrategy),
       }
     })
   }
@@ -270,8 +294,8 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
     setState((p) => ({
       ...p,
       isMatchingField,
-      matchingStrategy: isMatchingField && !p.matchingStrategy
-        ? getDefaultMatchingStrategy(p.questionKey, p.type)
+      matchingStrategy: isMatchingField
+        ? normalizeMatchingStrategy(p.questionKey, p.type, p.matchingStrategy)
         : p.matchingStrategy,
     }))
   }
@@ -285,6 +309,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const isHardKey = HARD_KEYS.includes(state.questionKey)
   // 텍스트 답변은 매칭에 사용할 수 없다. (KAN-226)
   const isTextType = state.type === 'SHORT_TEXT' || state.type === 'LONG_TEXT'
+  const allowedMatchingStrategies = getAllowedMatchingStrategies(state.type)
 
   const handleSave = () => {
     setError(null)
@@ -292,6 +317,9 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
     const choices = state.choicesText.split(/[\n,]/).map((c) => c.trim()).filter(Boolean)
     if (isChoice && choices.length === 0) return setError('선택형 질문은 보기를 1개 이상 입력해주세요.')
     if (state.isMatchingField && !state.matchingStrategy) return setError('매칭 항목은 매칭 방식을 선택해주세요.')
+    if (state.isMatchingField && !allowedMatchingStrategies.includes(state.matchingStrategy as MatchingStrategy)) {
+      return setError('이 질문 유형에서 사용할 수 없는 매칭 방식입니다.')
+    }
 
     // question key는 화면에 노출하지 않는다. 기존 질문/프리셋은 지정된 key를 유지하고,
     // 자유 질문은 자동 생성한다. (KAN-191)
@@ -417,9 +445,9 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
                 <Field label="매칭 방식">
                   <select value={state.matchingStrategy} onChange={(e) => set('matchingStrategy', e.target.value as MatchingStrategy)} className={inputCls}>
                     <option value="">선택</option>
-                    <option value="SAME">비슷하게</option>
-                    <option value="DIVERSE">다양하게</option>
-                    <option value="OVERLAP">많이 겹치게</option>
+                    {allowedMatchingStrategies.map((strategy) => (
+                      <option key={strategy} value={strategy}>{STRATEGY_LABEL[strategy]}</option>
+                    ))}
                   </select>
                 </Field>
               </div>
