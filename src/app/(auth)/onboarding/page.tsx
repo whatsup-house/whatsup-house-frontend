@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useRegisterAndLogin } from '@/lib/hooks/useAuth'
+import { useToastStore } from '@/lib/store/toastStore'
 import type { Gender } from '@/lib/api/types'
 import { REGISTER_SESSION_KEY } from '../register/page'
 
@@ -34,16 +35,10 @@ interface Step1Data {
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const [step1Data] = useState<Step1Data | null>(() => {
-    if (typeof window === 'undefined') return null
-    const raw = sessionStorage.getItem(REGISTER_SESSION_KEY)
-    if (!raw) return null
-    try {
-      return JSON.parse(raw) as Step1Data
-    } catch {
-      return null
-    }
-  })
+  const showToast = useToastStore((s) => s.show)
+  // SSR/CSR 렌더 결과 불일치(Hydration Error)를 막는다: 마운트 전에는 항상 null을 렌더하고,
+  // 마운트 후에만 sessionStorage를 읽어 파생한다. (KAN-219)
+  const [mounted, setMounted] = useState(false)
   const [bio, setBio] = useState('')
   const [job, setJob] = useState('')
   const [mbti, setMbti] = useState<(string | null)[]>([null, null, null, null])
@@ -53,10 +48,26 @@ export default function OnboardingPage() {
   const registerAndLogin = useRegisterAndLogin()
 
   useEffect(() => {
-    if (!step1Data) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 클라이언트 마운트 신호용 1회성 플래그
+    setMounted(true)
+  }, [])
+
+  const step1Data = useMemo<Step1Data | null>(() => {
+    if (!mounted) return null
+    const raw = sessionStorage.getItem(REGISTER_SESSION_KEY)
+    if (!raw) return null
+    try {
+      return JSON.parse(raw) as Step1Data
+    } catch {
+      return null
+    }
+  }, [mounted])
+
+  useEffect(() => {
+    if (mounted && !step1Data) {
       router.replace('/register')
     }
-  }, [step1Data, router])
+  }, [mounted, step1Data, router])
 
   const mbtiString = mbti.every((v) => v !== null) ? mbti.join('') : undefined
 
@@ -89,6 +100,8 @@ export default function OnboardingPage() {
       {
         onSuccess: () => {
           sessionStorage.removeItem(REGISTER_SESSION_KEY)
+          // 가입 완료 후 홈으로 이동하더라도 전역 토스트로 완료를 알린다. (KAN-227)
+          showToast('회원가입이 완료되었습니다.')
         },
         onError: () => {
           setFormError('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
@@ -97,7 +110,8 @@ export default function OnboardingPage() {
     )
   }
 
-  if (!step1Data) return null
+  // 마운트 전(또는 세션 데이터 없음)에는 렌더하지 않아 Hydration 불일치를 피한다. (KAN-219)
+  if (!mounted || !step1Data) return null
 
   return (
     <div className="min-h-screen bg-background">
