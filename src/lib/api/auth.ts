@@ -76,6 +76,14 @@ export const updateMyProfile = async (data: ProfileUpdateRequest): Promise<UserP
   return response.data.data
 }
 
+// 비밀번호 변경 (KAN-223)
+export const changeMyPassword = async (data: {
+  currentPassword: string
+  newPassword: string
+}): Promise<void> => {
+  await apiClient.patch('/api/users/me/password', data)
+}
+
 // 회원탈퇴
 export const withdrawMyAccount = async (data: UserWithdrawRequest): Promise<UserWithdrawResponse> => {
   const response = await apiClient.delete<ApiResponse<UserWithdrawResponse>>('/api/users/me', {
