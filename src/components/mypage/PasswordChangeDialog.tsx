@@ -28,9 +28,10 @@ type FormValues = z.infer<typeof schema>
 
 interface PasswordChangeDialogProps {
   onClose: () => void
+  onSuccess?: () => void
 }
 
-export default function PasswordChangeDialog({ onClose }: PasswordChangeDialogProps) {
+export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordChangeDialogProps) {
   const changePassword = useChangePassword()
 
   const {
@@ -45,7 +46,12 @@ export default function PasswordChangeDialog({ onClose }: PasswordChangeDialogPr
   const onSubmit = (data: FormValues) => {
     changePassword.mutate(
       { currentPassword: data.currentPassword, newPassword: data.newPassword },
-      { onSuccess: onClose }
+      {
+        onSuccess: () => {
+          onSuccess?.()
+          onClose()
+        },
+      }
     )
   }
 

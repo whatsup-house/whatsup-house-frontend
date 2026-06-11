@@ -34,12 +34,19 @@ export default function MyProfile() {
   const [showEdit, setShowEdit] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => {
     if (isInitialized && !isLoggedIn) {
       router.replace('/login?returnUrl=/mypage')
     }
   }, [isInitialized, isLoggedIn, router])
+
+  useEffect(() => {
+    if (!notice) return
+    const timer = setTimeout(() => setNotice(null), 2500)
+    return () => clearTimeout(timer)
+  }, [notice])
 
   if (!isInitialized || !isLoggedIn || isLoading) {
     return (
@@ -66,7 +73,10 @@ export default function MyProfile() {
       <WithdrawAccountDialog onClose={() => setShowWithdraw(false)} />
     )}
     {showPasswordChange && (
-      <PasswordChangeDialog onClose={() => setShowPasswordChange(false)} />
+      <PasswordChangeDialog
+        onClose={() => setShowPasswordChange(false)}
+        onSuccess={() => setNotice('비밀번호 변경이 완료되었습니다.')}
+      />
     )}
     <div className="min-h-screen bg-background">
       <div className="px-6 py-6 flex flex-col gap-4">
@@ -177,6 +187,13 @@ export default function MyProfile() {
         </div>
       </div>
     </div>
+    {notice && (
+      <div className="fixed inset-x-0 bottom-8 z-[100] flex justify-center px-6 pointer-events-none">
+        <div className="max-w-[430px] w-full rounded-input bg-foreground/90 text-white text-sm font-medium px-4 py-3 text-center shadow-lg">
+          {notice}
+        </div>
+      </div>
+    )}
     </>
   )
 }
