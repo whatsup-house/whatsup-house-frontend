@@ -1,10 +1,14 @@
 import apiClient from './client'
 import type { ApiResponse, MatchingRunResult, MatchingResult } from './types'
 
-// 자동매칭 실행 (CONFIRMED 신청 → 추천 그룹 생성)
-export const runMatching = async (gatheringId: string): Promise<MatchingRunResult> => {
+// 자동매칭 실행 (CONFIRMED 신청 → 추천 그룹 생성). groupSize로 그룹당 인원 수 지정. (KAN-225)
+export const runMatching = async (
+  gatheringId: string,
+  groupSize: number,
+): Promise<MatchingRunResult> => {
   const response = await apiClient.post<ApiResponse<MatchingRunResult>>(
     `/api/admin/gatherings/${gatheringId}/matching`,
+    { groupSize },
   )
   return response.data.data
 }
