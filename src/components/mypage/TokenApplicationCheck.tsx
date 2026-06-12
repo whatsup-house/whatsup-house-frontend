@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Calendar, MapPin, Hash } from 'lucide-react'
 import { useApplicationByToken } from '@/lib/hooks/useApplications'
 import { Card, LoadingSpinner } from '@/components/ui'
+import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
 import type { ApplicationStatus } from '@/lib/api/types'
 import dayjs from 'dayjs'
 
@@ -95,9 +96,12 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
             {data.applicantName && (
               <p className="text-sm font-medium text-foreground">{data.applicantName}</p>
             )}
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ml-auto ${STATUS_STYLE[data.status]}`}>
-              {STATUS_LABEL[data.status]}
-            </span>
+            <div className="flex items-center gap-1.5 ml-auto">
+              <PaymentStatusBadge status={data.paymentStatus} />
+              <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[data.status]}`}>
+                {STATUS_LABEL[data.status]}
+              </span>
+            </div>
           </div>
 
           <h2 className="text-base font-bold text-foreground mb-4">{data.gathering.title}</h2>

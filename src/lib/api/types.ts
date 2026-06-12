@@ -134,10 +134,14 @@ export interface ProfileUpdateRequest {
 // 내 신청 내역 타입
 export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
 
+// 입금 상태. 유료 게더링에서만 내려오며, 무료 게더링은 null(표시하지 않음). (KAN-243)
+export type PaymentStatus = 'PENDING' | 'CONFIRMED'
+
 export interface ApplicationListItem {
   id: string
   bookingNumber: string
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
   gathering: {
     id: string
     title: string
@@ -152,6 +156,7 @@ export interface GuestApplicationCheckResponse {
   id: string
   bookingNumber: string
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
   gathering: {
     id: string
     title: string
@@ -166,6 +171,7 @@ export interface ApplicationTokenCheckResponse {
   id: string
   bookingNumber: string
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
   applicantName: string | null
   gathering: {
     id: string

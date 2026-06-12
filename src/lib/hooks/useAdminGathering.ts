@@ -113,6 +113,21 @@ export function useUpdateApplicationStatus(gatheringId: string) {
   })
 }
 
+// 입금 확인 토글 (KAN-243)
+export function useUpdatePaymentStatus(gatheringId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, confirmed }: { id: string; confirmed: boolean }) =>
+      adminGatheringApi.updatePaymentStatus(id, confirmed),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['admin', 'applications', gatheringId] }),
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      alert(msg || '입금 상태 변경 중 오류가 발생했어요.')
+    },
+  })
+}
+
 // 홈 큐레이션 노출 토글 (KAN-190)
 export function useSetCuration() {
   const queryClient = useQueryClient()

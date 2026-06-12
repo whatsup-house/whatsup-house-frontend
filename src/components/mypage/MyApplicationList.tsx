@@ -7,6 +7,7 @@ import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
 import { useMyApplicationsMe, useCancelApplication } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
+import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
 import type { ApplicationStatus } from '@/lib/api/types'
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
@@ -141,9 +142,12 @@ export default function MyApplicationList() {
                     <p className="text-sm font-bold text-foreground leading-snug line-clamp-2">
                       {item.gathering.title}
                     </p>
-                    <span className={`shrink-0 text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[item.status]}`}>
-                      {STATUS_LABEL[item.status]}
-                    </span>
+                    <div className="shrink-0 flex flex-col items-end gap-1">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[item.status]}`}>
+                        {STATUS_LABEL[item.status]}
+                      </span>
+                      <PaymentStatusBadge status={item.paymentStatus} />
+                    </div>
                   </div>
                   <p className="text-xs text-tag-text mt-1">
                     {dayjs(item.gathering.eventDate).format('YYYY. MM. DD (ddd)')}

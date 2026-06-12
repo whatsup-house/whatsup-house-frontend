@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { Search, Hash, Calendar } from 'lucide-react'
 import { useCheckGuestApplication } from '@/lib/hooks/useApplications'
 import { Button, Card, Input } from '@/components/ui'
+import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
 import type { ApplicationStatus, GuestApplicationCheckResponse } from '@/lib/api/types'
 import dayjs from 'dayjs'
 
@@ -67,9 +68,12 @@ function ResultCard({ result }: ResultCardProps) {
       <Card className="w-full p-5">
         <div className="flex items-center justify-between mb-4">
           <p className="text-xs text-tag-text">신청 내역</p>
-          <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[result.status]}`}>
-            {STATUS_LABEL[result.status]}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <PaymentStatusBadge status={result.paymentStatus} />
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[result.status]}`}>
+              {STATUS_LABEL[result.status]}
+            </span>
+          </div>
         </div>
 
         <h2 className="text-base font-bold text-foreground mb-3">{result.gathering.title}</h2>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { adminGatheringApi, AdminGatheringListItem, ApplicationStatus } from '@/lib/api/adminGathering'
-import { useAdminApplications, useUpdateApplicationStatus, useDeleteApplication } from '@/lib/hooks/useAdminGathering'
+import { useAdminApplications, useUpdateApplicationStatus, useUpdatePaymentStatus, useDeleteApplication } from '@/lib/hooks/useAdminGathering'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
@@ -205,6 +205,7 @@ const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
 function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   const { data: participants = [], isLoading } = useAdminApplications(gatheringId)
   const { mutate: changeStatus } = useUpdateApplicationStatus(gatheringId)
+  const { mutate: changePayment } = useUpdatePaymentStatus(gatheringId)
   const { mutate: deleteApplication, isPending: isDeleting, variables: deletingId } = useDeleteApplication(gatheringId)
 
   if (isLoading) {
@@ -241,7 +242,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
       <table className="w-full">
         <thead>
           <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
-            {['예약번호', '이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '상태', '삭제'].map((col) => (
+            {['예약번호', '이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '상태', '입금', '삭제'].map((col) => (
               <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
             ))}
           </tr>
@@ -286,6 +287,23 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                       </button>
                     )}
                   </div>
+                </td>
+                <td className="px-4 py-3">
+                  {p.paid ? (
+                    <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={p.paymentConfirmed}
+                        onChange={(e) => changePayment({ id: p.id, confirmed: e.target.checked })}
+                        className="w-4 h-4 accent-[#C8392B] cursor-pointer"
+                      />
+                      <span className={`text-xs font-medium ${p.paymentConfirmed ? 'text-[#4CAF50]' : 'text-[#767676]'}`}>
+                        {p.paymentConfirmed ? '완료' : '확인 중'}
+                      </span>
+                    </label>
+                  ) : (
+                    <span className="text-[12px] text-[#BBBBBB]">무료</span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   {p.status === 'ATTENDED' ? (
