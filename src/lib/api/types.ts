@@ -110,7 +110,6 @@ export interface UserWithdrawRequest {
 
 export interface UserWithdrawResponse {
   withdrawn: boolean
-  deleted: 'Y'
 }
 
 // 신청 관련 타입
