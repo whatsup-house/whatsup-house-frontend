@@ -15,6 +15,7 @@ import {
   useUpdateMatchingRestaurant,
 } from '@/lib/hooks/useMatching'
 import type { MatchingGroupView, MatchingMemberView } from '@/lib/api/types'
+import { useToastStore } from '@/lib/store/toastStore'
 
 const GROUP_STATUS_LABEL: Record<string, string> = {
   PENDING: '추천',
@@ -34,6 +35,7 @@ interface MatchingBoardProps {
 
 export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingBoardProps) {
   const { data, isLoading } = useMatchingResult(gatheringId)
+  const showToast = useToastStore((s) => s.show)
   const runMatching = useRunMatching(gatheringId)
   const moveMember = useMoveMatchingMember(gatheringId)
   const excludeMember = useExcludeMatchingMember(gatheringId)
@@ -56,8 +58,8 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
     if (!confirm(msg)) return
     runMatching.mutate(groupSize, {
       onSuccess: (res) =>
-        alert(
-          `자동매칭 완료\n· 대상 ${res.confirmedCount}명\n· 그룹 ${res.groupCount}개\n· 배정 ${res.matchedCount}명\n· 미배정 ${res.unmatchedCount}명`,
+        showToast(
+          `자동매칭 완료 · 대상 ${res.confirmedCount}명 · 그룹 ${res.groupCount}개 · 배정 ${res.matchedCount}명 · 미배정 ${res.unmatchedCount}명`,
         ),
     })
   }
