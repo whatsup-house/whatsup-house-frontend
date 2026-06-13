@@ -146,7 +146,7 @@ export default function MyApplicationList() {
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[item.status]}`}>
                         {STATUS_LABEL[item.status]}
                       </span>
-                      <PaymentStatusBadge status={item.paymentStatus} />
+                      <PaymentStatusBadge status={item.status === 'CONFIRMED' || item.status === 'ATTENDED' ? item.paymentStatus : null} />
                     </div>
                   </div>
                   <p className="text-xs text-tag-text mt-1">

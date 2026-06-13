@@ -97,7 +97,7 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
               <p className="text-sm font-medium text-foreground">{data.applicantName}</p>
             )}
             <div className="flex items-center gap-1.5 ml-auto">
-              <PaymentStatusBadge status={data.paymentStatus} />
+              <PaymentStatusBadge status={data.status === 'CONFIRMED' || data.status === 'ATTENDED' ? data.paymentStatus : null} />
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[data.status]}`}>
                 {STATUS_LABEL[data.status]}
               </span>

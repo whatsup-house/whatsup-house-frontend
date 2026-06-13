@@ -69,7 +69,7 @@ function ResultCard({ result }: ResultCardProps) {
         <div className="flex items-center justify-between mb-4">
           <p className="text-xs text-tag-text">신청 내역</p>
           <div className="flex items-center gap-1.5">
-            <PaymentStatusBadge status={result.paymentStatus} />
+            <PaymentStatusBadge status={result.status === 'CONFIRMED' || result.status === 'ATTENDED' ? result.paymentStatus : null} />
             <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[result.status]}`}>
               {STATUS_LABEL[result.status]}
             </span>

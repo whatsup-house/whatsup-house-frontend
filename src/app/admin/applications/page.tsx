@@ -289,7 +289,10 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {p.paid ? (
+                  {!p.paid ? (
+                    <span className="text-[12px] text-[#BBBBBB]">무료</span>
+                  ) : p.status === 'CONFIRMED' || p.status === 'ATTENDED' ? (
+                    // 선확정 후입금: 확정(또는 출석)된 신청만 입금을 받으므로 그때만 체크박스를 노출한다. (KAN-243)
                     <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
                       <input
                         type="checkbox"
@@ -302,7 +305,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                       </span>
                     </label>
                   ) : (
-                    <span className="text-[12px] text-[#BBBBBB]">무료</span>
+                    <span className="text-[12px] text-[#BBBBBB]">확정 후</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
