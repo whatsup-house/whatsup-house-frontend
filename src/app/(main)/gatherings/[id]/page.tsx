@@ -44,10 +44,9 @@ export default function GatheringDetailPage({
 
   // 과거 모집중 게더링은 진행 완료로 보정해 신청하기 CTA를 숨긴다 (KAN-164)
   const isRecruiting = getEffectiveStatus(gathering.status, gathering.eventDate) === 'OPEN'
-  const today = new Date().toISOString().split('T')[0]
-  const hasFutureDates = sameNameGatherings?.some(
-    g => g.id !== gathering.id && g.eventDate > today
-  ) ?? false
+  // 동명 게더링이 여러 날짜에 걸쳐 있으면 달력으로 다른 날짜를 선택할 수 있게 한다. 단일 날짜면 비노출. (KAN-253)
+  const hasMultipleDates =
+    new Set((sameNameGatherings ?? []).map((g) => g.eventDate)).size > 1
 
   const handleApplyClick = () => {
     if (isLoggedIn) {
@@ -85,34 +84,48 @@ export default function GatheringDetailPage({
             <p className="text-xs text-tag-text">참가비</p>
             <p className="text-lg font-bold text-foreground">{gathering.price.toLocaleString()}원</p>
           </div>
-          {isRecruiting ? (
-            <Button
-              variant="primary"
-              size="default"
-              className="px-8"
-              onClick={handleApplyClick}
-            >
-              신청하기
-            </Button>
-          ) : hasFutureDates ? (
-            <Button
-              variant="outlined"
-              size="default"
-              className="px-6"
-              onClick={() => setIsDateSheetOpen(true)}
-            >
-              다른 날짜 보기
-            </Button>
-          ) : (
-            <Button
-              variant="secondary"
-              size="default"
-              className="px-6"
-              disabled
-            >
-              운영 종료
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {isRecruiting ? (
+              <>
+                {hasMultipleDates && (
+                  <Button
+                    variant="outlined"
+                    size="default"
+                    className="px-4"
+                    onClick={() => setIsDateSheetOpen(true)}
+                  >
+                    다른 날짜
+                  </Button>
+                )}
+                <Button
+                  variant="primary"
+                  size="default"
+                  className="px-8"
+                  onClick={handleApplyClick}
+                >
+                  신청하기
+                </Button>
+              </>
+            ) : hasMultipleDates ? (
+              <Button
+                variant="outlined"
+                size="default"
+                className="px-6"
+                onClick={() => setIsDateSheetOpen(true)}
+              >
+                다른 날짜 보기
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                size="default"
+                className="px-6"
+                disabled
+              >
+                운영 종료
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
