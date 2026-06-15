@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Home, ArrowLeft, RotateCcw } from 'lucide-react'
+import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 
 interface ErrorViewProps {
   /** 상단 대형 숫자 (예: '404', '500'). 공용 에러는 생략한다. */
@@ -27,7 +27,9 @@ export default function ErrorView({
   showBack = false,
   showHome = true,
 }: ErrorViewProps) {
-  const router = useRouter()
+  // 헤더(TopNav)의 뒤로가기와 동일하게 동작시키기 위해 같은 훅을 사용한다.
+  // 앱 내 이동 기록이 있으면 직전 페이지로, 없으면 홈으로 폴백. (KAN-248)
+  const handleBack = useBackNavigation('/')
 
   const primaryCls =
     'inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-button bg-primary px-6 text-[15px] font-bold text-white transition-opacity hover:opacity-90'
@@ -72,7 +74,7 @@ export default function ErrorView({
               </Link>
             )}
             {showBack && (
-              <button type="button" onClick={() => router.back()} className={outlineCls}>
+              <button type="button" onClick={handleBack} className={outlineCls}>
                 <ArrowLeft size={17} />
                 이전 페이지
               </button>
