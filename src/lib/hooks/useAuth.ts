@@ -51,12 +51,15 @@ export function useInitAuth() {
 
 export function useLogin(returnUrl: string = '/') {
   const { login: storeLogin } = useAuthStore()
+  const queryClient = useQueryClient()
   const router = useRouter()
 
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       login(email, password),
     onSuccess: (data) => {
+      // 이전 세션의 서버 캐시를 폐기해 다른 계정 로그인 시 stale 데이터 노출을 막는다. (KAN-249)
+      queryClient.clear()
       storeLogin(data.user.id, data.user.nickname, data.user.admin)
       router.push(returnUrl)
     },
@@ -71,6 +74,7 @@ export function useRegister() {
 
 export function useRegisterAndLogin() {
   const { login: storeLogin } = useAuthStore()
+  const queryClient = useQueryClient()
   const router = useRouter()
 
   return useMutation({
@@ -79,6 +83,8 @@ export function useRegisterAndLogin() {
       return login(data.email, data.password)
     },
     onSuccess: (loginData) => {
+      // 이전 세션의 서버 캐시를 폐기해 새 계정 데이터로 갱신되게 한다. (KAN-249)
+      queryClient.clear()
       storeLogin(loginData.user.id, loginData.user.nickname, loginData.user.admin)
       router.push('/')
     },
@@ -143,12 +149,15 @@ export function useUpdateProfile() {
 
 export function useLogout() {
   const { logout: storeLogout } = useAuthStore()
+  const queryClient = useQueryClient()
   const router = useRouter()
 
   return useMutation({
     mutationFn: logoutApi,
     onSettled: () => {
       storeLogout()
+      // 로그아웃 후 이전 사용자 서버 캐시가 남지 않도록 폐기한다. (KAN-249)
+      queryClient.clear()
       router.push('/')
     },
   })
