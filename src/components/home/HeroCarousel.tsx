@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Flame, ChevronLeft, ChevronRight } from 'lucide-react'
 import AppImage from '@/components/ui/AppImage'
 import { useHeroCarousel } from '@/lib/hooks/useHome'
+import { findStoryByTitle } from '@/lib/constants/stories'
 import type { HeroCarouselSlide } from '@/lib/api/types'
 
 const AUTO_INTERVAL = 5000
@@ -103,8 +104,11 @@ export default function HeroCarousel() {
       router.push('/gatherings')
     } else if (slide.type === 'GATHERING' && slide.gatheringId) {
       router.push(`/gatherings/${slide.gatheringId}`)
+    } else if (slide.type === 'STORY') {
+      // STORY 슬라이드는 제목 기준으로 정적 소개 페이지에 매핑한다 (BE 링크 필드 없음). (KAN-254)
+      const story = findStoryByTitle(slide.title)
+      if (story) router.push(`/story/${story.slug}`)
     }
-    // STORY: 1차 릴리즈 비활성
   }
 
   if (isLoading) return <CarouselSkeleton />
