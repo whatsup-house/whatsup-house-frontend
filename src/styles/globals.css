@@ -35,6 +35,11 @@ body {
   font-family: var(--font-allura), cursive;
 }
 
+/* 에러 페이지 숫자(404/500)용 픽셀 폰트 (KAN-248) */
+.font-pixel {
+  font-family: var(--font-press-start), monospace;
+}
+
 /* 앱 레이아웃: 모바일 100% 너비, 데스크탑(md↑)에서 430px 중앙 프레임 */
 .mobile-layout {
   width: 100%;
