@@ -71,7 +71,7 @@ body {
 @keyframes field-reveal {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -80,7 +80,7 @@ body {
 }
 
 .animate-field-reveal {
-  animation: field-reveal 0.28s ease-out;
+  animation: field-reveal 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* 스크롤바 숨김 */

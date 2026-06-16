@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import dayjs, { type Dayjs } from 'dayjs'
+import { ArrowLeft, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useCheckEmail, useCheckNickname } from '@/lib/hooks/useAuth'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
@@ -17,6 +18,7 @@ export const REGISTER_EMAIL_ERROR_KEY = 'register-email-error'
 
 const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).+$/
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
 const schema = z.object({
   name: z.string().min(1, '이름을 입력해주세요'),
@@ -54,14 +56,181 @@ const TERMS = [
   { id: 'marketing', label: '[선택] 마케팅 정보 수신에 동의합니다', required: false },
 ]
 
+const getDefaultBirthDate = () => dayjs().year(2000).format('YYYY-MM-DD')
+
+interface BirthDateCalendarProps {
+  selectedDate: string
+  calendarMonth: Dayjs
+  error?: string
+  onSelectDate: (date: string) => void
+  onChangeMonth: (month: Dayjs) => void
+}
+
+function BirthDateCalendar({
+  selectedDate,
+  calendarMonth,
+  error,
+  onSelectDate,
+  onChangeMonth,
+}: BirthDateCalendarProps) {
+  const minBirthDate = dayjs().subtract(120, 'year')
+  const maxBirthDate = dayjs().subtract(14, 'year')
+  const minDate = minBirthDate.format('YYYY-MM-DD')
+  const maxDate = maxBirthDate.format('YYYY-MM-DD')
+  const minMonth = minBirthDate.startOf('month').format('YYYY-MM')
+  const maxMonth = maxBirthDate.startOf('month').format('YYYY-MM')
+
+  const firstDay = calendarMonth.startOf('month')
+  const year = firstDay.year()
+  const month = firstDay.month() + 1
+  const startDayOfWeek = firstDay.day()
+  const daysInMonth = firstDay.daysInMonth()
+  const currentMonth = firstDay.format('YYYY-MM')
+  const canGoPrev = currentMonth > minMonth
+  const canGoNext = currentMonth < maxMonth
+  const birthYears = Array.from(
+    { length: maxBirthDate.year() - minBirthDate.year() + 1 },
+    (_, index) => maxBirthDate.year() - index,
+  )
+
+  const cells: (number | null)[] = [
+    ...Array(startDayOfWeek).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ]
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  const moveMonth = (nextMonth: Dayjs) => {
+    const next = nextMonth.startOf('month')
+    const nextKey = next.format('YYYY-MM')
+    if (nextKey < minMonth || nextKey > maxMonth) return
+    onChangeMonth(next)
+  }
+
+  const clampMonth = (nextMonth: Dayjs) => {
+    const next = nextMonth.startOf('month')
+    const nextKey = next.format('YYYY-MM')
+    if (nextKey < minMonth) return minBirthDate.startOf('month')
+    if (nextKey > maxMonth) return maxBirthDate.startOf('month')
+    return next
+  }
+
+  const changeYear = (nextYear: number) => {
+    onChangeMonth(clampMonth(dayjs(`${nextYear}-${String(month).padStart(2, '0')}-01`)))
+  }
+
+  const changeMonth = (nextMonth: number) => {
+    onChangeMonth(clampMonth(dayjs(`${year}-${String(nextMonth).padStart(2, '0')}-01`)))
+  }
+
+  return (
+    <div className={`bg-card rounded-card p-4 border ${error ? 'border-primary' : 'border-tag-bg/50'}`}>
+      <div className="flex items-center justify-between mb-4">
+        <button
+          type="button"
+          onClick={() => moveMonth(firstDay.subtract(1, 'month'))}
+          disabled={!canGoPrev}
+          className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-30"
+          aria-label="이전 달"
+        >
+          <ChevronLeft size={20} className="text-tag-text" />
+        </button>
+
+        <div className="flex items-center gap-2">
+          <select
+            value={year}
+            onChange={(e) => changeYear(Number(e.target.value))}
+            className="h-9 rounded-input border border-tag-bg bg-background px-2 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="연도 선택"
+          >
+            {birthYears.map((birthYear) => (
+              <option key={birthYear} value={birthYear}>{birthYear}년</option>
+            ))}
+          </select>
+          <select
+            value={month}
+            onChange={(e) => changeMonth(Number(e.target.value))}
+            className="h-9 rounded-input border border-tag-bg bg-background px-2 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="월 선택"
+          >
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((birthMonth) => {
+              const monthKey = `${year}-${String(birthMonth).padStart(2, '0')}`
+              return (
+                <option key={birthMonth} value={birthMonth} disabled={monthKey < minMonth || monthKey > maxMonth}>
+                  {birthMonth}월
+                </option>
+              )
+            })}
+          </select>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => moveMonth(firstDay.add(1, 'month'))}
+          disabled={!canGoNext}
+          className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-30"
+          aria-label="다음 달"
+        >
+          <ChevronRight size={20} className="text-tag-text" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 mb-1">
+        {DAY_LABELS.map((day, i) => (
+          <div
+            key={day}
+            className={`text-center text-xs font-medium py-1 ${i === 0 ? 'text-primary' : 'text-tag-text'}`}
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7">
+        {cells.map((day, idx) => {
+          if (!day) return <div key={`empty-${idx}`} className="h-10" />
+
+          const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          const isSelected = dateStr === selectedDate
+          const isSunday = idx % 7 === 0
+          const disabled = dateStr < minDate || dateStr > maxDate
+
+          return (
+            <button
+              key={dateStr}
+              type="button"
+              onClick={() => onSelectDate(dateStr)}
+              disabled={disabled}
+              aria-pressed={isSelected}
+              className="flex flex-col items-center py-1 gap-0.5 min-h-[44px] justify-center disabled:pointer-events-none"
+            >
+              <span
+                className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors
+                  ${isSelected ? 'bg-primary text-white font-semibold' : ''}
+                  ${!isSelected && !disabled && isSunday ? 'text-primary' : ''}
+                  ${!isSelected && !disabled && !isSunday ? 'text-foreground hover:bg-tag-bg' : ''}
+                  ${disabled ? 'text-tag-text/30' : ''}
+                `}
+              >
+                {day}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function RegisterPage() {
   const router = useRouter()
   const handleBack = useBackNavigation('/')
+  const defaultBirthDate = getDefaultBirthDate()
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
   const [debouncedNickname, setDebouncedNickname] = useState('')
   const [debouncedEmail, setDebouncedEmail] = useState('')
+  const [birthCalendarMonthValue, setBirthCalendarMonthValue] = useState<string | null>(null)
 
   const {
     register,
@@ -86,6 +255,8 @@ export default function RegisterPage() {
   const confirmMatch = passwordConfirmValue.length > 0 && passwordConfirmValue === password
   const agePreview = birthDateValue ? getAge(birthDateValue) : NaN
   const birthValid = !Number.isNaN(agePreview) && agePreview >= 14 && agePreview <= 120
+  const calendarSelectedDate = birthDateValue || defaultBirthDate
+  const birthCalendarMonth = dayjs(birthCalendarMonthValue ?? calendarSelectedDate).startOf('month')
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedNickname(nicknameValue), 300)
@@ -142,6 +313,11 @@ export default function RegisterPage() {
     setCheckedTerms(Object.fromEntries(TERMS.map((t) => [t.id, next])))
   }
   const toggleTerm = (id: string) => setCheckedTerms((prev) => ({ ...prev, [id]: !prev[id] }))
+
+  const handleBirthDateSelect = (date: string) => {
+    setBirthCalendarMonthValue(dayjs(date).startOf('month').format('YYYY-MM-DD'))
+    setValue('birthDate', date, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+  }
 
   // 한 항목을 충족하면 다음 항목이 순차로 노출된다. (KAN-256)
   // 각 단계의 충족 여부를 앞에서부터 세어 노출 레벨을 구한다.
@@ -243,13 +419,20 @@ export default function RegisterPage() {
           {/* 2. 생년월일 + 만 나이 표시 */}
           {visible(2) && (
             <div className="animate-field-reveal flex flex-col gap-1">
-              <Input
-                label="생년월일"
-                requiredMark
-                type="date"
-                {...register('birthDate')}
+              <label className="text-sm font-medium text-foreground">
+                생년월일<span className="text-primary"> *</span>
+              </label>
+              <input type="hidden" {...register('birthDate')} />
+              <BirthDateCalendar
+                selectedDate={calendarSelectedDate}
+                calendarMonth={birthCalendarMonth}
                 error={errors.birthDate?.message}
+                onSelectDate={handleBirthDateSelect}
+                onChangeMonth={(month) => setBirthCalendarMonthValue(month.format('YYYY-MM-DD'))}
               />
+              {errors.birthDate && (
+                <p className="text-xs text-primary pl-1">{errors.birthDate.message}</p>
+              )}
               {birthValid && (
                 <p className="text-xs text-tag-text pl-1">만 {agePreview}세</p>
               )}
