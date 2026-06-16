@@ -1,14 +1,22 @@
 'use client'
 
+import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import ErrorView from '@/components/layout/ErrorView'
 
 // admin 세그먼트 에러 바운더리 — 관리자 화면의 런타임 에러. (KAN-248)
+// 발생한 에러는 Sentry로 전송한다. (KAN-255)
 export default function AdminError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
   return (
     <ErrorView
       title="앗! 잠시 문제가 생겼어요"
