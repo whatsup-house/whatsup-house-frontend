@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -88,6 +88,17 @@ function useDebouncedValue<T>(value: T, delay: number): T {
   }, [value, delay])
 
   return debouncedValue
+}
+
+function scrollIntoComfortView(element: HTMLElement) {
+  const rect = element.getBoundingClientRect()
+  const topPadding = 88
+  const bottomPadding = 96
+  const isComfortable = rect.top >= topPadding && rect.bottom <= window.innerHeight - bottomPadding
+  if (isComfortable) return
+
+  const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+  element.scrollIntoView({ behavior, block: 'center' })
 }
 
 interface BirthDateCalendarProps {
@@ -265,6 +276,9 @@ export default function RegisterPage() {
   const [birthDateDraft, setBirthDateDraft] = useState<string | null>(null)
   const [isBirthCalendarOpen, setIsBirthCalendarOpen] = useState(false)
   const [birthCalendarMonthValue, setBirthCalendarMonthValue] = useState<string | null>(null)
+  const fieldRefs = useRef<Array<HTMLDivElement | null>>([])
+  const birthCalendarPanelRef = useRef<HTMLDivElement | null>(null)
+  const previousRevealLevelRef = useRef(0)
 
   const {
     register,
@@ -415,6 +429,27 @@ export default function RegisterPage() {
   const visible = (index: number) => index <= revealLevel
   const allFilled = revealLevel === stepFlags.length
 
+  useEffect(() => {
+    const previousRevealLevel = previousRevealLevelRef.current
+    previousRevealLevelRef.current = revealLevel
+    if (revealLevel <= previousRevealLevel) return
+
+    const target = fieldRefs.current[revealLevel]
+    if (!target) return
+
+    const timer = window.setTimeout(() => scrollIntoComfortView(target), 120)
+    return () => window.clearTimeout(timer)
+  }, [revealLevel])
+
+  useEffect(() => {
+    if (!isBirthCalendarOpen || !birthCalendarPanelRef.current) return
+
+    const timer = window.setTimeout(() => {
+      if (birthCalendarPanelRef.current) scrollIntoComfortView(birthCalendarPanelRef.current)
+    }, 120)
+    return () => window.clearTimeout(timer)
+  }, [isBirthCalendarOpen])
+
   const handleValid = (data: FormValues) => {
     if (!allRequired) return
     if (nicknameAvailable === false) return
@@ -472,7 +507,7 @@ export default function RegisterPage() {
 
           {/* 1. 성별 */}
           {visible(1) && (
-            <div className="animate-field-reveal flex flex-col gap-2">
+            <div ref={(node) => { fieldRefs.current[1] = node }} className="animate-field-reveal flex flex-col gap-2">
               <label className="text-sm font-medium text-foreground">
                 성별<span className="text-primary"> *</span>
               </label>
@@ -494,7 +529,7 @@ export default function RegisterPage() {
 
           {/* 2. 생년월일 + 만 나이 표시 */}
           {visible(2) && (
-            <div className="animate-field-reveal flex flex-col gap-1">
+            <div ref={(node) => { fieldRefs.current[2] = node }} className="animate-field-reveal flex flex-col gap-1">
               <label className="text-sm font-medium text-foreground">
                 생년월일<span className="text-primary"> *</span>
               </label>
@@ -518,7 +553,7 @@ export default function RegisterPage() {
                 </button>
               </div>
               {isBirthCalendarOpen && (
-                <div className="animate-field-reveal pt-2">
+                <div ref={birthCalendarPanelRef} className="animate-field-reveal pt-2">
                   <BirthDateCalendar
                     selectedDate={birthDateValue}
                     calendarMonth={birthCalendarMonth}
@@ -539,7 +574,7 @@ export default function RegisterPage() {
 
           {/* 3. 닉네임 */}
           {visible(3) && (
-            <div className="animate-field-reveal flex flex-col gap-1">
+            <div ref={(node) => { fieldRefs.current[3] = node }} className="animate-field-reveal flex flex-col gap-1">
               <Input
                 label="닉네임"
                 requiredMark
@@ -563,7 +598,7 @@ export default function RegisterPage() {
 
           {/* 4. 이메일(ID) */}
           {visible(4) && (
-            <div className="animate-field-reveal flex flex-col gap-1">
+            <div ref={(node) => { fieldRefs.current[4] = node }} className="animate-field-reveal flex flex-col gap-1">
               <Input
                 label="이메일(ID)"
                 requiredMark
@@ -588,7 +623,7 @@ export default function RegisterPage() {
 
           {/* 5. 비밀번호 + 비밀번호 확인 (동시 노출) */}
           {visible(5) && (
-            <div className="animate-field-reveal flex flex-col gap-5">
+            <div ref={(node) => { fieldRefs.current[5] = node }} className="animate-field-reveal flex flex-col gap-5">
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-foreground">
                   비밀번호<span className="text-primary"> *</span>
@@ -645,7 +680,7 @@ export default function RegisterPage() {
 
           {/* 6. 연락처 (필수) */}
           {visible(6) && (
-            <div className="animate-field-reveal">
+            <div ref={(node) => { fieldRefs.current[6] = node }} className="animate-field-reveal">
               <Input
                 label="연락처"
                 requiredMark
@@ -659,7 +694,7 @@ export default function RegisterPage() {
 
           {/* 7. 약관 동의 */}
           {visible(7) && (
-            <div className="animate-field-reveal bg-card rounded-card p-4 flex flex-col gap-3 border border-tag-bg/50">
+            <div ref={(node) => { fieldRefs.current[7] = node }} className="animate-field-reveal bg-card rounded-card p-4 flex flex-col gap-3 border border-tag-bg/50">
               <button
                 type="button"
                 onClick={toggleAll}
