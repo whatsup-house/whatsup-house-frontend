@@ -446,9 +446,10 @@ function BirthDateCalendar({
 interface PolicyModalProps {
   policyId: PolicyId | null
   onClose: () => void
+  onAgree: (policyId: PolicyId) => void
 }
 
-function PolicyModal({ policyId, onClose }: PolicyModalProps) {
+function PolicyModal({ policyId, onClose, onAgree }: PolicyModalProps) {
   useEffect(() => {
     if (!policyId) return
 
@@ -469,6 +470,9 @@ function PolicyModal({ policyId, onClose }: PolicyModalProps) {
   if (!policyId) return null
 
   const policy = POLICY_CONTENT[policyId]
+  const handleAgree = () => {
+    onAgree(policyId)
+  }
 
   return (
     <div
@@ -516,8 +520,8 @@ function PolicyModal({ policyId, onClose }: PolicyModalProps) {
         </div>
 
         <div className="border-t border-tag-bg px-5 py-4">
-          <Button type="button" variant="primary" className="w-full" onClick={onClose}>
-            확인
+          <Button type="button" variant="primary" className="w-full" onClick={handleAgree}>
+            동의
           </Button>
         </div>
       </section>
@@ -1011,7 +1015,14 @@ export default function RegisterPage() {
           )}
         </form>
       </div>
-      <PolicyModal policyId={policyModal} onClose={() => setPolicyModal(null)} />
+      <PolicyModal
+        policyId={policyModal}
+        onClose={() => setPolicyModal(null)}
+        onAgree={(policyId) => {
+          setCheckedTerms((prev) => ({ ...prev, [policyId]: true }))
+          setPolicyModal(null)
+        }}
+      />
     </div>
   )
 }
