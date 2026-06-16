@@ -63,12 +63,12 @@ export interface RegisterRequest {
   name: string
   nickname: string
   gender: Gender   // @NotNull in backend
-  age: number      // @NotNull in backend
-  phone?: string   // nullable, 11 digits
+  age: number      // @NotNull in backend — birthDate 기준 만 나이(BE 전환 전까지 호환용 전송)
+  birthDate?: string // 생년월일 (YYYY-MM-DD). BE(KAN-257)에서 영속화 후 age 계산에 사용
+  phone?: string   // 11 digits
   bio?: string
   job?: string
   mbti?: string
-  interests?: string[]
 }
 
 export interface RegisterResponse {

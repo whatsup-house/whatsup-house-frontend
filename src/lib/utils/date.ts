@@ -18,6 +18,13 @@ export function formatKoreanNumericDate(date: string): string {
   return `${d.year()}. ${String(d.month() + 1).padStart(2, '0')}. ${String(d.date()).padStart(2, '0')} (${WEEKDAYS[d.day()]})`
 }
 
+// 생년월일(YYYY-MM-DD) 기준 만 나이를 계산한다. 유효하지 않으면 NaN.
+export function getAge(birthDate: string): number {
+  const birth = dayjs(birthDate)
+  if (!birth.isValid()) return NaN
+  return dayjs().diff(birth, 'year')
+}
+
 export function formatTime(time: string | null | undefined): string {
   return time?.slice(0, 5) ?? ''
 }

@@ -12,6 +12,9 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await page.route('**/api/users/check-nickname**', (route) => {
       route.fulfill({ json: { success: true, message: 'OK', data: { available: true } } })
     })
+    await page.route('**/api/users/check-email**', (route) => {
+      route.fulfill({ json: { success: true, message: 'OK', data: { available: true } } })
+    })
     await page.route('**/api/auth/register', (route) => {
       route.fulfill({
         json: {
@@ -49,29 +52,52 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await captureFullPage(page, 'e2e/screenshots/user/register-01-form.png')
 
     // 2. 기본 정보 입력
+    await page.getByPlaceholder('이름을 입력해주세요').fill('김')
+    await page.waitForTimeout(350)
+    await expect(page.getByRole('button', { name: '여' })).toBeHidden()
     await page.getByPlaceholder('이름을 입력해주세요').fill('김새싹')
     await page.getByRole('button', { name: '여' }).click()
-    await page.getByPlaceholder('나이를 입력해주세요').fill('25')
+    await expect(page.getByPlaceholder('YYYY.MM.DD')).toBeVisible()
+    await expect(page.getByRole('button', { name: '생년월일 달력 열기' })).toBeVisible()
+    await page.getByPlaceholder('YYYY.MM.DD').fill('20000617')
     await page.getByPlaceholder('2자 이상 입력해주세요').fill('새싹유저')
 
     // 닉네임 중복 확인 결과 대기
     await expect(page.getByText('사용 가능한 닉네임입니다')).toBeVisible({ timeout: 5000 })
 
     await page.getByPlaceholder('이메일 주소를 입력해주세요').fill('newuser@test.kr')
+    await expect(page.getByText('사용 가능한 이메일입니다')).toBeVisible({ timeout: 5000 })
     await page.getByPlaceholder('영문+숫자 포함 8자 이상').fill('Password1!')
     await page.getByPlaceholder('비밀번호를 다시 입력해주세요').fill('Password1!')
-    await page.getByPlaceholder('01012345678 (선택, 11자리)').fill('01087654321')
+    await page.getByPlaceholder('01012345678 (11자리)').fill('01087654321')
 
     await captureFullPage(page, 'e2e/screenshots/user/register-02-filled.png')
 
-    // 3. 약관 전체 동의
+    // 3. 약관 전문 모달 확인 후 전체 동의
+    await page.getByRole('button', { name: '이용약관 전문 보기' }).click()
+    await expect(page.getByRole('dialog', { name: '와썹하우스 이용약관' })).toBeVisible()
+    await expect(page.getByText('게더링 신청 및 참여')).toBeVisible()
+    await page.getByRole('button', { name: '동의', exact: true }).click()
+    await expect(page.locator('button[aria-pressed="true"]').filter({ hasText: '이용약관' })).toHaveCount(1)
+    await page.getByRole('button', { name: '개인정보처리방침 전문 보기' }).click()
+    await expect(page.getByRole('dialog', { name: '와썹하우스 개인정보처리방침' })).toBeVisible()
+    await expect(page.getByText('수집하는 개인정보 항목')).toBeVisible()
+    await page.getByRole('button', { name: '동의', exact: true }).click()
+    await expect(page.locator('button[aria-pressed="true"]').filter({ hasText: '개인정보처리방침' })).toHaveCount(1)
     await page.getByText('전체 동의').click()
     await captureFullPage(page, 'e2e/screenshots/user/register-03-terms.png')
 
     // 4. 다음 → 온보딩
-    await page.getByRole('button', { name: '다음' }).click()
+    await page.getByRole('button', { name: '다음', exact: true }).click()
     await expect(page).toHaveURL('/onboarding')
     await captureFullPage(page, 'e2e/screenshots/user/register-04-onboarding.png')
+
+    // 온보딩에서 돌아와도 약관 동의 상태가 유지된다
+    await page.getByRole('button', { name: '이전' }).click()
+    await expect(page).toHaveURL('/register')
+    await expect(page.getByRole('button', { name: '다음', exact: true })).toBeEnabled()
+    await page.getByRole('button', { name: '다음', exact: true }).click()
+    await expect(page).toHaveURL('/onboarding')
 
     // 5. 직업 선택
     const jobBtn = page.getByText('직장인').or(page.getByText('대학생')).first()
@@ -83,14 +109,10 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await page.getByRole('button', { name: 'F' }).click()
     await page.getByRole('button', { name: 'P' }).click()
 
-    // 7. 관심사 선택
-    await page.getByText('감성').click()
-    await page.getByText('독서').click()
-
     await captureFullPage(page, 'e2e/screenshots/user/register-05-onboarding-filled.png')
 
     registered = true
-    // 8. 완료 버튼
+    // 7. 완료 버튼
     const completeBtn = page.getByRole('button', { name: '완료' }).or(page.getByRole('button', { name: '시작하기' })).first()
     await completeBtn.click()
     await page.screenshot({ path: 'e2e/screenshots/user/register-06-complete.png' })
@@ -102,8 +124,12 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     })
 
     await page.goto('/register')
+    await page.getByPlaceholder('이름을 입력해주세요').fill('김중복')
+    await page.getByRole('button', { name: '여' }).click()
+    await page.getByRole('button', { name: '생년월일 달력 열기' }).click()
+    await page.getByRole('button', { name: String(new Date().getDate()), exact: true }).click()
     await page.getByPlaceholder('2자 이상 입력해주세요').fill('중복닉네임')
-    await expect(page.getByText('중복된 닉네임입니다')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('이미 사용 중인 닉네임이에요')).toBeVisible({ timeout: 5000 })
     await page.screenshot({ path: 'e2e/screenshots/user/register-nickname-dup.png' })
   })
 })
