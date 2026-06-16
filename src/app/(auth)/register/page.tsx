@@ -6,7 +6,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import dayjs, { type Dayjs } from 'dayjs'
-import { ArrowLeft, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useCheckEmail, useCheckNickname } from '@/lib/hooks/useAuth'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
@@ -19,6 +19,7 @@ export const REGISTER_EMAIL_ERROR_KEY = 'register-email-error'
 const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).+$/
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
+const REVEAL_DELAY_MS = 300
 
 const schema = z.object({
   name: z.string().min(1, '이름을 입력해주세요'),
@@ -57,6 +58,37 @@ const TERMS = [
 ]
 
 const getDefaultBirthDate = () => dayjs().year(2000).format('YYYY-MM-DD')
+
+function formatBirthDateInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+  if (digits.length <= 4) return digits
+  if (digits.length <= 6) return `${digits.slice(0, 4)}.${digits.slice(4)}`
+  return `${digits.slice(0, 4)}.${digits.slice(4, 6)}.${digits.slice(6)}`
+}
+
+function formatBirthDateDisplay(date: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date.replaceAll('-', '.') : ''
+}
+
+function parseBirthDateInput(value: string): string {
+  const digits = value.replace(/\D/g, '')
+  if (digits.length !== 8) return ''
+
+  const date = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`
+  const parsed = dayjs(date)
+  return parsed.isValid() && parsed.format('YYYY-MM-DD') === date ? date : ''
+}
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debouncedValue
+}
 
 interface BirthDateCalendarProps {
   selectedDate: string
@@ -230,6 +262,8 @@ export default function RegisterPage() {
   const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>({})
   const [debouncedNickname, setDebouncedNickname] = useState('')
   const [debouncedEmail, setDebouncedEmail] = useState('')
+  const [birthDateDraft, setBirthDateDraft] = useState<string | null>(null)
+  const [isBirthCalendarOpen, setIsBirthCalendarOpen] = useState(false)
   const [birthCalendarMonthValue, setBirthCalendarMonthValue] = useState<string | null>(null)
 
   const {
@@ -257,6 +291,7 @@ export default function RegisterPage() {
   const birthValid = !Number.isNaN(agePreview) && agePreview >= 14 && agePreview <= 120
   const calendarSelectedDate = birthDateValue || defaultBirthDate
   const birthCalendarMonth = dayjs(birthCalendarMonthValue ?? calendarSelectedDate).startOf('month')
+  const birthDateInputValue = birthDateDraft ?? formatBirthDateDisplay(birthDateValue)
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedNickname(nicknameValue), 300)
@@ -314,22 +349,63 @@ export default function RegisterPage() {
   }
   const toggleTerm = (id: string) => setCheckedTerms((prev) => ({ ...prev, [id]: !prev[id] }))
 
+  const handleBirthDateInputChange = (value: string) => {
+    const nextValue = formatBirthDateInput(value)
+    const parsedDate = parseBirthDateInput(nextValue)
+    const isComplete = nextValue.replace(/\D/g, '').length === 8
+
+    setBirthDateDraft(nextValue)
+
+    if (parsedDate) {
+      clearErrors('birthDate')
+      setBirthCalendarMonthValue(dayjs(parsedDate).startOf('month').format('YYYY-MM-DD'))
+      setValue('birthDate', parsedDate, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+      return
+    }
+
+    setValue('birthDate', '', { shouldDirty: true, shouldTouch: true })
+    if (isComplete) {
+      setError('birthDate', { type: 'manual', message: '올바른 생년월일을 입력해주세요' })
+    } else {
+      clearErrors('birthDate')
+    }
+  }
+
+  const toggleBirthCalendar = () => {
+    if (!isBirthCalendarOpen) {
+      setBirthCalendarMonthValue(dayjs(calendarSelectedDate).startOf('month').format('YYYY-MM-DD'))
+    }
+    setIsBirthCalendarOpen((open) => !open)
+  }
+
   const handleBirthDateSelect = (date: string) => {
+    setBirthDateDraft(formatBirthDateDisplay(date))
     setBirthCalendarMonthValue(dayjs(date).startOf('month').format('YYYY-MM-DD'))
     setValue('birthDate', date, { shouldDirty: true, shouldTouch: true, shouldValidate: true })
+    setIsBirthCalendarOpen(false)
   }
 
   // 한 항목을 충족하면 다음 항목이 순차로 노출된다. (KAN-256)
   // 각 단계의 충족 여부를 앞에서부터 세어 노출 레벨을 구한다.
+  const nameReady = nameValue.trim().length >= 1 && !errors.name
+  const genderReady = !!genderValue
+  const passwordReady = passwordValid && confirmMatch
+  const phoneReady = /^\d{11}$/.test(phoneValue)
+  const delayedNameReady = useDebouncedValue(nameReady, REVEAL_DELAY_MS)
+  const delayedGenderReady = useDebouncedValue(genderReady, REVEAL_DELAY_MS)
+  const delayedBirthReady = useDebouncedValue(birthValid, REVEAL_DELAY_MS)
+  const delayedPasswordReady = useDebouncedValue(passwordReady, REVEAL_DELAY_MS)
+  const delayedPhoneReady = useDebouncedValue(phoneReady, REVEAL_DELAY_MS)
+  const delayedTermsReady = useDebouncedValue(allRequired, REVEAL_DELAY_MS)
   const stepFlags = [
-    nameValue.trim().length >= 1 && !errors.name,                  // 0 이름
-    !!genderValue,                                                  // 1 성별
-    birthValid,                                                     // 2 생년월일
+    delayedNameReady,                                               // 0 이름
+    delayedGenderReady,                                             // 1 성별
+    delayedBirthReady,                                              // 2 생년월일
     nicknameValue.length >= 2 && nicknameAvailable === true,        // 3 닉네임
     EMAIL_REGEX.test(emailValue) && emailAvailable === true,        // 4 이메일
-    passwordValid && confirmMatch,                                  // 5 비밀번호
-    /^\d{11}$/.test(phoneValue),                                    // 6 연락처
-    allRequired,                                                    // 7 약관
+    delayedPasswordReady,                                           // 5 비밀번호
+    delayedPhoneReady,                                              // 6 연락처
+    delayedTermsReady,                                              // 7 약관
   ]
   let revealLevel = 0
   for (const ok of stepFlags) {
@@ -423,13 +499,35 @@ export default function RegisterPage() {
                 생년월일<span className="text-primary"> *</span>
               </label>
               <input type="hidden" {...register('birthDate')} />
-              <BirthDateCalendar
-                selectedDate={calendarSelectedDate}
-                calendarMonth={birthCalendarMonth}
-                error={errors.birthDate?.message}
-                onSelectDate={handleBirthDateSelect}
-                onChangeMonth={(month) => setBirthCalendarMonthValue(month.format('YYYY-MM-DD'))}
-              />
+              <div className="relative">
+                <input
+                  value={birthDateInputValue}
+                  onChange={(e) => handleBirthDateInputChange(e.target.value)}
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="YYYY.MM.DD"
+                  className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${errors.birthDate ? 'border-primary' : 'border-tag-bg'}`}
+                />
+                <button
+                  type="button"
+                  onClick={toggleBirthCalendar}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[40px] min-h-[40px] flex items-center justify-center text-tag-text"
+                  aria-label={isBirthCalendarOpen ? '생년월일 달력 닫기' : '생년월일 달력 열기'}
+                >
+                  <CalendarDays size={19} />
+                </button>
+              </div>
+              {isBirthCalendarOpen && (
+                <div className="animate-field-reveal pt-2">
+                  <BirthDateCalendar
+                    selectedDate={birthDateValue}
+                    calendarMonth={birthCalendarMonth}
+                    error={errors.birthDate?.message}
+                    onSelectDate={handleBirthDateSelect}
+                    onChangeMonth={(month) => setBirthCalendarMonthValue(month.format('YYYY-MM-DD'))}
+                  />
+                </div>
+              )}
               {errors.birthDate && (
                 <p className="text-xs text-primary pl-1">{errors.birthDate.message}</p>
               )}

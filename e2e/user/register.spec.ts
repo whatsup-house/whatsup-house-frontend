@@ -54,7 +54,9 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     // 2. 기본 정보 입력
     await page.getByPlaceholder('이름을 입력해주세요').fill('김새싹')
     await page.getByRole('button', { name: '여' }).click()
-    await page.getByRole('button', { name: String(new Date().getDate()), exact: true }).click()
+    await expect(page.getByPlaceholder('YYYY.MM.DD')).toBeVisible()
+    await expect(page.getByRole('button', { name: '생년월일 달력 열기' })).toBeVisible()
+    await page.getByPlaceholder('YYYY.MM.DD').fill('20000617')
     await page.getByPlaceholder('2자 이상 입력해주세요').fill('새싹유저')
 
     // 닉네임 중복 확인 결과 대기
@@ -104,6 +106,7 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await page.goto('/register')
     await page.getByPlaceholder('이름을 입력해주세요').fill('김중복')
     await page.getByRole('button', { name: '여' }).click()
+    await page.getByRole('button', { name: '생년월일 달력 열기' }).click()
     await page.getByRole('button', { name: String(new Date().getDate()), exact: true }).click()
     await page.getByPlaceholder('2자 이상 입력해주세요').fill('중복닉네임')
     await expect(page.getByText('이미 사용 중인 닉네임이에요')).toBeVisible({ timeout: 5000 })
