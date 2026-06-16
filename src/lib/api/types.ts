@@ -8,6 +8,9 @@ export interface ApiResponse<T> {
 // 게더링 상태
 export type GatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 
+// 게더링 종류 (REGULAR=일반, RANDOM_TABLE=우연한 식탁)
+export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
+
 // 게더링 타입
 export interface GatheringListItem {
   id: string
@@ -30,12 +33,37 @@ export interface GatheringListItem {
 }
 
 export interface GatheringDetail extends GatheringListItem {
+  gatheringType?: GatheringType
   howToRun?: string[] | null
   locationAddress?: string
   photoUrls?: string[] | null
   mileageReward?: number
   averageRating?: number | null
   reviewCount?: number
+}
+
+// 우연한 식탁 이용권 (KAN-260)
+export type TicketPassStatus = 'PENDING' | 'ACTIVE' | 'USED_UP' | 'CANCELLED'
+export type TicketProduct = 'RANDOM_TABLE_FOUR'
+
+export interface TicketPass {
+  id: string
+  product: TicketProduct
+  productLabel: string
+  totalCount: number
+  remainingCount: number
+  status: TicketPassStatus
+  createdAt: string
+  activatedAt: string | null
+}
+
+export interface MyTickets {
+  totalRemaining: number
+  passes: TicketPass[]
+}
+
+export interface TicketPurchaseRequest {
+  product: TicketProduct
 }
 
 // 달력 dot 표시용 (날짜별 대표 게더링 상태)
