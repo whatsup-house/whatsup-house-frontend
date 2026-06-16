@@ -52,6 +52,9 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await captureFullPage(page, 'e2e/screenshots/user/register-01-form.png')
 
     // 2. 기본 정보 입력
+    await page.getByPlaceholder('이름을 입력해주세요').fill('김')
+    await page.waitForTimeout(350)
+    await expect(page.getByRole('button', { name: '여' })).toBeHidden()
     await page.getByPlaceholder('이름을 입력해주세요').fill('김새싹')
     await page.getByRole('button', { name: '여' }).click()
     await expect(page.getByPlaceholder('YYYY.MM.DD')).toBeVisible()
@@ -70,7 +73,15 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
 
     await captureFullPage(page, 'e2e/screenshots/user/register-02-filled.png')
 
-    // 3. 약관 전체 동의
+    // 3. 약관 전문 모달 확인 후 전체 동의
+    await page.getByRole('button', { name: '이용약관 전문 보기' }).click()
+    await expect(page.getByRole('dialog', { name: '와썹하우스 이용약관' })).toBeVisible()
+    await expect(page.getByText('게더링 신청 및 참여')).toBeVisible()
+    await page.getByRole('button', { name: '확인' }).click()
+    await page.getByRole('button', { name: '개인정보처리방침 전문 보기' }).click()
+    await expect(page.getByRole('dialog', { name: '와썹하우스 개인정보처리방침' })).toBeVisible()
+    await expect(page.getByText('수집하는 개인정보 항목')).toBeVisible()
+    await page.getByRole('button', { name: '확인' }).click()
     await page.getByText('전체 동의').click()
     await captureFullPage(page, 'e2e/screenshots/user/register-03-terms.png')
 
@@ -78,6 +89,13 @@ test.describe('회원 - 회원가입 및 온보딩', () => {
     await page.getByRole('button', { name: '다음', exact: true }).click()
     await expect(page).toHaveURL('/onboarding')
     await captureFullPage(page, 'e2e/screenshots/user/register-04-onboarding.png')
+
+    // 온보딩에서 돌아와도 약관 동의 상태가 유지된다
+    await page.getByRole('button', { name: '이전' }).click()
+    await expect(page).toHaveURL('/register')
+    await expect(page.getByRole('button', { name: '다음', exact: true })).toBeEnabled()
+    await page.getByRole('button', { name: '다음', exact: true }).click()
+    await expect(page).toHaveURL('/onboarding')
 
     // 5. 직업 선택
     const jobBtn = page.getByText('직장인').or(page.getByText('대학생')).first()
