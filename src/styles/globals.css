@@ -67,6 +67,22 @@ body {
   animation: slide-up 0.3s ease-out;
 }
 
+/* 회원가입 폼 필드 순차 노출 애니메이션 */
+@keyframes field-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-field-reveal {
+  animation: field-reveal 0.28s ease-out;
+}
+
 /* 스크롤바 숨김 */
 .scrollbar-hide {
   -ms-overflow-style: none;

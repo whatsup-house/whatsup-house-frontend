@@ -22,8 +22,6 @@ const JOB_OPTIONS = [
   { value: 'OTHER', label: '기타' },
 ]
 
-const INTEREST_OPTIONS = ['감성', '독서', '음악', '자연', '요리', '운동', '여행', '영화', '미술', '사진']
-
 function getErrorMessage(error: unknown): string | null {
   if (typeof error !== 'object' || error === null || !('response' in error)) return null
   const response = (error as { response?: { data?: { message?: unknown } } }).response
@@ -38,6 +36,7 @@ interface Step1Data {
   nickname: string
   gender: Gender
   age: number
+  birthDate: string
   phone?: string
 }
 
@@ -51,7 +50,6 @@ export default function OnboardingPage() {
   const [bio, setBio] = useState('')
   const [job, setJob] = useState('')
   const [mbti, setMbti] = useState<(string | null)[]>([null, null, null, null])
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [formError, setFormError] = useState<string | null>(null)
 
   const registerAndLogin = useRegisterAndLogin()
@@ -88,12 +86,6 @@ export default function OnboardingPage() {
     })
   }
 
-  const toggleInterest = (interest: string) => {
-    setSelectedInterests((prev) =>
-      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
-    )
-  }
-
   const handleSubmit = () => {
     if (!step1Data) return
     setFormError(null)
@@ -104,7 +96,6 @@ export default function OnboardingPage() {
         bio: bio || undefined,
         job: job || undefined,
         mbti: mbtiString,
-        interests: selectedInterests.length > 0 ? selectedInterests : undefined,
       },
       {
         onSuccess: () => {
@@ -214,22 +205,6 @@ export default function OnboardingPage() {
               {mbtiString} 유형이군요!
             </p>
           )}
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-foreground block mb-3">관심 분야</label>
-          <div className="flex flex-wrap gap-2">
-            {INTEREST_OPTIONS.map((interest) => (
-              <button
-                key={interest}
-                type="button"
-                onClick={() => toggleInterest(interest)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors min-h-[44px] ${selectedInterests.includes(interest) ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'}`}
-              >
-                {interest}
-              </button>
-            ))}
-          </div>
         </div>
 
         {formError && (
