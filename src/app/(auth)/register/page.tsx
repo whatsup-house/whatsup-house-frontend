@@ -472,7 +472,7 @@ function PolicyModal({ policyId, onClose }: PolicyModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 px-4 pb-4 sm:items-center sm:pb-0"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 px-4 pb-4 sm:items-center sm:pb-0 lg:absolute"
       onClick={onClose}
     >
       <section
@@ -989,7 +989,7 @@ export default function RegisterPage() {
                       className="min-h-[44px] shrink-0 text-xs font-semibold text-primary"
                       aria-label={`${term.policyId === 'terms' ? '이용약관' : '개인정보처리방침'} 전문 보기`}
                     >
-                      전문 보기
+                      전문 보기 →
                     </button>
                   )}
                 </div>
