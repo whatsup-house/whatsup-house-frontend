@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil, LayoutDashboard } from 'lucide-react'
+import { Pencil, LayoutDashboard, Ticket } from 'lucide-react'
 import Link from 'next/link'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
+import { useMyTickets } from '@/lib/hooks/useTickets'
 import Button from '@/components/ui/Button'
 import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
@@ -30,6 +31,7 @@ export default function MyProfile() {
   const router = useRouter()
   const { isLoggedIn, isInitialized } = useRequireAuth()
   const { data: profile, isLoading } = useMyProfile()
+  const { data: tickets } = useMyTickets()
   const logout = useLogout()
   const [showEdit, setShowEdit] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
@@ -108,6 +110,17 @@ export default function MyProfile() {
             <span className="text-xs text-tag-text">›</span>
           </Link>
         </div>
+
+        {/* 우연한 식탁 이용권 잔여 (KAN-260) */}
+        {tickets && (
+          <div className="bg-card rounded-card px-5 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Ticket size={18} className="text-primary shrink-0" />
+              <span className="text-sm font-medium text-foreground">우연한 식탁 이용권</span>
+            </div>
+            <span className="text-sm font-bold text-primary">{tickets.totalRemaining}회 남음</span>
+          </div>
+        )}
 
         {/* 상세 정보 */}
         <div className="bg-card rounded-card px-5">
