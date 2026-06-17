@@ -660,3 +660,22 @@ export interface AdminApplicationDetail {
   createdAt: string
   answers: AnswerView[]
 }
+
+// 인앱 알림 (KAN-262)
+export type NotificationType = 'PARTICIPATION_CONFIRMED' | 'MILEAGE_EARNED' | 'REVIEW_LIKE_MILESTONE'
+// 알림 클릭 시 이동 대상 (FE가 라우트로 매핑)
+export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS'
+
+export interface NotificationItem {
+  id: string
+  type: NotificationType
+  title: string
+  content: string | null
+  link: NotificationLink | null
+  isRead: boolean
+  createdAt: string
+}
+
+export interface UnreadCountResponse {
+  unreadCount: number
+}
