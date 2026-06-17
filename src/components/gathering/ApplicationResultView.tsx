@@ -115,7 +115,7 @@ export default function ApplicationResultView({
               variant="outlined"
               size="lg"
               className="w-full"
-              onClick={() => router.push('/mypage')}
+              onClick={() => router.push('/mypage?tab=applications')}
             >
               마이페이지에서 확정 여부 확인하기
             </Button>
