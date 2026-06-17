@@ -8,6 +8,9 @@ export interface ApiResponse<T> {
 // 게더링 상태
 export type GatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 
+// 게더링 종류 (REGULAR=일반, RANDOM_TABLE=우연한 식탁)
+export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
+
 // 게더링 타입
 export interface GatheringListItem {
   id: string
@@ -30,12 +33,37 @@ export interface GatheringListItem {
 }
 
 export interface GatheringDetail extends GatheringListItem {
+  gatheringType?: GatheringType
   howToRun?: string[] | null
   locationAddress?: string
   photoUrls?: string[] | null
   mileageReward?: number
   averageRating?: number | null
   reviewCount?: number
+}
+
+// 우연한 식탁 이용권 (KAN-260)
+export type TicketPassStatus = 'PENDING' | 'ACTIVE' | 'USED_UP' | 'CANCELLED'
+export type TicketProduct = 'RANDOM_TABLE_FOUR'
+
+export interface TicketPass {
+  id: string
+  product: TicketProduct
+  productLabel: string
+  totalCount: number
+  remainingCount: number
+  status: TicketPassStatus
+  createdAt: string
+  activatedAt: string | null
+}
+
+export interface MyTickets {
+  totalRemaining: number
+  passes: TicketPass[]
+}
+
+export interface TicketPurchaseRequest {
+  product: TicketProduct
 }
 
 // 달력 dot 표시용 (날짜별 대표 게더링 상태)
@@ -63,12 +91,12 @@ export interface RegisterRequest {
   name: string
   nickname: string
   gender: Gender   // @NotNull in backend
-  age: number      // @NotNull in backend
-  phone?: string   // nullable, 11 digits
+  age: number      // @NotNull in backend — birthDate 기준 만 나이(BE 전환 전까지 호환용 전송)
+  birthDate?: string // 생년월일 (YYYY-MM-DD). BE(KAN-257)에서 영속화 후 age 계산에 사용
+  phone?: string   // 11 digits
   bio?: string
   job?: string
   mbti?: string
-  interests?: string[]
 }
 
 export interface RegisterResponse {
@@ -134,10 +162,14 @@ export interface ProfileUpdateRequest {
 // 내 신청 내역 타입
 export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
 
+// 입금 상태. 유료 게더링에서만 내려오며, 무료 게더링은 null(표시하지 않음). (KAN-243)
+export type PaymentStatus = 'PENDING' | 'CONFIRMED'
+
 export interface ApplicationListItem {
   id: string
   bookingNumber: string
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
   gathering: {
     id: string
     title: string
@@ -152,6 +184,7 @@ export interface GuestApplicationCheckResponse {
   id: string
   bookingNumber: string
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
   gathering: {
     id: string
     title: string
@@ -166,6 +199,7 @@ export interface ApplicationTokenCheckResponse {
   id: string
   bookingNumber: string
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
   applicantName: string | null
   gathering: {
     id: string

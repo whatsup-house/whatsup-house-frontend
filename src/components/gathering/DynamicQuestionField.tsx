@@ -8,6 +8,9 @@ const MBTI_ROWS = [
   ['I', 'N', 'T', 'P'],
 ] as const
 
+// 성별 선택지는 값(MALE/FEMALE)은 유지하되 화면에는 한국어로 노출한다. (KAN-258)
+const GENDER_CHOICE_LABELS: Record<string, string> = { MALE: '남성', FEMALE: '여성' }
+
 type FieldValue = string | number | string[]
 
 interface DynamicQuestionFieldProps {
@@ -23,8 +26,12 @@ export default function DynamicQuestionField({
   error,
   onChange,
 }: DynamicQuestionFieldProps) {
-  const { type, label, placeholder, required, options } = question
+  const { type, label, placeholder, required, options, questionKey } = question
   const choices = options?.choices ?? []
+
+  // 성별 질문은 선택지 값을 한국어 라벨로 바꿔 노출한다. (제출/매칭 값은 원본 유지)
+  const choiceLabel = (choice: string) =>
+    questionKey === 'gender' ? GENDER_CHOICE_LABELS[choice] ?? choice : choice
 
   const labelNode = (
     <label className="text-sm font-medium text-foreground">
@@ -37,7 +44,8 @@ export default function DynamicQuestionField({
   if (type === 'SHORT_TEXT' || type === 'NUMBER') {
     return (
       <Input
-        label={`${label}${required ? ' *' : ''}`}
+        label={label}
+        requiredMark={required}
         type={type === 'NUMBER' ? 'number' : 'text'}
         placeholder={placeholder ?? ''}
         value={value === undefined ? '' : String(value)}
@@ -81,7 +89,7 @@ export default function DynamicQuestionField({
                 value === choice ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
               }`}
             >
-              {choice}
+              {choiceLabel(choice)}
             </button>
           ))}
         </div>
@@ -102,7 +110,10 @@ export default function DynamicQuestionField({
     }
     return (
       <div className="flex flex-col gap-2">
-        {labelNode}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {labelNode}
+          <span className="text-xs text-tag-text">(중복 선택 가능)</span>
+        </div>
         <div className="flex flex-wrap gap-2">
           {choices.map((choice) => (
             <button
@@ -113,7 +124,7 @@ export default function DynamicQuestionField({
                 selected.includes(choice) ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
               }`}
             >
-              {choice}
+              {choiceLabel(choice)}
             </button>
           ))}
         </div>

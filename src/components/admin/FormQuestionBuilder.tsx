@@ -46,11 +46,11 @@ interface Preset {
 }
 const PRESETS: Preset[] = [
   { name: '나이', hint: '나이 ±8 + 비슷한 나이 우대', data: { label: '나이', questionKey: 'age', type: 'NUMBER', isMatchingField: true, matchingStrategy: 'SAME' } },
-  { name: '성별', hint: '성별 균형 맞추기', data: { label: '성별', questionKey: 'gender', type: 'SINGLE_CHOICE', choicesText: 'MALE\nFEMALE', isMatchingField: true, matchingStrategy: 'DIVERSE' } },
+  { name: '성별', hint: '성별 균형 맞추기 (신청 화면엔 남성/여성으로 노출)', data: { label: '성별', questionKey: 'gender', type: 'SINGLE_CHOICE', choicesText: 'MALE\nFEMALE', isMatchingField: true, matchingStrategy: 'DIVERSE' } },
   { name: '직업', hint: '같은 직군 쏠림 방지', data: { label: '직업', questionKey: 'job_category', type: 'SINGLE_CHOICE', choicesText: '학생\n직장인\n프리랜서\n자영업', isMatchingField: true, matchingStrategy: 'DIVERSE' } },
   { name: 'MBTI', hint: '성향 다양성', data: { label: 'MBTI', questionKey: 'mbti', type: 'MBTI_INPUT', isMatchingField: true, matchingStrategy: 'DIVERSE' } },
   { name: '관심사', hint: '관심사 겹치는 사람끼리', data: { label: '관심사', questionKey: 'interests', type: 'MULTI_CHOICE', choicesText: '영화\n음악\n여행\n운동\n독서', isMatchingField: true, matchingStrategy: 'OVERLAP' } },
-  { name: '예산', hint: '예산대 겹쳐야 같은 그룹 (하드 조건)', data: { label: '예산', questionKey: 'budget', type: 'MULTI_CHOICE', choicesText: '1만원\n2만원\n3만원', isMatchingField: false } },
+  { name: '식사 예산', hint: '예산대 겹쳐야 같은 그룹 (하드 조건)', data: { label: '식사 예산', questionKey: 'budget', type: 'MULTI_CHOICE', choicesText: '1만원대\n2만원대\n3만원대', isMatchingField: false } },
   { name: '가능 날짜', hint: '날짜 겹쳐야 같은 그룹 (하드 조건)', data: { label: '가능 날짜', questionKey: 'available_dates', type: 'MULTI_CHOICE', choicesText: '2026-08-01\n2026-08-08', isMatchingField: false } },
 ]
 

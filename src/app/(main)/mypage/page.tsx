@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import MyProfile from '@/components/mypage/MyProfile'
 import MyApplicationList from '@/components/mypage/MyApplicationList'
 import MyReviewList from '@/components/mypage/MyReviewList'
@@ -13,8 +14,15 @@ const TABS = [
 
 type TabKey = typeof TABS[number]['key']
 
-export default function MyPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('profile')
+function isTabKey(value: string | null): value is TabKey {
+  return TABS.some((tab) => tab.key === value)
+}
+
+function MyPageContent() {
+  const searchParams = useSearchParams()
+  // 쿼리파라미터(tab)로 진입 탭을 결정한다. 잘못된 값이면 프로필로 폴백. (KAN-259)
+  const tabParam = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState<TabKey>(isTabKey(tabParam) ? tabParam : 'profile')
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,5 +52,13 @@ export default function MyPage() {
       )}
       {activeTab === 'reviews' && <MyReviewList />}
     </div>
+  )
+}
+
+export default function MyPage() {
+  return (
+    <Suspense fallback={null}>
+      <MyPageContent />
+    </Suspense>
   )
 }

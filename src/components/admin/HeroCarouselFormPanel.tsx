@@ -171,18 +171,20 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
               </select>
             </div>
 
-            {/* 이미지 업로드 (9:16 크롭) */}
+            {/* 이미지 업로드 (9:16 크롭) — 미리보기 폭을 제한해 드롭존 높이를 줄인다 (KAN-251) */}
             <div>
-              <ImageUploadField
-                label="슬라이드 이미지 *"
-                previewUrl={imagePreviewUrl}
-                cropRatio="9:16"
-                cropContext="carousel"
-                onConfirm={handleImageConfirm}
-                onClear={handleImageClear}
-                isUploading={isUploading}
-                aspectClassName="aspect-[9/16]"
-              />
+              <div className="max-w-[200px]">
+                <ImageUploadField
+                  label="슬라이드 이미지 *"
+                  previewUrl={imagePreviewUrl}
+                  cropRatio="9:16"
+                  cropContext="carousel"
+                  onConfirm={handleImageConfirm}
+                  onClear={handleImageClear}
+                  isUploading={isUploading}
+                  aspectClassName="aspect-[9/16]"
+                />
+              </div>
               {errors.imageUrl && (
                 <p className="text-xs text-red-500 mt-1">{errors.imageUrl.message}</p>
               )}

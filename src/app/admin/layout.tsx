@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import {
-  LayoutDashboard, CalendarDays, MapPin, Users, LogOut, ClipboardList, Home, Utensils, FileText,
+  LayoutDashboard, CalendarDays, MapPin, Users, LogOut, ClipboardList, Home, Utensils, FileText, Mail,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useLogout } from '@/lib/hooks/useAuth'
@@ -18,6 +18,7 @@ const sidebarItems = [
   { href: '/admin/matching', icon: Utensils, label: '우연한 식탁 매칭' },
   { href: '/admin/locations', icon: MapPin, label: '장소 관리' },
   { href: '/admin/users', icon: Users, label: '회원 관리' },
+  { href: '/admin/email-templates', icon: Mail, label: '메일 템플릿 관리' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

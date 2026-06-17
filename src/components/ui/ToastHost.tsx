@@ -13,7 +13,7 @@ export default function ToastHost() {
 
   useEffect(() => {
     if (!message || isPaused) return
-    const timer = setTimeout(clear, variant === 'welcome' ? 4200 : 3000)
+    const timer = setTimeout(clear, 3000)
     return () => clearTimeout(timer)
   }, [message, variant, clear, isPaused])
 
@@ -23,7 +23,14 @@ export default function ToastHost() {
     const [title, ...bodyLines] = message.split('\n').filter(Boolean)
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/30 px-6">
-        <div className="w-full max-w-[360px] rounded-card bg-card px-6 py-7 text-center shadow-xl">
+        <div className="relative w-full max-w-[360px] rounded-card bg-card px-6 py-7 text-center shadow-xl">
+          <button
+            onClick={clear}
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center text-tag-text transition-opacity hover:opacity-70"
+            aria-label="닫기"
+          >
+            <X size={18} />
+          </button>
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-[24px] text-primary">
             M
           </div>

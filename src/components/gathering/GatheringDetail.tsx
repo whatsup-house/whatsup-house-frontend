@@ -6,6 +6,7 @@ import { Card, Badge } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
 import GatheringReviewSection from './GatheringReviewSection'
 import MapLinkButton from './MapLinkButton'
+import TicketPassSection from './TicketPassSection'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
 import { formatDuration, formatKoreanFullDate, formatTimeRange } from '@/lib/utils/date'
 import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
@@ -20,7 +21,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
     title, status, eventDate, startTime, endTime, location, locationAddress,
     price, maxAttendees, thumbnailUrl,
     description, howToRun, photoUrls, mileageReward,
-    reviewCount,
+    reviewCount, gatheringType,
   } = gathering
 
   const photos = photoUrls && photoUrls.length > 0 ? photoUrls : (thumbnailUrl ? [thumbnailUrl] : [])
@@ -207,6 +208,9 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             )}
           </div>
         </Card>
+
+        {/* 우연한 식탁 이용권 선결제 (KAN-260) */}
+        {gatheringType === 'RANDOM_TABLE' && <TicketPassSection />}
 
         {/* 게더링 설명 */}
         <div className="mb-6">

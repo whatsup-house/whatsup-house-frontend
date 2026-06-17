@@ -134,6 +134,8 @@ export interface AdminApplicationItem {
   intro: string | null
   referralSource: string | null
   status: ApplicationStatus
+  paid: boolean              // 유료 게더링 여부 (입금 체크 노출 대상). (KAN-243)
+  paymentConfirmed: boolean  // 입금 확인 여부
   createdAt: string
   isGuest: boolean
 }
@@ -265,6 +267,15 @@ export const adminGatheringApi = {
     const res = await apiClient.patch<ApiResponse<unknown>>(
       `/api/admin/applications/${applicationId}/status`,
       { status }
+    )
+    return res.data.data
+  },
+
+  // 입금 확인 토글 (신청 상태와 독립). (KAN-243)
+  updatePaymentStatus: async (applicationId: string, confirmed: boolean) => {
+    const res = await apiClient.patch<ApiResponse<unknown>>(
+      `/api/admin/applications/${applicationId}/payment`,
+      { confirmed }
     )
     return res.data.data
   },

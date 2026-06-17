@@ -26,6 +26,7 @@ function getTitle(pathname: string): string {
   if (pathname.endsWith('/apply/complete')) return '신청 완료'
   if (pathname.endsWith('/apply')) return '신청하기'
   if (pathname.startsWith('/gatherings/')) return '게더링'
+  if (pathname.startsWith('/story/')) return '소개'
   return ''
 }
 
