@@ -1,8 +1,9 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { ArrowLeft, Bell } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
+import NotificationBell from './NotificationBell'
 
 const HIDDEN_PATTERNS: RegExp[] = []
 
@@ -66,12 +67,7 @@ export default function TopNav() {
           )}
           <span className="text-base font-bold text-foreground">{title}</span>
         </div>
-        <button
-          className="p-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-foreground"
-          aria-label="알림"
-        >
-          <Bell size={20} />
-        </button>
+        <NotificationBell />
       </div>
     </header>
   )
