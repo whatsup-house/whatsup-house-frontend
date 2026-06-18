@@ -1,0 +1,36 @@
+{
+  "common": {
+    "back": "뒤로가기",
+    "login": "로그인",
+    "register": "회원가입",
+    "start": "시작하기",
+    "previous": "이전"
+  },
+  "language": {
+    "label": "언어",
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "auth": {
+    "login": {
+      "title": "로그인",
+      "tagline": "해가 지는 선선한 저녁에 만나요",
+      "withdrawnNotice": "회원탈퇴가 완료되었습니다.",
+      "emailLabel": "이메일",
+      "emailPlaceholder": "이메일 주소",
+      "passwordLabel": "비밀번호",
+      "passwordPlaceholder": "비밀번호 입력",
+      "findEmail": "아이디 찾기",
+      "findPassword": "비밀번호 찾기",
+      "credentialError": "아이디 또는 비밀번호를 확인해주세요.",
+      "submit": "로그인",
+      "submitting": "로그인 중...",
+      "noAccount": "아직 회원이 아니신가요?",
+      "validation": {
+        "email": "올바른 이메일 형식을 입력해주세요",
+        "password": "비밀번호를 입력해주세요"
+      }
+    }
+  }
+}

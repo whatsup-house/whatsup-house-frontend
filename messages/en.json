@@ -1,0 +1,36 @@
+{
+  "common": {
+    "back": "Back",
+    "login": "Log in",
+    "register": "Sign up",
+    "start": "Get started",
+    "previous": "Previous"
+  },
+  "language": {
+    "label": "Language",
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "tagline": "Let's meet on a cool evening at sunset",
+      "withdrawnNotice": "Your account has been deleted.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "findEmail": "Find ID",
+      "findPassword": "Find password",
+      "credentialError": "Please check your email or password.",
+      "submit": "Log in",
+      "submitting": "Logging in...",
+      "noAccount": "Don't have an account yet?",
+      "validation": {
+        "email": "Please enter a valid email address",
+        "password": "Please enter your password"
+      }
+    }
+  }
+}
