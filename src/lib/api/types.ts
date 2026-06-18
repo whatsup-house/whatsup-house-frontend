@@ -159,6 +159,18 @@ export interface ProfileUpdateRequest {
   interests?: string[]
 }
 
+// 직업 카탈로그 (KAN-270)
+export interface JobItem {
+  code: string
+  label: string
+}
+
+export interface JobGroup {
+  category: string
+  categoryLabel: string
+  jobs: JobItem[]
+}
+
 // 내 신청 내역 타입
 export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
 

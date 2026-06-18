@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyTickets } from '@/lib/hooks/useTickets'
+import { useJobs } from '@/lib/hooks/useJobs'
 import Button from '@/components/ui/Button'
 import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
@@ -32,6 +33,7 @@ export default function MyProfile() {
   const { isLoggedIn, isInitialized } = useRequireAuth()
   const { data: profile, isLoading } = useMyProfile()
   const { data: tickets } = useMyTickets()
+  const { data: jobGroups } = useJobs()
   const logout = useLogout()
   const [showEdit, setShowEdit] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
@@ -65,6 +67,16 @@ export default function MyProfile() {
       </div>
     )
   }
+
+  // 직업은 코드로 저장되므로 카탈로그에서 라벨로 변환해 표시한다. (KAN-270)
+  const jobLabel = (() => {
+    if (!profile.job) return null
+    for (const group of jobGroups ?? []) {
+      const found = group.jobs.find((job) => job.code === profile.job)
+      if (found) return found.label
+    }
+    return profile.job
+  })()
 
   return (
     <>
@@ -133,7 +145,7 @@ export default function MyProfile() {
             label="나이"
             value={profile.age !== null ? `${profile.age}세` : null}
           />
-          <ProfileRow label="직업" value={profile.job} />
+          <ProfileRow label="직업" value={jobLabel} />
           <ProfileRow label="MBTI" value={profile.mbti} />
           <ProfileRow label="동물 유형" value={profile.animalType} />
         </div>

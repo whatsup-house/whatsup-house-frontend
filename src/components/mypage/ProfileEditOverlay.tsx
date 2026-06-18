@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Plus } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
+import JobSelect from '@/components/auth/JobSelect'
 import { useUpdateProfile } from '@/lib/hooks/useAuth'
 import type { UserProfile, Gender } from '@/lib/api/types'
 
@@ -78,7 +79,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
     setInterests((prev) => prev.filter((i) => i !== target))
   }
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   })
 
@@ -219,11 +220,16 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
               placeholder="@username"
               {...register('instagramId')}
             />
-            <Input
-              label="직업"
-              placeholder="예: 디자이너"
-              {...register('job')}
-            />
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-foreground">직업</label>
+              <Controller
+                name="job"
+                control={control}
+                render={({ field }) => (
+                  <JobSelect value={field.value ?? ''} onChange={field.onChange} />
+                )}
+              />
+            </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-foreground">MBTI</label>
               <div className="grid grid-cols-4 gap-2">
