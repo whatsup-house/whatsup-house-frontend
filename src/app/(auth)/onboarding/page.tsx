@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui'
+import JobSelect from '@/components/auth/JobSelect'
 import { useRegisterAndLogin } from '@/lib/hooks/useAuth'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { useToastStore } from '@/lib/store/toastStore'
@@ -14,13 +15,6 @@ const MBTI_ROWS = [
   ['E', 'S', 'T', 'J'],
   ['I', 'N', 'F', 'P'],
 ] as const
-
-const JOB_OPTIONS = [
-  { value: 'STUDENT', label: '대학생' },
-  { value: 'WORKER', label: '직장인' },
-  { value: 'FREELANCER', label: '프리랜서' },
-  { value: 'OTHER', label: '기타' },
-]
 
 function getErrorMessage(error: unknown): string | null {
   if (typeof error !== 'object' || error === null || !('response' in error)) return null
@@ -162,18 +156,7 @@ export default function OnboardingPage() {
 
         <div>
           <label className="text-sm font-medium text-foreground block mb-2">직업</label>
-          <div className="grid grid-cols-2 gap-2">
-            {JOB_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setJob(job === option.value ? '' : option.value)}
-                className={`py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${job === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'}`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          <JobSelect value={job} onChange={setJob} />
         </div>
 
         <div>
