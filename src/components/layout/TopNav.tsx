@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
+import LanguageSwitcher from './LanguageSwitcher'
 import NotificationBell from './NotificationBell'
 
 const HIDDEN_PATTERNS: RegExp[] = []
@@ -67,7 +68,10 @@ export default function TopNav() {
           )}
           <span className="text-base font-bold text-foreground">{title}</span>
         </div>
-        <NotificationBell />
+        <div className="flex items-center gap-1">
+          <LanguageSwitcher />
+          <NotificationBell />
+        </div>
       </div>
     </header>
   )
