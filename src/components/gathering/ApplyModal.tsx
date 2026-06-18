@@ -40,7 +40,7 @@ export default function ApplyModal({
   const formattedTime = formatTime(gathering.startTime)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center">
       {/* 오버레이 */}
       <div
         className="absolute inset-0 bg-black/50 transition-opacity"

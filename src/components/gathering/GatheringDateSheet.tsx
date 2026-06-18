@@ -59,7 +59,7 @@ export default function GatheringDateSheet({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+    <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
       <div
         className="relative w-full md:max-w-[430px] bg-card rounded-t-2xl overflow-hidden animate-slide-up"

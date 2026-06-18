@@ -45,7 +45,7 @@ function DeleteConfirmDialog({
   isPending: boolean
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-6">
+    <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-6">
       <div className="w-full max-w-sm bg-card rounded-2xl overflow-hidden shadow-xl">
         <div className="px-5 pt-6 pb-5 text-center">
           <p className="text-sm font-bold text-foreground mb-1.5">리뷰를 삭제하시겠어요?</p>
