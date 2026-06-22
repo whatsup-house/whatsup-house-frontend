@@ -5,7 +5,25 @@
     "register": "Sign up",
     "start": "Get started",
     "previous": "Previous",
-    "brand": "Whatsup House"
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "next": "Next",
+    "close": "Close",
+    "errors": {
+      "UNKNOWN": "Something went wrong. Please try again.",
+      "EMAIL_ALREADY_EXISTS": "This email is already in use.",
+      "NICKNAME_ALREADY_EXISTS": "This nickname is already in use.",
+      "INVALID_CREDENTIALS": "Please check your email or password.",
+      "USER_NOT_FOUND": "We could not find matching account information.",
+      "PASSWORD_RESET_FAILED": "Failed to request a password reset.",
+      "INVALID_PASSWORD_RESET_TOKEN": "Please check your password reset link."
+    },
+    "agree": "Agree",
+    "brand": "Whatsup House",
+    "errorBoundary": {
+      "title": "Oops! Something went wrong",
+      "description": "An unexpected error occurred.\nPlease try again in a moment."
+    }
   },
   "language": {
     "label": "Language",
@@ -31,6 +49,298 @@
       "validation": {
         "email": "Please enter a valid email address",
         "password": "Please enter your password"
+      }
+    },
+    "findEmail": {
+      "title": "Find ID",
+      "nameLabel": "Name",
+      "namePlaceholder": "Name used at sign-up",
+      "phoneLabel": "Phone number",
+      "submit": "Find ID",
+      "submitting": "Checking...",
+      "resultLabel": "Registered email",
+      "resetPassword": "Reset password",
+      "validation": {
+        "nameRequired": "Please enter your name",
+        "nameMax": "Name must be 50 characters or less",
+        "phone": "Please enter an 11-digit phone number"
+      }
+    },
+    "passwordReset": {
+      "request": {
+        "title": "Reset password",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Email address used at sign-up",
+        "submit": "Get reset link",
+        "submitting": "Sending...",
+        "successTitle": "We sent password reset instructions.",
+        "successDescription": "Please check the link in your inbox. If you do not see the email, check your registered email address again.",
+        "findEmail": "Find ID",
+        "validation": {
+          "email": "Please enter a valid email address"
+        }
+      },
+      "confirm": {
+        "title": "New password",
+        "invalidLink": "The reset link is invalid.",
+        "requestAgain": "Get a new link",
+        "newPasswordLabel": "New password",
+        "newPasswordPlaceholder": "At least 8 characters with letters and numbers",
+        "passwordConfirmLabel": "Confirm password",
+        "passwordConfirmPlaceholder": "Enter the new password again",
+        "submit": "Change password",
+        "submitting": "Changing...",
+        "successTitle": "Your password has been changed.",
+        "validation": {
+          "passwordMin": "Password must be at least 8 characters",
+          "passwordPattern": "Password must include letters and numbers",
+          "passwordConfirm": "Please confirm your password",
+          "passwordMismatch": "Passwords do not match"
+        }
+      }
+    },
+    "welcome": {
+      "brand": "Whatsup House",
+      "hostAlt": "Whatsup House host",
+      "guestStart": "Continue as guest"
+    },
+    "onboarding": {
+      "intro": "Tell us about yourself (optional)",
+      "bioLabel": "Short bio",
+      "optional": "(optional)",
+      "bioPlaceholder": "Introduce yourself in one line",
+      "jobLabel": "Job",
+      "mbtiLabel": "MBTI",
+      "mbtiResult": "So you are {mbti}!",
+      "welcomeToast": "Welcome to Whatsup House\nYour 1,000M sign-up mileage has been added.\nBrowse gatherings you like and get ready for your first meet-up.",
+      "jobSelect": {
+        "placeholder": "Search and select a job",
+        "clear": "Clear selected job",
+        "searchPlaceholder": "Search jobs",
+        "empty": "No results found"
+      }
+    },
+    "register": {
+      "title": "Sign up",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter your name",
+      "genderLabel": "Gender",
+      "gender": {
+        "male": "Male",
+        "female": "Female"
+      },
+      "birthDateLabel": "Date of birth",
+      "agePreview": "Age {age}",
+      "nicknameLabel": "Nickname",
+      "nicknamePlaceholder": "Enter at least 2 characters",
+      "emailLabel": "Email (ID)",
+      "emailPlaceholder": "Enter your email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters with letters and numbers",
+      "passwordConfirmLabel": "Confirm password",
+      "passwordConfirmPlaceholder": "Enter your password again",
+      "phoneLabel": "Contact number",
+      "phonePlaceholder": "01012345678 (11 digits)",
+      "checking": "Checking...",
+      "duplicateCheckFailed": "Duplicate check failed",
+      "nicknameAvailable": "This nickname is available",
+      "emailAvailable": "This email is available",
+      "passwordAvailable": "This password is available",
+      "passwordMatch": "Passwords match",
+      "terms": {
+        "all": "Agree to all",
+        "age": "[Required] I am at least 14 years old",
+        "terms": "[Required] I agree to the Terms of Use",
+        "privacy": "[Required] I agree to the Privacy Policy",
+        "marketing": "[Optional] I agree to receive marketing information"
+      },
+      "calendar": {
+        "dayLabels": [
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat"
+        ],
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "yearSelect": "Select year",
+        "monthSelect": "Select month",
+        "yearOption": "{year}",
+        "monthOption": "{month}",
+        "openBirth": "Open birth date calendar",
+        "closeBirth": "Close birth date calendar"
+      },
+      "validation": {
+        "nameMin": "Please enter at least 2 characters for your name",
+        "gender": "Please select your gender",
+        "birthRequired": "Please select your date of birth",
+        "birthInvalid": "Please enter a valid date of birth",
+        "birthAge": "You must be at least 14 years old to sign up",
+        "nicknameMin": "Please enter at least 2 characters for your nickname",
+        "nicknameMax": "Nickname must be 50 characters or less",
+        "email": "Please enter a valid email address",
+        "password": "Use at least 8 characters with letters and numbers",
+        "passwordConfirm": "Please enter your password again",
+        "phone": "Phone number must be 11 digits",
+        "passwordMismatch": "Passwords do not match"
+      },
+      "policies": {
+        "viewFull": "View full text →",
+        "terms": {
+          "title": "Whatsup House Terms of Use",
+          "summary": "These terms define the conditions for using Whatsup House gathering discovery, applications, and community services, as well as member rights and responsibilities.",
+          "viewFullLabel": "View full terms of use",
+          "sections": [
+            {
+              "title": "Article 1 Purpose",
+              "items": [
+                "These terms set out the procedures and responsibilities between the company and members when using Whatsup House services.",
+                "These terms set out the procedures and responsibilities between the company and members when using Whatsup House services."
+              ]
+            },
+            {
+              "title": "Article 2 Sign-up and account management",
+              "items": [
+                "Members must provide accurate information, manage their own accounts, and follow participation guidelines for gatherings.",
+                "Members must provide accurate information, manage their own accounts, and follow participation guidelines for gatherings.",
+                "Members must provide accurate information, manage their own accounts, and follow participation guidelines for gatherings."
+              ]
+            },
+            {
+              "title": "Article 3 Gathering applications and participation",
+              "items": [
+                "Schedules, venues, capacity, paid participation, cancellation, and refund details may change according to operating conditions and posted notices.",
+                "Schedules, venues, capacity, paid participation, cancellation, and refund details may change according to operating conditions and posted notices.",
+                "Schedules, venues, capacity, paid participation, cancellation, and refund details may change according to operating conditions and posted notices."
+              ]
+            },
+            {
+              "title": "Article 4 Payments, cancellations, and refunds",
+              "items": [
+                "Members must not misuse personal information, submit false applications, disrupt the service, or harm other participants.",
+                "Members must not misuse personal information, submit false applications, disrupt the service, or harm other participants.",
+                "Members must not misuse personal information, submit false applications, disrupt the service, or harm other participants."
+              ]
+            },
+            {
+              "title": "Article 5 Prohibited conduct",
+              "items": [
+                "The company may change or suspend services when necessary for stable operation or unavoidable circumstances.",
+                "The company may change or suspend services when necessary for stable operation or unavoidable circumstances."
+              ]
+            },
+            {
+              "title": "Article 6 Service changes and suspension",
+              "items": [
+                "Disputes will be handled through good-faith consultation and applicable laws.",
+                "Disputes will be handled through good-faith consultation and applicable laws."
+              ]
+            },
+            {
+              "title": "Article 7 Limitation of liability and disputes",
+              "items": [
+                "Disputes will be handled through good-faith consultation and applicable laws.",
+                "Disputes will be handled through good-faith consultation and applicable laws."
+              ]
+            },
+            {
+              "title": "Article 8 Changes to terms",
+              "items": [
+                "Disputes will be handled through good-faith consultation and applicable laws.",
+                "Disputes will be handled through good-faith consultation and applicable laws."
+              ]
+            }
+          ]
+        },
+        "privacy": {
+          "title": "Whatsup House Privacy Policy",
+          "summary": "Whatsup House processes personal information only as needed for sign-up, gathering applications, and safe service operation.",
+          "viewFullLabel": "View full privacy policy",
+          "sections": [
+            {
+              "title": "Article 1 Purpose of processing personal information",
+              "items": [
+                "We process personal information for member identification, account management, fraud prevention, gathering operations, notices, support, service improvement, and statistics.",
+                "We process personal information for member identification, account management, fraud prevention, gathering operations, notices, support, service improvement, and statistics."
+              ]
+            },
+            {
+              "title": "Article 2 Personal information collected",
+              "items": [
+                "Collected information may include required sign-up details, optional profile details entered by members, and automatically collected service usage records.",
+                "Collected information may include required sign-up details, optional profile details entered by members, and automatically collected service usage records.",
+                "Collected information may include required sign-up details, optional profile details entered by members, and automatically collected service usage records."
+              ]
+            },
+            {
+              "title": "Article 3 Retention and use period",
+              "items": [
+                "Personal information is destroyed when the purpose is achieved or membership ends, except where laws require retention.",
+                "Personal information is destroyed when the purpose is achieved or membership ends, except where laws require retention.",
+                "Personal information is destroyed when the purpose is achieved or membership ends, except where laws require retention."
+              ]
+            },
+            {
+              "title": "Article 4 Third-party provision",
+              "items": [
+                "We do not provide personal information externally unless permitted by consent or law, and we announce necessary operational sharing in advance.",
+                "We do not provide personal information externally unless permitted by consent or law, and we announce necessary operational sharing in advance."
+              ]
+            },
+            {
+              "title": "Article 5 Outsourcing of processing",
+              "items": [
+                "Some work may be outsourced for stable service operation, and relevant details will be announced when needed.",
+                "Some work may be outsourced for stable service operation, and relevant details will be announced when needed."
+              ]
+            },
+            {
+              "title": "Article 6 Destruction of personal information",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 7 User rights",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 8 Security measures",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 9 Cookies and automatic collection",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 10 Privacy inquiries",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 11 Changes to this policy",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            }
+          ]
+        }
       }
     }
   },
