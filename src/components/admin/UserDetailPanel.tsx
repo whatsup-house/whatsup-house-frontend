@@ -28,7 +28,7 @@ export function UserDetailPanel({ userId, onClose }: UserDetailPanelProps) {
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 w-[440px] h-full bg-white shadow-2xl z-50 flex flex-col">
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[440px] h-full bg-white shadow-2xl z-50 flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#F0EBE8]">
           <h2 className="font-bold text-[18px]">회원 상세</h2>
@@ -55,7 +55,7 @@ export function UserDetailPanel({ userId, onClose }: UserDetailPanelProps) {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {[
                     ['이름', detail.name ?? '미입력'],
                     ['연락처', detail.phone ?? '미입력'],
@@ -115,7 +115,7 @@ export function UserDetailPanel({ userId, onClose }: UserDetailPanelProps) {
 
         {/* 푸터 - 상태 변경 (관리자 계정은 변경 불가) */}
         {!isAdmin ? (
-          <div className="px-6 py-4 border-t border-[#F0EBE8] flex gap-3">
+          <div className="px-6 py-4 border-t border-tag-bg flex flex-col sm:flex-row gap-3">
             <Button variant="ghost" type="button" onClick={onClose} className="flex-1">닫기</Button>
             <Button
               variant={isSuspended ? 'primary' : 'outlined'}

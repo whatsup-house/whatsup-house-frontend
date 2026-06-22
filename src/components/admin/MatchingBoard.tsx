@@ -75,8 +75,8 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
   return (
     <div>
       {/* 헤더 */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between mb-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <h2 className="font-bold text-[16px] text-[#1A1A1A]">
             {gatheringTitle ? `${gatheringTitle} — 매칭` : '자동매칭'}
           </h2>
@@ -84,7 +84,7 @@ export default function MatchingBoard({ gatheringId, gatheringTitle }: MatchingB
             그룹 {groups.length}개 · 미배정 {unmatched.length}명
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           {/* 그룹당 인원 수 선택 (KAN-225) */}
           <select
             value={groupSize}
@@ -189,8 +189,8 @@ function GroupCard({ group, groupIndex, allGroups, onMemberClick, onMove, onExcl
   return (
     <div className="bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col">
       {/* 카드 헤더 */}
-      <div className="px-4 py-3 border-b border-[#F0EBE8] flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-tag-bg flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="font-bold text-[14px] text-[#1A1A1A]">
             {groupLabel}
           </span>
@@ -201,7 +201,7 @@ function GroupCard({ group, groupIndex, allGroups, onMemberClick, onMove, onExcl
             {GROUP_STATUS_LABEL[group.status] ?? group.status}
           </span>
         </div>
-        <div className="flex items-center gap-3 text-xs text-[#767676]">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-tag-text">
           <span>
             {fitPercent != null ? `매칭적합도 ${fitPercent}%` : '적합도 계산 전'}
           </span>
@@ -217,7 +217,7 @@ function GroupCard({ group, groupIndex, allGroups, onMemberClick, onMove, onExcl
         {group.members.map((m) => (
           <div
             key={m.memberId ?? m.applicationId}
-            className="flex items-center gap-2 px-2 py-2 rounded-input hover:bg-[#F5F0EB] transition-colors"
+            className="flex flex-wrap sm:flex-nowrap items-center gap-2 px-2 py-2 rounded-input hover:bg-background transition-colors"
           >
             <button
               onClick={() => onMemberClick(m.applicationId)}
@@ -344,7 +344,7 @@ function UnmatchedList({ members, groups, onMemberClick, onAssign }: UnmatchedLi
         {members.map((m) => (
           <div
             key={m.applicationId}
-            className="flex items-center gap-2 px-2 py-2 rounded-input hover:bg-[#F5F0EB] transition-colors"
+            className="flex flex-wrap sm:flex-nowrap items-center gap-2 px-2 py-2 rounded-input hover:bg-background transition-colors"
           >
             <button onClick={() => onMemberClick(m.applicationId)} className="flex-1 text-left min-w-0">
               <span className="text-[14px] font-medium text-[#1A1A1A] hover:underline">{m.name ?? '-'}</span>

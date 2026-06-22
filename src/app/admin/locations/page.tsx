@@ -82,13 +82,13 @@ function LocationModal({
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-        <div className="bg-white rounded-[16px] shadow-2xl w-[480px] pointer-events-auto">
+      <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+        <div className="bg-white rounded-[16px] shadow-2xl w-full max-w-[480px] max-h-[calc(100vh-32px)] overflow-hidden pointer-events-auto">
           <div className="flex items-center justify-between px-6 py-4 border-b border-[#F0EBE8]">
             <h2 className="font-bold text-[18px]">{isEdit ? '장소 수정' : '장소 추가'}</h2>
             <button onClick={onClose} className="text-[#767676] text-xl leading-none">✕</button>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 flex flex-col gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="max-h-[calc(100vh-96px)] overflow-y-auto px-6 py-5 flex flex-col gap-4">
             <Input label="장소명 *" placeholder="장소 이름" {...register('name', { required: true })} />
             <Input label="주소 *" placeholder="서울특별시 강남구..." {...register('address', { required: true })} />
             <Input label="최대 수용 인원 *" type="number" min={1} max={20} {...register('maxCapacity', { required: true })} />
@@ -136,19 +136,19 @@ export default function AdminLocationsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
         <h1 className="font-bold text-[22px] text-foreground">장소 관리</h1>
         <button
           id="btn-location-add"
           onClick={() => setModalLocation(null)}
-          className="px-5 h-11 bg-primary text-white rounded-[12px] font-medium text-sm hover:opacity-90 transition-opacity"
+          className="self-start sm:self-auto px-5 h-11 bg-primary text-white rounded-[12px] font-medium text-sm hover:opacity-90 transition-opacity"
         >
           + 장소 추가
         </button>
       </div>
 
-      <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-x-auto">
+        <table className="w-full min-w-[820px]">
           <thead>
             <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
               {['장소명', '주소', '최대 수용', '계약 상태', '특징', '지도', '액션'].map((col) => (

@@ -56,7 +56,7 @@ function MiniCalendar({ year, month, selectedDate, dotDates, onSelectDate, onCha
   }
 
   return (
-    <div className="bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-5 shrink-0 w-[320px]">
+    <div className="bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-5 shrink-0 w-full max-w-[360px] lg:w-[320px]">
       {/* 월 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <button
@@ -225,8 +225,8 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   const attendedCount = participants.filter((p) => p.status === 'ATTENDED').length
 
   return (
-    <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#F0EBE8] flex items-center gap-3">
+    <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-x-auto">
+      <div className="min-w-[1080px] px-4 py-3 border-b border-tag-bg flex items-center gap-3">
         <span className="text-sm font-bold text-[#1A1A1A]">총 {participants.length}명 신청</span>
         {confirmedCount > 0 && (
           <span className="px-2 py-0.5 bg-[#E3F2FD] text-[#1976D2] rounded-full text-xs font-medium">
@@ -239,7 +239,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
           </span>
         )}
       </div>
-      <table className="w-full">
+      <table className="w-full min-w-[1080px]">
         <thead>
           <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
             {['예약번호', '이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '상태', '입금', '삭제'].map((col) => (
@@ -371,7 +371,7 @@ export default function AdminApplicationsPage() {
       </div>
 
       {/* 상단: 캘린더 + 게더링 카드 리스트 */}
-      <div className="flex gap-6 mb-6 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 mb-6 items-start">
         {/* 미니 캘린더 */}
         <MiniCalendar
           year={currentYear}
@@ -383,7 +383,7 @@ export default function AdminApplicationsPage() {
         />
 
         {/* 게더링 카드 영역 */}
-        <div className="flex-1 min-w-0">
+        <div className="w-full flex-1 min-w-0">
           <p className="text-sm font-bold text-[#1A1A1A] mb-3">
             {selectedDayjs.format('M월 D일')} 게더링
             {dayGatherings.length > 0 && (
@@ -423,8 +423,8 @@ export default function AdminApplicationsPage() {
       {/* 하단: 참가자 테이블 */}
       {selectedGatheringId ? (
         <>
-          <div className="flex items-center gap-3 mb-3">
-            <h2 className="font-bold text-[16px] text-[#1A1A1A]">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+            <h2 className="w-full sm:w-auto font-bold text-[16px] text-foreground">
               {selectedGathering?.title} — 참가자 목록
             </h2>
             <span className="px-3 py-1 bg-[#F5F0EB] rounded-full text-sm">

@@ -47,14 +47,14 @@ export default function AdminHomePage() {
   return (
     <div className="max-w-[1280px]">
       {/* 헤더 */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-foreground">홈화면 관리</h1>
           <p className="text-sm text-tag-text mt-1">항목을 클릭해 편집하세요</p>
         </div>
         <button
           onClick={() => setCarouselPanel('new')}
-          className="flex items-center gap-1.5 px-4 h-10 bg-primary text-white rounded-[12px] text-sm font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-1.5 self-start px-4 h-10 bg-primary text-white rounded-[12px] text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Plus size={15} />
           슬라이드 추가
@@ -146,7 +146,7 @@ function SlideCard({ slide, onClick }: SlideCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative flex-none w-[150px] cursor-pointer rounded-2xl overflow-hidden bg-tag-bg"
+      className="group relative flex-none w-[136px] sm:w-[150px] cursor-pointer rounded-2xl overflow-hidden bg-tag-bg"
       style={{ aspectRatio: '9/16' }}
     >
       {slide.imageUrl && (
@@ -200,7 +200,7 @@ interface ReviewCardProps {
 
 function ReviewCard({ review, onUnfeature, onDelete }: ReviewCardProps) {
   return (
-    <div className="relative flex-none w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden">
+    <div className="relative flex-none w-[176px] sm:w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden">
       {/* 리뷰 이미지 */}
       <div className="relative w-full aspect-square bg-tag-bg">
         {review.imageUrl ? (
