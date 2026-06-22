@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
 import { useCalendarDots } from '@/lib/hooks/useGatherings'
+import { usePendingDeposits, usePendingDepositCount, useConfirmDeposit } from '@/lib/hooks/useAdminTicket'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -334,8 +335,77 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   )
 }
 
+// ─── 입금 대기 큐 ───────────────────────────────────────────────────────
+function DepositQueue() {
+  const { data: deposits = [], isLoading } = usePendingDeposits()
+  const { mutate: confirmDeposit, isPending } = useConfirmDeposit()
+
+  if (isLoading) {
+    return (
+      <div className="h-[200px] flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
+  }
+
+  if (deposits.length === 0) {
+    return (
+      <div className="bg-white rounded-[12px] p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+        <p className="text-base font-medium text-[#1A1A1A] mb-1">입금 대기 중인 요청이 없어요</p>
+        <p className="text-sm text-[#767676]">고객이 이용권 입금을 요청하면 여기에 오래된 순으로 표시돼요.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white rounded-[12px] overflow-x-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-[#F5F0EB] text-[#767676] text-left">
+            {['신청자', '구분', '게더링', '예약번호', '상품', '금액', '요청 시각', '입금확인'].map((col) => (
+              <th key={col} className="px-4 py-3 font-medium whitespace-nowrap">{col}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {deposits.map((d) => (
+            <tr key={d.ticketPassId} className="border-t border-[#F0EDE8]">
+              <td className="px-4 py-3 font-medium text-[#1A1A1A] whitespace-nowrap">{d.applicantName}</td>
+              <td className="px-4 py-3 whitespace-nowrap">
+                <span className={`text-xs px-2 py-0.5 rounded-full ${d.member ? 'bg-[#E8F5E9] text-[#4CAF50]' : 'bg-[#F5F0EB] text-[#767676]'}`}>
+                  {d.member ? '회원' : '비회원'}
+                </span>
+              </td>
+              <td className="px-4 py-3 whitespace-nowrap">{d.gatheringTitle ?? '-'}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-[#767676]">{d.bookingNumber ?? '-'}</td>
+              <td className="px-4 py-3 whitespace-nowrap">{d.productLabel}</td>
+              <td className="px-4 py-3 whitespace-nowrap">{d.amount.toLocaleString()}원</td>
+              <td className="px-4 py-3 whitespace-nowrap text-[#767676]">{dayjs(d.requestedAt).format('M/D HH:mm')}</td>
+              <td className="px-4 py-3 whitespace-nowrap">
+                <button
+                  disabled={isPending}
+                  onClick={() => {
+                    if (confirm(`${d.applicantName}님의 입금을 확인하고 이용권을 발급할까요?`)) {
+                      confirmDeposit(d.ticketPassId)
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-full bg-[#C8392B] text-white text-xs font-medium disabled:opacity-50"
+                >
+                  입금확인
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 // ─── 메인 페이지 ───────────────────────────────────────────────────────
 export default function AdminApplicationsPage() {
+  const [view, setView] = useState<'byGathering' | 'deposits'>('byGathering')
+  const { data: depositCount = 0 } = usePendingDepositCount()
   const today = dayjs()
   const [selectedDate, setSelectedDate] = useState(today.format('YYYY-MM-DD'))
   const [currentYear, setCurrentYear] = useState(today.year())
@@ -370,6 +440,30 @@ export default function AdminApplicationsPage() {
         <h1 className="font-bold text-[22px] text-foreground">참가자 관리</h1>
       </div>
 
+      {/* 뷰 전환: 게더링별 조회 / 입금 대기 큐 (게더링 가로지른 시간순) */}
+      <div className="flex gap-2 mb-5">
+        {([['byGathering', '게더링별 조회'], ['deposits', '입금 대기']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setView(key)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              view === key ? 'bg-[#C8392B] text-white' : 'bg-[#F5F0EB] text-[#767676]'
+            }`}
+          >
+            {label}
+            {key === 'deposits' && depositCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-white text-[#C8392B] text-[11px] font-bold">
+                {depositCount}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {view === 'deposits' ? (
+        <DepositQueue />
+      ) : (
+      <>
       {/* 상단: 캘린더 + 게더링 카드 리스트 */}
       <div className="flex gap-6 mb-6 items-start">
         {/* 미니 캘린더 */}
@@ -441,6 +535,8 @@ export default function AdminApplicationsPage() {
           <p className="text-base font-medium text-[#1A1A1A] mb-1">게더링을 선택해주세요</p>
           <p className="text-sm text-[#767676]">위 캘린더에서 날짜를 선택하고, 게더링 카드를 클릭하면 참가자 목록이 표시돼요.</p>
         </div>
+      )}
+      </>
       )}
     </div>
   )

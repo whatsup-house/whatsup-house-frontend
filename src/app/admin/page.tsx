@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, TrendingUp, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react'
 import { useAdminDashboardGatherings } from '@/lib/hooks/useAdminDashboard'
+import { usePendingDepositCount } from '@/lib/hooks/useAdminTicket'
 import { Badge, LoadingSpinner, ApiErrorMessage } from '@/components/ui'
 import type { AdminGatheringStatus } from '@/lib/api/admin'
 
@@ -26,6 +27,8 @@ export default function AdminDashboardPage() {
     isError: allError,
     refetch: refetchAll,
   } = useAdminDashboardGatherings()
+
+  const { data: depositPending = 0 } = usePendingDepositCount()
 
   const isLoading = weekLoading || allLoading
   const isError = weekError || allError
@@ -54,6 +57,20 @@ export default function AdminDashboardPage() {
           <span>마지막 갱신: {updatedTime}</span>
         </button>
       </div>
+
+      {/* 입금 확인 대기 알림 — 고객이 이용권 입금을 요청하면 즉시 확인하도록 유도 */}
+      {depositPending > 0 && (
+        <button
+          onClick={() => router.push('/admin/applications')}
+          className="w-full flex items-center justify-between mb-6 px-5 py-4 rounded-card bg-[#FDECEA] hover:bg-[#FBDAD6] transition-colors text-left"
+        >
+          <span className="flex items-center gap-2 text-sm font-bold text-[#C8392B]">
+            <AlertCircle size={18} />
+            입금 확인 대기 {depositPending}건
+          </span>
+          <span className="text-xs font-medium text-[#C8392B]">확인하러 가기 →</span>
+        </button>
+      )}
 
       {isLoading && (
         <div className="flex justify-center py-20">
