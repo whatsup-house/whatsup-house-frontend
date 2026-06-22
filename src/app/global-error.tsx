@@ -5,6 +5,8 @@ import * as Sentry from '@sentry/nextjs'
 import koMessages from '../../messages/ko.json'
 import enMessages from '../../messages/en.json'
 import jaMessages from '../../messages/ja.json'
+import zhMessages from '../../messages/zh.json'
+import esMessages from '../../messages/es.json'
 import '@/styles/globals.css'
 
 const FALLBACK_COPY = {
@@ -29,11 +31,25 @@ const FALLBACK_COPY = {
     description: jaMessages.common.globalError.description,
     retry: jaMessages.common.retry,
   },
+  zh: {
+    lang: 'zh',
+    brand: zhMessages.common.brand,
+    title: zhMessages.common.globalError.title,
+    description: zhMessages.common.globalError.description,
+    retry: zhMessages.common.retry,
+  },
+  es: {
+    lang: 'es',
+    brand: esMessages.common.brand,
+    title: esMessages.common.globalError.title,
+    description: esMessages.common.globalError.description,
+    retry: esMessages.common.retry,
+  },
 } as const
 
 function getFallbackCopy() {
   if (typeof document === 'undefined') return FALLBACK_COPY.ko
-  const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=(ko|en|ja)(?:;|$)/)
+  const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=(ko|en|ja|zh|es)(?:;|$)/)
   return FALLBACK_COPY[match?.[1] as keyof typeof FALLBACK_COPY] ?? FALLBACK_COPY.ko
 }
 

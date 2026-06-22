@@ -42,8 +42,10 @@
   "language": {
     "label": "언어",
     "ko": "한국어",
-    "en": "English",
-    "ja": "日本語"
+    "en": "영어",
+    "ja": "일본어",
+    "zh": "중국어",
+    "es": "스페인어"
   },
   "auth": {
     "login": {
@@ -147,7 +149,7 @@
       "agePreview": "만 {age}세",
       "nicknameLabel": "닉네임",
       "nicknamePlaceholder": "2자 이상 입력해주세요",
-      "emailLabel": "이메일(ID)",
+      "emailLabel": "이메일(아이디)",
       "emailPlaceholder": "이메일 주소를 입력해주세요",
       "passwordLabel": "비밀번호",
       "passwordPlaceholder": "영문+숫자 포함 8자 이상",
@@ -285,7 +287,7 @@
               "title": "제2조 수집하는 개인정보 항목",
               "items": [
                 "필수 항목: 이름, 닉네임, 이메일, 비밀번호, 성별, 생년월일, 연락처",
-                "선택 항목: 한 줄 소개, 직업, MBTI, 관심사, 인스타그램 ID, 프로필 이미지 등 회원이 직접 입력하거나 업로드한 정보",
+                "선택 항목: 한 줄 소개, 직업, MBTI, 관심사, 인스타그램 아이디, 프로필 이미지 등 회원이 직접 입력하거나 업로드한 정보",
                 "자동 수집 항목: 서비스 이용 기록, 접속 로그, 쿠키, IP 주소, 기기 및 브라우저 정보, 오류 기록"
               ]
             },
@@ -690,7 +692,7 @@
     "mileage": {
       "balanceAsOf": "{time} 기준 보유 마일리지",
       "unit": "마일리지",
-      "howToEarnEyebrow": "HOW TO EARN",
+      "howToEarnEyebrow": "적립 방법",
       "howToEarnTitle": "어떻게 쌓나요?",
       "earnMethods": [
         {
@@ -736,7 +738,7 @@
         }
       },
       "browseGatherings": "게더링 둘러보기",
-      "logEyebrow": "MILEAGE LOG",
+      "logEyebrow": "마일리지 기록",
       "logTitle": "마일리지 내역",
       "itemCount": "{count}건",
       "sortLatest": "최신순",
@@ -761,7 +763,7 @@
       "optional": "(선택)",
       "bio": "한 줄 소개",
       "bioPlaceholder": "나를 한 줄로 표현해보세요",
-      "instagram": "인스타그램 ID",
+      "instagram": "인스타그램 아이디",
       "job": "직업",
       "mbti": "MBTI",
       "mbtiResult": "{mbti} 유형이군요!",
@@ -824,7 +826,7 @@
     }
   },
   "social": {
-    "title": "소셜 스페이스",
+    "title": "소셜 공간",
     "description": "소셜 기능이 여기에 표시됩니다."
   },
   "story": {

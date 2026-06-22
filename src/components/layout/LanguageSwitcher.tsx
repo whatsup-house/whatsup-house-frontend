@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Globe, Check } from 'lucide-react'
-import { locales, localeLabels, type Locale } from '@/i18n/config'
+import { locales, type Locale } from '@/i18n/config'
 import { setUserLocale } from '@/i18n/locale'
 
 // 헤더 언어 선택 UI: 지구본 아이콘 버튼 + 드롭다운. 선택값은 쿠키에 저장되고
@@ -69,7 +69,7 @@ export default function LanguageSwitcher() {
                   locale === code ? 'text-foreground font-medium' : 'text-tag-text'
                 }`}
               >
-                {localeLabels[code]}
+                {t(code)}
                 {locale === code && <Check size={16} className="text-primary" />}
               </button>
             </li>
