@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, User, Compass, ClipboardCheck } from 'lucide-react'
+import { Home, User, Compass } from 'lucide-react'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { getAnimalEmoji } from '@/lib/utils/animalProfile'
@@ -47,7 +47,6 @@ export default function BottomNav() {
   const navItems = [
     { href: '/', icon: Home, label: '홈', requireLogin: false },
     { href: '/gatherings', icon: Compass, label: '게더링', requireLogin: false },
-    { href: '/applications/check', icon: ClipboardCheck, label: '조회', requireLogin: false },
     { href: '/mypage', icon: User, label: '마이', requireLogin: true },
   ]
 
@@ -58,7 +57,7 @@ export default function BottomNav() {
           const isActive =
             item.href === '/'
               ? pathname === '/'
-              : pathname.startsWith(item.href)
+              : pathname.startsWith(item.href) || (item.href === '/mypage' && pathname === '/login')
           const Icon = item.icon
 
           if (item.requireLogin) {
