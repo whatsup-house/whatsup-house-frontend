@@ -32,5 +32,59 @@
         "password": "パスワードを入力してください"
       }
     }
+  },
+  "nav": {
+    "profileAlt": "プロフィール",
+    "tabs": {
+      "home": "ホーム",
+      "gatherings": "ゲザリング",
+      "my": "マイ"
+    },
+    "titles": {
+      "home": "ワッサップハウス",
+      "gatherings": "ゲザリング",
+      "reviews": "参加者のレビュー",
+      "social": "ソーシャル",
+      "mypage": "マイページ",
+      "mileage": "マイレージ",
+      "applicationCheck": "申請履歴照会",
+      "login": "ログイン",
+      "register": "会員登録",
+      "onboarding": "オンボーディング",
+      "applyComplete": "申請完了",
+      "apply": "申請する",
+      "story": "紹介"
+    }
+  },
+  "desktopBrand": {
+    "brand": "ワッサップハウス",
+    "headlineLine1": "穏やかな雰囲気が好きな",
+    "headlineLine2": "人たちの場所",
+    "descriptionLine1": "一人暮らしの20代・30代のためのオフラインソーシャルゲザリング。",
+    "descriptionLine2": "気軽な少人数の集まりを右側の画面で見つけてください。",
+    "keywords": [
+      "#少人数",
+      "#オフライン",
+      "#穏やかな集まり",
+      "#20代30代"
+    ]
+  },
+  "notifications": {
+    "label": "通知",
+    "close": "閉じる",
+    "loginRequired": "ログイン後に通知を確認できます。",
+    "loading": "読み込み中...",
+    "empty": "新しい通知はありません。",
+    "delete": "通知を削除"
+  },
+  "errorView": {
+    "imageAlt": "ワッサップハウス エラー案内",
+    "retry": "もう一度試す",
+    "home": "ホームへ",
+    "previousPage": "前のページ"
+  },
+  "notFound": {
+    "title": "あっ！ページが見つかりません",
+    "description": "リクエストされたページが削除されたか、\nアドレスが間違っている可能性があります。\nホームに戻ってやり直してください。"
   }
 }

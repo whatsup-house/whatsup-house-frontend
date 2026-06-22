@@ -32,5 +32,59 @@
         "password": "비밀번호를 입력해주세요"
       }
     }
+  },
+  "nav": {
+    "profileAlt": "프로필",
+    "tabs": {
+      "home": "홈",
+      "gatherings": "게더링",
+      "my": "마이"
+    },
+    "titles": {
+      "home": "와썹하우스",
+      "gatherings": "게더링",
+      "reviews": "다녀온 사람들의 후기",
+      "social": "소셜",
+      "mypage": "마이페이지",
+      "mileage": "마일리지",
+      "applicationCheck": "신청 내역 조회",
+      "login": "로그인",
+      "register": "회원가입",
+      "onboarding": "온보딩",
+      "applyComplete": "신청 완료",
+      "apply": "신청하기",
+      "story": "소개"
+    }
+  },
+  "desktopBrand": {
+    "brand": "와썹하우스",
+    "headlineLine1": "잔잔한 게 좋은",
+    "headlineLine2": "사람들의 공간",
+    "descriptionLine1": "혼자 사는 2030을 위한 오프라인 소셜 게더링.",
+    "descriptionLine2": "부담 없는 소규모 모임을 오른쪽 화면에서 둘러보세요.",
+    "keywords": [
+      "#소규모",
+      "#오프라인",
+      "#잔잔한_모임",
+      "#2030"
+    ]
+  },
+  "notifications": {
+    "label": "알림",
+    "close": "닫기",
+    "loginRequired": "로그인 후 알림을 확인할 수 있어요.",
+    "loading": "불러오는 중...",
+    "empty": "새로운 알림이 없어요.",
+    "delete": "알림 삭제"
+  },
+  "errorView": {
+    "imageAlt": "와썹하우스 에러 안내",
+    "retry": "다시 시도",
+    "home": "홈으로 가기",
+    "previousPage": "이전 페이지"
+  },
+  "notFound": {
+    "title": "앗! 페이지를 찾을 수 없어요",
+    "description": "요청하신 페이지가 사라졌거나,\n주소가 잘못 입력되었어요.\n홈으로 돌아가 다시 시작해보세요."
   }
 }

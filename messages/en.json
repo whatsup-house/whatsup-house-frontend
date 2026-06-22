@@ -32,5 +32,59 @@
         "password": "Please enter your password"
       }
     }
+  },
+  "nav": {
+    "profileAlt": "Profile",
+    "tabs": {
+      "home": "Home",
+      "gatherings": "Gatherings",
+      "my": "My"
+    },
+    "titles": {
+      "home": "Whatsup House",
+      "gatherings": "Gatherings",
+      "reviews": "Reviews from guests",
+      "social": "Social",
+      "mypage": "My Page",
+      "mileage": "Mileage",
+      "applicationCheck": "Check applications",
+      "login": "Log in",
+      "register": "Sign up",
+      "onboarding": "Onboarding",
+      "applyComplete": "Application complete",
+      "apply": "Apply",
+      "story": "About"
+    }
+  },
+  "desktopBrand": {
+    "brand": "Whatsup House",
+    "headlineLine1": "A calm place",
+    "headlineLine2": "for people who like it easy",
+    "descriptionLine1": "Offline social gatherings for 20s and 30s living solo.",
+    "descriptionLine2": "Browse small, low-pressure meetups on the screen to the right.",
+    "keywords": [
+      "#SmallGroups",
+      "#Offline",
+      "#CalmMeetups",
+      "#20s30s"
+    ]
+  },
+  "notifications": {
+    "label": "Notifications",
+    "close": "Close",
+    "loginRequired": "Log in to check your notifications.",
+    "loading": "Loading...",
+    "empty": "No new notifications.",
+    "delete": "Delete notification"
+  },
+  "errorView": {
+    "imageAlt": "Whatsup House error notice",
+    "retry": "Try again",
+    "home": "Go home",
+    "previousPage": "Previous page"
+  },
+  "notFound": {
+    "title": "Oops! We cannot find that page",
+    "description": "The page you requested may be gone,\nor the address may be incorrect.\nGo back home and start again."
   }
 }
