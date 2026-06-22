@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -7,25 +8,33 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertCircle, ChevronLeft } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useLogin } from '@/lib/hooks/useAuth'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { safeReturnUrl } from '@/lib/utils/url'
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
-const loginSchema = z.object({
-  email: z.string().email('올바른 이메일 형식을 입력해주세요'),
-  password: z.string().min(1, '비밀번호를 입력해주세요'),
-})
-
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = { email: string; password: string }
 
 export default function LoginPageClient() {
+  const t = useTranslations('auth.login')
+  const tCommon = useTranslations('common')
   const searchParams = useSearchParams()
   const rawReturnUrl = searchParams.get('returnUrl')
   const returnUrl = safeReturnUrl(rawReturnUrl)
   const isWithdrawn = searchParams.get('withdrawn') === '1'
   const loginMutation = useLogin(returnUrl)
   const handleBack = useBackNavigation('/')
+
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('validation.email')),
+        password: z.string().min(1, t('validation.password')),
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -50,12 +59,12 @@ export default function LoginPageClient() {
             type="button"
             onClick={handleBack}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground"
-            aria-label="뒤로가기"
+            aria-label={tCommon('back')}
           >
             <ChevronLeft size={22} />
           </button>
-          <h1 className="text-base font-bold text-foreground">로그인</h1>
-          <div className="h-11 w-11" />
+          <h1 className="text-base font-bold text-foreground">{t('title')}</h1>
+          <LanguageSwitcher />
         </div>
       </header>
 
@@ -70,23 +79,23 @@ export default function LoginPageClient() {
             className="object-contain"
           />
           <p className="mt-1.5 text-[13px] leading-relaxed text-tag-text">
-            해가 지는 선선한 저녁에 만나요
+            {t('tagline')}
           </p>
         </section>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
           {isWithdrawn && (
             <div className="mb-4 rounded-card bg-card px-4 py-3 text-center text-xs font-medium text-tag-text">
-              회원탈퇴가 완료되었습니다.
+              {t('withdrawnNotice')}
             </div>
           )}
 
           <div className="flex flex-col gap-2.5">
             <label className="flex flex-col gap-1.5">
-              <span className="ml-1 text-xs font-medium text-tag-text">이메일</span>
+              <span className="ml-1 text-xs font-medium text-tag-text">{t('emailLabel')}</span>
               <input
                 type="email"
-                placeholder="이메일 주소"
+                placeholder={t('emailPlaceholder')}
                 autoComplete="username"
                 className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
                   errors.email || hasLoginError ? 'border-primary' : 'border-tag-bg'
@@ -96,10 +105,10 @@ export default function LoginPageClient() {
             </label>
 
             <label className="flex flex-col gap-1.5">
-              <span className="ml-1 text-xs font-medium text-tag-text">비밀번호</span>
+              <span className="ml-1 text-xs font-medium text-tag-text">{t('passwordLabel')}</span>
               <input
                 type="password"
-                placeholder="비밀번호 입력"
+                placeholder={t('passwordPlaceholder')}
                 autoComplete="current-password"
                 className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
                   errors.password || hasLoginError ? 'border-primary' : 'border-tag-bg'
@@ -119,17 +128,17 @@ export default function LoginPageClient() {
             <div className="mt-2 flex flex-col gap-1.5">
               <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-primary">
                 <AlertCircle size={13} />
-                <span>아이디 또는 비밀번호를 확인해주세요.</span>
+                <span>{t('credentialError')}</span>
               </div>
             </div>
           )}
 
           <div className="mt-2 flex justify-end gap-3 text-xs font-medium text-tag-text">
             <Link href="/find-email" className="underline decoration-tag-text/40 underline-offset-4">
-              아이디 찾기
+              {t('findEmail')}
             </Link>
             <Link href="/password-reset" className="underline decoration-tag-text/40 underline-offset-4">
-              비밀번호 찾기
+              {t('findPassword')}
             </Link>
           </div>
 
@@ -138,7 +147,7 @@ export default function LoginPageClient() {
             disabled={loginMutation.isPending}
             className="mt-5 flex min-h-[52px] w-full items-center justify-center rounded-button bg-primary px-5 py-4 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(200,57,43,0.25)] disabled:opacity-60"
           >
-            {loginMutation.isPending ? '로그인 중...' : '로그인'}
+            {loginMutation.isPending ? t('submitting') : t('submit')}
           </button>
         </form>
 
@@ -146,8 +155,8 @@ export default function LoginPageClient() {
           href="/register"
           className="block w-full px-0 py-5 text-center text-[13px] font-medium text-tag-text"
         >
-          아직 회원이 아니신가요?{' '}
-          <span className="font-bold text-primary underline underline-offset-4">회원가입</span>
+          {t('noAccount')}{' '}
+          <span className="font-bold text-primary underline underline-offset-4">{tCommon('register')}</span>
         </Link>
       </div>
     </main>

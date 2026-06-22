@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Allura, Gowun_Batang, Press_Start_2P } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import { Providers } from './providers'
 import '@/styles/globals.css'
 
@@ -28,15 +30,21 @@ export const metadata: Metadata = {
   icons: { icon: '/assets/whatsup-logo.png' },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // 쿠키 기반 로케일 + 메시지 카탈로그를 서버에서 읽어 Provider로 내려준다. (KAN-264)
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="ko" className={`${gowunBatang.variable} ${allura.variable} ${pressStart2P.variable}`}>
+    <html lang={locale} className={`${gowunBatang.variable} ${allura.variable} ${pressStart2P.variable}`}>
       <body>
-        <Providers>{children}</Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
