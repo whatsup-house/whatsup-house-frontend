@@ -95,9 +95,14 @@ function PaymentContent() {
               variant="primary"
               size="lg"
               className="w-full"
-              onClick={() => router.push(`/applications/check${bookingNumber ? `?bookingNumber=${encodeURIComponent(bookingNumber)}` : ''}`)}
+              onClick={() => {
+                if (data?.gatheringId) {
+                  router.push(`/gatherings/${data.gatheringId}/apply/confirmed${bookingNumber ? `?bookingNumber=${encodeURIComponent(bookingNumber)}` : ''}`)
+                }
+              }}
+              disabled={!data?.gatheringId}
             >
-              신청 내역 확인하기
+              예약 확정 페이지로 이동
             </Button>
           </>
         ) : (

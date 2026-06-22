@@ -68,6 +68,7 @@ export interface MyTickets {
   purchasable: boolean
   totalRemaining: number
   passes: TicketPass[]
+  gatheringId: string | null
 }
 
 export interface TicketPurchaseRequest {
