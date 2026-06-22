@@ -21,6 +21,8 @@ type FormValues = z.infer<typeof schema>
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
   PENDING: '검토 중',
+  PAYMENT_PENDING: '결제 대기',
+  REJECTED: '심사 거절',
   CONFIRMED: '확정',
   CANCELLED: '취소됨',
   ATTENDED: '참석 완료',
@@ -28,6 +30,8 @@ const STATUS_LABEL: Record<ApplicationStatus, string> = {
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
   PENDING: 'bg-tag-bg text-tag-text',
+  PAYMENT_PENDING: 'bg-blue-50 text-blue-700',
+  REJECTED: 'bg-red-50 text-red-700',
   CONFIRMED: 'bg-primary-light text-primary',
   CANCELLED: 'bg-tag-bg text-tag-text opacity-60',
   ATTENDED: 'bg-primary-light text-primary',
