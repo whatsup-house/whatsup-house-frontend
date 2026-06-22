@@ -7,6 +7,7 @@ import { z } from 'zod'
 import dayjs from 'dayjs'
 import type { AdminGatheringListItem, GatheringCreateRequest, GatheringType } from '@/lib/api/adminGathering'
 import { useAdminLocations, useAdminGatheringDetail, useCreateGathering, useUpdateGathering } from '@/lib/hooks/useAdminGathering'
+import AdminTranslationPanel from '@/components/admin/AdminTranslationPanel'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
@@ -264,6 +265,16 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
             />
           </div>
         </div>
+
+        {isEdit && gathering && (
+          <div className="px-6 pb-4">
+            <AdminTranslationPanel
+              entityType="GATHERING"
+              entityId={gathering.id}
+              fields={[{ key: 'title', label: '제목' }, { key: 'description', label: '소개' }]}
+            />
+          </div>
+        )}
 
         <div className="flex gap-3 px-6 py-4 border-t border-tag-bg">
           <Button variant="ghost" type="button" onClick={onClose} className="flex-1">취소</Button>

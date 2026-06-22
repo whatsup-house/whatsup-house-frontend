@@ -1,4 +1,5 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query'
+import { useLocale } from 'next-intl'
 import { fetchGatherings, fetchGatheringsAll, fetchCalendarDots, fetchGatheringDetail } from '@/lib/api/gathering'
 
 export function useGatheringsAll() {
@@ -36,9 +37,11 @@ export function useCalendarDots(year: number, month: number) {
 }
 
 export function useGatheringDetail(id: string) {
+  // 현재 로케일을 Accept-Language로 전달하고 queryKey에도 포함해, 언어 변경 시 번역본으로 재조회한다. (KAN-268)
+  const locale = useLocale()
   return useQuery({
-    queryKey: ['gathering', id],
-    queryFn: () => fetchGatheringDetail(id),
+    queryKey: ['gathering', id, locale],
+    queryFn: () => fetchGatheringDetail(id, locale),
     enabled: !!id,
   })
 }
