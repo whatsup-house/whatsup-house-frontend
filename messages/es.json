@@ -1,0 +1,964 @@
+{
+  "common": {
+    "back": "Atrás",
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "start": "Empezar",
+    "previous": "Anterior",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "next": "Siguiente",
+    "close": "Cerrar",
+    "errors": {
+      "UNKNOWN": "Algo salió mal. Por favor inténtalo de nuevo.",
+      "EMAIL_ALREADY_EXISTS": "Este correo electrónico ya está en uso.",
+      "NICKNAME_ALREADY_EXISTS": "Este apodo ya está en uso.",
+      "INVALID_CREDENTIALS": "Por favor revisa tu correo electrónico o contraseña.",
+      "USER_NOT_FOUND": "No pudimos encontrar información de cuenta coincidente.",
+      "PASSWORD_RESET_FAILED": "No se pudo solicitar un restablecimiento de contraseña.",
+      "INVALID_PASSWORD_RESET_TOKEN": "Por favor verifique el enlace para restablecer su contraseña."
+    },
+    "agree": "De acuerdo",
+    "brand": "Whatsup House",
+    "errorBoundary": {
+      "title": "¡Ups! algo salió mal",
+      "description": "Se produjo un error inesperado.\nInténtelo de nuevo en un momento."
+    },
+    "loading": "Cargando...",
+    "status": {
+      "OPEN": "Abierto",
+      "CLOSED": "Cerrado",
+      "COMPLETED": "Finalizado",
+      "CANCELLED": "Cancelado",
+      "ATTENDED": "Asistido",
+      "PENDING": "Pendiente"
+    },
+    "retry": "Intentar de nuevo",
+    "globalError": {
+      "title": "¡Ups! algo salió mal",
+      "description": "El servidor tiene un problema temporal.\nInténtelo de nuevo en un momento.\nSi continúa, espere un poco más."
+    }
+  },
+  "language": {
+    "label": "Idioma",
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語",
+    "zh": "中文",
+    "es": "Español"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "tagline": "Nos vemos en una tarde fresca al atardecer.",
+      "withdrawnNotice": "Tu cuenta ha sido eliminada.",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "Correo electrónico",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Ingresa tu contraseña",
+      "findEmail": "Buscar ID",
+      "findPassword": "Buscar contraseña",
+      "credentialError": "Por favor revisa tu correo electrónico o contraseña.",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión...",
+      "noAccount": "¿Aún no tienes cuenta?",
+      "validation": {
+        "email": "Por favor introduce una dirección de correo electrónico válida",
+        "password": "Por favor ingrese su contraseña"
+      }
+    },
+    "findEmail": {
+      "title": "Encuentra ID",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Nombre utilizado al registrarse",
+      "phoneLabel": "Número de teléfono",
+      "submit": "Encuentra ID",
+      "submitting": "Comprobando...",
+      "resultLabel": "correo electrónico registrado",
+      "resetPassword": "Restablecer contraseña",
+      "validation": {
+        "nameRequired": "Por favor ingresa tu nombre",
+        "nameMax": "El nombre debe tener 50 caracteres o menos.",
+        "phone": "Por favor ingresa un número de teléfono de 11 dígitos"
+      }
+    },
+    "passwordReset": {
+      "request": {
+        "title": "Restablecer contraseña",
+        "emailLabel": "Correo electrónico",
+        "emailPlaceholder": "Dirección de correo electrónico utilizada al registrarse",
+        "submit": "Obtener enlace de reinicio",
+        "submitting": "Enviando...",
+        "successTitle": "Enviamos instrucciones para restablecer la contraseña.",
+        "successDescription": "Por favor revisa el enlace en tu bandeja de entrada. Si no ve el correo electrónico, verifique nuevamente su dirección de correo electrónico registrada.",
+        "findEmail": "Encuentra ID",
+        "validation": {
+          "email": "Por favor introduce una dirección de correo electrónico válida"
+        }
+      },
+      "confirm": {
+        "title": "Nueva contraseña",
+        "invalidLink": "El enlace de reinicio no es válido.",
+        "requestAgain": "Obtener un nuevo enlace",
+        "newPasswordLabel": "Nueva contraseña",
+        "newPasswordPlaceholder": "Al menos 8 caracteres con letras y números.",
+        "passwordConfirmLabel": "Confirmar contraseña",
+        "passwordConfirmPlaceholder": "Ingrese la nueva contraseña nuevamente",
+        "submit": "Cambiar contraseña",
+        "submitting": "Cambiando...",
+        "successTitle": "Su contraseña ha sido cambiada.",
+        "validation": {
+          "passwordMin": "La contraseña debe tener al menos 8 caracteres.",
+          "passwordPattern": "La contraseña debe incluir letras y números.",
+          "passwordConfirm": "Por favor confirma tu contraseña",
+          "passwordMismatch": "Las contraseñas no coinciden"
+        }
+      }
+    },
+    "welcome": {
+      "brand": "Whatsup House",
+      "hostAlt": "Whatsup House anfitrión",
+      "guestStart": "Continuar como invitado"
+    },
+    "onboarding": {
+      "intro": "Cuéntanos sobre ti (opcional)",
+      "bioLabel": "Breve biografía",
+      "optional": "(opcional)",
+      "bioPlaceholder": "Preséntate en una línea",
+      "jobLabel": "Trabajo",
+      "mbtiLabel": "MBTI",
+      "mbtiResult": "¡Entonces eres {mbti}!",
+      "welcomeToast": "Bienvenido a Whatsup House\nSe ha agregado tu mileage de registro de 1,000M.\nExplora los encuentros que te gustan y prepárate para tu primer encuentro.",
+      "jobSelect": {
+        "placeholder": "Buscar y seleccionar un trabajo",
+        "clear": "Borrar trabajo seleccionado",
+        "searchPlaceholder": "Buscar empleos",
+        "empty": "No se encontraron resultados"
+      }
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Introduce tu nombre",
+      "genderLabel": "Género",
+      "gender": {
+        "male": "masculino",
+        "female": "Mujer"
+      },
+      "birthDateLabel": "fecha de nacimiento",
+      "agePreview": "Edad {age}",
+      "nicknameLabel": "Apodo",
+      "nicknamePlaceholder": "Introduzca al menos 2 caracteres",
+      "emailLabel": "Correo electrónico (ID)",
+      "emailPlaceholder": "Introduce tu dirección de correo electrónico",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Al menos 8 caracteres con letras y números.",
+      "passwordConfirmLabel": "Confirmar contraseña",
+      "passwordConfirmPlaceholder": "Ingrese su contraseña nuevamente",
+      "phoneLabel": "Número de contacto",
+      "phonePlaceholder": "01012345678 (11 dígitos)",
+      "checking": "Comprobando...",
+      "duplicateCheckFailed": "Error en la comprobación de duplicados",
+      "nicknameAvailable": "Este apodo está disponible",
+      "emailAvailable": "Este correo electrónico está disponible",
+      "passwordAvailable": "Esta contraseña está disponible",
+      "passwordMatch": "Las contraseñas coinciden",
+      "terms": {
+        "all": "De acuerdo con todos",
+        "age": "[Obligatorio] Tengo al menos 14 años",
+        "terms": "[Obligatorio] Acepto los Términos de uso",
+        "privacy": "[Obligatorio] Acepto la Política de Privacidad",
+        "marketing": "[Opcional] Acepto recibir información de marketing"
+      },
+      "calendar": {
+        "dayLabels": [
+          "sol",
+          "lun",
+          "mar",
+          "mié",
+          "jueves",
+          "viernes",
+          "sábado"
+        ],
+        "previousMonth": "Mes anterior",
+        "nextMonth": "El próximo mes",
+        "yearSelect": "Seleccionar año",
+        "monthSelect": "Seleccionar mes",
+        "yearOption": "{year}",
+        "monthOption": "{month}",
+        "openBirth": "Abrir calendario de fechas de nacimiento",
+        "closeBirth": "Cerrar calendario de fecha de nacimiento"
+      },
+      "validation": {
+        "nameMin": "Por favor ingrese al menos 2 caracteres para su nombre",
+        "gender": "Por favor selecciona tu género",
+        "birthRequired": "Por favor seleccione su fecha de nacimiento",
+        "birthInvalid": "Por favor ingresa una fecha de nacimiento válida",
+        "birthAge": "Debes tener al menos 14 años para registrarte.",
+        "nicknameMin": "Por favor ingresa al menos 2 caracteres para tu apodo",
+        "nicknameMax": "El apodo debe tener 50 caracteres o menos.",
+        "email": "Por favor introduce una dirección de correo electrónico válida",
+        "password": "Utilice al menos 8 caracteres con letras y números.",
+        "passwordConfirm": "Por favor ingrese su contraseña nuevamente",
+        "phone": "El número de teléfono debe tener 11 dígitos.",
+        "passwordMismatch": "Las contraseñas no coinciden"
+      },
+      "policies": {
+        "viewFull": "Ver texto completo →",
+        "terms": {
+          "title": "Whatsup House Condiciones de uso",
+          "summary": "Estos términos definen las condiciones para utilizar los servicios de descubrimiento de encuentros, solicitudes y comunidad de Whatsup House, así como los derechos y responsabilidades de los miembros.",
+          "viewFullLabel": "Ver términos de uso completos",
+          "sections": [
+            {
+              "title": "Artículo 1 Objeto",
+              "items": [
+                "Estos términos establecen los procedimientos y responsabilidades entre la empresa y los miembros al utilizar los servicios Whatsup House.",
+                "Estos términos establecen los procedimientos y responsabilidades entre la empresa y los miembros al utilizar los servicios Whatsup House."
+              ]
+            },
+            {
+              "title": "Artículo 2 Registro y gestión de cuenta",
+              "items": [
+                "Los miembros deben proporcionar información precisa, administrar sus propias cuentas y seguir las pautas de participación en los encuentros.",
+                "Los miembros deben proporcionar información precisa, administrar sus propias cuentas y seguir las pautas de participación en los encuentros.",
+                "Los miembros deben proporcionar información precisa, administrar sus propias cuentas y seguir las pautas de participación en los encuentros."
+              ]
+            },
+            {
+              "title": "Artículo 3 Recogida de solicitudes y participación",
+              "items": [
+                "Los horarios, lugares, capacidad, participación paga, cancelación y detalles de reembolso pueden cambiar según las condiciones operativas y los avisos publicados.",
+                "Los horarios, lugares, capacidad, participación paga, cancelación y detalles de reembolso pueden cambiar según las condiciones operativas y los avisos publicados.",
+                "Los horarios, lugares, capacidad, participación paga, cancelación y detalles de reembolso pueden cambiar según las condiciones operativas y los avisos publicados."
+              ]
+            },
+            {
+              "title": "Artículo 4 Pagos, cancelaciones y reembolsos",
+              "items": [
+                "Los miembros no deben hacer mal uso de la información personal, presentar solicitudes falsas, interrumpir el servicio ni dañar a otros participantes.",
+                "Los miembros no deben hacer mal uso de la información personal, presentar solicitudes falsas, interrumpir el servicio ni dañar a otros participantes.",
+                "Los miembros no deben hacer mal uso de la información personal, presentar solicitudes falsas, interrumpir el servicio ni dañar a otros participantes."
+              ]
+            },
+            {
+              "title": "Artículo 5 Conductas prohibidas",
+              "items": [
+                "La empresa podrá cambiar o suspender los servicios cuando sea necesario para un funcionamiento estable o por circunstancias inevitables.",
+                "La empresa podrá cambiar o suspender los servicios cuando sea necesario para un funcionamiento estable o por circunstancias inevitables."
+              ]
+            },
+            {
+              "title": "Artículo 6 Cambios y suspensión del servicio",
+              "items": [
+                "Las disputas se manejarán mediante consultas de buena fe y las leyes aplicables.",
+                "Las disputas se manejarán mediante consultas de buena fe y las leyes aplicables."
+              ]
+            },
+            {
+              "title": "Artículo 7 Limitación de responsabilidad y litigios",
+              "items": [
+                "Las disputas se manejarán mediante consultas de buena fe y las leyes aplicables.",
+                "Las disputas se manejarán mediante consultas de buena fe y las leyes aplicables."
+              ]
+            },
+            {
+              "title": "Artículo 8 Modificaciones de las condiciones",
+              "items": [
+                "Las disputas se manejarán mediante consultas de buena fe y las leyes aplicables.",
+                "Las disputas se manejarán mediante consultas de buena fe y las leyes aplicables."
+              ]
+            }
+          ]
+        },
+        "privacy": {
+          "title": "Whatsup House Política de privacidad",
+          "summary": "Whatsup House procesa información personal solo según sea necesario para el registro, las solicitudes de encuentros y la operación segura del servicio.",
+          "viewFullLabel": "Ver política de privacidad completa",
+          "sections": [
+            {
+              "title": "Artículo 1 Finalidad del tratamiento de datos personales",
+              "items": [
+                "Procesamos información personal para la identificación de miembros, administración de cuentas, prevención de fraude, operación de encuentros, avisos, soporte, mejora del servicio y estadísticas.",
+                "Procesamos información personal para la identificación de miembros, administración de cuentas, prevención de fraude, operación de encuentros, avisos, soporte, mejora del servicio y estadísticas."
+              ]
+            },
+            {
+              "title": "Artículo 2 Información personal recopilada",
+              "items": [
+                "La información recopilada puede incluir detalles de registro requeridos, detalles de perfil opcionales ingresados por los miembros y registros de uso del servicio recopilados automáticamente.",
+                "La información recopilada puede incluir detalles de registro requeridos, detalles de perfil opcionales ingresados por los miembros y registros de uso del servicio recopilados automáticamente.",
+                "La información recopilada puede incluir detalles de registro requeridos, detalles de perfil opcionales ingresados por los miembros y registros de uso del servicio recopilados automáticamente."
+              ]
+            },
+            {
+              "title": "Artículo 3 Plazo de conservación y utilización",
+              "items": [
+                "La información personal se destruye cuando se logra el propósito o finaliza la membresía, excepto cuando las leyes exigen su conservación.",
+                "La información personal se destruye cuando se logra el propósito o finaliza la membresía, excepto cuando las leyes exigen su conservación.",
+                "La información personal se destruye cuando se logra el propósito o finaliza la membresía, excepto cuando las leyes exigen su conservación."
+              ]
+            },
+            {
+              "title": "Artículo 4 Disposición de terceros",
+              "items": [
+                "No proporcionamos información personal externamente a menos que lo permita el consentimiento o la ley, y anunciamos con anticipación el intercambio operativo necesario.",
+                "No proporcionamos información personal externamente a menos que lo permita el consentimiento o la ley, y anunciamos con anticipación el intercambio operativo necesario."
+              ]
+            },
+            {
+              "title": "Artículo 5 Subcontratación del tratamiento",
+              "items": [
+                "Es posible que se subcontraten algunos trabajos para lograr un funcionamiento estable del servicio y se anunciarán los detalles relevantes cuando sea necesario.",
+                "Es posible que se subcontraten algunos trabajos para lograr un funcionamiento estable del servicio y se anunciarán los detalles relevantes cuando sea necesario."
+              ]
+            },
+            {
+              "title": "Artículo 6 Destrucción de datos personales",
+              "items": [
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte.",
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte."
+              ]
+            },
+            {
+              "title": "Artículo 7 Derechos del usuario",
+              "items": [
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte.",
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte."
+              ]
+            },
+            {
+              "title": "Artículo 8 Medidas de seguridad",
+              "items": [
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte.",
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte."
+              ]
+            },
+            {
+              "title": "Artículo 9 Cookies y recogida automática",
+              "items": [
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte.",
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte."
+              ]
+            },
+            {
+              "title": "Artículo 10 Consultas de privacidad",
+              "items": [
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte.",
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte."
+              ]
+            },
+            {
+              "title": "Artículo 11 Cambios a esta política",
+              "items": [
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte.",
+                "Los usuarios podrán solicitar acceso, corrección, eliminación, suspensión del procesamiento o retirada del consentimiento a través de la configuración del servicio o canales de soporte."
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "nav": {
+    "profileAlt": "Perfil",
+    "tabs": {
+      "home": "Inicio",
+      "gatherings": "Encuentros",
+      "my": "Mi página"
+    },
+    "titles": {
+      "home": "Whatsup House",
+      "gatherings": "Encuentros",
+      "reviews": "Comentarios de invitados",
+      "social": "Social",
+      "mypage": "Mi página",
+      "mileage": "Puntos",
+      "applicationCheck": "Consultar solicitudes",
+      "login": "Iniciar sesión",
+      "register": "Crear cuenta",
+      "onboarding": "Incorporación",
+      "applyComplete": "Solicitud completa",
+      "apply": "Solicitar",
+      "story": "Acerca de"
+    }
+  },
+  "desktopBrand": {
+    "brand": "Whatsup House",
+    "headlineLine1": "un lugar tranquilo",
+    "headlineLine2": "para gente a la que le gusta lo fácil",
+    "descriptionLine1": "Encuentros sociales sin conexión para personas de entre 20 y 30 años que viven solas.",
+    "descriptionLine2": "Explora encuentros pequeños y sin presión en la pantalla de la derecha.",
+    "keywords": [
+      "#GruposPequeños",
+      "#Sin conexión",
+      "#EncuentrosCalmadas",
+      "#20s30s"
+    ]
+  },
+  "notifications": {
+    "label": "Notificaciones",
+    "close": "Cerrar",
+    "loginRequired": "Inicia sesión para consultar tus notificaciones.",
+    "loading": "Cargando...",
+    "empty": "No hay nuevas notificaciones.",
+    "delete": "Eliminar notificación"
+  },
+  "errorView": {
+    "imageAlt": "Whatsup House aviso de error",
+    "retry": "Inténtalo de nuevo",
+    "home": "Vete a casa",
+    "previousPage": "Página anterior"
+  },
+  "notFound": {
+    "title": "¡Ups! No podemos encontrar esa página.",
+    "description": "Es posible que la página que solicitaste ya no esté.\no la dirección puede ser incorrecta.\nVuelve a casa y empieza de nuevo."
+  },
+  "home": {
+    "hero": {
+      "calendarEyebrow": "Agenda de este mes",
+      "calendarCta": "Toca para ver todos los encuentros →",
+      "openBadge": "Abierto",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "curated": {
+      "title": "Encuentros seleccionados",
+      "rankLabel": "No. {rank} {title}"
+    },
+    "reviews": {
+      "title": "Reseñas de participantes",
+      "viewAll": "Ver todo ›"
+    }
+  },
+  "pagination": {
+    "previous": "Página anterior",
+    "next": "Página siguiente"
+  },
+  "gathering": {
+    "calendar": {
+      "dayLabels": [
+        "sol",
+        "lun",
+        "mar",
+        "mié",
+        "jueves",
+        "viernes",
+        "sábado"
+      ],
+      "monthTitle": "{month}/{year}",
+      "previousMonth": "Mes anterior",
+      "nextMonth": "El próximo mes",
+      "close": "Cerrar",
+      "current": "Actual"
+    },
+    "list": {
+      "dateTitle": "Encuentros el {month}/{day}",
+      "emptyTitle": "No hay encuentros en este día.",
+      "emptyDescription": "Prueba otro día:)",
+      "calendarView": "Vista de calendario",
+      "mapView": "Vista de mapa"
+    },
+    "card": {
+      "price": "₩{price}",
+      "capacity": "Hasta {count} personas"
+    },
+    "map": {
+      "naverLabel": "Ver en el mapa Naver",
+      "naverShort": "Naver",
+      "kakaoLabel": "Ver en KakaoMapa",
+      "kakaoShort": "Kakao",
+      "comingSoon": "Próximamente la integración de mapas",
+      "nearbyCount": "{count} próximos encuentros en esta área"
+    },
+    "detail": {
+      "loadFailed": "No se pudo cargar la información del encuentro.",
+      "share": "Compartir",
+      "previousPhoto": "Foto anterior",
+      "nextPhoto": "siguiente foto",
+      "hostedBy": "Anfitrión: Whatsup House",
+      "photoLabel": "Foto {index}",
+      "date": "Fecha",
+      "time": "tiempo",
+      "location": "Ubicación",
+      "capacityLabel": "Capacidad",
+      "capacity": "Hasta {count} personas",
+      "priceLabel": "Tarifa",
+      "price": "₩{price}",
+      "onsitePayment": "(pago en el sitio)",
+      "mileageReward": "Recompensa de puntos",
+      "descriptionTitle": "Acerca de este encuentro",
+      "howToRunTitle": "como funciona",
+      "cautionTitle": "Es posible que esto no sea adecuado si",
+      "caution1": "Molestar a los demás con ruido excesivo",
+      "caution2": "Fuerza tus gustos e ignora las opiniones de los demás.",
+      "caution3": "Asistir para promoción comercial.",
+      "reviewsTitle": "Reseñas de participantes",
+      "reviewCount": "{count} opiniones",
+      "linkCopied": "Enlace copiado",
+      "durationHours": "{hours} horas",
+      "durationWithMinutes": "{hours} h {minutes} min",
+      "otherDate": "Otra fecha",
+      "apply": "Aplicar",
+      "viewOtherDate": "Ver otras fechas",
+      "closed": "Finalizado"
+    },
+    "apply": {
+      "modal": {
+        "title": "Elige cómo aplicar",
+        "memberApply": "Aplicar después de iniciar sesión",
+        "memberApplyDescription": "Acumule puntos y consulte su historial de reservas",
+        "guestApply": "Aplicar sin iniciar sesión",
+        "guestApplyDescription": "No se acumularán puntos"
+      },
+      "form": {
+        "requiredError": "Este campo es obligatorio.",
+        "loadFailed": "No se pudo cargar el formulario de solicitud.",
+        "gatheringLoadFailed": "No se pudo cargar la información del encuentro.",
+        "guestMileageNotice": "Las solicitudes de invitados no acumulan puntos.",
+        "loginToApply": "Aplicar después de iniciar sesión",
+        "loginBenefitSuffix": "para recibir beneficios.",
+        "memberMileageNotice": "Obtendrá {mileage} puntos después de asistir",
+        "submit": "Solicitud completa"
+      },
+      "question": {
+        "male": "masculino",
+        "female": "Mujer",
+        "multiChoice": "(Se permiten múltiples selecciones)",
+        "mbtiResult": "¡Entonces eres {mbti}!"
+      },
+      "result": {
+        "headline": {
+          "completed": "¡Solicitud completa! 🎉",
+          "confirmed": "¡Reserva confirmada! 🎉"
+        },
+        "subcopy": {
+          "completed": "El anfitrión confirmará su reserva después de verificarla.",
+          "confirmed": "Nos vemos el día del encuentro."
+        },
+        "appliedGathering": "encuentro solicitado",
+        "dateTime": "Fecha + hora",
+        "location": "Ubicación",
+        "price": "Tarifa",
+        "priceValue": "₩{price}",
+        "checkWithBookingNumber": "Consultar estado con número de reserva",
+        "checkInMypage": "Verificar confirmación en Mi Página",
+        "goHome": "Vete a casa",
+        "bookingNumber": "Número de reserva",
+        "copy": "Copiar",
+        "copied": "Copiado",
+        "bookingNumberHelp": "Puedes consultar tu solicitud con tu número de reserva y número de teléfono.",
+        "paymentAccount": "cuenta de pago",
+        "accountHolder": "Titular de la cuenta",
+        "depositAmount": "Monto del depósito",
+        "accountCopyHelp": "Toca el número de cuenta para copiarlo."
+      }
+    },
+    "ticketPass": {
+      "purchaseSuccess": "Se recibió su solicitud de compra de pase.\nEl pase se activará después de la confirmación del depósito.",
+      "purchaseFailed": "No se pudo solicitar la compra del pase. Inténtelo de nuevo más tarde.",
+      "title": "Pase de mesa aleatorio",
+      "description": "La tabla aleatoria utiliza pases. Pague por adelantado un pase de 4 usos para que no tenga que pagar cada vez.",
+      "remaining": "Pases restantes",
+      "remainingCount": "{count} izquierda",
+      "pendingNotice": "Tienes un pase esperando la confirmación del depósito. Se activará después de la confirmación del administrador.",
+      "purchase": "Solicitar prepago de pase de 4 usos",
+      "depositAccount": "Cuenta de depósito (pago después de la solicitud)",
+      "accountHolder": "Titular de la cuenta {holder}",
+      "loginRequired": "Inicia sesión para comprar un pase."
+    }
+  },
+  "review": {
+    "photoReview": "📷 Revisión de fotos",
+    "anonymous": "anónimo",
+      "countForGathering": "{count} reseñas para este encuentro",
+    "sort": {
+      "likes": "Recomendadas",
+      "latest": "Más recientes"
+    },
+    "loading": "Cargando...",
+    "empty": "Aún no hay reseñas. ¡Sé el primero en dejar uno!",
+    "emptyShort": "Aún no hay reseñas.",
+    "alreadyWritten": "Ya escribiste una reseña",
+    "allGatherings": "Todos los encuentros",
+    "form": {
+      "starLabel": "{score} estrellas",
+      "success": "¡Reseña publicada!",
+      "successWithReward": "¡Reseña publicada! +{mileage}M ganados",
+      "imageUploadFailed": "Error al cargar la imagen. Por favor inténtalo de nuevo.",
+      "title": "Escribe una reseña",
+      "textTab": "Texto",
+      "photoTab": "Foto",
+      "placeholder": "Comparte tu experiencia de encuentro libremente",
+      "rewardNotice": "Publicar una reseña genera +{mileage}M de puntos",
+      "submitting": "Publicando...",
+      "uploading": "Subiendo imagen...",
+      "submit": "Publicar revisión"
+    },
+    "card": {
+      "deleteTitle": "¿Eliminar esta reseña?",
+      "deleteDescription": "Las puntos acumuladas no serán reclamadas.",
+      "cancel": "Cancelar",
+      "deleting": "Eliminando…",
+      "delete": "Eliminar",
+      "loginRequired": "Por favor inicie sesión para utilizar esta función",
+      "deleteSuccess": "Revisión eliminada",
+      "deleteFailed": "No se pudo eliminar. Por favor inténtalo de nuevo",
+      "anonymous": "anónimo",
+      "gatheringFallback": "encuentro",
+      "photoReview": "📷 Revisión de fotos",
+      "writtenAt": "Escrito el {date}",
+      "more": "Más",
+      "unlike": "a diferencia",
+      "like": "Me gusta"
+    }
+  },
+  "mypage": {
+    "profile": {
+      "loadFailed": "No se pudo cargar tu perfil.",
+      "passwordChanged": "La contraseña se cambió correctamente.",
+      "editProfile": "Editar perfil",
+      "mileage": "{mileage} puntos",
+      "ticketPass": "Pase de mesa aleatorio",
+      "ticketRemaining": "{count} izquierda",
+      "phone": "Teléfono",
+      "gender": "Género",
+      "genderLabels": {
+        "MALE": "masculino",
+        "FEMALE": "Mujer"
+      },
+      "age": "edad",
+      "ageValue": "{age}",
+      "job": "Trabajo",
+      "mbti": "MBTI",
+      "animalType": "tipo de animal",
+      "interests": "Intereses",
+      "adminDashboard": "Panel de administración",
+      "logout": "Cerrar sesión",
+      "changePassword": "Cambiar contraseña",
+      "withdraw": "Eliminar cuenta"
+    },
+    "applications": {
+      "loading": "Cargando...",
+      "filters": {
+        "all": "Todo",
+        "pending": "Pendiente",
+        "confirmed": "Confirmada",
+        "attended": "Asistida",
+        "cancelled": "Cancelada"
+      },
+      "status": {
+        "PENDING": "En revisión",
+        "CONFIRMED": "Confirmada",
+        "CANCELLED": "Cancelada",
+        "ATTENDED": "Asistencia completada"
+      },
+      "payment": {
+        "PENDING": "Depósito pendiente",
+        "CONFIRMED": "Depósito completo"
+      },
+      "emptyFiltered": "No hay solicitudes con este estado.",
+      "empty": "Aún no has solicitado ningún encuentro.",
+      "browseGatherings": "Explorar encuentros",
+      "bookingNumber": "Número de reserva {bookingNumber}",
+      "cancelConfirmQuestion": "¿Cancelar esta solicitud?",
+      "goBack": "volver",
+      "cancelling": "Cancelando...",
+      "confirmCancel": "Confirmar cancelación",
+      "cancelApplication": "Cancelar solicitud"
+    },
+    "password": {
+      "title": "Cambiar contraseña",
+      "currentPassword": "Contraseña actual",
+      "currentPasswordPlaceholder": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "newPasswordPlaceholder": "Al menos 8 caracteres con letras y números.",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "confirmPasswordPlaceholder": "Ingrese la nueva contraseña nuevamente",
+      "submitting": "Cambiando...",
+      "submit": "Cambiar",
+      "validation": {
+        "currentPassword": "Por favor ingrese su contraseña actual",
+        "newPassword": "Utilice al menos 8 caracteres con letras y números.",
+        "confirmPassword": "Por favor ingrese la nueva contraseña nuevamente",
+        "mismatch": "Las nuevas contraseñas no coinciden"
+      }
+    },
+    "tabs": {
+      "profile": "Perfil",
+      "applications": "Solicitudes",
+      "reviews": "Reseñas"
+    },
+    "mileage": {
+      "balanceAsOf": "Saldo de puntos a partir del {time}",
+      "unit": "Puntos",
+      "howToEarnEyebrow": "CÓMO GANAR",
+      "howToEarnTitle": "¿Cómo lo gano?",
+      "earnMethods": [
+        {
+          "title": "Asistir a un encuentro",
+          "desc": "Gana puntos cuando asistes a un encuentro\ny el anfitrión marca tu asistencia"
+        },
+        {
+          "title": "Escribe una reseña del encuentro",
+          "desc": "Comparte el ambiente y tus impresiones.\ncon texto o fotos"
+        },
+        {
+          "title": "Puntos de bienvenida",
+          "desc": "Un pequeño regalo de bienvenida\npara miembros nuevos de Whatsup House"
+        }
+      ],
+      "typeLabels": {
+        "SIGNUP": "Bono de bienvenida",
+        "ATTENDANCE": "Asistencia al encuentro",
+        "REVIEW_REWARD": "Reseña del encuentro",
+        "REVIEW_UPGRADE": "Actualización de revisión de fotos",
+        "ADMIN_ADJUST": "Ajuste de administrador",
+        "ADMIN_ADJUST_EARN": "Crédito de administrador",
+        "ADMIN_ADJUST_USE": "Deducción administrativa"
+      },
+      "filters": {
+        "ALL": "Todos",
+        "EARN": "Ganado",
+        "USE": "Usado"
+      },
+      "balance": "Saldo {balance}M",
+      "empty": {
+        "USE": {
+          "head": "Aún no hay historial de uso",
+          "body": "Utilice sus puntos para obtener descuentos\nsobre el cobro de cuotas de participación"
+        },
+        "EARN": {
+          "head": "Aún no hay historial de ganancias",
+          "body": "Solicita un encuentro que te llame la atención\ny conoce gente sin conexión"
+        },
+        "ALL": {
+          "head": "Aún no hay historial de puntos",
+          "body": "Asistir a encuentros o dejar reseñas\npara ganar puntos"
+        }
+      },
+      "browseGatherings": "Explorar encuentros",
+      "logEyebrow": "REGISTRO DE KILOMETRAJE",
+      "logTitle": "Historial de puntos",
+      "itemCount": "{count} artículos",
+      "sortLatest": "Lo más nuevo",
+      "sortOldest": "más antiguo"
+    },
+    "profileEdit": {
+      "title": "Editar perfil",
+      "basicInfo": "Información básica",
+      "nickname": "Apodo*",
+      "nicknamePlaceholder": "Introduce tu apodo",
+      "name": "Nombre*",
+      "namePlaceholder": "Ingrese su nombre legal",
+      "gender": "Género*",
+      "genderLabels": {
+        "MALE": "masculino",
+        "FEMALE": "Mujer"
+      },
+      "age": "Edad*",
+      "agePlaceholder": "Introduce tu edad",
+      "phone": "Teléfono",
+      "additionalInfo": "Información adicional",
+      "optional": "(Opcional)",
+      "bio": "Introducción de una línea",
+      "bioPlaceholder": "Descríbete en una línea",
+      "instagram": "Instagram ID",
+      "job": "Trabajo",
+      "mbti": "MBTI",
+      "mbtiResult": "¡Eres {mbti}!",
+      "interests": "Intereses",
+      "interestPlaceholder": "Ingrese un interés y agréguelo",
+      "addInterest": "Añadir interés",
+      "removeInterest": "Quitar {interest}",
+      "maxInterests": "hasta 10",
+      "submit": "Guardar",
+      "submitFailed": "No se pudo actualizar su perfil. Por favor inténtalo de nuevo.",
+      "validation": {
+        "nicknameMin": "El apodo debe tener al menos 2 caracteres.",
+        "nicknameMax": "El apodo debe tener 50 caracteres o menos.",
+        "nameRequired": "Por favor ingresa tu nombre",
+        "nameMax": "El nombre debe tener 50 caracteres o menos.",
+        "phone": "El número de teléfono debe tener 11 dígitos.",
+        "age": "Por favor ingresa una edad válida",
+        "bioMax": "La introducción debe tener 100 caracteres o menos.",
+        "gender": "Por favor seleccione un género."
+      }
+    },
+    "guestApplication": {
+      "intro": "Consulta tu solicitud con tu número de reserva y número de teléfono.",
+      "bookingNumber": "Número de reserva",
+      "phone": "Teléfono",
+      "checking": "Comprobando...",
+      "check": "comprobar",
+      "notFound": "Por favor verifique su número de reserva o número de teléfono.",
+      "resultLabel": "Detalles de la solicitud",
+      "confirmedHelp": "Toque la tarjeta para abrir la página de confirmación de la reserva.",
+      "invalidTitle": "Enlace no válido",
+      "invalidDescription": "Este enlace ha caducado o no es válido.",
+      "checkDirectly": "Consultar directamente con el número de reserva",
+      "goHome": "Vete a casa",
+      "title": "Detalles de la solicitud",
+      "description": "Consulte la información de su solicitud a continuación.",
+      "loginToView": "Inicie sesión para ver mis solicitudes",
+      "validation": {
+        "bookingNumber": "Por favor introduce tu número de reserva",
+        "phoneRequired": "Por favor ingresa tu número de teléfono",
+        "phoneInvalid": "Por favor ingresa un número de teléfono válido"
+      }
+    },
+    "reviews": {
+      "loading": "Cargando...",
+      "empty": "Aún no has escrito ninguna reseña",
+      "more": "Cargar más"
+    },
+    "withdraw": {
+      "title": "Eliminar cuenta",
+      "description": "Una vez eliminada, tu cuenta se desactivará y no podrás volver a iniciar sesión.",
+      "passwordConfirm": "Confirmar contraseña",
+      "passwordPlaceholder": "Contraseña actual",
+      "submitting": "Procesando...",
+      "submit": "Eliminar cuenta",
+      "failed": "No se pudo eliminar tu cuenta.",
+      "validation": {
+        "password": "Por favor ingrese su contraseña"
+      }
+    }
+  },
+  "social": {
+    "title": "Espacio Social",
+    "description": "Las funciones sociales aparecerán aquí."
+  },
+  "story": {
+    "fallbackTitle": "Acerca de | Whatsup House",
+    "cta": "Explorar encuentros",
+    "whatsupHouse": {
+      "tagline": "El espacio que estamos creando",
+      "title": "La historia de Whatsup House",
+      "description": "Whatsup House es una pequeña plataforma de encuentros sociales fuera de línea planificada y organizada directamente por su fundador para que las personas de entre 20 y 30 años que viven solas puedan reunirse sin presión.",
+      "sections": [
+        {
+          "heading": "¿Qué es Whatsup House?",
+          "body": "Queríamos que las noches se sintieran menos solitarias, incluso cuando vives solo. Whatsup House es una plataforma de encuentro social fuera de línea para hogares unipersonales de entre 20 y 30 años. Creamos momentos tranquilos donde las personas pueden conocer y compartir gustos e historias cotidianas."
+        },
+        {
+          "heading": "Los encuentros que creamos",
+          "body": "Cada encuentro es planificado y organizado directamente por Whatsup House. Cada uno es pequeño, con capacidad para 20 personas, para que quienes visitan por primera vez puedan integrarse de forma natural."
+        },
+        {
+          "heading": "Cómo unirse",
+          "body": "Explora los encuentros que te gustan y solicita tu plaza. No hay coincidencias complicadas, simplemente únete a un encuentro en la fecha que más te convenga."
+        }
+      ]
+    }
+  },
+  "ui": {
+    "apiError": {
+      "fallback": "Se produjo un error.",
+      "retry": "Inténtalo de nuevo"
+    },
+    "pagination": {
+      "first": "Primera página",
+      "previous": "Página anterior",
+      "next": "Página siguiente",
+      "last": "Última página"
+    },
+    "scroll": {
+      "previous": "Anterior",
+      "next": "Siguiente"
+    },
+    "toast": {
+      "close": "Cerrar"
+    },
+    "loading": {
+      "label": "Cargando"
+    },
+    "imageUpload": {
+      "alt": "Imagen cargada",
+      "selectPhoto": "Seleccionar foto",
+      "loadPhoto": "Cargar foto",
+      "ratioHint": "Se muestra en esta proporción",
+      "change": "Cambiar",
+      "remove": "Quitar imagen"
+    },
+    "imageCrop": {
+      "contextTitle": {
+        "review": "Editar foto de reseña",
+        "carousel": "Editar imagen del carrusel",
+        "avatar": "Editar imagen de perfil"
+      },
+      "processing": "Procesando...",
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "dragHint": "Arrastre a la posición, use el control deslizante para cambiar el tamaño",
+      "zoomOut": "alejar",
+      "zoomIn": "Acercar",
+      "ratio": "Relación {ratio}",
+      "rotate": "rotar",
+      "originalSize": "Tamaño original",
+      "confirm": "Confirmar",
+      "previewTitle": "Vista previa",
+      "previewContext": {
+        "avatar": "Así se verá en tu perfil.",
+        "carousel": "Así quedará en el carrusel de casa",
+        "review": "Así se verá a continuación."
+      },
+      "avatarAlt": "Vista previa de avatar",
+      "avatarMask": "Se muestra con una máscara circular.",
+      "cardAlt": "Vista previa de la tarjeta",
+      "sampleTitle": "Una tarde lenta para escuchar jazz",
+      "sampleDate": "Sábado, 24 de mayo · 14:00 · Seongsu-dong",
+      "listAlt": "Vista previa de la lista",
+      "sampleListTitle": "Así en listas",
+      "sampleListBody": "El área recortada se mantiene constante incluso cuando la miniatura se hace más pequeña",
+      "editAgain": "Editar de nuevo"
+    },
+    "multiCrop": {
+      "title": "Imágenes del encuentro",
+      "pending": "Recorte múltiple próximamente",
+      "steps": [
+        {
+          "label": "Miniatura cuadrada",
+          "description": "Se muestra en tarjetas de lista y calendarios."
+        },
+        {
+          "label": "Imagen horizontal de detalle",
+          "description": "Se muestra en la parte superior de la página de detalles del encuentro."
+        }
+      ],
+      "select": "Selecciona una imagen y recorta cada paso",
+      "selectAgain": "Seleccionar de nuevo"
+    }
+  },
+  "metadata": {
+    "root": {
+      "title": "Whatsup House",
+      "description": "Un espacio para personas que disfrutan de conexiones tranquilas."
+    },
+    "home": {
+      "title": "Whatsup House | Plataforma de encuentros sociales para hogares unipersonales",
+      "description": "Pequeños encuentros sociales fuera de línea para personas de entre 20 y 30 años que viven solas. Conoce gente nueva de una forma cómoda.",
+      "openGraphTitle": "Whatsup House",
+      "openGraphDescription": "Pequeños encuentros sociales fuera de línea para personas de entre 20 y 30 años que viven solas."
+    },
+    "gatherings": {
+      "title": "Encuentros | Whatsup House",
+      "description": "Consulta los horarios de encuentros sociales por fecha y solicita tu plaza."
+    }
+  },
+  "payment": {
+    "account": {
+      "bankName": "Woori Bank",
+      "accountHolder": "Whatsup House"
+    }
+  },
+  "errors": {
+    "UNKNOWN": "Algo salió mal. Por favor inténtalo de nuevo.",
+    "EMAIL_ALREADY_EXISTS": "Este correo electrónico ya está en uso.",
+    "NICKNAME_ALREADY_EXISTS": "Este apodo ya está en uso.",
+    "INVALID_CREDENTIALS": "Por favor revisa tu correo electrónico o contraseña.",
+    "USER_NOT_FOUND": "No pudimos encontrar información de cuenta coincidente.",
+    "PASSWORD_RESET_FAILED": "No se pudo solicitar un restablecimiento de contraseña.",
+    "INVALID_PASSWORD_RESET_TOKEN": "Por favor verifique el enlace para restablecer su contraseña."
+  }
+}

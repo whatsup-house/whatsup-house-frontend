@@ -4,6 +4,8 @@ const LOCALE_MAP = {
   ko: 'ko-KR',
   en: 'en-US',
   ja: 'ja-JP',
+  zh: 'zh-CN',
+  es: 'es-ES',
 } as const
 
 export type AppLocale = keyof typeof LOCALE_MAP
