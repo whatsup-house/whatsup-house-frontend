@@ -6,11 +6,10 @@ import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import dayjs, { type Dayjs } from 'dayjs'
-import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, Eye, EyeOff, X } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Eye, EyeOff, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Button, Input } from '@/components/ui'
 import { useCheckEmail, useCheckNickname } from '@/lib/hooks/useAuth'
-import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { getAge } from '@/lib/utils/date'
 import type { Gender } from '@/lib/api/types'
 
@@ -371,7 +370,6 @@ export default function RegisterPage() {
   const t = useTranslations('auth.register')
   const tCommon = useTranslations('common')
   const router = useRouter()
-  const handleBack = useBackNavigation('/')
   const defaultBirthDate = getDefaultBirthDate()
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
@@ -606,21 +604,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
-        <div className="flex items-center px-4 py-3">
-          <button
-            onClick={handleBack}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label={tCommon('back')}
-          >
-            <ArrowLeft size={20} className="text-foreground" />
-          </button>
-          <h1 className="flex-1 text-center text-base font-bold text-foreground pr-11">
-            {tCommon('register')}
-          </h1>
-        </div>
-      </header>
-
       <div className="flex justify-center gap-2 pt-6 pb-2">
         <div className="w-2.5 h-2.5 rounded-full bg-primary" />
         <div className="w-2.5 h-2.5 rounded-full bg-primary opacity-30" />
