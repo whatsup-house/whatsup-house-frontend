@@ -41,14 +41,14 @@ export default function AdminDashboardPage() {
   return (
     <div className="max-w-[1280px]">
       {/* 헤더 */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-foreground mb-1">대시보드</h1>
           <p className="text-sm text-tag-text">{dayjs().format('YYYY년 M월 D일 dddd')}</p>
         </div>
         <button
           onClick={refetch}
-          className="flex items-center gap-1.5 text-xs text-tag-text hover:text-primary transition-colors"
+          className="flex items-center gap-1.5 self-start text-xs text-tag-text hover:text-primary transition-colors"
         >
           <RefreshCw size={12} />
           <span>마지막 갱신: {updatedTime}</span>
@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
       {!isLoading && !isError && (
         <>
           {/* KPI 카드 */}
-          <div className="grid grid-cols-4 gap-5 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mb-8">
             <KpiCard
               icon={<CalendarDays size={22} className="text-primary" />}
               label="다가오는 7일 게더링"
@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
               <p className="text-sm text-tag-text py-6 text-center">향후 7일간 예정된 게더링이 없어요.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[720px] text-sm">
                   <thead>
                     <tr className="border-b border-tag-bg">
                       <th className="text-left text-xs text-tag-text font-medium pb-3 pr-4">게더링명</th>
@@ -170,7 +170,7 @@ export default function AdminDashboardPage() {
               <h2 className="text-base font-bold text-foreground">전체 게더링 현황</h2>
               <span className="text-xs text-tag-text">총 {allGatherings.length}건</span>
             </div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
               {(['OPEN', 'CLOSED', 'COMPLETED', 'CANCELLED'] as AdminGatheringStatus[]).map((status) => {
                 const count = allGatherings.filter((g) => g.status === status).length
                 const pct = allGatherings.length > 0 ? Math.round((count / allGatherings.length) * 100) : 0

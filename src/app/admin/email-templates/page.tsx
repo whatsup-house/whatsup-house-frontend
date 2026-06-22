@@ -73,7 +73,7 @@ function TemplateEditor({ detail }: { detail: MailTemplateDetail }) {
       </div>
 
       {/* 액션 */}
-      <div className="flex items-center gap-2 mt-6">
+      <div className="flex flex-wrap items-center gap-2 mt-6">
         <button
           type="button"
           onClick={handlePreview}
@@ -90,7 +90,7 @@ function TemplateEditor({ detail }: { detail: MailTemplateDetail }) {
         >
           {update.isPending ? '저장 중…' : '저장'}
         </button>
-        {dirty && <span className="text-xs text-[#C8392B]">저장하지 않은 변경 사항이 있어요</span>}
+        {dirty && <span className="w-full sm:w-auto text-xs text-primary">저장하지 않은 변경 사항이 있어요</span>}
       </div>
 
       {/* 미리보기 결과 */}
@@ -126,9 +126,9 @@ export default function AdminEmailTemplatesPage() {
       {isLoading ? (
         <div className="flex justify-center py-16"><LoadingSpinner /></div>
       ) : (
-        <div className="flex gap-6 items-start">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* 템플릿 목록 */}
-          <div className="w-72 shrink-0 bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-2">
+          <div className="w-full lg:w-72 shrink-0 bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-2">
             {templates.map((t) => {
               const isActive = t.templateKey === selectedKey
               return (
@@ -149,7 +149,7 @@ export default function AdminEmailTemplatesPage() {
           </div>
 
           {/* 편집기 */}
-          <div className="flex-1 min-w-0">
+          <div className="w-full flex-1 min-w-0">
             {isDetailLoading || !detail ? (
               <div className="flex justify-center py-16"><LoadingSpinner /></div>
             ) : (
