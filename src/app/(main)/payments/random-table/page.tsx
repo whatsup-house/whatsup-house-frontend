@@ -69,24 +69,55 @@ function PaymentContent() {
   return (
     <div className="min-h-screen bg-background px-5 py-6">
       <div className="flex items-center gap-2 mb-2"><Ticket size={22} className="text-primary" /><h1 className="text-xl font-bold">우연한 식탁 이용권</h1></div>
-      <p className="text-sm text-tag-text mb-6">{displayPass ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}</p>
+      <p className="text-sm text-tag-text mb-6">
+        {isPaymentComplete ? '참가 확정 정보를 확인해 주세요.' : displayPass ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}
+      </p>
       {bookingNumber && <Card className="p-4 mb-4 bg-tag-bg"><p className="text-xs text-tag-text">신청 예약번호</p><p className="font-bold text-primary mt-1">{bookingNumber}</p></Card>}
       {displayPass ? (
-        <>
-          <Card className="p-5 mb-4">
-            <p className="font-bold text-lg">{displayPass.productLabel} 구매 요청이 접수됐어요</p>
-            <p className="text-sm text-tag-text mt-2">아래 계좌로 입금해 주시면 관리자가 최대한 빨리 확인해 드려요.</p>
-          </Card>
-          <Card className="p-5 mb-5">
-            <p className="text-xs text-tag-text mb-2">입금 계좌</p>
-            <p className="font-semibold">{PAYMENT_ACCOUNT.bankName} {PAYMENT_ACCOUNT.accountNumber}</p>
-            <p className="text-sm text-tag-text mt-2">예금주 {PAYMENT_ACCOUNT.accountHolder}</p>
-            <p className="text-lg font-bold text-primary mt-3">{displayPass.purchaseAmount.toLocaleString()}원</p>
-          </Card>
-          <div className={`flex min-h-[56px] w-full items-center justify-center rounded-button text-lg font-bold text-white ${isPaymentComplete ? 'bg-primary' : 'bg-[#E5968D]'}`}>
-            {isPaymentComplete ? '입금완료' : '입금 확인중'}
-          </div>
-        </>
+        isPaymentComplete ? (
+          <>
+            <Card className="p-5 mb-4 bg-primary-light">
+              <p className="text-xs font-bold text-primary mb-2">입금완료</p>
+              <p className="font-bold text-lg">{displayPass.productLabel} 결제가 완료됐어요</p>
+              <p className="text-sm text-tag-text mt-2">이번 모임에 이용권 1회가 자동 사용됐어요.</p>
+            </Card>
+            <Card className="p-5 mb-5">
+              <div className="flex items-center justify-between border-b border-tag-bg pb-4">
+                <span className="text-sm text-tag-text">남은 이용권</span>
+                <strong className="text-lg text-primary">{displayPass.remainingCount}회</strong>
+              </div>
+              <div className="flex items-center justify-between pt-4">
+                <span className="text-sm text-tag-text">신청 상태</span>
+                <strong>참가 확정</strong>
+              </div>
+            </Card>
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full"
+              onClick={() => router.push(`/applications/check${bookingNumber ? `?bookingNumber=${encodeURIComponent(bookingNumber)}` : ''}`)}
+            >
+              신청 내역 확인하기
+            </Button>
+          </>
+        ) : (
+          <>
+            <Card className="p-5 mb-4">
+              <p className="font-bold text-lg">{displayPass.productLabel} 구매 요청이 접수됐어요</p>
+              <p className="text-sm text-tag-text mt-2">아래 계좌로 입금해 주시면 관리자가 최대한 빨리 확인해 드려요.</p>
+            </Card>
+            <Card className="p-5 mb-4">
+              <p className="text-xs text-tag-text mb-2">입금 계좌</p>
+              <p className="font-semibold">{PAYMENT_ACCOUNT.bankName} {PAYMENT_ACCOUNT.accountNumber}</p>
+              <p className="text-sm text-tag-text mt-2">예금주 {PAYMENT_ACCOUNT.accountHolder}</p>
+              <p className="text-lg font-bold text-primary mt-3">{displayPass.purchaseAmount.toLocaleString()}원</p>
+            </Card>
+            <p className="mb-4 text-center text-xs text-tag-text">입금 확인 → 이용권 1회 자동 사용 → 신청 확정</p>
+            <div className="flex min-h-[56px] w-full items-center justify-center rounded-button bg-[#E5968D] text-lg font-bold text-white">
+              입금 확인중
+            </div>
+          </>
+        )
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 mb-5">
