@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Check, Clock3, Ticket } from 'lucide-react'
+import { Check, Ticket } from 'lucide-react'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseTicketPass } from '@/lib/hooks/useTickets'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
@@ -47,6 +47,9 @@ function PaymentContent() {
   const product = PRODUCTS.find((item) => item.product === selected)!
   const canPurchase = data?.purchasable === true
   const pendingPass = requestedPass ?? data?.passes.find((pass) => pass.status === 'PENDING') ?? null
+  const confirmedPass = data?.passes.find((pass) => pass.paymentConfirmedAt !== null) ?? null
+  const displayPass = pendingPass ?? confirmedPass
+  const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt)
   const submit = async () => {
     try {
       if (bookingNumber) {
@@ -66,23 +69,23 @@ function PaymentContent() {
   return (
     <div className="min-h-screen bg-background px-5 py-6">
       <div className="flex items-center gap-2 mb-2"><Ticket size={22} className="text-primary" /><h1 className="text-xl font-bold">우연한 식탁 이용권</h1></div>
-      <p className="text-sm text-tag-text mb-6">{pendingPass ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}</p>
+      <p className="text-sm text-tag-text mb-6">{displayPass ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}</p>
       {bookingNumber && <Card className="p-4 mb-4 bg-tag-bg"><p className="text-xs text-tag-text">신청 예약번호</p><p className="font-bold text-primary mt-1">{bookingNumber}</p></Card>}
-      {pendingPass ? (
+      {displayPass ? (
         <>
-          <Card className="p-5 mb-4 border border-primary bg-primary-light">
-            <div className="flex items-start justify-between gap-3">
-              <div><p className="font-bold text-lg">{pendingPass.productLabel} 구매 요청이 접수됐어요</p><p className="text-sm text-tag-text mt-2">아래 계좌로 입금하면 관리자가 확인해 드려요.</p></div>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-primary"><Clock3 size={14} />입금 확인중</span>
-            </div>
+          <Card className="p-5 mb-4">
+            <p className="font-bold text-lg">{displayPass.productLabel} 구매 요청이 접수됐어요</p>
+            <p className="text-sm text-tag-text mt-2">아래 계좌로 입금해 주시면 관리자가 최대한 빨리 확인해 드려요.</p>
           </Card>
           <Card className="p-5 mb-5">
             <p className="text-xs text-tag-text mb-2">입금 계좌</p>
             <p className="font-semibold">{PAYMENT_ACCOUNT.bankName} {PAYMENT_ACCOUNT.accountNumber}</p>
             <p className="text-sm text-tag-text mt-2">예금주 {PAYMENT_ACCOUNT.accountHolder}</p>
-            <p className="text-lg font-bold text-primary mt-3">{pendingPass.purchaseAmount.toLocaleString()}원</p>
+            <p className="text-lg font-bold text-primary mt-3">{displayPass.purchaseAmount.toLocaleString()}원</p>
           </Card>
-          <Button variant="primary" size="lg" className="w-full" disabled>입금 확인중</Button>
+          <div className={`flex min-h-[56px] w-full items-center justify-center rounded-button text-lg font-bold text-white ${isPaymentComplete ? 'bg-primary' : 'bg-[#E5968D]'}`}>
+            {isPaymentComplete ? '입금완료' : '입금 확인중'}
+          </div>
         </>
       ) : (
         <>
