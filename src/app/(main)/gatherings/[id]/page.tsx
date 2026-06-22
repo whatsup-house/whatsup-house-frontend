@@ -2,6 +2,7 @@
 
 import { useState, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useGatheringDetail, useGatheringsByTitle } from '@/lib/hooks/useGatherings'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { LoadingSpinner, ApiErrorMessage, Button } from '@/components/ui'
@@ -15,6 +16,8 @@ export default function GatheringDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  const t = useTranslations('gathering.detail')
+  const locale = useLocale()
   const { id } = use(params)
   const router = useRouter()
   const { isLoggedIn, requireAuth } = useRequireAuth()
@@ -35,7 +38,7 @@ export default function GatheringDetailPage({
     return (
       <div className="min-h-screen bg-background px-4 pt-20">
         <ApiErrorMessage
-          message="게더링 정보를 불러올 수 없습니다."
+          message={t('loadFailed')}
           onRetry={() => { refetch() }}
         />
       </div>
@@ -81,8 +84,8 @@ export default function GatheringDetailPage({
       <div className="sticky bottom-0 z-40 bg-card border-t border-tag-bg/50 px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-tag-text">참가비</p>
-            <p className="text-lg font-bold text-foreground">{gathering.price.toLocaleString()}원</p>
+            <p className="text-xs text-tag-text">{t('priceLabel')}</p>
+            <p className="text-lg font-bold text-foreground">{t('price', { price: gathering.price.toLocaleString(locale) })}</p>
           </div>
           <div className="flex items-center gap-2">
             {isRecruiting ? (
@@ -94,7 +97,7 @@ export default function GatheringDetailPage({
                     className="px-4"
                     onClick={() => setIsDateSheetOpen(true)}
                   >
-                    다른 날짜
+                    {t('otherDate')}
                   </Button>
                 )}
                 <Button
@@ -103,7 +106,7 @@ export default function GatheringDetailPage({
                   className="px-8"
                   onClick={handleApplyClick}
                 >
-                  신청하기
+                  {t('apply')}
                 </Button>
               </>
             ) : hasMultipleDates ? (
@@ -113,7 +116,7 @@ export default function GatheringDetailPage({
                 className="px-6"
                 onClick={() => setIsDateSheetOpen(true)}
               >
-                다른 날짜 보기
+                {t('viewOtherDate')}
               </Button>
             ) : (
               <Button
@@ -122,7 +125,7 @@ export default function GatheringDetailPage({
                 className="px-6"
                 disabled
               >
-                운영 종료
+                {t('closed')}
               </Button>
             )}
           </div>

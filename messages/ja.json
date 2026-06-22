@@ -23,6 +23,20 @@
     "errorBoundary": {
       "title": "あっ！一時的な問題が発生しました",
       "description": "予期しないエラーが発生しました。\nしばらくしてからもう一度お試しください。"
+    },
+    "loading": "読み込み中...",
+    "status": {
+      "OPEN": "募集中",
+      "CLOSED": "締切",
+      "COMPLETED": "完了",
+      "CANCELLED": "キャンセル",
+      "ATTENDED": "参加完了",
+      "PENDING": "待機中"
+    },
+    "retry": "もう一度試す",
+    "globalError": {
+      "title": "あっ！一時的な問題が発生しました",
+      "description": "サーバーで一時的なエラーが発生しました。\nしばらくしてからもう一度お試しください。\n続く場合は少しお待ちください。"
     }
   },
   "language": {
@@ -397,5 +411,552 @@
   "notFound": {
     "title": "あっ！ページが見つかりません",
     "description": "リクエストされたページが削除されたか、\nアドレスが間違っている可能性があります。\nホームに戻ってやり直してください。"
+  },
+  "home": {
+    "hero": {
+      "calendarEyebrow": "今月の日程",
+      "calendarCta": "タップしてすべてのゲザリングを見る →",
+      "openBadge": "募集中",
+      "previous": "前へ",
+      "next": "次へ"
+    },
+    "curated": {
+      "title": "今週よく見られたゲザリング",
+      "rankLabel": "{rank}位 {title}"
+    },
+    "reviews": {
+      "title": "参加者のレビュー",
+      "viewAll": "すべて見る ›"
+    }
+  },
+  "pagination": {
+    "previous": "前のページ",
+    "next": "次のページ"
+  },
+  "gathering": {
+    "calendar": {
+      "dayLabels": [
+        "日",
+        "月",
+        "火",
+        "水",
+        "木",
+        "金",
+        "土"
+      ],
+      "monthTitle": "{year}年{month}月",
+      "previousMonth": "前の月",
+      "nextMonth": "次の月",
+      "close": "閉じる",
+      "current": "現在"
+    },
+    "list": {
+      "dateTitle": "{month}月{day}日に開かれるゲザリング",
+      "emptyTitle": "この日はゲザリングがありません。",
+      "emptyDescription": "別の日を選んでみてください :)",
+      "calendarView": "カレンダーで見る",
+      "mapView": "地図で見る"
+    },
+    "card": {
+      "price": "{price}ウォン",
+      "capacity": "最大{count}名"
+    },
+    "map": {
+      "naverLabel": "Naver地図で見る",
+      "naverShort": "Naver",
+      "kakaoLabel": "KakaoMapで見る",
+      "kakaoShort": "Kakao",
+      "comingSoon": "地図連携予定",
+      "nearbyCount": "この地域の予定ゲザリング {count}件"
+    },
+    "detail": {
+      "loadFailed": "ゲザリング情報を読み込めません。",
+      "share": "共有する",
+      "previousPhoto": "前の写真",
+      "nextPhoto": "次の写真",
+      "hostedBy": "ワッサップハウス主催",
+      "photoLabel": "{index}番目の写真",
+      "date": "日付",
+      "time": "時間",
+      "location": "場所",
+      "capacityLabel": "募集人数",
+      "capacity": "最大{count}名",
+      "priceLabel": "参加費",
+      "price": "{price}ウォン",
+      "onsitePayment": "（現地決済）",
+      "mileageReward": "マイレージ付与",
+      "descriptionTitle": "こんなゲザリングです",
+      "howToRunTitle": "このように進行します",
+      "cautionTitle": "このような方は参加が難しいです",
+      "caution1": "過度な騒音で鑑賞を妨げる方",
+      "caution2": "自分の好みだけを押し付け、他人の意見を無視する方",
+      "caution3": "商業目的や宣伝のために参加する方",
+      "reviewsTitle": "参加者レビュー",
+      "reviewCount": "{count}件",
+      "linkCopied": "リンクをコピーしました",
+      "durationHours": "{hours}時間",
+      "durationWithMinutes": "{hours}時間{minutes}分",
+      "otherDate": "別の日付",
+      "apply": "申請する",
+      "viewOtherDate": "別の日付を見る",
+      "closed": "運営終了"
+    },
+    "apply": {
+      "modal": {
+        "title": "申請方法を選択してください",
+        "memberApply": "ログインして申請する",
+        "memberApplyDescription": "マイレージ付与と予約履歴の確認ができます",
+        "guestApply": "ログインせずに申請する",
+        "guestApplyDescription": "マイレージは付与されません"
+      },
+      "form": {
+        "requiredError": "必須項目です。",
+        "loadFailed": "申請フォームを読み込めません。",
+        "gatheringLoadFailed": "ゲザリング情報を読み込めません。",
+        "guestMileageNotice": "非ログイン申請ではマイレージが付与されません。",
+        "loginToApply": "ログイン後に申請",
+        "loginBenefitSuffix": "すると特典を受けられます。",
+        "memberMileageNotice": "参加完了後に{mileage}マイレージが付与されます",
+        "submit": "申請を完了する"
+      },
+      "question": {
+        "male": "男性",
+        "female": "女性",
+        "multiChoice": "（複数選択可）",
+        "mbtiResult": "{mbti}タイプですね！"
+      },
+      "result": {
+        "headline": {
+          "completed": "申請が完了しました！🎉",
+          "confirmed": "予約が確定しました！🎉"
+        },
+        "subcopy": {
+          "completed": "ホストが確認後、予約確定をお知らせします",
+          "confirmed": "ゲザリング当日にお会いしましょう"
+        },
+        "appliedGathering": "申請したゲザリング",
+        "dateTime": "日付＋時間",
+        "location": "場所",
+        "price": "参加費",
+        "priceValue": "{price}ウォン",
+        "checkWithBookingNumber": "予約番号で申請状態を確認する",
+        "checkInMypage": "マイページで確定状況を確認する",
+        "goHome": "ホームへ戻る",
+        "bookingNumber": "予約番号",
+        "copy": "コピー",
+        "copied": "コピー済み",
+        "bookingNumberHelp": "予約番号と連絡先で申請履歴を確認できます",
+        "paymentAccount": "参加費入金口座",
+        "accountHolder": "口座名義",
+        "depositAmount": "入金額",
+        "accountCopyHelp": "口座番号を押すとコピーできます"
+      }
+    },
+    "ticketPass": {
+      "purchaseSuccess": "利用券購入リクエストを受け付けました。\n入金確認後、利用券が有効化されます。",
+      "purchaseFailed": "利用券購入リクエストに失敗しました。しばらくしてからもう一度お試しください。",
+      "title": "偶然の食卓 利用券",
+      "description": "偶然の食卓は利用券で参加します。4回券を事前決済しておくと、毎回別途決済する必要がありません。",
+      "remaining": "残り利用券",
+      "remainingCount": "残り{count}回",
+      "pendingNotice": "入金確認待ちの利用券があります。管理者確認後に有効化されます。",
+      "purchase": "4回券事前決済を申請",
+      "depositAccount": "入金口座（申請後に入金）",
+      "accountHolder": "口座名義 {holder}",
+      "loginRequired": "ログイン後に利用券を購入できます。"
+    }
+  },
+  "review": {
+    "photoReview": "📷 写真レビュー",
+    "anonymous": "匿名",
+    "countForGathering": "このゲザリングのレビュー {count}件",
+    "sort": {
+      "likes": "おすすめ順",
+      "latest": "新着順"
+    },
+    "loading": "読み込み中...",
+    "empty": "まだレビューがありません。最初のレビューを残してみましょう！",
+    "emptyShort": "まだレビューがありません。",
+    "alreadyWritten": "自分が書いたレビューがあります",
+    "allGatherings": "すべてのゲザリング",
+    "form": {
+      "starLabel": "{score}点",
+      "success": "レビューが登録されました！",
+      "successWithReward": "レビューが登録されました！ +{mileage}M付与",
+      "imageUploadFailed": "画像のアップロードに失敗しました。もう一度お試しください。",
+      "title": "レビューを書く",
+      "textTab": "テキスト",
+      "photoTab": "写真",
+      "placeholder": "ゲザリングでの体験を自由に書いてください",
+      "rewardNotice": "レビュー登録時に+{mileage}Mマイレージが付与されます",
+      "submitting": "登録中...",
+      "uploading": "画像アップロード中...",
+      "submit": "レビュー登録"
+    },
+    "card": {
+      "deleteTitle": "レビューを削除しますか？",
+      "deleteDescription": "付与されたマイレージは回収されません。",
+      "cancel": "キャンセル",
+      "deleting": "削除中…",
+      "delete": "削除",
+      "loginRequired": "ログインが必要な機能です",
+      "deleteSuccess": "レビューを削除しました",
+      "deleteFailed": "削除に失敗しました。もう一度お試しください",
+      "anonymous": "匿名",
+      "gatheringFallback": "ゲザリング",
+      "photoReview": "📷 写真レビュー",
+      "writtenAt": "{date} 作成",
+      "more": "もっと見る",
+      "unlike": "おすすめを取り消す",
+      "like": "おすすめ"
+    }
+  },
+  "mypage": {
+    "profile": {
+      "loadFailed": "プロフィールを読み込めません。",
+      "passwordChanged": "パスワード変更が完了しました。",
+      "editProfile": "プロフィール編集",
+      "mileage": "{mileage}マイレージ",
+      "ticketPass": "偶然の食卓 利用券",
+      "ticketRemaining": "残り{count}回",
+      "phone": "連絡先",
+      "gender": "性別",
+      "genderLabels": {
+        "MALE": "男性",
+        "FEMALE": "女性"
+      },
+      "age": "年齢",
+      "ageValue": "{age}歳",
+      "job": "職業",
+      "mbti": "MBTI",
+      "animalType": "動物タイプ",
+      "interests": "関心事",
+      "adminDashboard": "管理者ダッシュボード",
+      "logout": "ログアウト",
+      "changePassword": "パスワード変更",
+      "withdraw": "退会"
+    },
+    "applications": {
+      "loading": "読み込み中...",
+      "filters": {
+        "all": "全体",
+        "pending": "待機中",
+        "confirmed": "確定",
+        "attended": "参加",
+        "cancelled": "キャンセル"
+      },
+      "status": {
+        "PENDING": "確認中",
+        "CONFIRMED": "確定",
+        "CANCELLED": "キャンセル済み",
+        "ATTENDED": "参加完了"
+      },
+      "payment": {
+        "PENDING": "入金確認中",
+        "CONFIRMED": "入金完了"
+      },
+      "emptyFiltered": "該当状態の申請履歴がありません。",
+      "empty": "まだ申請したゲザリングがありません。",
+      "browseGatherings": "ゲザリングを見る",
+      "bookingNumber": "予約番号: {bookingNumber}",
+      "cancelConfirmQuestion": "本当にキャンセルしますか？",
+      "goBack": "戻る",
+      "cancelling": "キャンセル中...",
+      "confirmCancel": "キャンセル確認",
+      "cancelApplication": "申請キャンセル"
+    },
+    "password": {
+      "title": "パスワード変更",
+      "currentPassword": "現在のパスワード",
+      "currentPasswordPlaceholder": "現在のパスワード",
+      "newPassword": "新しいパスワード",
+      "newPasswordPlaceholder": "英字＋数字を含む8文字以上",
+      "confirmPassword": "新しいパスワード確認",
+      "confirmPasswordPlaceholder": "新しいパスワードを再入力",
+      "submitting": "変更中...",
+      "submit": "変更する",
+      "validation": {
+        "currentPassword": "現在のパスワードを入力してください",
+        "newPassword": "パスワードは英字＋数字を含む8文字以上で設定してください",
+        "confirmPassword": "新しいパスワードを再入力してください",
+        "mismatch": "新しいパスワードが一致しません"
+      }
+    },
+    "tabs": {
+      "profile": "プロフィール",
+      "applications": "申請履歴",
+      "reviews": "レビュー"
+    },
+    "mileage": {
+      "balanceAsOf": "{time}時点の保有マイレージ",
+      "unit": "マイレージ",
+      "howToEarnEyebrow": "HOW TO EARN",
+      "howToEarnTitle": "どうやって貯まりますか？",
+      "earnMethods": [
+        {
+          "title": "ゲザリング参加完了",
+          "desc": "申し込んだゲザリングに参加し\n主催者が出席処理をすると貯まります"
+        },
+        {
+          "title": "ゲザリングレビュー作成",
+          "desc": "参加した集まりの雰囲気や感想を\n文章や写真で残してください"
+        },
+        {
+          "title": "会員登録ウェルカムマイレージ",
+          "desc": "ワッツアップハウスに初めて来た方へ\nご挨拶の代わりにお渡しします"
+        }
+      ],
+      "typeLabels": {
+        "SIGNUP": "会員登録ウェルカム",
+        "ATTENDANCE": "ゲザリング参加",
+        "REVIEW_REWARD": "ゲザリングレビュー作成",
+        "REVIEW_UPGRADE": "写真レビューアップグレード",
+        "ADMIN_ADJUST": "管理者調整",
+        "ADMIN_ADJUST_EARN": "管理者付与",
+        "ADMIN_ADJUST_USE": "管理者差し引き"
+      },
+      "filters": {
+        "ALL": "すべて",
+        "EARN": "獲得履歴",
+        "USE": "使用履歴"
+      },
+      "balance": "残高 {balance}M",
+      "empty": {
+        "USE": {
+          "head": "まだ使用履歴がありません",
+          "body": "貯めたマイレージでゲザリング参加費を\n割引できます"
+        },
+        "EARN": {
+          "head": "まだ獲得履歴がありません",
+          "body": "気になるゲザリングに申し込んで\nオフラインで会ってみましょう"
+        },
+        "ALL": {
+          "head": "まだマイレージ履歴がありません",
+          "body": "ゲザリングに参加したりレビューを残すと\nマイレージが貯まります"
+        }
+      },
+      "browseGatherings": "ゲザリングを見る",
+      "logEyebrow": "MILEAGE LOG",
+      "logTitle": "マイレージ履歴",
+      "itemCount": "{count}件",
+      "sortLatest": "新しい順",
+      "sortOldest": "古い順"
+    },
+    "profileEdit": {
+      "title": "プロフィール編集",
+      "basicInfo": "基本情報",
+      "nickname": "ニックネーム*",
+      "nicknamePlaceholder": "ニックネームを入力してください",
+      "name": "名前*",
+      "namePlaceholder": "本名を入力してください",
+      "gender": "性別*",
+      "genderLabels": {
+        "MALE": "男性",
+        "FEMALE": "女性"
+      },
+      "age": "年齢*",
+      "agePlaceholder": "年齢を入力してください",
+      "phone": "連絡先",
+      "additionalInfo": "追加情報",
+      "optional": "（任意）",
+      "bio": "ひとこと紹介",
+      "bioPlaceholder": "自分をひとことで表現してみましょう",
+      "instagram": "Instagram ID",
+      "job": "職業",
+      "mbti": "MBTI",
+      "mbtiResult": "{mbti}タイプですね！",
+      "interests": "興味・関心",
+      "interestPlaceholder": "興味を入力して追加",
+      "addInterest": "興味を追加",
+      "removeInterest": "{interest}を削除",
+      "maxInterests": "最大10個",
+      "submit": "保存する",
+      "submitFailed": "プロフィールの修正中にエラーが発生しました。もう一度お試しください。",
+      "validation": {
+        "nicknameMin": "ニックネームは2文字以上で入力してください",
+        "nicknameMax": "ニックネームは50文字以内で入力してください",
+        "nameRequired": "名前を入力してください",
+        "nameMax": "名前は50文字以内で入力してください",
+        "phone": "電話番号は11桁の数字で入力してください",
+        "age": "正しい年齢を入力してください",
+        "bioMax": "紹介は100文字以内で入力してください",
+        "gender": "性別を選択してください。"
+      }
+    },
+    "guestApplication": {
+      "intro": "予約番号と連絡先で申請履歴を確認できます",
+      "bookingNumber": "予約番号",
+      "phone": "連絡先",
+      "checking": "照会中...",
+      "check": "照会する",
+      "notFound": "予約番号または連絡先を確認してください",
+      "resultLabel": "申請履歴",
+      "confirmedHelp": "カードをタップすると予約確定ページに移動します",
+      "invalidTitle": "無効なリンクです",
+      "invalidDescription": "リンクの有効期限が切れているか、正しくありません",
+      "checkDirectly": "予約番号で直接照会する",
+      "goHome": "ホームへ戻る",
+      "title": "申請履歴",
+      "description": "下で申請情報を確認してください",
+      "loginToView": "ログインして自分の申請履歴を見る",
+      "validation": {
+        "bookingNumber": "予約番号を入力してください",
+        "phoneRequired": "連絡先を入力してください",
+        "phoneInvalid": "正しい連絡先を入力してください"
+      }
+    },
+    "reviews": {
+      "loading": "読み込み中...",
+      "empty": "まだ作成したレビューがありません",
+      "more": "もっと見る"
+    },
+    "withdraw": {
+      "title": "退会",
+      "description": "退会するとアカウントが無効化され、再度ログインできなくなります。",
+      "passwordConfirm": "パスワード確認",
+      "passwordPlaceholder": "現在のパスワード",
+      "submitting": "処理中...",
+      "submit": "退会する",
+      "failed": "退会に失敗しました。",
+      "validation": {
+        "password": "パスワードを入力してください"
+      }
+    }
+  },
+  "social": {
+    "title": "ソーシャルスペース",
+    "description": "ソーシャル機能はここに表示されます。"
+  },
+  "story": {
+    "fallbackTitle": "紹介 | ワッツアップハウス",
+    "cta": "ゲザリングを見る",
+    "whatsupHouse": {
+      "tagline": "私たちがつくる場所",
+      "title": "ワッツアップハウスのストーリー",
+      "description": "ワッツアップハウスは、一人暮らしの20〜30代が気軽に集まれるよう、代表が直接企画・運営する少人数オフラインゲザリングプラットフォームです。",
+      "sections": [
+        {
+          "heading": "ワッツアップハウスとは",
+          "body": "一人でも寂しくない夜をつくりたい。ワッツアップハウスは、一人暮らしの20〜30代のためのオフラインソーシャルゲザリングプラットフォームです。気軽に出会い、好みや日常を分かち合う場をつくっています。"
+        },
+        {
+          "heading": "こんなゲザリングをつくります",
+          "body": "すべてのゲザリングはワッツアップハウスが直接企画し、運営しています。1回あたり最大20名までの少人数で、初めての方も自然になじめるようにしています。"
+        },
+        {
+          "heading": "参加方法",
+          "body": "気になるゲザリングを見つけて申し込むだけ。複雑なマッチングはなく、希望する日の集まりに気軽に参加できます。"
+        }
+      ]
+    }
+  },
+  "ui": {
+    "apiError": {
+      "fallback": "エラーが発生しました。",
+      "retry": "もう一度試す"
+    },
+    "pagination": {
+      "first": "最初のページ",
+      "previous": "前のページ",
+      "next": "次のページ",
+      "last": "最後のページ"
+    },
+    "scroll": {
+      "previous": "前へ",
+      "next": "次へ"
+    },
+    "toast": {
+      "close": "閉じる"
+    },
+    "loading": {
+      "label": "読み込み中"
+    },
+    "imageUpload": {
+      "alt": "アップロード画像",
+      "selectPhoto": "写真を選択",
+      "loadPhoto": "写真を読み込む",
+      "ratioHint": "この比率で表示されます",
+      "change": "変更",
+      "remove": "画像を削除"
+    },
+    "imageCrop": {
+      "contextTitle": {
+        "review": "レビュー写真を編集",
+        "carousel": "カルーセル画像を編集",
+        "avatar": "プロフィール画像を編集"
+      },
+      "processing": "処理中...",
+      "apply": "適用",
+      "cancel": "キャンセル",
+      "dragHint": "ドラッグで位置を調整し、スライダーでサイズを調整",
+      "zoomOut": "縮小",
+      "zoomIn": "拡大",
+      "ratio": "比率 {ratio}",
+      "rotate": "回転",
+      "originalSize": "元のサイズ",
+      "confirm": "確定",
+      "previewTitle": "このように表示されます",
+      "previewContext": {
+        "avatar": "プロフィールではこのように表示されます",
+        "carousel": "ホームカルーセルではこのように表示されます",
+        "review": "下の画面ではこのように表示されます"
+      },
+      "avatarAlt": "アバターのプレビュー",
+      "avatarMask": "円形マスクで表示されます",
+      "cardAlt": "カードプレビュー",
+      "sampleTitle": "ゆったり午後のジャズ鑑賞会",
+      "sampleDate": "5月24日 土 · 14:00 · 聖水洞",
+      "listAlt": "リストプレビュー",
+      "sampleListTitle": "リストではこのように",
+      "sampleListBody": "サムネイルが小さくなっても切り抜き部分は同じです",
+      "editAgain": "再編集する"
+    },
+    "multiCrop": {
+      "title": "ゲザリング画像",
+      "pending": "複数クロップ準備中",
+      "steps": [
+        {
+          "label": "正方形サムネイル",
+          "description": "リストカードとカレンダーに表示されます"
+        },
+        {
+          "label": "横長詳細画像",
+          "description": "ゲザリング詳細ページ上部に表示されます"
+        }
+      ],
+      "select": "画像を選択して段階ごとにクロップ設定",
+      "selectAgain": "もう一度選択"
+    }
+  },
+  "metadata": {
+    "root": {
+      "title": "ワッツアップハウス",
+      "description": "穏やかなつながりを好む人たちの場所"
+    },
+    "home": {
+      "title": "ワッツアップハウス | 一人暮らし向けソーシャルゲザリングプラットフォーム",
+      "description": "一人暮らしの20〜30代のための少人数オフラインソーシャルゲザリング。新しい出会いを見つけてみましょう。",
+      "openGraphTitle": "ワッツアップハウス",
+      "openGraphDescription": "一人暮らしの20〜30代のための少人数オフラインソーシャルゲザリング。"
+    },
+    "gatherings": {
+      "title": "ゲザリング | ワッツアップハウス",
+      "description": "日付別のソーシャルゲザリング予定を確認して申し込めます。"
+    }
+  },
+  "payment": {
+    "account": {
+      "bankName": "ウリ銀行",
+      "accountHolder": "ワッツアップハウス"
+    }
+  },
+  "errors": {
+    "UNKNOWN": "不明なエラーが発生しました。もう一度お試しください。",
+    "EMAIL_ALREADY_EXISTS": "すでに使用中のメールです",
+    "NICKNAME_ALREADY_EXISTS": "すでに使用中のニックネームです",
+    "INVALID_CREDENTIALS": "メールまたはパスワードをご確認ください。",
+    "USER_NOT_FOUND": "一致する登録情報が見つかりません。",
+    "PASSWORD_RESET_FAILED": "パスワード再設定のリクエストに失敗しました。",
+    "INVALID_PASSWORD_RESET_TOKEN": "パスワード再設定リンクをご確認ください。"
   }
 }

@@ -23,6 +23,20 @@
     "errorBoundary": {
       "title": "앗! 잠시 문제가 생겼어요",
       "description": "예상치 못한 오류가 발생했어요.\n잠시 후 다시 시도해주세요."
+    },
+    "loading": "불러오는 중...",
+    "status": {
+      "OPEN": "모집중",
+      "CLOSED": "마감",
+      "COMPLETED": "진행 완료",
+      "CANCELLED": "취소",
+      "ATTENDED": "참석완료",
+      "PENDING": "대기중"
+    },
+    "retry": "다시 시도",
+    "globalError": {
+      "title": "앗! 잠시 문제가 생겼어요",
+      "description": "서버에 일시적인 오류가 발생했어요.\n잠시 후 다시 시도해주세요.\n계속되면 조금만 기다려 주세요."
     }
   },
   "language": {
@@ -397,5 +411,552 @@
   "notFound": {
     "title": "앗! 페이지를 찾을 수 없어요",
     "description": "요청하신 페이지가 사라졌거나,\n주소가 잘못 입력되었어요.\n홈으로 돌아가 다시 시작해보세요."
+  },
+  "home": {
+    "hero": {
+      "calendarEyebrow": "이번 달 일정",
+      "calendarCta": "탭해서 전체 게더링 보기 →",
+      "openBadge": "모집중",
+      "previous": "이전",
+      "next": "다음"
+    },
+    "curated": {
+      "title": "이번 주 가장 많이 본 게더링",
+      "rankLabel": "{rank}위 {title}"
+    },
+    "reviews": {
+      "title": "다녀온 사람들의 후기",
+      "viewAll": "전체보기 ›"
+    }
+  },
+  "pagination": {
+    "previous": "이전 페이지",
+    "next": "다음 페이지"
+  },
+  "gathering": {
+    "calendar": {
+      "dayLabels": [
+        "일",
+        "월",
+        "화",
+        "수",
+        "목",
+        "금",
+        "토"
+      ],
+      "monthTitle": "{year}년 {month}월",
+      "previousMonth": "이전 달",
+      "nextMonth": "다음 달",
+      "close": "닫기",
+      "current": "현재"
+    },
+    "list": {
+      "dateTitle": "{month}월 {day}일 열리는 게더링",
+      "emptyTitle": "이 날은 게더링이 없어요.",
+      "emptyDescription": "다른 날을 골라보세요 :)",
+      "calendarView": "달력으로 보기",
+      "mapView": "지도로 보기"
+    },
+    "card": {
+      "price": "{price}원",
+      "capacity": "최대 {count}명"
+    },
+    "map": {
+      "naverLabel": "네이버 지도에서 보기",
+      "naverShort": "네이버",
+      "kakaoLabel": "카카오맵에서 보기",
+      "kakaoShort": "카카오",
+      "comingSoon": "지도 연동 예정",
+      "nearbyCount": "이 지역 예정 게더링 {count}개"
+    },
+    "detail": {
+      "loadFailed": "게더링 정보를 불러올 수 없습니다.",
+      "share": "공유하기",
+      "previousPhoto": "이전 사진",
+      "nextPhoto": "다음 사진",
+      "hostedBy": "와썹하우스 주최",
+      "photoLabel": "{index}번 사진",
+      "date": "날짜",
+      "time": "시간",
+      "location": "장소",
+      "capacityLabel": "모집인원",
+      "capacity": "최대 {count}명",
+      "priceLabel": "참가비",
+      "price": "{price}원",
+      "onsitePayment": "(현장 결제)",
+      "mileageReward": "마일리지 적립",
+      "descriptionTitle": "이런 게더링이에요",
+      "howToRunTitle": "이렇게 진행돼요",
+      "cautionTitle": "이런 분은 참여가 어려워요",
+      "caution1": "지나친 소란으로 감상을 방해하시는 분",
+      "caution2": "본인의 취향만을 강요하며 타인의 의견을 무시하시는 분",
+      "caution3": "상업적인 목적이나 홍보를 위해 참석하시는 분",
+      "reviewsTitle": "참가자 후기",
+      "reviewCount": "{count}개",
+      "linkCopied": "링크가 복사되었습니다",
+      "durationHours": "{hours}시간",
+      "durationWithMinutes": "{hours}시간 {minutes}분",
+      "otherDate": "다른 날짜",
+      "apply": "신청하기",
+      "viewOtherDate": "다른 날짜 보기",
+      "closed": "운영 종료"
+    },
+    "apply": {
+      "modal": {
+        "title": "신청 방법을 선택해주세요",
+        "memberApply": "로그인하고 신청하기",
+        "memberApplyDescription": "마일리지 적립 및 예약 내역 확인이 가능해요",
+        "guestApply": "로그인 없이 신청하기",
+        "guestApplyDescription": "마일리지 적립이 되지 않아요"
+      },
+      "form": {
+        "requiredError": "필수 항목이에요.",
+        "loadFailed": "신청폼을 불러올 수 없습니다.",
+        "gatheringLoadFailed": "게더링 정보를 불러올 수 없습니다.",
+        "guestMileageNotice": "비로그인 신청은 마일리지가 적립되지 않아요.",
+        "loginToApply": "로그인 후 신청",
+        "loginBenefitSuffix": "하시면 혜택을 받을 수 있습니다.",
+        "memberMileageNotice": "참여 완료 후 {mileage} 마일리지가 적립돼요",
+        "submit": "신청 완료하기"
+      },
+      "question": {
+        "male": "남성",
+        "female": "여성",
+        "multiChoice": "(중복 선택 가능)",
+        "mbtiResult": "{mbti} 유형이군요!"
+      },
+      "result": {
+        "headline": {
+          "completed": "신청이 완료됐어요! 🎉",
+          "confirmed": "예약이 확정되었어요! 🎉"
+        },
+        "subcopy": {
+          "completed": "호스트가 확인 후 예약 확정을 알려드릴게요",
+          "confirmed": "게더링 당일에 뵙겠습니다"
+        },
+        "appliedGathering": "신청한 게더링",
+        "dateTime": "날짜 + 시간",
+        "location": "장소",
+        "price": "참가비",
+        "priceValue": "{price}원",
+        "checkWithBookingNumber": "예약번호로 신청 상태 조회하기",
+        "checkInMypage": "마이페이지에서 확정 여부 확인하기",
+        "goHome": "홈으로 돌아가기",
+        "bookingNumber": "예약번호",
+        "copy": "복사",
+        "copied": "복사됨",
+        "bookingNumberHelp": "예약번호와 연락처로 신청 내역을 조회할 수 있어요",
+        "paymentAccount": "참가비 입금 계좌",
+        "accountHolder": "예금주",
+        "depositAmount": "입금액",
+        "accountCopyHelp": "계좌번호를 누르면 복사돼요"
+      }
+    },
+    "ticketPass": {
+      "purchaseSuccess": "이용권 구매 요청이 접수됐어요.\n입금 확인 후 이용권이 활성화됩니다.",
+      "purchaseFailed": "이용권 구매 요청에 실패했어요. 잠시 후 다시 시도해주세요.",
+      "title": "우연한 식탁 이용권",
+      "description": "우연한 식탁은 이용권으로 참여해요. 4회권을 미리 결제해두면 매번 따로 결제하지 않아도 됩니다.",
+      "remaining": "남은 이용권",
+      "remainingCount": "{count}회",
+      "pendingNotice": "입금 확인 대기 중인 이용권이 있어요. 관리자 확인 후 활성화됩니다.",
+      "purchase": "4회권 선결제 신청",
+      "depositAccount": "입금 계좌 (신청 후 입금)",
+      "accountHolder": "예금주 {holder}",
+      "loginRequired": "로그인 후 이용권을 구매할 수 있어요."
+    }
+  },
+  "review": {
+    "photoReview": "📷 포토리뷰",
+    "anonymous": "익명",
+    "countForGathering": "이 게더링의 후기 {count}개",
+    "sort": {
+      "likes": "추천순",
+      "latest": "최신순"
+    },
+    "loading": "불러오는 중...",
+    "empty": "아직 후기가 없어요. 첫 번째 후기를 남겨보세요!",
+    "emptyShort": "아직 후기가 없어요.",
+    "alreadyWritten": "내가 작성한 리뷰가 있어요",
+    "allGatherings": "전체 게더링",
+    "form": {
+      "starLabel": "{score}점",
+      "success": "후기가 등록됐어요!",
+      "successWithReward": "후기가 등록됐어요! +{mileage}M 적립",
+      "imageUploadFailed": "이미지 업로드에 실패했어요. 다시 시도해주세요.",
+      "title": "후기 남기기",
+      "textTab": "텍스트",
+      "photoTab": "사진",
+      "placeholder": "게더링에서의 경험을 자유롭게 작성해주세요",
+      "rewardNotice": "후기 등록 시 +{mileage}M 마일리지가 적립돼요",
+      "submitting": "등록 중...",
+      "uploading": "이미지 업로드 중...",
+      "submit": "후기 등록"
+    },
+    "card": {
+      "deleteTitle": "리뷰를 삭제하시겠어요?",
+      "deleteDescription": "적립된 마일리지는 회수되지 않습니다.",
+      "cancel": "취소",
+      "deleting": "삭제 중…",
+      "delete": "삭제",
+      "loginRequired": "로그인이 필요한 기능이에요",
+      "deleteSuccess": "리뷰가 삭제됐어요",
+      "deleteFailed": "삭제에 실패했어요. 다시 시도해주세요",
+      "anonymous": "익명",
+      "gatheringFallback": "게더링",
+      "photoReview": "📷 포토리뷰",
+      "writtenAt": "{date} 작성",
+      "more": "더보기",
+      "unlike": "추천 취소",
+      "like": "추천"
+    }
+  },
+  "mypage": {
+    "profile": {
+      "loadFailed": "프로필을 불러올 수 없습니다.",
+      "passwordChanged": "비밀번호 변경이 완료되었습니다.",
+      "editProfile": "프로필 수정",
+      "mileage": "{mileage} 마일리지",
+      "ticketPass": "우연한 식탁 이용권",
+      "ticketRemaining": "{count}회 남음",
+      "phone": "연락처",
+      "gender": "성별",
+      "genderLabels": {
+        "MALE": "남성",
+        "FEMALE": "여성"
+      },
+      "age": "나이",
+      "ageValue": "{age}세",
+      "job": "직업",
+      "mbti": "MBTI",
+      "animalType": "동물 유형",
+      "interests": "관심사",
+      "adminDashboard": "관리자 대시보드",
+      "logout": "로그아웃",
+      "changePassword": "비밀번호 변경",
+      "withdraw": "회원탈퇴"
+    },
+    "applications": {
+      "loading": "불러오는 중...",
+      "filters": {
+        "all": "전체",
+        "pending": "대기중",
+        "confirmed": "확정",
+        "attended": "참석",
+        "cancelled": "취소"
+      },
+      "status": {
+        "PENDING": "검토 중",
+        "CONFIRMED": "확정",
+        "CANCELLED": "취소됨",
+        "ATTENDED": "참석 완료"
+      },
+      "payment": {
+        "PENDING": "입금 확인 중",
+        "CONFIRMED": "입금 완료"
+      },
+      "emptyFiltered": "해당 상태의 신청 내역이 없어요.",
+      "empty": "아직 신청한 게더링이 없어요.",
+      "browseGatherings": "게더링 둘러보기",
+      "bookingNumber": "예약번호: {bookingNumber}",
+      "cancelConfirmQuestion": "정말 취소할까요?",
+      "goBack": "돌아가기",
+      "cancelling": "취소 중...",
+      "confirmCancel": "취소 확인",
+      "cancelApplication": "신청 취소"
+    },
+    "password": {
+      "title": "비밀번호 변경",
+      "currentPassword": "현재 비밀번호",
+      "currentPasswordPlaceholder": "현재 비밀번호",
+      "newPassword": "새 비밀번호",
+      "newPasswordPlaceholder": "영문+숫자 포함 8자 이상",
+      "confirmPassword": "새 비밀번호 확인",
+      "confirmPasswordPlaceholder": "새 비밀번호 다시 입력",
+      "submitting": "변경 중...",
+      "submit": "변경하기",
+      "validation": {
+        "currentPassword": "현재 비밀번호를 입력해주세요",
+        "newPassword": "비밀번호는 영문+숫자 포함 8자 이상으로 설정해주세요",
+        "confirmPassword": "새 비밀번호를 다시 입력해주세요",
+        "mismatch": "새 비밀번호가 일치하지 않습니다"
+      }
+    },
+    "tabs": {
+      "profile": "프로필",
+      "applications": "신청 내역",
+      "reviews": "후기"
+    },
+    "mileage": {
+      "balanceAsOf": "{time} 기준 보유 마일리지",
+      "unit": "마일리지",
+      "howToEarnEyebrow": "HOW TO EARN",
+      "howToEarnTitle": "어떻게 쌓나요?",
+      "earnMethods": [
+        {
+          "title": "게더링 참석 완료",
+          "desc": "신청한 게더링에 참석하고\n주최자가 출석을 처리하면 쌓여요"
+        },
+        {
+          "title": "게더링 후기 작성",
+          "desc": "참석한 모임의 분위기와 감상을\n글이나 사진으로 남겨주세요"
+        },
+        {
+          "title": "회원가입 환영 마일리지",
+          "desc": "와썹하우스에 처음 오신 분께\n인사 대신 드려요"
+        }
+      ],
+      "typeLabels": {
+        "SIGNUP": "회원가입 환영",
+        "ATTENDANCE": "게더링 참석",
+        "REVIEW_REWARD": "게더링 후기 작성",
+        "REVIEW_UPGRADE": "후기 사진 업그레이드",
+        "ADMIN_ADJUST": "관리자 조정",
+        "ADMIN_ADJUST_EARN": "관리자 지급",
+        "ADMIN_ADJUST_USE": "관리자 차감"
+      },
+      "filters": {
+        "ALL": "전체",
+        "EARN": "적립 내역",
+        "USE": "사용 내역"
+      },
+      "balance": "잔액 {balance}M",
+      "empty": {
+        "USE": {
+          "head": "아직 사용 내역이 없어요",
+          "body": "모은 마일리지로 게더링 참가비를\n할인받을 수 있어요"
+        },
+        "EARN": {
+          "head": "아직 적립 내역이 없어요",
+          "body": "마음 가는 게더링에 신청하고\n오프라인에서 만나보세요"
+        },
+        "ALL": {
+          "head": "아직 마일리지 내역이 없어요",
+          "body": "게더링에 참석하거나 후기를 남기면\n마일리지가 쌓여요"
+        }
+      },
+      "browseGatherings": "게더링 둘러보기",
+      "logEyebrow": "MILEAGE LOG",
+      "logTitle": "마일리지 내역",
+      "itemCount": "{count}건",
+      "sortLatest": "최신순",
+      "sortOldest": "오래된 순"
+    },
+    "profileEdit": {
+      "title": "프로필 수정",
+      "basicInfo": "기본 정보",
+      "nickname": "닉네임*",
+      "nicknamePlaceholder": "닉네임을 입력해주세요",
+      "name": "이름*",
+      "namePlaceholder": "실명을 입력해주세요",
+      "gender": "성별*",
+      "genderLabels": {
+        "MALE": "남성",
+        "FEMALE": "여성"
+      },
+      "age": "나이*",
+      "agePlaceholder": "나이를 입력해주세요",
+      "phone": "연락처",
+      "additionalInfo": "추가 정보",
+      "optional": "(선택)",
+      "bio": "한 줄 소개",
+      "bioPlaceholder": "나를 한 줄로 표현해보세요",
+      "instagram": "인스타그램 ID",
+      "job": "직업",
+      "mbti": "MBTI",
+      "mbtiResult": "{mbti} 유형이군요!",
+      "interests": "관심사",
+      "interestPlaceholder": "관심사 입력 후 추가",
+      "addInterest": "관심사 추가",
+      "removeInterest": "{interest} 삭제",
+      "maxInterests": "최대 10개",
+      "submit": "저장하기",
+      "submitFailed": "프로필 수정 중 오류가 발생했습니다. 다시 시도해주세요.",
+      "validation": {
+        "nicknameMin": "닉네임은 2자 이상이어야 합니다",
+        "nicknameMax": "닉네임은 50자 이하여야 합니다",
+        "nameRequired": "이름을 입력해주세요",
+        "nameMax": "이름은 50자 이하여야 합니다",
+        "phone": "전화번호는 11자리 숫자여야 합니다",
+        "age": "올바른 나이를 입력해주세요",
+        "bioMax": "소개는 100자 이하여야 합니다",
+        "gender": "성별을 선택해주세요."
+      }
+    },
+    "guestApplication": {
+      "intro": "예약번호와 연락처로 신청 내역을 확인할 수 있어요",
+      "bookingNumber": "예약번호",
+      "phone": "연락처",
+      "checking": "조회 중...",
+      "check": "조회하기",
+      "notFound": "예약번호 또는 연락처를 확인해주세요",
+      "resultLabel": "신청 내역",
+      "confirmedHelp": "카드를 누르면 예약 확정 페이지로 이동해요",
+      "invalidTitle": "유효하지 않은 링크입니다",
+      "invalidDescription": "링크가 만료됐거나 올바르지 않아요",
+      "checkDirectly": "예약번호로 직접 조회하기",
+      "goHome": "홈으로 돌아가기",
+      "title": "신청 내역",
+      "description": "아래에서 신청 정보를 확인하세요",
+      "loginToView": "로그인하고 내 신청 내역 보기",
+      "validation": {
+        "bookingNumber": "예약번호를 입력해주세요",
+        "phoneRequired": "연락처를 입력해주세요",
+        "phoneInvalid": "올바른 연락처를 입력해주세요"
+      }
+    },
+    "reviews": {
+      "loading": "불러오는 중...",
+      "empty": "아직 작성한 후기가 없어요",
+      "more": "더보기"
+    },
+    "withdraw": {
+      "title": "회원탈퇴",
+      "description": "탈퇴하면 계정이 비활성화되고 다시 로그인할 수 없습니다.",
+      "passwordConfirm": "비밀번호 확인",
+      "passwordPlaceholder": "현재 비밀번호",
+      "submitting": "처리 중...",
+      "submit": "탈퇴하기",
+      "failed": "회원탈퇴에 실패했습니다.",
+      "validation": {
+        "password": "비밀번호를 입력해주세요"
+      }
+    }
+  },
+  "social": {
+    "title": "소셜 스페이스",
+    "description": "소셜 기능이 여기에 표시됩니다."
+  },
+  "story": {
+    "fallbackTitle": "소개 | 와썹하우스",
+    "cta": "게더링 둘러보기",
+    "whatsupHouse": {
+      "tagline": "우리가 만드는 공간",
+      "title": "와썹하우스 이야기",
+      "description": "와썹하우스는 혼자 사는 2030 청년이 부담 없이 모일 수 있도록, 대표가 직접 기획하고 운영하는 소규모 오프라인 게더링 플랫폼입니다.",
+      "sections": [
+        {
+          "heading": "와썹하우스는요",
+          "body": "혼자여도 외롭지 않은 저녁을 만들고 싶었어요. 와썹하우스는 1인 가구 2030 청년을 위한 오프라인 소셜 게더링 플랫폼입니다. 가볍게 만나 취향과 일상을 나누는 자리를 이어갑니다."
+        },
+        {
+          "heading": "이런 게더링을 만들어요",
+          "body": "모든 게더링은 와썹하우스가 직접 주최하고 운영해요. 한 번에 최대 20명까지, 늘 소규모로 진행해 처음 오신 분도 자연스럽게 어울릴 수 있어요."
+        },
+        {
+          "heading": "이렇게 참여해요",
+          "body": "마음에 드는 게더링을 둘러보고 신청만 하면 끝. 복잡한 매칭 없이, 원하는 날짜의 모임에 가볍게 합류하세요."
+        }
+      ]
+    }
+  },
+  "ui": {
+    "apiError": {
+      "fallback": "오류가 발생했습니다.",
+      "retry": "다시 시도"
+    },
+    "pagination": {
+      "first": "첫 페이지",
+      "previous": "이전 페이지",
+      "next": "다음 페이지",
+      "last": "마지막 페이지"
+    },
+    "scroll": {
+      "previous": "이전",
+      "next": "다음"
+    },
+    "toast": {
+      "close": "닫기"
+    },
+    "loading": {
+      "label": "로딩 중"
+    },
+    "imageUpload": {
+      "alt": "업로드 이미지",
+      "selectPhoto": "사진 선택",
+      "loadPhoto": "사진 불러오기",
+      "ratioHint": "비율로 보여져요",
+      "change": "변경",
+      "remove": "이미지 제거"
+    },
+    "imageCrop": {
+      "contextTitle": {
+        "review": "후기 사진 편집",
+        "carousel": "캐러셀 이미지 편집",
+        "avatar": "프로필 이미지 편집"
+      },
+      "processing": "처리 중...",
+      "apply": "적용",
+      "cancel": "취소",
+      "dragHint": "드래그하여 위치, 슬라이더로 크기 조절",
+      "zoomOut": "축소",
+      "zoomIn": "확대",
+      "ratio": "비율 {ratio}",
+      "rotate": "회전",
+      "originalSize": "원본 크기",
+      "confirm": "확정",
+      "previewTitle": "이렇게 보여요",
+      "previewContext": {
+        "avatar": "프로필에서 이렇게 보여요",
+        "carousel": "홈 캐러셀에서 이렇게 보여요",
+        "review": "아래 화면들에서 이렇게 보여져요"
+      },
+      "avatarAlt": "아바타 미리보기",
+      "avatarMask": "원형 마스크로 표시됩니다",
+      "cardAlt": "카드 미리보기",
+      "sampleTitle": "느린 오후의 재즈 감상 모임",
+      "sampleDate": "5월 24일 토 · 14:00 · 성수동",
+      "listAlt": "리스트 미리보기",
+      "sampleListTitle": "리스트에서 이렇게",
+      "sampleListBody": "썸네일 크기로 줄어들어도 잘리는 부분이 같아요",
+      "editAgain": "다시 편집하기"
+    },
+    "multiCrop": {
+      "title": "게더링 이미지",
+      "pending": "다중 크롭 준비 중",
+      "steps": [
+        {
+          "label": "정사각 썸네일",
+          "description": "목록 카드 및 캘린더에 표시됩니다"
+        },
+        {
+          "label": "가로 상세 이미지",
+          "description": "게더링 상세 페이지 상단에 표시됩니다"
+        }
+      ],
+      "select": "이미지 선택 후 단계별 크롭 설정",
+      "selectAgain": "다시 선택"
+    }
+  },
+  "metadata": {
+    "root": {
+      "title": "와썹하우스",
+      "description": "잔잔한 게 좋은 사람들의 공간"
+    },
+    "home": {
+      "title": "와썹하우스 | 1인 가구 소셜 게더링 플랫폼",
+      "description": "혼자 사는 2030 청년을 위한 소규모 오프라인 소셜 게더링. 새로운 인연을 만나보세요.",
+      "openGraphTitle": "와썹하우스",
+      "openGraphDescription": "혼자 사는 2030 청년을 위한 소규모 오프라인 소셜 게더링."
+    },
+    "gatherings": {
+      "title": "게더링 | 와썹하우스",
+      "description": "날짜별 소셜 게더링 일정을 확인하고 신청하세요."
+    }
+  },
+  "payment": {
+    "account": {
+      "bankName": "우리은행",
+      "accountHolder": "와썹하우스"
+    }
+  },
+  "errors": {
+    "UNKNOWN": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요.",
+    "EMAIL_ALREADY_EXISTS": "이미 사용 중인 이메일이에요",
+    "NICKNAME_ALREADY_EXISTS": "이미 사용 중인 닉네임이에요",
+    "INVALID_CREDENTIALS": "아이디 또는 비밀번호를 확인해주세요.",
+    "USER_NOT_FOUND": "일치하는 가입 정보를 찾을 수 없습니다.",
+    "PASSWORD_RESET_FAILED": "비밀번호 재설정 요청에 실패했습니다.",
+    "INVALID_PASSWORD_RESET_TOKEN": "비밀번호 재설정 링크를 확인해주세요."
   }
 }

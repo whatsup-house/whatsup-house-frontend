@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useToastStore } from '@/lib/store/toastStore'
 
 // 전역 토스트 호스트. Providers에 마운트되어 페이지 이동과 무관하게 토스트를 표시한다. (KAN-227)
 export default function ToastHost() {
+  const t = useTranslations('ui.toast')
   const message = useToastStore((s) => s.message)
   const variant = useToastStore((s) => s.variant)
   const clear = useToastStore((s) => s.clear)
@@ -27,7 +29,7 @@ export default function ToastHost() {
           <button
             onClick={clear}
             className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center text-tag-text transition-opacity hover:opacity-70"
-            aria-label="닫기"
+            aria-label={t('close')}
           >
             <X size={18} />
           </button>
@@ -58,7 +60,7 @@ export default function ToastHost() {
         <button
           onClick={clear}
           className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
-          aria-label="닫기"
+          aria-label={t('close')}
         >
           <X size={16} />
         </button>

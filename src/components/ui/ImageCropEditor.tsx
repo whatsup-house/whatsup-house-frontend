@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { CropContext, CropRatio } from '@/lib/api/types'
 
 interface ImageCropEditorProps {
@@ -25,10 +26,10 @@ const RATIO_NUM: Record<CropRatio, number> = {
   '1:1': 1,
 }
 
-const CONTEXT_TITLE: Record<CropContext, string> = {
-  review: '후기 사진 편집',
-  carousel: '캐러셀 이미지 편집',
-  avatar: '프로필 이미지 편집',
+const CONTEXT_TITLE_KEY: Record<CropContext, string> = {
+  review: 'contextTitle.review',
+  carousel: 'contextTitle.carousel',
+  avatar: 'contextTitle.avatar',
 }
 
 function computeFrame(cropRatio: CropRatio): { fw: number; fh: number } {
@@ -55,6 +56,7 @@ export default function ImageCropEditor({
   onConfirm,
   onCancel,
 }: ImageCropEditorProps) {
+  const t = useTranslations('ui.imageCrop')
   const [stage, setStage] = useState<'edit' | 'preview'>('edit')
   const [imgSrc, setImgSrc] = useState('')
   const [imgSize, setImgSize] = useState({ w: 1, h: 1 })
@@ -236,9 +238,9 @@ export default function ImageCropEditor({
       <EditorHeader
         onBack={onCancel}
         onDone={handlePreview}
-        doneLabel={isCropping ? '처리 중...' : '적용'}
+        doneLabel={isCropping ? t('processing') : t('apply')}
         doneDisabled={isCropping}
-        title={CONTEXT_TITLE[context]}
+        title={t(CONTEXT_TITLE_KEY[context])}
         dark
       />
 
@@ -276,7 +278,7 @@ export default function ImageCropEditor({
         <div className="absolute top-4 left-0 right-0 flex justify-center pointer-events-none">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-white/10 bg-[rgba(20,15,12,0.7)] backdrop-blur-md text-xs font-medium text-white/90 whitespace-nowrap">
             <HandIcon className="text-white/90" size={15} />
-            <span>드래그하여 위치, 슬라이더로 크기 조절</span>
+            <span>{t('dragHint')}</span>
           </div>
         </div>
 
@@ -294,7 +296,7 @@ export default function ImageCropEditor({
             type="button"
             onClick={() => setZoom(zoomMultiplier - ZOOM_STEP)}
             className="flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.08] shrink-0"
-            aria-label="축소"
+            aria-label={t('zoomOut')}
           >
             <MinusGlyph className="text-white" size={14} />
           </button>
@@ -320,7 +322,7 @@ export default function ImageCropEditor({
             type="button"
             onClick={() => setZoom(zoomMultiplier + ZOOM_STEP)}
             className="flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.08] shrink-0"
-            aria-label="확대"
+            aria-label={t('zoomIn')}
           >
             <PlusGlyph className="text-white" size={14} />
           </button>
@@ -328,9 +330,9 @@ export default function ImageCropEditor({
 
         {/* Quick actions */}
         <div className="flex items-center justify-between gap-2">
-          <Pill label={`비율 ${cropRatio}`} Icon={CropIcon} disabled />
-          <Pill label="회전" Icon={RotateIcon} onClick={handleRotate} />
-          <Pill label="원본 크기" Icon={ResetIcon} onClick={handleReset} />
+          <Pill label={t('ratio', { ratio: cropRatio })} Icon={CropIcon} disabled />
+          <Pill label={t('rotate')} Icon={RotateIcon} onClick={handleRotate} />
+          <Pill label={t('originalSize')} Icon={ResetIcon} onClick={handleReset} />
         </div>
       </div>
 
@@ -375,11 +377,13 @@ interface EditorHeaderProps {
 function EditorHeader({
   onBack,
   onDone,
-  doneLabel = '적용',
+  doneLabel,
   doneDisabled = false,
   title,
   dark = true,
 }: EditorHeaderProps) {
+  const t = useTranslations('ui.imageCrop')
+
   return (
     <header
       className={`flex items-center justify-between h-14 px-2 shrink-0 z-10 backdrop-blur ${
@@ -396,7 +400,7 @@ function EditorHeader({
         }`}
       >
         <ChevronLeftIcon size={22} />
-        <span>취소</span>
+        <span>{t('cancel')}</span>
       </button>
       <h1 className={`text-base font-bold whitespace-nowrap ${dark ? 'text-white' : 'text-foreground'}`}>
         {title}
@@ -415,7 +419,7 @@ function EditorHeader({
             : 'text-primary'
         }`}
       >
-        {doneLabel}
+        {doneLabel ?? t('apply')}
       </button>
     </header>
   )
@@ -538,6 +542,7 @@ interface PreviewStageProps {
 }
 
 function PreviewStage({ previewUrl, cropRatio, context, onBack, onConfirm }: PreviewStageProps) {
+  const t = useTranslations('ui.imageCrop')
   const aspectStyle = {
     aspectRatio: cropRatio === '4:3' ? '4 / 3' : cropRatio === '9:16' ? '9 / 16' : '1 / 1',
   }
@@ -547,18 +552,14 @@ function PreviewStage({ previewUrl, cropRatio, context, onBack, onConfirm }: Pre
       <EditorHeader
         onBack={onBack}
         onDone={onConfirm}
-        doneLabel="확정"
-        title="이렇게 보여요"
+        doneLabel={t('confirm')}
+        title={t('previewTitle')}
         dark={false}
       />
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-4 pb-6 flex flex-col gap-5">
         <p className="text-center text-xs text-tag-text">
-          {context === 'avatar'
-            ? '프로필에서 이렇게 보여요'
-            : context === 'carousel'
-            ? '홈 캐러셀에서 이렇게 보여요'
-            : '아래 화면들에서 이렇게 보여져요'}
+          {t(`previewContext.${context}`)}
         </p>
 
         {context === 'avatar' ? (
@@ -567,12 +568,12 @@ function PreviewStage({ previewUrl, cropRatio, context, onBack, onConfirm }: Pre
               {previewUrl && (
                 <img
                   src={previewUrl}
-                  alt="아바타 미리보기"
+                  alt={t('avatarAlt')}
                   className="w-full h-full object-cover"
                 />
               )}
             </div>
-            <p className="text-xs text-tag-text">원형 마스크로 표시됩니다</p>
+            <p className="text-xs text-tag-text">{t('avatarMask')}</p>
           </div>
         ) : (
           <>
@@ -582,16 +583,16 @@ function PreviewStage({ previewUrl, cropRatio, context, onBack, onConfirm }: Pre
                 {previewUrl && (
                   <img
                     src={previewUrl}
-                    alt="카드 미리보기"
+                    alt={t('cardAlt')}
                     className="w-full h-full object-cover"
                   />
                 )}
               </div>
               <div className="px-4 py-3.5">
                 <p className="text-[15px] font-bold text-foreground mb-1">
-                  느린 오후의 재즈 감상 모임
+                  {t('sampleTitle')}
                 </p>
-                <p className="text-xs text-tag-text">5월 24일 토 · 14:00 · 성수동</p>
+                <p className="text-xs text-tag-text">{t('sampleDate')}</p>
               </div>
             </div>
 
@@ -604,17 +605,17 @@ function PreviewStage({ previewUrl, cropRatio, context, onBack, onConfirm }: Pre
                 {previewUrl && (
                   <img
                     src={previewUrl}
-                    alt="리스트 미리보기"
+                    alt={t('listAlt')}
                     className="w-full h-full object-cover"
                   />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-bold text-foreground mb-0.5">
-                  리스트에서 이렇게
+                  {t('sampleListTitle')}
                 </p>
                 <p className="text-[11.5px] text-tag-text leading-snug">
-                  썸네일 크기로 줄어들어도 잘리는 부분이 같아요
+                  {t('sampleListBody')}
                 </p>
               </div>
             </div>
@@ -626,7 +627,7 @@ function PreviewStage({ previewUrl, cropRatio, context, onBack, onConfirm }: Pre
           onClick={onBack}
           className="self-center px-5 py-2.5 rounded-full bg-transparent border border-tag-bg/50 text-[13px] font-semibold text-tag-text"
         >
-          다시 편집하기
+          {t('editAgain')}
         </button>
       </div>
     </div>

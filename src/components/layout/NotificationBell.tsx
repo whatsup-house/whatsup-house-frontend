@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, X, CheckCircle, Gift, Heart, type LucideIcon } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useAuthStore } from '@/lib/store/authStore'
 import {
   useNotifications,
@@ -11,7 +11,7 @@ import {
   useMarkNotificationRead,
   useDeleteNotification,
 } from '@/lib/hooks/useNotifications'
-import { formatKoreanShortDate } from '@/lib/utils/date'
+import { formatLocalizedShortDate } from '@/lib/utils/date'
 import type { NotificationItem, NotificationLink, NotificationType } from '@/lib/api/types'
 
 // 유형별 이동 대상 라우트. (KAN-262)
@@ -29,6 +29,7 @@ const TYPE_ICON: Record<NotificationType, LucideIcon> = {
 
 export default function NotificationBell() {
   const t = useTranslations('notifications')
+  const locale = useLocale()
   const router = useRouter()
   const { isLoggedIn } = useAuthStore()
   const [open, setOpen] = useState(false)
@@ -115,7 +116,7 @@ export default function NotificationBell() {
                             {item.content && (
                               <p className="text-sm text-tag-text mt-0.5 break-keep">{item.content}</p>
                             )}
-                            <p className="text-xs text-tag-text mt-1.5">{formatKoreanShortDate(item.createdAt)}</p>
+                            <p className="text-xs text-tag-text mt-1.5">{formatLocalizedShortDate(item.createdAt, locale)}</p>
                           </div>
                           <button
                             onClick={(e) => {

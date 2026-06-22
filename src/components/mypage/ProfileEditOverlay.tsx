@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button, Input } from '@/components/ui'
 import JobSelect from '@/components/auth/JobSelect'
 import { useUpdateProfile } from '@/lib/hooks/useAuth'
+import { resolveApiErrorMessage } from '@/lib/utils/apiError'
 import type { UserProfile, Gender } from '@/lib/api/types'
 
 const MBTI_ROWS = [
@@ -15,22 +17,20 @@ const MBTI_ROWS = [
   ['I', 'N', 'T', 'P'],
 ] as const
 
-const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'MALE', label: '남성' },
-  { value: 'FEMALE', label: '여성' },
+const GENDER_OPTIONS: { value: Gender; labelKey: string }[] = [
+  { value: 'MALE', labelKey: 'genderLabels.MALE' },
+  { value: 'FEMALE', labelKey: 'genderLabels.FEMALE' },
 ]
 
-const schema = z.object({
-  nickname: z.string().min(2, '닉네임은 2자 이상이어야 합니다').max(50, '닉네임은 50자 이하여야 합니다'),
-  name: z.string().min(1, '이름을 입력해주세요').max(50, '이름은 50자 이하여야 합니다'),
-  phone: z.string().regex(/^\d{11}$/, '전화번호는 11자리 숫자여야 합니다').optional().or(z.literal('')),
-  age: z.number().int().min(1, '올바른 나이를 입력해주세요').max(100, '올바른 나이를 입력해주세요'),
-  instagramId: z.string().optional(),
-  job: z.string().optional(),
-  bio: z.string().max(100, '소개는 100자 이하여야 합니다').optional(),
-})
-
-type FormValues = z.infer<typeof schema>
+type FormValues = {
+  nickname: string
+  name: string
+  phone?: string
+  age: number
+  instagramId?: string
+  job?: string
+  bio?: string
+}
 
 interface ProfileEditOverlayProps {
   profile: UserProfile
@@ -38,7 +38,22 @@ interface ProfileEditOverlayProps {
 }
 
 export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOverlayProps) {
+  const t = useTranslations('mypage.profileEdit')
+  const tCommon = useTranslations('common')
   const updateMutation = useUpdateProfile()
+  const schema = useMemo(
+    () =>
+      z.object({
+        nickname: z.string().min(2, t('validation.nicknameMin')).max(50, t('validation.nicknameMax')),
+        name: z.string().min(1, t('validation.nameRequired')).max(50, t('validation.nameMax')),
+        phone: z.string().regex(/^\d{11}$/, t('validation.phone')).optional().or(z.literal('')),
+        age: z.number().int().min(1, t('validation.age')).max(100, t('validation.age')),
+        instagramId: z.string().optional(),
+        job: z.string().optional(),
+        bio: z.string().max(100, t('validation.bioMax')).optional(),
+      }),
+    [t],
+  )
 
   // 성별은 mbti와 동일하게 'profile 값 + 사용자 override' 파생으로 둔다.
   // 그래야 profile이 나중에 채워져도 기존 성별이 유지된다(초기화 방지). (KAN-222)
@@ -97,7 +112,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
 
   const onSubmit = async (formData: FormValues) => {
     if (!gender) {
-      setGenderError('성별을 선택해주세요.')
+      setGenderError(t('validation.gender'))
       return
     }
     setGenderError(null)
@@ -117,8 +132,8 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
         interests: interests.length > 0 ? interests : undefined,
       })
       onClose()
-    } catch {
-      setSubmitError('프로필 수정 중 오류가 발생했습니다. 다시 시도해주세요.')
+    } catch (error) {
+      setSubmitError(resolveApiErrorMessage(error, tCommon))
     }
   }
 
@@ -130,12 +145,12 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
           <button
             onClick={onClose}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label="닫기"
+            aria-label={tCommon('close')}
           >
             <X size={20} className="text-foreground" />
           </button>
           <h1 className="flex-1 text-center text-base font-bold text-foreground pr-11">
-            프로필 수정
+            {t('title')}
           </h1>
         </div>
       </header>
@@ -145,23 +160,23 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
         <div>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-1 h-5 bg-primary rounded-full" />
-            <h2 className="text-base font-bold text-foreground">기본 정보</h2>
+            <h2 className="text-base font-bold text-foreground">{t('basicInfo')}</h2>
           </div>
           <div className="flex flex-col gap-4">
             <Input
-              label="닉네임*"
-              placeholder="닉네임을 입력해주세요"
+              label={t('nickname')}
+              placeholder={t('nicknamePlaceholder')}
               {...register('nickname')}
               error={errors.nickname?.message}
             />
             <Input
-              label="이름*"
-              placeholder="실명을 입력해주세요"
+              label={t('name')}
+              placeholder={t('namePlaceholder')}
               {...register('name')}
               error={errors.name?.message}
             />
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-foreground">성별*</label>
+              <label className="text-sm font-medium text-foreground">{t('gender')}</label>
               <div className="flex gap-2">
                 {GENDER_OPTIONS.map((option) => (
                   <button
@@ -174,21 +189,21 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
                         : 'bg-tag-bg text-tag-text'
                     }`}
                   >
-                    {option.label}
+                    {t(option.labelKey)}
                   </button>
                 ))}
               </div>
               {genderError && <p className="text-xs text-primary pl-1">{genderError}</p>}
             </div>
             <Input
-              label="나이*"
+              label={t('age')}
               type="number"
-              placeholder="나이를 입력해주세요"
+              placeholder={t('agePlaceholder')}
               {...register('age', { valueAsNumber: true })}
               error={errors.age?.message}
             />
             <Input
-              label="연락처"
+              label={t('phone')}
               placeholder="01012345678"
               {...register('phone')}
               error={errors.phone?.message}
@@ -201,14 +216,14 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
           <div className="flex items-center gap-2 mb-4">
             <div className="w-1 h-5 bg-tag-bg rounded-full" />
             <h2 className="text-base font-bold text-foreground">
-              추가 정보 <span className="text-sm font-normal text-tag-text">(선택)</span>
+              {t('additionalInfo')} <span className="text-sm font-normal text-tag-text">{t('optional')}</span>
             </h2>
           </div>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-foreground">한 줄 소개</label>
+              <label className="text-sm font-medium text-foreground">{t('bio')}</label>
               <textarea
-                placeholder="나를 한 줄로 표현해보세요"
+                placeholder={t('bioPlaceholder')}
                 {...register('bio')}
                 className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground text-sm placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[80px]"
                 rows={3}
@@ -216,12 +231,12 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
               {errors.bio && <p className="text-xs text-primary pl-1">{errors.bio.message}</p>}
             </div>
             <Input
-              label="인스타그램 ID"
+              label={t('instagram')}
               placeholder="@username"
               {...register('instagramId')}
             />
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-foreground">직업</label>
+              <label className="text-sm font-medium text-foreground">{t('job')}</label>
               <Controller
                 name="job"
                 control={control}
@@ -231,7 +246,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-foreground">MBTI</label>
+              <label className="text-sm font-medium text-foreground">{t('mbti')}</label>
               <div className="grid grid-cols-4 gap-2">
                 {MBTI_ROWS[0].map((letter, colIndex) => (
                   <button
@@ -264,19 +279,19 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
               </div>
               {mbtiString && (
                 <p className="text-center text-sm text-primary font-medium">
-                  {mbtiString} 유형이군요!
+                  {t('mbtiResult', { mbti: mbtiString })}
                 </p>
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-foreground">관심사</label>
+              <label className="text-sm font-medium text-foreground">{t('interests')}</label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={interestInput}
                   onChange={(e) => setInterestInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addInterest() } }}
-                  placeholder="관심사 입력 후 추가"
+                  placeholder={t('interestPlaceholder')}
                   maxLength={20}
                   className="flex-1 px-4 py-2.5 rounded-input border border-tag-bg bg-card text-foreground text-sm placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[44px]"
                 />
@@ -285,7 +300,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
                   onClick={addInterest}
                   disabled={!interestInput.trim() || interests.length >= 10}
                   className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-input bg-tag-bg text-tag-text disabled:opacity-40"
-                  aria-label="관심사 추가"
+                  aria-label={t('addInterest')}
                 >
                   <Plus size={18} />
                 </button>
@@ -302,7 +317,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
                         type="button"
                         onClick={() => removeInterest(interest)}
                         className="ml-0.5 text-tag-text"
-                        aria-label={`${interest} 삭제`}
+                        aria-label={t('removeInterest', { interest })}
                       >
                         <X size={12} />
                       </button>
@@ -310,7 +325,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
                   ))}
                 </div>
               )}
-              <p className="text-xs text-tag-text">최대 10개</p>
+              <p className="text-xs text-tag-text">{t('maxInterests')}</p>
             </div>
           </div>
         </div>
@@ -326,7 +341,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
           className="w-full"
           isLoading={updateMutation.isPending}
         >
-          저장하기
+          {t('submit')}
         </Button>
       </form>
       </div>

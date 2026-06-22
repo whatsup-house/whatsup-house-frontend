@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import {
   CheckCircle,
   Calendar,
@@ -12,7 +13,7 @@ import {
   Check,
 } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
-import { formatKoreanFullDate, formatTime } from '@/lib/utils/date'
+import { formatLocalizedFullDate, formatTime } from '@/lib/utils/date'
 import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
 import type { GatheringDetail } from '@/lib/api/types'
 
@@ -24,24 +25,16 @@ interface ApplicationResultViewProps {
   bookingNumber?: string | null
 }
 
-const HEADLINE: Record<Mode, string> = {
-  completed: '신청이 완료됐어요! 🎉',
-  confirmed: '예약이 확정되었어요! 🎉',
-}
-
-const SUBCOPY: Record<Mode, string> = {
-  completed: '호스트가 확인 후 예약 확정을 알려드릴게요',
-  confirmed: '게더링 당일에 뵙겠습니다',
-}
-
 export default function ApplicationResultView({
   gathering,
   mode,
   bookingNumber,
 }: ApplicationResultViewProps) {
+  const t = useTranslations('gathering.apply.result')
+  const locale = useLocale()
   const router = useRouter()
 
-  const formattedDate = formatKoreanFullDate(gathering.eventDate)
+  const formattedDate = formatLocalizedFullDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
 
   return (
@@ -58,20 +51,20 @@ export default function ApplicationResultView({
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-foreground mb-2">{HEADLINE[mode]}</h1>
-        <p className="text-sm text-tag-text mb-8">{SUBCOPY[mode]}</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">{t(`headline.${mode}`)}</h1>
+        <p className="text-sm text-tag-text mb-8">{t(`subcopy.${mode}`)}</p>
 
         {bookingNumber && <BookingNumberCard bookingNumber={bookingNumber} />}
 
         <Card className="w-full p-5 mb-4">
-          <p className="text-xs text-tag-text mb-1">신청한 게더링</p>
+          <p className="text-xs text-tag-text mb-1">{t('appliedGathering')}</p>
           <h2 className="text-base font-bold text-foreground mb-4">{gathering.title}</h2>
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <Calendar size={16} className="text-tag-text shrink-0" />
               <div>
-                <p className="text-xs text-tag-text">날짜 + 시간</p>
+                <p className="text-xs text-tag-text">{t('dateTime')}</p>
                 <p className="text-sm font-medium text-foreground">
                   {formattedDate} {formattedTime}
                 </p>
@@ -81,7 +74,7 @@ export default function ApplicationResultView({
             <div className="flex items-center gap-3">
               <MapPin size={16} className="text-tag-text shrink-0" />
               <div>
-                <p className="text-xs text-tag-text">장소</p>
+                <p className="text-xs text-tag-text">{t('location')}</p>
                 <p className="text-sm font-medium text-foreground">{gathering.location?.name}</p>
               </div>
             </div>
@@ -89,9 +82,9 @@ export default function ApplicationResultView({
             <div className="flex items-center gap-3">
               <CreditCard size={16} className="text-tag-text shrink-0" />
               <div>
-                <p className="text-xs text-tag-text">참가비</p>
+                <p className="text-xs text-tag-text">{t('price')}</p>
                 <p className="text-sm font-medium text-foreground">
-                  {(gathering.price ?? 0).toLocaleString()}원
+                  {t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
                 </p>
               </div>
             </div>
@@ -108,7 +101,7 @@ export default function ApplicationResultView({
               className="w-full"
               onClick={() => router.push('/applications/check')}
             >
-              예약번호로 신청 상태 조회하기
+              {t('checkWithBookingNumber')}
             </Button>
           ) : (
             <Button
@@ -117,7 +110,7 @@ export default function ApplicationResultView({
               className="w-full"
               onClick={() => router.push('/mypage?tab=applications')}
             >
-              마이페이지에서 확정 여부 확인하기
+              {t('checkInMypage')}
             </Button>
           )}
 
@@ -126,7 +119,7 @@ export default function ApplicationResultView({
             onClick={() => router.push('/')}
             className="text-sm text-tag-text underline py-3 min-h-[44px]"
           >
-            홈으로 돌아가기
+            {t('goHome')}
           </button>
         </div>
       </div>
@@ -135,6 +128,7 @@ export default function ApplicationResultView({
 }
 
 function BookingNumberCard({ bookingNumber }: { bookingNumber: string }) {
+  const t = useTranslations('gathering.apply.result')
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -152,7 +146,7 @@ function BookingNumberCard({ bookingNumber }: { bookingNumber: string }) {
       <div className="bg-primary-light rounded-card px-5 py-4 flex items-center gap-3">
         <Hash size={18} className="text-primary shrink-0" />
         <div className="flex-1">
-          <p className="text-xs text-tag-text">예약번호</p>
+          <p className="text-xs text-tag-text">{t('bookingNumber')}</p>
           <p className="text-base font-bold text-primary tracking-wider">{bookingNumber}</p>
         </div>
         <button
@@ -161,19 +155,22 @@ function BookingNumberCard({ bookingNumber }: { bookingNumber: string }) {
           className="flex items-center gap-1 text-xs text-primary font-medium shrink-0"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
-          {copied ? '복사됨' : '복사'}
+          {copied ? t('copied') : t('copy')}
         </button>
       </div>
       <p className="text-xs text-tag-text mt-2 px-1">
-        예약번호와 연락처로 신청 내역을 조회할 수 있어요
+        {t('bookingNumberHelp')}
       </p>
     </div>
   )
 }
 
 function PaymentAccountCard({ price }: { price: number }) {
+  const t = useTranslations('gathering.apply.result')
+  const tPayment = useTranslations('payment.account')
+  const locale = useLocale()
   const [copied, setCopied] = useState(false)
-  const accountText = `${PAYMENT_ACCOUNT.bankName} ${PAYMENT_ACCOUNT.accountNumber}`
+  const accountText = `${tPayment('bankName')} ${PAYMENT_ACCOUNT.accountNumber}`
 
   const handleCopy = async () => {
     try {
@@ -190,7 +187,7 @@ function PaymentAccountCard({ price }: { price: number }) {
       <div className="bg-primary-light rounded-card px-5 py-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <CreditCard size={16} className="text-primary shrink-0" />
-          <p className="text-xs text-tag-text">참가비 입금 계좌</p>
+          <p className="text-xs text-tag-text">{t('paymentAccount')}</p>
         </div>
 
         <button
@@ -203,22 +200,22 @@ function PaymentAccountCard({ price }: { price: number }) {
           </span>
           <span className="flex items-center gap-1 text-xs text-primary font-medium shrink-0">
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? '복사됨' : '복사'}
+            {copied ? t('copied') : t('copy')}
           </span>
         </button>
 
         <div className="flex flex-col gap-1 pt-2 border-t border-primary/10">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-tag-text">예금주</span>
-            <span className="text-foreground font-medium">{PAYMENT_ACCOUNT.accountHolder}</span>
+            <span className="text-tag-text">{t('accountHolder')}</span>
+            <span className="text-foreground font-medium">{tPayment('accountHolder')}</span>
           </div>
           <div className="flex items-center justify-between text-xs">
-            <span className="text-tag-text">입금액</span>
-            <span className="text-foreground font-medium">{price.toLocaleString()}원</span>
+            <span className="text-tag-text">{t('depositAmount')}</span>
+            <span className="text-foreground font-medium">{t('priceValue', { price: price.toLocaleString(locale) })}</span>
           </div>
         </div>
       </div>
-      <p className="text-xs text-tag-text mt-2 px-1">계좌번호를 누르면 복사돼요</p>
+      <p className="text-xs text-tag-text mt-2 px-1">{t('accountCopyHelp')}</p>
     </div>
   )
 }

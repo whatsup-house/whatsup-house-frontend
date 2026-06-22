@@ -23,6 +23,20 @@
     "errorBoundary": {
       "title": "Oops! Something went wrong",
       "description": "An unexpected error occurred.\nPlease try again in a moment."
+    },
+    "loading": "Loading...",
+    "status": {
+      "OPEN": "Open",
+      "CLOSED": "Closed",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "ATTENDED": "Attended",
+      "PENDING": "Pending"
+    },
+    "retry": "Try again",
+    "globalError": {
+      "title": "Oops! Something went wrong",
+      "description": "The server is having a temporary issue.\nPlease try again in a moment.\nIf it continues, please wait a little longer."
     }
   },
   "language": {
@@ -397,5 +411,552 @@
   "notFound": {
     "title": "Oops! We cannot find that page",
     "description": "The page you requested may be gone,\nor the address may be incorrect.\nGo back home and start again."
+  },
+  "home": {
+    "hero": {
+      "calendarEyebrow": "This month",
+      "calendarCta": "Tap to view all gatherings →",
+      "openBadge": "Open",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "curated": {
+      "title": "Most viewed gatherings this week",
+      "rankLabel": "No. {rank} {title}"
+    },
+    "reviews": {
+      "title": "Reviews from guests",
+      "viewAll": "View all ›"
+    }
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "gathering": {
+    "calendar": {
+      "dayLabels": [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
+      "monthTitle": "{month}/{year}",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "close": "Close",
+      "current": "Current"
+    },
+    "list": {
+      "dateTitle": "Gatherings on {month}/{day}",
+      "emptyTitle": "No gatherings on this day.",
+      "emptyDescription": "Try another day :)",
+      "calendarView": "Calendar view",
+      "mapView": "Map view"
+    },
+    "card": {
+      "price": "₩{price}",
+      "capacity": "Up to {count} people"
+    },
+    "map": {
+      "naverLabel": "View on Naver Map",
+      "naverShort": "Naver",
+      "kakaoLabel": "View on KakaoMap",
+      "kakaoShort": "Kakao",
+      "comingSoon": "Map integration coming soon",
+      "nearbyCount": "{count} upcoming gatherings in this area"
+    },
+    "detail": {
+      "loadFailed": "Could not load gathering information.",
+      "share": "Share",
+      "previousPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "hostedBy": "Hosted by Whatsup House",
+      "photoLabel": "Photo {index}",
+      "date": "Date",
+      "time": "Time",
+      "location": "Location",
+      "capacityLabel": "Capacity",
+      "capacity": "Up to {count} people",
+      "priceLabel": "Fee",
+      "price": "₩{price}",
+      "onsitePayment": "(pay on site)",
+      "mileageReward": "Mileage reward",
+      "descriptionTitle": "About this gathering",
+      "howToRunTitle": "How it works",
+      "cautionTitle": "This may not be a fit if you",
+      "caution1": "Disrupt others with excessive noise",
+      "caution2": "Force your tastes and ignore others’ opinions",
+      "caution3": "Attend for commercial promotion",
+      "reviewsTitle": "Participant reviews",
+      "reviewCount": "{count} reviews",
+      "linkCopied": "Link copied",
+      "durationHours": "{hours} hr",
+      "durationWithMinutes": "{hours} hr {minutes} min",
+      "otherDate": "Other dates",
+      "apply": "Apply",
+      "viewOtherDate": "View other dates",
+      "closed": "Closed"
+    },
+    "apply": {
+      "modal": {
+        "title": "Choose how to apply",
+        "memberApply": "Apply after logging in",
+        "memberApplyDescription": "Earn mileage and check your booking history",
+        "guestApply": "Apply without logging in",
+        "guestApplyDescription": "Mileage will not be earned"
+      },
+      "form": {
+        "requiredError": "This field is required.",
+        "loadFailed": "Could not load the application form.",
+        "gatheringLoadFailed": "Could not load gathering information.",
+        "guestMileageNotice": "Guest applications do not earn mileage.",
+        "loginToApply": "Apply after logging in",
+        "loginBenefitSuffix": "to receive benefits.",
+        "memberMileageNotice": "You will earn {mileage} mileage after attending",
+        "submit": "Complete application"
+      },
+      "question": {
+        "male": "Male",
+        "female": "Female",
+        "multiChoice": "(Multiple selections allowed)",
+        "mbtiResult": "So you are {mbti}!"
+      },
+      "result": {
+        "headline": {
+          "completed": "Application complete! 🎉",
+          "confirmed": "Booking confirmed! 🎉"
+        },
+        "subcopy": {
+          "completed": "The host will confirm your booking after checking it",
+          "confirmed": "See you on the gathering day"
+        },
+        "appliedGathering": "Applied gathering",
+        "dateTime": "Date + time",
+        "location": "Location",
+        "price": "Fee",
+        "priceValue": "₩{price}",
+        "checkWithBookingNumber": "Check status with booking number",
+        "checkInMypage": "Check confirmation in My Page",
+        "goHome": "Go home",
+        "bookingNumber": "Booking number",
+        "copy": "Copy",
+        "copied": "Copied",
+        "bookingNumberHelp": "You can check your application with your booking number and phone number",
+        "paymentAccount": "Payment account",
+        "accountHolder": "Account holder",
+        "depositAmount": "Deposit amount",
+        "accountCopyHelp": "Tap the account number to copy it"
+      }
+    },
+    "ticketPass": {
+      "purchaseSuccess": "Your pass purchase request was received.\nThe pass will activate after deposit confirmation.",
+      "purchaseFailed": "Failed to request pass purchase. Please try again later.",
+      "title": "Random Table Pass",
+      "description": "Random Table uses passes. Prepay for a 4-use pass so you do not need to pay every time.",
+      "remaining": "Remaining passes",
+      "remainingCount": "{count} left",
+      "pendingNotice": "You have a pass waiting for deposit confirmation. It will activate after admin confirmation.",
+      "purchase": "Request 4-use pass prepayment",
+      "depositAccount": "Deposit account (pay after request)",
+      "accountHolder": "Account holder {holder}",
+      "loginRequired": "Log in to purchase a pass."
+    }
+  },
+  "review": {
+    "photoReview": "📷 Photo review",
+    "anonymous": "Anonymous",
+    "countForGathering": "{count} reviews for this gathering",
+    "sort": {
+      "likes": "Most liked",
+      "latest": "Newest"
+    },
+    "loading": "Loading...",
+    "empty": "No reviews yet. Be the first to leave one!",
+    "emptyShort": "No reviews yet.",
+    "alreadyWritten": "You already wrote a review",
+    "allGatherings": "All gatherings",
+    "form": {
+      "starLabel": "{score} stars",
+      "success": "Review posted!",
+      "successWithReward": "Review posted! +{mileage}M earned",
+      "imageUploadFailed": "Image upload failed. Please try again.",
+      "title": "Write a review",
+      "textTab": "Text",
+      "photoTab": "Photo",
+      "placeholder": "Share your gathering experience freely",
+      "rewardNotice": "Posting a review earns +{mileage}M mileage",
+      "submitting": "Posting...",
+      "uploading": "Uploading image...",
+      "submit": "Post review"
+    },
+    "card": {
+      "deleteTitle": "Delete this review?",
+      "deleteDescription": "Earned mileage will not be reclaimed.",
+      "cancel": "Cancel",
+      "deleting": "Deleting…",
+      "delete": "Delete",
+      "loginRequired": "Please log in to use this feature",
+      "deleteSuccess": "Review deleted",
+      "deleteFailed": "Failed to delete. Please try again",
+      "anonymous": "Anonymous",
+      "gatheringFallback": "Gathering",
+      "photoReview": "📷 Photo review",
+      "writtenAt": "Written on {date}",
+      "more": "More",
+      "unlike": "Unlike",
+      "like": "Like"
+    }
+  },
+  "mypage": {
+    "profile": {
+      "loadFailed": "Could not load your profile.",
+      "passwordChanged": "Password changed successfully.",
+      "editProfile": "Edit profile",
+      "mileage": "{mileage} mileage",
+      "ticketPass": "Random Table Pass",
+      "ticketRemaining": "{count} left",
+      "phone": "Phone",
+      "gender": "Gender",
+      "genderLabels": {
+        "MALE": "Male",
+        "FEMALE": "Female"
+      },
+      "age": "Age",
+      "ageValue": "{age}",
+      "job": "Job",
+      "mbti": "MBTI",
+      "animalType": "Animal type",
+      "interests": "Interests",
+      "adminDashboard": "Admin dashboard",
+      "logout": "Log out",
+      "changePassword": "Change password",
+      "withdraw": "Delete account"
+    },
+    "applications": {
+      "loading": "Loading...",
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "attended": "Attended",
+        "cancelled": "Cancelled"
+      },
+      "status": {
+        "PENDING": "Under review",
+        "CONFIRMED": "Confirmed",
+        "CANCELLED": "Cancelled",
+        "ATTENDED": "Attended"
+      },
+      "payment": {
+        "PENDING": "Deposit pending",
+        "CONFIRMED": "Deposit complete"
+      },
+      "emptyFiltered": "No applications with this status.",
+      "empty": "You have not applied for any gatherings yet.",
+      "browseGatherings": "Browse gatherings",
+      "bookingNumber": "Booking No. {bookingNumber}",
+      "cancelConfirmQuestion": "Cancel this application?",
+      "goBack": "Go back",
+      "cancelling": "Cancelling...",
+      "confirmCancel": "Confirm cancellation",
+      "cancelApplication": "Cancel application"
+    },
+    "password": {
+      "title": "Change password",
+      "currentPassword": "Current password",
+      "currentPasswordPlaceholder": "Current password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "At least 8 characters with letters and numbers",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Enter the new password again",
+      "submitting": "Changing...",
+      "submit": "Change",
+      "validation": {
+        "currentPassword": "Please enter your current password",
+        "newPassword": "Use at least 8 characters with letters and numbers",
+        "confirmPassword": "Please enter the new password again",
+        "mismatch": "New passwords do not match"
+      }
+    },
+    "tabs": {
+      "profile": "Profile",
+      "applications": "Applications",
+      "reviews": "Reviews"
+    },
+    "mileage": {
+      "balanceAsOf": "Mileage balance as of {time}",
+      "unit": "Mileage",
+      "howToEarnEyebrow": "HOW TO EARN",
+      "howToEarnTitle": "How do I earn it?",
+      "earnMethods": [
+        {
+          "title": "Attend a gathering",
+          "desc": "Earn mileage when you attend a gathering\nand the host marks you present"
+        },
+        {
+          "title": "Write a gathering review",
+          "desc": "Share the atmosphere and your impressions\nwith text or photos"
+        },
+        {
+          "title": "Welcome mileage",
+          "desc": "A small welcome gift\nfor first-time Whatsup House members"
+        }
+      ],
+      "typeLabels": {
+        "SIGNUP": "Welcome signup bonus",
+        "ATTENDANCE": "Gathering attendance",
+        "REVIEW_REWARD": "Gathering review",
+        "REVIEW_UPGRADE": "Photo review upgrade",
+        "ADMIN_ADJUST": "Admin adjustment",
+        "ADMIN_ADJUST_EARN": "Admin credit",
+        "ADMIN_ADJUST_USE": "Admin deduction"
+      },
+      "filters": {
+        "ALL": "All",
+        "EARN": "Earned",
+        "USE": "Used"
+      },
+      "balance": "Balance {balance}M",
+      "empty": {
+        "USE": {
+          "head": "No usage history yet",
+          "body": "Use your mileage to get discounts\non gathering participation fees"
+        },
+        "EARN": {
+          "head": "No earning history yet",
+          "body": "Apply to a gathering that catches your eye\nand meet people offline"
+        },
+        "ALL": {
+          "head": "No mileage history yet",
+          "body": "Attend gatherings or leave reviews\nto earn mileage"
+        }
+      },
+      "browseGatherings": "Browse gatherings",
+      "logEyebrow": "MILEAGE LOG",
+      "logTitle": "Mileage history",
+      "itemCount": "{count} items",
+      "sortLatest": "Newest",
+      "sortOldest": "Oldest"
+    },
+    "profileEdit": {
+      "title": "Edit profile",
+      "basicInfo": "Basic information",
+      "nickname": "Nickname*",
+      "nicknamePlaceholder": "Enter your nickname",
+      "name": "Name*",
+      "namePlaceholder": "Enter your legal name",
+      "gender": "Gender*",
+      "genderLabels": {
+        "MALE": "Male",
+        "FEMALE": "Female"
+      },
+      "age": "Age*",
+      "agePlaceholder": "Enter your age",
+      "phone": "Phone",
+      "additionalInfo": "Additional information",
+      "optional": "(Optional)",
+      "bio": "One-line intro",
+      "bioPlaceholder": "Describe yourself in one line",
+      "instagram": "Instagram ID",
+      "job": "Job",
+      "mbti": "MBTI",
+      "mbtiResult": "You are {mbti}!",
+      "interests": "Interests",
+      "interestPlaceholder": "Enter an interest and add it",
+      "addInterest": "Add interest",
+      "removeInterest": "Remove {interest}",
+      "maxInterests": "Up to 10",
+      "submit": "Save",
+      "submitFailed": "Failed to update your profile. Please try again.",
+      "validation": {
+        "nicknameMin": "Nickname must be at least 2 characters",
+        "nicknameMax": "Nickname must be 50 characters or less",
+        "nameRequired": "Please enter your name",
+        "nameMax": "Name must be 50 characters or less",
+        "phone": "Phone number must be 11 digits",
+        "age": "Please enter a valid age",
+        "bioMax": "Intro must be 100 characters or less",
+        "gender": "Please select a gender."
+      }
+    },
+    "guestApplication": {
+      "intro": "Check your application with your booking number and phone number.",
+      "bookingNumber": "Booking number",
+      "phone": "Phone",
+      "checking": "Checking...",
+      "check": "Check",
+      "notFound": "Please check your booking number or phone number.",
+      "resultLabel": "Application details",
+      "confirmedHelp": "Tap the card to open the reservation confirmation page.",
+      "invalidTitle": "Invalid link",
+      "invalidDescription": "This link has expired or is not valid.",
+      "checkDirectly": "Check directly with booking number",
+      "goHome": "Go home",
+      "title": "Application details",
+      "description": "Check your application information below.",
+      "loginToView": "Log in to view my applications",
+      "validation": {
+        "bookingNumber": "Please enter your booking number",
+        "phoneRequired": "Please enter your phone number",
+        "phoneInvalid": "Please enter a valid phone number"
+      }
+    },
+    "reviews": {
+      "loading": "Loading...",
+      "empty": "You have not written any reviews yet",
+      "more": "Load more"
+    },
+    "withdraw": {
+      "title": "Delete account",
+      "description": "Once deleted, your account will be deactivated and you will not be able to log in again.",
+      "passwordConfirm": "Confirm password",
+      "passwordPlaceholder": "Current password",
+      "submitting": "Processing...",
+      "submit": "Delete account",
+      "failed": "Failed to delete your account.",
+      "validation": {
+        "password": "Please enter your password"
+      }
+    }
+  },
+  "social": {
+    "title": "Social Space",
+    "description": "Social features will appear here."
+  },
+  "story": {
+    "fallbackTitle": "About | Whatsup House",
+    "cta": "Browse gatherings",
+    "whatsupHouse": {
+      "tagline": "The space we are creating",
+      "title": "The Whatsup House Story",
+      "description": "Whatsup House is a small offline social gathering platform planned and hosted directly by its founder so people in their 20s and 30s living alone can meet without pressure.",
+      "sections": [
+        {
+          "heading": "What is Whatsup House?",
+          "body": "We wanted to make evenings feel less lonely, even when you live alone. Whatsup House is an offline social gathering platform for one-person households in their 20s and 30s. We create easygoing moments where people can meet and share tastes and everyday stories."
+        },
+        {
+          "heading": "The gatherings we create",
+          "body": "Every gathering is planned and hosted directly by Whatsup House. Each one is kept small, with up to 20 people, so first-time guests can settle in naturally."
+        },
+        {
+          "heading": "How to join",
+          "body": "Browse gatherings you like and apply. No complicated matching, just join a gathering on the date that works for you."
+        }
+      ]
+    }
+  },
+  "ui": {
+    "apiError": {
+      "fallback": "An error occurred.",
+      "retry": "Try again"
+    },
+    "pagination": {
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "scroll": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "toast": {
+      "close": "Close"
+    },
+    "loading": {
+      "label": "Loading"
+    },
+    "imageUpload": {
+      "alt": "Uploaded image",
+      "selectPhoto": "Select photo",
+      "loadPhoto": "Load photo",
+      "ratioHint": "Displayed in this ratio",
+      "change": "Change",
+      "remove": "Remove image"
+    },
+    "imageCrop": {
+      "contextTitle": {
+        "review": "Edit review photo",
+        "carousel": "Edit carousel image",
+        "avatar": "Edit profile image"
+      },
+      "processing": "Processing...",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "dragHint": "Drag to position, use the slider to resize",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "ratio": "Ratio {ratio}",
+      "rotate": "Rotate",
+      "originalSize": "Original size",
+      "confirm": "Confirm",
+      "previewTitle": "Preview",
+      "previewContext": {
+        "avatar": "This is how it will look on your profile",
+        "carousel": "This is how it will look in the home carousel",
+        "review": "This is how it will look below"
+      },
+      "avatarAlt": "Avatar preview",
+      "avatarMask": "Displayed with a circular mask",
+      "cardAlt": "Card preview",
+      "sampleTitle": "A Slow Afternoon Jazz Listening Gathering",
+      "sampleDate": "Sat, May 24 · 14:00 · Seongsu-dong",
+      "listAlt": "List preview",
+      "sampleListTitle": "Like this in lists",
+      "sampleListBody": "The cropped area stays consistent even as the thumbnail gets smaller",
+      "editAgain": "Edit again"
+    },
+    "multiCrop": {
+      "title": "Gathering images",
+      "pending": "Multi-crop coming soon",
+      "steps": [
+        {
+          "label": "Square thumbnail",
+          "description": "Shown on list cards and calendars"
+        },
+        {
+          "label": "Landscape detail image",
+          "description": "Shown at the top of the gathering detail page"
+        }
+      ],
+      "select": "Select an image and crop each step",
+      "selectAgain": "Select again"
+    }
+  },
+  "metadata": {
+    "root": {
+      "title": "Whatsup House",
+      "description": "A space for people who enjoy calm connections"
+    },
+    "home": {
+      "title": "Whatsup House | Social gathering platform for one-person households",
+      "description": "Small offline social gatherings for people in their 20s and 30s living alone. Meet new people in a comfortable way.",
+      "openGraphTitle": "Whatsup House",
+      "openGraphDescription": "Small offline social gatherings for people in their 20s and 30s living alone."
+    },
+    "gatherings": {
+      "title": "Gatherings | Whatsup House",
+      "description": "Check social gathering schedules by date and apply."
+    }
+  },
+  "payment": {
+    "account": {
+      "bankName": "Woori Bank",
+      "accountHolder": "Whatsup House"
+    }
+  },
+  "errors": {
+    "UNKNOWN": "Something went wrong. Please try again.",
+    "EMAIL_ALREADY_EXISTS": "This email is already in use.",
+    "NICKNAME_ALREADY_EXISTS": "This nickname is already in use.",
+    "INVALID_CREDENTIALS": "Please check your email or password.",
+    "USER_NOT_FOUND": "We could not find matching account information.",
+    "PASSWORD_RESET_FAILED": "Failed to request a password reset.",
+    "INVALID_PASSWORD_RESET_TOKEN": "Please check your password reset link."
   }
 }

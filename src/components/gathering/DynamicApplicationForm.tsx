@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, CheckCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button, Card, LoadingSpinner, ApiErrorMessage } from '@/components/ui'
 import DynamicQuestionField from './DynamicQuestionField'
 import { useGatheringForm } from '@/lib/hooks/useForm'
@@ -12,6 +13,7 @@ import {
 } from '@/lib/hooks/useApplications'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { useAuthStore } from '@/lib/store/authStore'
+import { resolveApiErrorMessage } from '@/lib/utils/apiError'
 import type {
   GatheringDetail,
   FormQuestionDetail,
@@ -57,6 +59,8 @@ function prefillFromProfile(question: FormQuestionDetail, profile: UserProfile):
 }
 
 export default function DynamicApplicationForm({ gathering, forceGuest = false }: DynamicApplicationFormProps) {
+  const t = useTranslations('gathering.apply.form')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const { isLoggedIn } = useAuthStore()
   const { data: profile } = useMyProfile()
@@ -103,7 +107,7 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
     const nextErrors: Record<string, string> = {}
     for (const q of questions) {
       if (q.required && isEmpty(q, getValue(q))) {
-        nextErrors[q.questionId] = '필수 항목이에요.'
+        nextErrors[q.questionId] = t('requiredError')
       }
     }
     if (Object.keys(nextErrors).length > 0) {
@@ -128,8 +132,7 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
         router.push(`/gatherings/${gathering.id}/apply/complete`)
       }
     } catch (err) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      setSubmitError(msg || '신청 중 오류가 발생했습니다. 다시 시도해주세요.')
+      setSubmitError(resolveApiErrorMessage(err, tCommon))
     }
   }
 
@@ -142,7 +145,7 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
   }
 
   if (isError || !form) {
-    return <ApiErrorMessage message="신청폼을 불러올 수 없습니다." onRetry={() => { refetch() }} />
+    return <ApiErrorMessage message={t('loadFailed')} onRetry={() => { refetch() }} />
   }
 
   const isPending = isGuestMode ? guestMutation.isPending : memberMutation.isPending
@@ -154,15 +157,15 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
           <div className="flex items-start gap-2.5">
             <AlertTriangle size={18} className="text-primary mt-0.5 shrink-0" />
             <p className="text-sm text-tag-text">
-              비로그인 신청은 마일리지가 적립되지 않아요.{' '}
+              {t('guestMileageNotice')}{' '}
               <button
                 type="button"
                 onClick={() => router.push('/login')}
                 className="text-primary font-semibold underline"
               >
-                로그인 후 신청
+                {t('loginToApply')}
               </button>
-              하시면 혜택을 받을 수 있습니다.
+              {t('loginBenefitSuffix')}
             </p>
           </div>
         </Card>
@@ -170,7 +173,7 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
         <div className="flex items-center gap-2 px-4 py-3 bg-primary-light rounded-input">
           <CheckCircle size={18} className="text-primary shrink-0" />
           <p className="text-sm text-primary font-medium">
-            참여 완료 후 {gathering.mileageReward || 500} 마일리지가 적립돼요
+            {t('memberMileageNotice', { mileage: gathering.mileageReward || 500 })}
           </p>
         </div>
       )}
@@ -195,7 +198,7 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
 
       <div className="pt-2 pb-4">
         <Button type="submit" variant="primary" size="lg" className="w-full" isLoading={isPending}>
-          신청 완료하기
+          {t('submit')}
         </Button>
       </div>
     </form>

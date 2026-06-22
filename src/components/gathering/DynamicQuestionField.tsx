@@ -1,6 +1,7 @@
 'use client'
 
 import { Input } from '@/components/ui'
+import { useTranslations } from 'next-intl'
 import type { FormQuestionDetail } from '@/lib/api/types'
 
 const MBTI_ROWS = [
@@ -9,7 +10,7 @@ const MBTI_ROWS = [
 ] as const
 
 // 성별 선택지는 값(MALE/FEMALE)은 유지하되 화면에는 한국어로 노출한다. (KAN-258)
-const GENDER_CHOICE_LABELS: Record<string, string> = { MALE: '남성', FEMALE: '여성' }
+const GENDER_CHOICE_LABEL_KEYS: Record<string, string> = { MALE: 'male', FEMALE: 'female' }
 
 type FieldValue = string | number | string[]
 
@@ -26,12 +27,13 @@ export default function DynamicQuestionField({
   error,
   onChange,
 }: DynamicQuestionFieldProps) {
+  const t = useTranslations('gathering.apply.question')
   const { type, label, placeholder, required, options, questionKey } = question
   const choices = options?.choices ?? []
 
   // 성별 질문은 선택지 값을 한국어 라벨로 바꿔 노출한다. (제출/매칭 값은 원본 유지)
   const choiceLabel = (choice: string) =>
-    questionKey === 'gender' ? GENDER_CHOICE_LABELS[choice] ?? choice : choice
+    questionKey === 'gender' && GENDER_CHOICE_LABEL_KEYS[choice] ? t(GENDER_CHOICE_LABEL_KEYS[choice]) : choice
 
   const labelNode = (
     <label className="text-sm font-medium text-foreground">
@@ -112,7 +114,7 @@ export default function DynamicQuestionField({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1.5 flex-wrap">
           {labelNode}
-          <span className="text-xs text-tag-text">(중복 선택 가능)</span>
+          <span className="text-xs text-tag-text">{t('multiChoice')}</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {choices.map((choice) => (
@@ -164,7 +166,7 @@ export default function DynamicQuestionField({
           })}
         </div>
         {isComplete && (
-          <p className="text-center text-sm text-primary font-medium">{value} 유형이군요!</p>
+          <p className="text-center text-sm text-primary font-medium">{t('mbtiResult', { mbti: slots.join('') })}</p>
         )}
         {error && <p className="text-xs text-primary pl-1">{error}</p>}
       </div>
