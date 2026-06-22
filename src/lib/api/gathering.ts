@@ -14,8 +14,12 @@ export const fetchGatheringsAll = async (): Promise<GatheringListItem[]> => {
 }
 
 // 게더링 상세 조회
-export const fetchGatheringDetail = async (id: string): Promise<GatheringDetail> => {
-  const response = await apiClient.get<ApiResponse<GatheringDetail>>(`/api/gatherings/${id}`)
+export const fetchGatheringDetail = async (id: string, locale?: string): Promise<GatheringDetail> => {
+  // 현재 로케일을 Accept-Language로 전달해 번역된 콘텐츠를 받는다(없으면 ko). (KAN-268)
+  const response = await apiClient.get<ApiResponse<GatheringDetail>>(
+    `/api/gatherings/${id}`,
+    locale ? { headers: { 'Accept-Language': locale } } : undefined
+  )
   return response.data.data
 }
 

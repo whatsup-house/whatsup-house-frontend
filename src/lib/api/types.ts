@@ -5,6 +5,25 @@ export interface ApiResponse<T> {
   data: T
 }
 
+// 콘텐츠 번역 (KAN-268)
+export type ContentTranslationStatus = 'PENDING' | 'DONE' | 'FAILED'
+
+export interface AdminContentTranslation {
+  field: string
+  locale: string
+  value: string | null
+  status: ContentTranslationStatus
+  isOverride: boolean
+}
+
+export interface TranslationOverridePayload {
+  entityType: string
+  entityId: string
+  field: string
+  locale: 'EN' | 'JA'
+  value: string
+}
+
 // 게더링 상태
 export type GatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 
