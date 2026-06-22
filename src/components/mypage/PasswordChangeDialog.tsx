@@ -1,30 +1,17 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertCircle, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useChangePassword } from '@/lib/hooks/useAuth'
-import { getApiErrorMessage } from '@/lib/utils/apiError'
+import { resolveApiErrorMessage } from '@/lib/utils/apiError'
 
 const PASSWORD_REGEX = /^(?=.*[a-zA-Z])(?=.*\d).+$/
 
-// 비밀번호 변경 — 현재/신규/확인. 정책은 회원가입과 동일(영문+숫자 8자 이상). (KAN-223)
-const schema = z
-  .object({
-    currentPassword: z.string().min(1, '현재 비밀번호를 입력해주세요'),
-    newPassword: z
-      .string()
-      .min(8, '비밀번호는 영문+숫자 포함 8자 이상으로 설정해주세요')
-      .regex(PASSWORD_REGEX, '비밀번호는 영문+숫자 포함 8자 이상으로 설정해주세요'),
-    newPasswordConfirm: z.string().min(1, '새 비밀번호를 다시 입력해주세요'),
-  })
-  .refine((d) => d.newPassword === d.newPasswordConfirm, {
-    message: '새 비밀번호가 일치하지 않습니다',
-    path: ['newPasswordConfirm'],
-  })
-
-type FormValues = z.infer<typeof schema>
+type FormValues = { currentPassword: string; newPassword: string; newPasswordConfirm: string }
 
 interface PasswordChangeDialogProps {
   onClose: () => void
@@ -32,7 +19,26 @@ interface PasswordChangeDialogProps {
 }
 
 export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordChangeDialogProps) {
+  const t = useTranslations('mypage.password')
+  const tCommon = useTranslations('common')
   const changePassword = useChangePassword()
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          currentPassword: z.string().min(1, t('validation.currentPassword')),
+          newPassword: z
+            .string()
+            .min(8, t('validation.newPassword'))
+            .regex(PASSWORD_REGEX, t('validation.newPassword')),
+          newPasswordConfirm: z.string().min(1, t('validation.confirmPassword')),
+        })
+        .refine((d) => d.newPassword === d.newPasswordConfirm, {
+          message: t('validation.mismatch'),
+          path: ['newPasswordConfirm'],
+        }),
+    [t]
+  )
 
   const {
     register,
@@ -56,7 +62,7 @@ export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordCha
   }
 
   const errorMessage = changePassword.isError
-    ? getApiErrorMessage(changePassword.error, '비밀번호 변경에 실패했습니다.')
+    ? resolveApiErrorMessage(changePassword.error, tCommon)
     : null
 
   const inputCls = (hasError: boolean) =>
@@ -68,13 +74,13 @@ export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordCha
     <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center bg-foreground/30 px-4 pb-4 sm:items-center sm:pb-0">
       <div className="w-full max-w-[360px] rounded-card bg-background p-5 shadow-lg">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-foreground">비밀번호 변경</h2>
+          <h2 className="text-base font-bold text-foreground">{t('title')}</h2>
           <button
             type="button"
             onClick={onClose}
             disabled={changePassword.isPending}
             className="flex min-h-[36px] min-w-[36px] items-center justify-center text-tag-text disabled:opacity-50"
-            aria-label="닫기"
+            aria-label={tCommon('close')}
           >
             <X size={18} />
           </button>
@@ -82,11 +88,11 @@ export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordCha
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-5 flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="ml-1 text-xs font-medium text-tag-text">현재 비밀번호</span>
+            <span className="ml-1 text-xs font-medium text-tag-text">{t('currentPassword')}</span>
             <input
               type="password"
               autoComplete="current-password"
-              placeholder="현재 비밀번호"
+              placeholder={t('currentPasswordPlaceholder')}
               className={inputCls(!!errors.currentPassword)}
               {...register('currentPassword')}
             />
@@ -96,11 +102,11 @@ export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordCha
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="ml-1 text-xs font-medium text-tag-text">새 비밀번호</span>
+            <span className="ml-1 text-xs font-medium text-tag-text">{t('newPassword')}</span>
             <input
               type="password"
               autoComplete="new-password"
-              placeholder="영문+숫자 포함 8자 이상"
+              placeholder={t('newPasswordPlaceholder')}
               className={inputCls(!!errors.newPassword)}
               {...register('newPassword')}
             />
@@ -110,11 +116,11 @@ export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordCha
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="ml-1 text-xs font-medium text-tag-text">새 비밀번호 확인</span>
+            <span className="ml-1 text-xs font-medium text-tag-text">{t('confirmPassword')}</span>
             <input
               type="password"
               autoComplete="new-password"
-              placeholder="새 비밀번호 다시 입력"
+              placeholder={t('confirmPasswordPlaceholder')}
               className={inputCls(!!errors.newPasswordConfirm)}
               {...register('newPasswordConfirm')}
             />
@@ -137,14 +143,14 @@ export default function PasswordChangeDialog({ onClose, onSuccess }: PasswordCha
               disabled={changePassword.isPending}
               className="flex min-h-[48px] items-center justify-center rounded-button bg-tag-bg px-4 text-sm font-bold text-tag-text disabled:opacity-60"
             >
-              취소
+              {tCommon('cancel')}
             </button>
             <button
               type="submit"
               disabled={changePassword.isPending}
               className="flex min-h-[48px] items-center justify-center rounded-button bg-primary px-4 text-sm font-bold text-white disabled:opacity-60"
             >
-              {changePassword.isPending ? '변경 중...' : '변경하기'}
+              {changePassword.isPending ? t('submitting') : t('submit')}
             </button>
           </div>
         </form>

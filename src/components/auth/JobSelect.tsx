@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Search, ChevronDown, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useJobs } from '@/lib/hooks/useJobs'
 
 interface JobSelectProps {
@@ -12,7 +13,8 @@ interface JobSelectProps {
 
 // 검색형 직업 선택 콤보박스. 직업군 헤더로 그룹된 세부직업을 검색·선택한다. (KAN-270)
 // value/onChange는 직업 "코드"를 다룬다(라벨이 아님). 미선택은 빈 문자열.
-export default function JobSelect({ value, onChange, placeholder = '직업을 검색해 선택하세요' }: JobSelectProps) {
+export default function JobSelect({ value, onChange, placeholder }: JobSelectProps) {
+  const t = useTranslations('auth.onboarding.jobSelect')
   const { data: groups } = useJobs()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -70,14 +72,14 @@ export default function JobSelect({ value, onChange, placeholder = '직업을 �
         aria-expanded={open}
       >
         <span className={`text-sm ${selectedLabel ? 'text-foreground' : 'text-tag-text'}`}>
-          {selectedLabel || placeholder}
+          {selectedLabel || placeholder || t('placeholder')}
         </span>
         <span className="flex items-center gap-1">
           {value && (
             <span
               role="button"
               tabIndex={0}
-              aria-label="직업 선택 해제"
+              aria-label={t('clear')}
               onClick={(event) => {
                 event.stopPropagation()
                 handleSelect('')
@@ -106,13 +108,13 @@ export default function JobSelect({ value, onChange, placeholder = '직업을 �
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="직업 검색"
+              placeholder={t('searchPlaceholder')}
               className="flex-1 bg-transparent text-sm text-foreground placeholder:text-tag-text focus:outline-none"
             />
           </div>
           <ul role="listbox" className="max-h-64 overflow-y-auto py-1">
             {filtered.length === 0 && (
-              <li className="px-4 py-3 text-sm text-tag-text">검색 결과가 없어요</li>
+              <li className="px-4 py-3 text-sm text-tag-text">{t('empty')}</li>
             )}
             {filtered.map((group) => (
               <li key={group.category}>

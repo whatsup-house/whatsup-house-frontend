@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type RefObject } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface HScrollButtonsProps {
   /** 가로 스크롤 컨테이너 ref. 부모는 position: relative 여야 한다. */
@@ -14,6 +15,7 @@ interface HScrollButtonsProps {
  * - 더 스크롤할 수 있을 때만 해당 방향 버튼이 보인다.
  */
 export default function HScrollButtons({ scrollRef }: HScrollButtonsProps) {
+  const t = useTranslations('ui.scroll')
   const [canPrev, setCanPrev] = useState(false)
   const [canNext, setCanNext] = useState(false)
 
@@ -50,7 +52,7 @@ export default function HScrollButtons({ scrollRef }: HScrollButtonsProps) {
     <>
       <button
         type="button"
-        aria-label="이전"
+        aria-label={t('previous')}
         onClick={() => scrollByDir(-1)}
         className={`${base} left-1 ${canPrev ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       >
@@ -58,7 +60,7 @@ export default function HScrollButtons({ scrollRef }: HScrollButtonsProps) {
       </button>
       <button
         type="button"
-        aria-label="다음"
+        aria-label={t('next')}
         onClick={() => scrollByDir(1)}
         className={`${base} right-1 ${canNext ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       >

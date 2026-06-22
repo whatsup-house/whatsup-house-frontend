@@ -2,20 +2,14 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import dayjs from 'dayjs'
+import { useLocale, useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
 import { useMyApplicationsMe, useCancelApplication } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
+import { formatLocalizedNumericDate } from '@/lib/utils/date'
 import type { ApplicationStatus } from '@/lib/api/types'
-
-const STATUS_LABEL: Record<ApplicationStatus, string> = {
-  PENDING: '검토 중',
-  CONFIRMED: '확정',
-  CANCELLED: '취소됨',
-  ATTENDED: '참석 완료',
-}
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
   PENDING: 'bg-tag-bg text-tag-text',
@@ -26,15 +20,17 @@ const STATUS_STYLE: Record<ApplicationStatus, string> = {
 
 type FilterStatus = ApplicationStatus | null
 
-const FILTER_TABS: { label: string; value: FilterStatus }[] = [
-  { label: '전체', value: null },
-  { label: '대기중', value: 'PENDING' },
-  { label: '확정', value: 'CONFIRMED' },
-  { label: '참석', value: 'ATTENDED' },
-  { label: '취소', value: 'CANCELLED' },
+const FILTER_TABS: { labelKey: string; value: FilterStatus }[] = [
+  { labelKey: 'filters.all', value: null },
+  { labelKey: 'filters.pending', value: 'PENDING' },
+  { labelKey: 'filters.confirmed', value: 'CONFIRMED' },
+  { labelKey: 'filters.attended', value: 'ATTENDED' },
+  { labelKey: 'filters.cancelled', value: 'CANCELLED' },
 ]
 
 export default function MyApplicationList() {
+  const t = useTranslations('mypage.applications')
+  const locale = useLocale()
   const router = useRouter()
   const { isLoggedIn } = useRequireAuth()
   const [filterStatus, setFilterStatus] = useState<FilterStatus>(null)
@@ -60,7 +56,7 @@ export default function MyApplicationList() {
         <div ref={tabScrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {FILTER_TABS.map((tab) => (
             <button
-              key={tab.label}
+              key={tab.labelKey}
               onClick={() => {
                 setFilterStatus(tab.value)
                 setConfirmingId(null)
@@ -71,7 +67,7 @@ export default function MyApplicationList() {
                   : 'bg-tag-bg text-tag-text'
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -80,19 +76,19 @@ export default function MyApplicationList() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-sm text-tag-text">불러오는 중...</p>
+          <p className="text-sm text-tag-text">{t('loading')}</p>
         </div>
       ) : !applications || applications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 gap-2">
           <p className="text-sm text-tag-text">
-            {filterStatus ? '해당 상태의 신청 내역이 없어요.' : '아직 신청한 게더링이 없어요.'}
+            {filterStatus ? t('emptyFiltered') : t('empty')}
           </p>
           {!filterStatus && (
             <button
               onClick={() => router.push('/gatherings')}
               className="text-sm text-primary font-medium underline"
             >
-              게더링 둘러보기
+              {t('browseGatherings')}
             </button>
           )}
         </div>
@@ -144,15 +140,15 @@ export default function MyApplicationList() {
                     </p>
                     <div className="shrink-0 flex flex-col items-end gap-1">
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[item.status]}`}>
-                        {STATUS_LABEL[item.status]}
+                        {t(`status.${item.status}`)}
                       </span>
                       <PaymentStatusBadge status={item.status === 'CONFIRMED' || item.status === 'ATTENDED' ? item.paymentStatus : null} />
                     </div>
                   </div>
                   <p className="text-xs text-tag-text mt-1">
-                    {dayjs(item.gathering.eventDate).format('YYYY. MM. DD (ddd)')}
+                    {formatLocalizedNumericDate(item.gathering.eventDate, locale)}
                   </p>
-                  <p className="text-xs text-tag-text mt-0.5">예약번호: {item.bookingNumber}</p>
+                  <p className="text-xs text-tag-text mt-0.5">{t('bookingNumber', { bookingNumber: item.bookingNumber })}</p>
                 </div>
               </div>
 
@@ -163,20 +159,20 @@ export default function MyApplicationList() {
                 >
                   {confirmingId === item.id ? (
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs text-tag-text">정말 취소할까요?</p>
+                      <p className="text-xs text-tag-text">{t('cancelConfirmQuestion')}</p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setConfirmingId(null)}
                           className="text-xs text-tag-text px-3 py-1.5 rounded-full bg-tag-bg"
                         >
-                          돌아가기
+                          {t('goBack')}
                         </button>
                         <button
                           onClick={() => handleCancelConfirm(item.id)}
                           disabled={cancelMutation.isPending}
                           className="text-xs text-primary font-medium px-3 py-1.5 rounded-full bg-primary-light disabled:opacity-50"
                         >
-                          {cancelMutation.isPending ? '취소 중...' : '취소 확인'}
+                          {cancelMutation.isPending ? t('cancelling') : t('confirmCancel')}
                         </button>
                       </div>
                     </div>
@@ -185,7 +181,7 @@ export default function MyApplicationList() {
                       onClick={() => handleCancelClick(item.id)}
                       className="text-xs text-tag-text underline"
                     >
-                      신청 취소
+                      {t('cancelApplication')}
                     </button>
                   )}
                 </div>

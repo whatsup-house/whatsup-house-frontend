@@ -2,14 +2,15 @@
 
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import MyProfile from '@/components/mypage/MyProfile'
 import MyApplicationList from '@/components/mypage/MyApplicationList'
 import MyReviewList from '@/components/mypage/MyReviewList'
 
 const TABS = [
-  { key: 'profile', label: '프로필' },
-  { key: 'applications', label: '신청 내역' },
-  { key: 'reviews', label: '후기' },
+  { key: 'profile', labelKey: 'profile' },
+  { key: 'applications', labelKey: 'applications' },
+  { key: 'reviews', labelKey: 'reviews' },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
@@ -19,6 +20,7 @@ function isTabKey(value: string | null): value is TabKey {
 }
 
 function MyPageContent() {
+  const t = useTranslations('mypage.tabs')
   const searchParams = useSearchParams()
   // 쿼리파라미터(tab)로 진입 탭을 결정한다. 잘못된 값이면 프로필로 폴백. (KAN-259)
   const tabParam = searchParams.get('tab')
@@ -38,7 +40,7 @@ function MyPageContent() {
                   : 'text-tag-text'
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>

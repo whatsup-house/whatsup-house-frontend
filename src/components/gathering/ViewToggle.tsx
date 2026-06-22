@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl'
+
 type View = 'calendar' | 'map'
 
 interface ViewToggleProps {
@@ -6,6 +8,8 @@ interface ViewToggleProps {
 }
 
 export default function ViewToggle({ view, onChange }: ViewToggleProps) {
+  const t = useTranslations('gathering.list')
+
   return (
     <div className="flex bg-tag-bg rounded-full p-1 mx-4">
       <button
@@ -14,7 +18,7 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
           view === 'calendar' ? 'bg-primary text-white' : 'text-tag-text'
         }`}
       >
-        달력으로 보기
+        {t('calendarView')}
       </button>
       <button
         onClick={() => onChange('map')}
@@ -22,7 +26,7 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
           view === 'map' ? 'bg-primary text-white' : 'text-tag-text'
         }`}
       >
-        지도로 보기
+        {t('mapView')}
       </button>
     </div>
   )

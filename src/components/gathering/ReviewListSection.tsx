@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
 import { useAllReviews, useGatheringReviews, useToggleReviewLike } from '@/lib/hooks/useReview'
@@ -32,12 +33,13 @@ function ReviewCardCompact({ review, isLoggedIn, onToast }: {
   isLoggedIn: boolean
   onToast: (msg: string) => void
 }) {
+  const t = useTranslations('review.card')
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(review.likeCount)
   const { mutate: toggleLike } = useToggleReviewLike()
 
   const handleLike = () => {
-    if (!isLoggedIn) { onToast('로그인이 필요한 기능이에요'); return }
+    if (!isLoggedIn) { onToast(t('loginRequired')); return }
     const prevLiked = liked
     const prevCount = likeCount
     setLiked(!prevLiked)
@@ -80,7 +82,7 @@ function ReviewCardCompact({ review, isLoggedIn, onToast }: {
         <button
           onClick={handleLike}
           className="flex items-center gap-1 min-h-[28px]"
-          aria-label={liked ? '추천 취소' : '추천'}
+          aria-label={liked ? t('unlike') : t('like')}
         >
           <HeartIcon filled={liked} />
           <span className={`text-[11px] font-medium ${liked ? 'text-primary' : 'text-tag-text'}`}>
@@ -98,6 +100,7 @@ interface ReviewListSectionProps {
 }
 
 export default function ReviewListSection({ gatheringId, mileageReward }: ReviewListSectionProps) {
+  const t = useTranslations('review')
   const { isLoggedIn } = useAuthStore()
   const [toast, setToast] = useState<string | null>(null)
 
@@ -122,10 +125,10 @@ export default function ReviewListSection({ gatheringId, mileageReward }: Review
       {/* 가로 스크롤 카드 목록 */}
       <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1 -mx-4 px-4">
         {isLoading && (
-          <p className="w-full py-8 text-center text-sm text-tag-text">불러오는 중...</p>
+          <p className="w-full py-8 text-center text-sm text-tag-text">{t('loading')}</p>
         )}
         {!isLoading && reviews.length === 0 && (
-          <p className="w-full py-8 text-center text-sm text-tag-text">아직 후기가 없어요.</p>
+          <p className="w-full py-8 text-center text-sm text-tag-text">{t('emptyShort')}</p>
         )}
         {reviews.map((review) => (
           <ReviewCardCompact

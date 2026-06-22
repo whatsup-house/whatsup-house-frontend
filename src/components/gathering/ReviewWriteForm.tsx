@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useCreateReview } from '@/lib/hooks/useReview'
 import { useUploadImage } from '@/lib/hooks/useUploadImage'
 import ImageUploadField from '@/components/ui/ImageUploadField'
@@ -14,6 +15,7 @@ interface ReviewWriteFormProps {
 }
 
 function StarRating({ rating, onChange }: { rating: number; onChange: (v: number) => void }) {
+  const t = useTranslations('review.form')
   return (
     <div className="flex gap-0.5 mb-3">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -22,7 +24,7 @@ function StarRating({ rating, onChange }: { rating: number; onChange: (v: number
           type="button"
           onClick={() => onChange(star)}
           className="w-8 h-8 flex items-center justify-center"
-          aria-label={`${star}점`}
+          aria-label={t('starLabel', { score: star })}
         >
           <svg
             width="20"
@@ -42,6 +44,7 @@ function StarRating({ rating, onChange }: { rating: number; onChange: (v: number
 }
 
 export default function ReviewWriteForm({ applicationId, mileageReward }: ReviewWriteFormProps) {
+  const t = useTranslations('review.form')
   const [tab, setTab] = useState<ReviewType>('TEXT')
   const [content, setContent] = useState('')
   const [rating, setRating] = useState(5)
@@ -49,7 +52,7 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
-  const { uploadWithTempPath, isUploading } = useUploadImage()
+  const { uploadWithTempPath, isUploading } = useUploadImage(t('imageUploadFailed'))
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -57,9 +60,7 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
   }
 
   const { mutate, isPending } = useCreateReview(() => {
-    const base = '후기가 등록됐어요!'
-    const reward = (mileageReward ?? 0) > 0 ? ` +${mileageReward}M 적립` : ''
-    showToast(base + reward)
+    showToast((mileageReward ?? 0) > 0 ? t('successWithReward', { mileage: mileageReward ?? 0 }) : t('success'))
     setContent('')
     setUploadedImageTempPath(null)
     if (previewUrl) URL.revokeObjectURL(previewUrl)
@@ -79,7 +80,7 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
       setUploadedImageTempPath(result.tempPath)
       setPreviewUrl(result.previewUrl)
     } catch {
-      showToast('이미지 업로드에 실패했어요. 다시 시도해주세요.')
+      showToast(t('imageUploadFailed'))
       URL.revokeObjectURL(localUrl)
       setPreviewUrl(null)
     }
@@ -104,20 +105,20 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
 
   return (
     <div className="mt-5 bg-card rounded-2xl border border-tag-bg/40 p-4">
-      <p className="text-sm font-bold text-foreground mb-3">후기 남기기</p>
+      <p className="text-sm font-bold text-foreground mb-3">{t('title')}</p>
 
       {/* 탭 */}
       <div className="flex gap-2 mb-4">
-        {(['TEXT', 'PHOTO'] as ReviewType[]).map((t) => (
+        {(['TEXT', 'PHOTO'] as ReviewType[]).map((type) => (
           <button
-            key={t}
+            key={type}
             type="button"
-            onClick={() => setTab(t)}
+            onClick={() => setTab(type)}
             className={`flex-1 py-2 rounded-full text-xs font-semibold transition-colors ${
-              tab === t ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+              tab === type ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
             }`}
           >
-            {t === 'TEXT' ? '텍스트' : '사진'}
+            {type === 'TEXT' ? t('textTab') : t('photoTab')}
           </button>
         ))}
       </div>
@@ -145,7 +146,7 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value.slice(0, MAX_CHARS))}
-          placeholder="게더링에서의 경험을 자유롭게 작성해주세요"
+          placeholder={t('placeholder')}
           rows={4}
           className="w-full resize-none rounded-xl bg-tag-bg text-sm text-foreground placeholder:text-tag-text p-3 pb-6 outline-none"
         />
@@ -157,7 +158,7 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
       {/* 마일리지 안내 */}
       {(mileageReward ?? 0) > 0 && (
         <p className="text-xs text-primary mb-3 font-medium">
-          후기 등록 시 +{mileageReward}M 마일리지가 적립돼요
+          {t('rewardNotice', { mileage: mileageReward ?? 0 })}
         </p>
       )}
 
@@ -168,7 +169,7 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
         disabled={!canSubmit}
         className="w-full py-3 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-40 transition-opacity"
       >
-        {isPending ? '등록 중...' : isUploading ? '이미지 업로드 중...' : '후기 등록'}
+        {isPending ? t('submitting') : isUploading ? t('uploading') : t('submit')}
       </button>
 
       {/* 토스트 */}

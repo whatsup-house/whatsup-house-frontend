@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { STORIES, getStoryBySlug } from '@/lib/constants/stories'
 
 interface StoryPageProps {
@@ -16,14 +17,17 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: StoryPageProps): Promise<Metadata> {
   const { slug } = await params
   const story = getStoryBySlug(slug)
-  if (!story) return { title: '소개 | 와썹하우스' }
+  const tStoryRoot = await getTranslations('story')
+  const tCommon = await getTranslations('common')
+  if (!story) return { title: tStoryRoot('fallbackTitle') }
+  const t = await getTranslations(`story.${story.messageKey}`)
 
   return {
-    title: `${story.title} | 와썹하우스`,
-    description: story.description,
+    title: `${t('title')} | ${tCommon('brand')}`,
+    description: t('description'),
     openGraph: {
-      title: story.title,
-      description: story.description,
+      title: t('title'),
+      description: t('description'),
       type: 'article',
       images: [{ url: story.heroImage }],
     },
@@ -34,16 +38,20 @@ export default async function StoryPage({ params }: StoryPageProps) {
   const { slug } = await params
   const story = getStoryBySlug(slug)
   if (!story) notFound()
+  const t = await getTranslations(`story.${story.messageKey}`)
+  const tStory = await getTranslations('story')
+  const tCommon = await getTranslations('common')
+  const sections = t.raw('sections') as Array<{ heading: string; body: string }>
 
   // AEO용 구조화 데이터 (Article)
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: story.title,
-    description: story.description,
+    headline: t('title'),
+    description: t('description'),
     image: story.heroImage,
-    author: { '@type': 'Organization', name: '와썹하우스' },
-    publisher: { '@type': 'Organization', name: '와썹하우스' },
+    author: { '@type': 'Organization', name: tCommon('brand') },
+    publisher: { '@type': 'Organization', name: tCommon('brand') },
   }
 
   return (
@@ -57,28 +65,26 @@ export default async function StoryPage({ params }: StoryPageProps) {
       <div className="relative aspect-[390/260] w-full overflow-hidden bg-tag-bg">
         <Image
           src={story.heroImage}
-          alt={story.title}
+          alt={t('title')}
           fill
           priority
           sizes="(max-width: 430px) 100vw, 430px"
           className="object-cover"
         />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-5 pb-5 pt-12">
-          {story.tagline && (
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-white/85">
-              {story.tagline}
-            </p>
-          )}
-          <h1 className="text-2xl font-bold leading-tight text-white">{story.title}</h1>
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-white/85">
+            {t('tagline')}
+          </p>
+          <h1 className="text-2xl font-bold leading-tight text-white">{t('title')}</h1>
         </div>
       </div>
 
       {/* 본문 */}
       <div className="px-5 py-6">
-        <p className="text-sm leading-relaxed text-tag-text">{story.description}</p>
+        <p className="text-sm leading-relaxed text-tag-text">{t('description')}</p>
 
         <div className="mt-6 flex flex-col gap-6">
-          {story.sections.map((section) => (
+          {sections.map((section) => (
             <section key={section.heading}>
               <div className="mb-2 flex items-center gap-2">
                 <div className="h-5 w-1 rounded-full bg-primary" />
@@ -95,7 +101,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
           href="/gatherings"
           className="mt-8 flex min-h-[52px] w-full items-center justify-center rounded-button bg-primary px-5 text-[15px] font-bold text-white"
         >
-          게더링 둘러보기
+          {tStory('cta')}
         </Link>
       </div>
     </article>

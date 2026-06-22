@@ -6,6 +6,7 @@ import {
   Gift, Users, Pencil, ImagePlus, Settings2,
   ChevronRight, ChevronDown, ArrowDownUp, Check, Coins,
 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import dayjs from 'dayjs'
 import { useMyMileageBalance, useMyMileageHistory } from '@/lib/hooks/useMileage'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
@@ -20,16 +21,11 @@ const TYPE_ICON: Record<MileageType, React.ElementType> = {
   ADMIN_ADJUST: Settings2,
 }
 
-function getTypeLabel(type: MileageType, amount: number): string {
-  if (type === 'ADMIN_ADJUST') return amount > 0 ? '관리자 지급' : '관리자 차감'
-  const LABELS: Record<MileageType, string> = {
-    SIGNUP: '회원가입 환영',
-    ATTENDANCE: '게더링 참석',
-    REVIEW_REWARD: '게더링 후기 작성',
-    REVIEW_UPGRADE: '후기 사진 업그레이드',
-    ADMIN_ADJUST: '관리자 조정',
+function getTypeLabel(type: MileageType, amount: number, t: (key: string) => string): string {
+  if (type === 'ADMIN_ADJUST') {
+    return amount > 0 ? t('typeLabels.ADMIN_ADJUST_EARN') : t('typeLabels.ADMIN_ADJUST_USE')
   }
-  return LABELS[type]
+  return t(`typeLabels.${type}`)
 }
 
 // ── 적립 방법 ──────────────────────────────────────────────
@@ -37,49 +33,45 @@ const EARN_METHODS = [
   {
     num: '01',
     Icon: Users,
-    title: '게더링 참석 완료',
-    desc: '신청한 게더링에 참석하고\n주최자가 출석을 처리하면 쌓여요',
   },
   {
     num: '02',
     Icon: Pencil,
-    title: '게더링 후기 작성',
-    desc: '참석한 모임의 분위기와 감상을\n글이나 사진으로 남겨주세요',
   },
   {
     num: '03',
     Icon: Gift,
-    title: '회원가입 환영 마일리지',
-    desc: '와썹하우스에 처음 오신 분께\n인사 대신 드려요',
   },
 ]
 
 type FilterKind = 'ALL' | 'EARN' | 'USE'
 type SortOrder = 'desc' | 'asc'
 
-const FILTER_OPTIONS: { value: FilterKind; label: string }[] = [
-  { value: 'ALL', label: '전체' },
-  { value: 'EARN', label: '적립 내역' },
-  { value: 'USE', label: '사용 내역' },
+const FILTER_OPTIONS: { value: FilterKind; labelKey: string }[] = [
+  { value: 'ALL', labelKey: 'filters.ALL' },
+  { value: 'EARN', labelKey: 'filters.EARN' },
+  { value: 'USE', labelKey: 'filters.USE' },
 ]
 
 // ── BalanceBlock ───────────────────────────────────────────
 function BalanceBlock({ balance, isLoading }: { balance: number | null; isLoading: boolean }) {
+  const t = useTranslations('mypage.mileage')
+  const locale = useLocale()
   const now = dayjs().format('YYYY.MM.DD HH:mm')
   const formatted = isLoading
     ? '—'
     : balance === null
     ? '— M'
-    : balance.toLocaleString('ko-KR')
+    : balance.toLocaleString(locale)
 
   return (
     <div className="px-1">
-      <p className="text-xs font-medium text-tag-text mb-1.5">{now} 기준 보유 마일리지</p>
+      <p className="text-xs font-medium text-tag-text mb-1.5">{t('balanceAsOf', { time: now })}</p>
       <div className="flex items-baseline gap-2">
         <span className="text-6xl font-bold tracking-tight text-foreground tabular-nums leading-none">
           {formatted}
         </span>
-        <span className="text-base font-semibold text-tag-text whitespace-nowrap">마일리지</span>
+        <span className="text-base font-semibold text-tag-text whitespace-nowrap">{t('unit')}</span>
       </div>
     </div>
   )
@@ -87,6 +79,8 @@ function BalanceBlock({ balance, isLoading }: { balance: number | null; isLoadin
 
 // ── EarnSection ────────────────────────────────────────────
 function EarnSection() {
+  const t = useTranslations('mypage.mileage')
+  const methods = t.raw('earnMethods') as Array<{ title: string; desc: string }>
   const [open, setOpen] = useState(false)
 
   return (
@@ -99,9 +93,9 @@ function EarnSection() {
         >
           <div>
             <p className="text-[10px] font-bold tracking-widest uppercase text-primary mb-1">
-              HOW TO EARN
+              {t('howToEarnEyebrow')}
             </p>
-            <p className="text-base font-bold text-foreground">어떻게 쌓나요?</p>
+            <p className="text-base font-bold text-foreground">{t('howToEarnTitle')}</p>
           </div>
           <div
             className={`w-7 h-7 rounded-full bg-tag-bg flex items-center justify-center shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
@@ -112,7 +106,7 @@ function EarnSection() {
 
         {open && (
           <div className="pb-2">
-            {EARN_METHODS.map((m) => (
+            {EARN_METHODS.map((m, index) => (
               <div
                 key={m.num}
                 className="flex gap-3.5 px-4 py-4 border-t border-tag-bg/40"
@@ -125,10 +119,10 @@ function EarnSection() {
                     <span className="text-[11px] font-bold text-primary tracking-wider tabular-nums">
                       {m.num}
                     </span>
-                    <span className="text-[15px] font-bold text-foreground">{m.title}</span>
+                    <span className="text-[15px] font-bold text-foreground">{methods[index]?.title}</span>
                   </div>
                   <p className="text-[12.5px] text-tag-text leading-relaxed whitespace-pre-line">
-                    {m.desc}
+                    {methods[index]?.desc}
                   </p>
                 </div>
               </div>
@@ -142,17 +136,19 @@ function EarnSection() {
 
 // ── LogRow ─────────────────────────────────────────────────
 function LogRow({ item, isFirst }: { item: MileageHistoryItem; isFirst: boolean }) {
+  const t = useTranslations('mypage.mileage')
+  const locale = useLocale()
   const Icon = TYPE_ICON[item.type]
   const isEarn = item.amount > 0
-  const label = getTypeLabel(item.type, item.amount)
+  const label = getTypeLabel(item.type, item.amount, t)
   const sign = isEarn ? '+' : '−'
-  const formattedAmount = `${sign}${Math.abs(item.amount).toLocaleString('ko-KR')}`
+  const formattedAmount = `${sign}${Math.abs(item.amount).toLocaleString(locale)}`
   const formattedDate = dayjs(item.createdAt).format('YYYY.MM.DD')
-  const formattedBalance = item.balanceAfter.toLocaleString('ko-KR')
+  const formattedBalance = item.balanceAfter.toLocaleString(locale)
   const subText =
     item.type === 'ADMIN_ADJUST' && item.adjustReason
       ? item.adjustReason
-      : `잔액 ${formattedBalance}M`
+      : t('balance', { balance: formattedBalance })
 
   return (
     <div
@@ -188,13 +184,9 @@ function LogRow({ item, isFirst }: { item: MileageHistoryItem; isFirst: boolean 
 
 // ── EmptyState ─────────────────────────────────────────────
 function EmptyState({ filter }: { filter: FilterKind }) {
+  const t = useTranslations('mypage.mileage')
   const router = useRouter()
-  const copy =
-    filter === 'USE'
-      ? { head: '아직 사용 내역이 없어요', body: '모은 마일리지로 게더링 참가비를\n할인받을 수 있어요' }
-      : filter === 'EARN'
-      ? { head: '아직 적립 내역이 없어요', body: '마음 가는 게더링에 신청하고\n오프라인에서 만나보세요' }
-      : { head: '아직 마일리지 내역이 없어요', body: '게더링에 참석하거나 후기를 남기면\n마일리지가 쌓여요' }
+  const copy = t.raw(`empty.${filter}`) as { head: string; body: string }
 
   return (
     <div className="flex flex-col items-center py-8 px-6 text-center">
@@ -207,7 +199,7 @@ function EmptyState({ filter }: { filter: FilterKind }) {
         onClick={() => router.push('/gatherings')}
         className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-full text-[13px] font-bold"
       >
-        게더링 둘러보기 <ChevronRight size={14} />
+        {t('browseGatherings')} <ChevronRight size={14} />
       </button>
     </div>
   )
@@ -215,6 +207,8 @@ function EmptyState({ filter }: { filter: FilterKind }) {
 
 // ── LogSection ─────────────────────────────────────────────
 function LogSection({ enabled }: { enabled: boolean }) {
+  const t = useTranslations('mypage.mileage')
+  const tCommon = useTranslations('common')
   const [filter, setFilter] = useState<FilterKind>('ALL')
   const [sort, setSort] = useState<SortOrder>('desc')
   const [page, setPage] = useState(0)
@@ -251,7 +245,8 @@ function LogSection({ enabled }: { enabled: boolean }) {
     return () => document.removeEventListener('mousedown', handler)
   }, [filterOpen])
 
-  const currentLabel = FILTER_OPTIONS.find((o) => o.value === filter)?.label ?? '전체'
+  const currentOption = FILTER_OPTIONS.find((o) => o.value === filter) ?? FILTER_OPTIONS[0]
+  const currentLabel = t(currentOption.labelKey)
 
   return (
     <section>
@@ -259,13 +254,13 @@ function LogSection({ enabled }: { enabled: boolean }) {
       <div className="flex items-end justify-between px-1 mb-2.5">
         <div>
           <p className="text-[10px] font-bold tracking-widest uppercase text-primary mb-1">
-            MILEAGE LOG
+            {t('logEyebrow')}
           </p>
-          <p className="text-lg font-bold text-foreground">마일리지 내역</p>
+          <p className="text-lg font-bold text-foreground">{t('logTitle')}</p>
         </div>
         {filteredItems.length > 0 && (
           <span className="text-[11px] font-bold text-tag-text tabular-nums">
-            {filteredItems.length}건
+            {t('itemCount', { count: filteredItems.length })}
           </span>
         )}
       </div>
@@ -298,7 +293,7 @@ function LogSection({ enabled }: { enabled: boolean }) {
                       : 'font-medium text-foreground'
                   }`}
                 >
-                  {opt.label}
+                  {t(opt.labelKey)}
                   {filter === opt.value && <Check size={14} className="text-primary" />}
                 </button>
               ))}
@@ -312,7 +307,7 @@ function LogSection({ enabled }: { enabled: boolean }) {
           className="inline-flex items-center gap-1.5 px-3 py-2 border border-tag-bg/40 rounded-full text-[13px] font-semibold text-tag-text"
         >
           <ArrowDownUp size={12} />
-          {sort === 'desc' ? '최신순' : '오래된 순'}
+          {sort === 'desc' ? t('sortLatest') : t('sortOldest')}
         </button>
       </div>
 
@@ -320,7 +315,7 @@ function LogSection({ enabled }: { enabled: boolean }) {
       <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
-            <p className="text-sm text-tag-text">불러오는 중...</p>
+            <p className="text-sm text-tag-text">{tCommon('loading')}</p>
           </div>
         ) : filteredItems.length > 0 ? (
           filteredItems.map((item, i) => (
@@ -339,7 +334,7 @@ function LogSection({ enabled }: { enabled: boolean }) {
             disabled={page === 0}
             className="px-4 py-2 rounded-full border border-tag-bg/40 text-[13px] font-semibold text-tag-text disabled:opacity-40"
           >
-            이전
+            {tCommon('previous')}
           </button>
           <span className="text-[13px] font-medium text-tag-text tabular-nums">
             {page + 1} / {totalPages}
@@ -349,7 +344,7 @@ function LogSection({ enabled }: { enabled: boolean }) {
             disabled={page >= totalPages - 1}
             className="px-4 py-2 rounded-full border border-tag-bg/40 text-[13px] font-semibold text-tag-text disabled:opacity-40"
           >
-            다음
+            {tCommon('next')}
           </button>
         </div>
       )}
@@ -359,6 +354,7 @@ function LogSection({ enabled }: { enabled: boolean }) {
 
 // ── MileagePage ────────────────────────────────────────────
 export default function MileagePage() {
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const { isLoggedIn, isInitialized } = useRequireAuth()
   const enabled = isLoggedIn && isInitialized
@@ -374,7 +370,7 @@ export default function MileagePage() {
   if (!isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-sm text-tag-text">불러오는 중...</p>
+        <p className="text-sm text-tag-text">{tCommon('loading')}</p>
       </div>
     )
   }

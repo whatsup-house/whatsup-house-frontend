@@ -2,33 +2,34 @@
 
 import { usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import LanguageSwitcher from './LanguageSwitcher'
 import NotificationBell from './NotificationBell'
 
 const HIDDEN_PATTERNS: RegExp[] = []
 
-const PAGE_TITLES: Record<string, string> = {
-  '/': '와썹하우스',
-  '/gatherings': '게더링',
-  '/reviews': '다녀온 사람들의 후기',
-  '/social': '소셜',
-  '/mypage': '마이페이지',
-  '/mypage/mileage': '마일리지',
-  '/applications/check': '신청 내역 조회',
-  '/login': '로그인',
-  '/register': '회원가입',
-  '/onboarding': '온보딩',
+const PAGE_TITLE_KEYS: Record<string, string> = {
+  '/': 'home',
+  '/gatherings': 'gatherings',
+  '/reviews': 'reviews',
+  '/social': 'social',
+  '/mypage': 'mypage',
+  '/mypage/mileage': 'mileage',
+  '/applications/check': 'applicationCheck',
+  '/login': 'login',
+  '/register': 'register',
+  '/onboarding': 'onboarding',
 }
 
 const ROOT_PATHS = new Set(['/', '/gatherings', '/mypage'])
 
-function getTitle(pathname: string): string {
-  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
-  if (pathname.endsWith('/apply/complete')) return '신청 완료'
-  if (pathname.endsWith('/apply')) return '신청하기'
-  if (pathname.startsWith('/gatherings/')) return '게더링'
-  if (pathname.startsWith('/story/')) return '소개'
+function getTitleKey(pathname: string): string {
+  if (PAGE_TITLE_KEYS[pathname]) return PAGE_TITLE_KEYS[pathname]
+  if (pathname.endsWith('/apply/complete')) return 'applyComplete'
+  if (pathname.endsWith('/apply')) return 'apply'
+  if (pathname.startsWith('/gatherings/')) return 'gatherings'
+  if (pathname.startsWith('/story/')) return 'story'
   return ''
 }
 
@@ -43,6 +44,8 @@ function getFallbackPath(pathname: string): string {
 }
 
 export default function TopNav() {
+  const t = useTranslations('nav')
+  const tCommon = useTranslations('common')
   const pathname = usePathname()
   const handleBack = useBackNavigation(getFallbackPath(pathname))
 
@@ -51,7 +54,8 @@ export default function TopNav() {
   }
 
   const canGoBack = !ROOT_PATHS.has(pathname)
-  const title = getTitle(pathname)
+  const titleKey = getTitleKey(pathname)
+  const title = titleKey ? t(`titles.${titleKey}`) : ''
 
   return (
     <header className="sticky top-0 z-30 bg-card/85 backdrop-blur-md border-b border-tag-bg">
@@ -61,7 +65,7 @@ export default function TopNav() {
             <button
               onClick={handleBack}
               className="-ml-1 p-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-foreground"
-              aria-label="뒤로가기"
+              aria-label={tCommon('back')}
             >
               <ArrowLeft size={20} />
             </button>

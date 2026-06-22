@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, X, CheckCircle, Gift, Heart, type LucideIcon } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useAuthStore } from '@/lib/store/authStore'
 import {
   useNotifications,
@@ -10,7 +11,7 @@ import {
   useMarkNotificationRead,
   useDeleteNotification,
 } from '@/lib/hooks/useNotifications'
-import { formatKoreanShortDate } from '@/lib/utils/date'
+import { formatLocalizedShortDate } from '@/lib/utils/date'
 import type { NotificationItem, NotificationLink, NotificationType } from '@/lib/api/types'
 
 // 유형별 이동 대상 라우트. (KAN-262)
@@ -27,6 +28,8 @@ const TYPE_ICON: Record<NotificationType, LucideIcon> = {
 }
 
 export default function NotificationBell() {
+  const t = useTranslations('notifications')
+  const locale = useLocale()
   const router = useRouter()
   const { isLoggedIn } = useAuthStore()
   const [open, setOpen] = useState(false)
@@ -48,7 +51,7 @@ export default function NotificationBell() {
       <button
         onClick={() => setOpen(true)}
         className="relative p-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-foreground"
-        aria-label="알림"
+        aria-label={t('label')}
       >
         <Bell size={20} />
         {isLoggedIn && unreadCount > 0 && (
@@ -68,10 +71,10 @@ export default function NotificationBell() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-tag-bg">
-              <h2 className="text-base font-bold text-foreground">알림</h2>
+              <h2 className="text-base font-bold text-foreground">{t('label')}</h2>
               <button
                 onClick={() => setOpen(false)}
-                aria-label="닫기"
+                aria-label={t('close')}
                 className="p-1 text-tag-text min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <X size={20} />
@@ -80,11 +83,11 @@ export default function NotificationBell() {
 
             <div className="flex-1 overflow-y-auto px-4 py-3">
               {!isLoggedIn ? (
-                <EmptyMessage text="로그인 후 알림을 확인할 수 있어요." />
+                <EmptyMessage text={t('loginRequired')} />
               ) : isLoading ? (
-                <EmptyMessage text="불러오는 중..." />
+                <EmptyMessage text={t('loading')} />
               ) : !notifications || notifications.length === 0 ? (
-                <EmptyMessage text="새로운 알림이 없어요." />
+                <EmptyMessage text={t('empty')} />
               ) : (
                 <ul className="flex flex-col gap-2">
                   {notifications.map((item) => {
@@ -113,14 +116,14 @@ export default function NotificationBell() {
                             {item.content && (
                               <p className="text-sm text-tag-text mt-0.5 break-keep">{item.content}</p>
                             )}
-                            <p className="text-xs text-tag-text mt-1.5">{formatKoreanShortDate(item.createdAt)}</p>
+                            <p className="text-xs text-tag-text mt-1.5">{formatLocalizedShortDate(item.createdAt, locale)}</p>
                           </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               removeNotification.mutate(item.id)
                             }}
-                            aria-label="알림 삭제"
+                            aria-label={t('delete')}
                             className="absolute top-2 right-2 p-1 text-tag-text min-w-[32px] min-h-[32px] flex items-center justify-center"
                           >
                             <X size={16} />

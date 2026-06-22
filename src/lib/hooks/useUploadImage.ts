@@ -10,7 +10,7 @@ interface UseUploadImageResult {
   reset: () => void
 }
 
-export function useUploadImage(): UseUploadImageResult {
+export function useUploadImage(fallbackMessage = 'Image upload failed'): UseUploadImageResult {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -20,7 +20,7 @@ export function useUploadImage(): UseUploadImageResult {
     try {
       return await uploadImage(blob, filename)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : '이미지 업로드에 실패했습니다'
+      const msg = err instanceof Error ? err.message : fallbackMessage
       setError(msg)
       throw err
     } finally {
