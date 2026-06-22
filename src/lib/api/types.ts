@@ -71,6 +71,14 @@ export interface MyTickets {
   gatheringId: string | null
 }
 
+export interface GuestOverview {
+  name: string
+  randomTableEligibility: RandomTableEligibility
+  totalRemaining: number
+  passes: TicketPass[]
+  applications: ApplicationListItem[]
+}
+
 export interface TicketPurchaseRequest {
   product: TicketProduct
 }

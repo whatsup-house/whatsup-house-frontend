@@ -160,10 +160,10 @@ export default function LoginPageClient() {
         </Link>
 
         <Link
-          href="/applications/check"
+          href="/guest"
           className="block w-full pb-5 text-center text-[13px] font-bold text-primary underline underline-offset-4"
         >
-          예약번호로 조회하기
+          비회원 이용내역 조회
         </Link>
       </div>
     </main>
