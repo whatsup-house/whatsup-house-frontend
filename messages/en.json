@@ -41,11 +41,9 @@
   },
   "language": {
     "label": "Language",
-    "ko": "Korean",
+    "ko": "한국어",
     "en": "English",
-    "ja": "Japanese",
-    "zh": "Chinese",
-    "es": "Spanish"
+    "ja": "日本語"
   },
   "auth": {
     "login": {
