@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, Ticket } from 'lucide-react'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
-import { useMyTickets, usePurchaseTicketPass } from '@/lib/hooks/useTickets'
+import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseTicketPass } from '@/lib/hooks/useTickets'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useToastStore } from '@/lib/store/toastStore'
 import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
@@ -20,19 +20,26 @@ function PaymentContent() {
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
   const { isLoggedIn, isInitialized } = useRequireAuth()
-  const { data, isLoading } = useMyTickets()
-  const purchase = usePurchaseTicketPass()
+  const memberTickets = useMyTickets()
+  const guestTickets = useGuestTickets(bookingNumber)
+  const memberPurchase = usePurchaseTicketPass()
+  const guestPurchase = usePurchaseGuestTicketPass()
   const showToast = useToastStore((state) => state.show)
   const [selected, setSelected] = useState<TicketProduct>('RANDOM_TABLE_ONE')
 
   useEffect(() => {
-    if (isInitialized && !isLoggedIn) {
-      const target = `/payments/random-table${bookingNumber ? `?bookingNumber=${encodeURIComponent(bookingNumber)}` : ''}`
+    if (isInitialized && !isLoggedIn && !bookingNumber) {
+      const target = '/payments/random-table'
       router.replace(`/login?returnUrl=${encodeURIComponent(target)}`)
     }
   }, [bookingNumber, isInitialized, isLoggedIn, router])
 
-  if (!isInitialized || !isLoggedIn || isLoading) {
+  const isGuestPurchase = Boolean(bookingNumber)
+  const data = isGuestPurchase ? guestTickets.data : memberTickets.data
+  const isLoading = isGuestPurchase ? guestTickets.isLoading : memberTickets.isLoading
+  const purchase = isGuestPurchase ? guestPurchase : memberPurchase
+
+  if (!isInitialized || (!isGuestPurchase && !isLoggedIn) || isLoading) {
     return <div className="flex justify-center py-24"><LoadingSpinner size="lg" /></div>
   }
 
@@ -40,9 +47,13 @@ function PaymentContent() {
   const canPurchase = data?.purchasable === true
   const submit = async () => {
     try {
-      await purchase.mutateAsync({ product: selected })
+      if (bookingNumber) {
+        await guestPurchase.mutateAsync({ bookingNumber, product: selected })
+      } else {
+        await memberPurchase.mutateAsync({ product: selected })
+      }
       showToast(`${product.label} 구매 요청이 접수됐어요.`, 'welcome')
-      router.push('/mypage')
+      if (!bookingNumber) router.push('/mypage')
     } catch (error) {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message
       showToast(message ?? '이용권 구매 요청에 실패했어요.', 'error')

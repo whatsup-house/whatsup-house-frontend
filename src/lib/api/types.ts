@@ -74,6 +74,10 @@ export interface TicketPurchaseRequest {
   product: TicketProduct
 }
 
+export interface GuestTicketPurchaseRequest extends TicketPurchaseRequest {
+  bookingNumber: string
+}
+
 // 달력 dot 표시용 (날짜별 대표 게더링 상태)
 export interface CalendarDot {
   date: string           // YYYY-MM-DD
