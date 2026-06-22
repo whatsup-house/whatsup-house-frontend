@@ -41,10 +41,10 @@
   },
   "language": {
     "label": "Idioma",
-    "ko": "한국어",
-    "en": "English",
-    "ja": "日本語",
-    "zh": "中文",
+    "ko": "Coreano",
+    "en": "Inglés",
+    "ja": "Japonés",
+    "zh": "Chino",
     "es": "Español"
   },
   "auth": {

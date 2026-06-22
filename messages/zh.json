@@ -41,11 +41,11 @@
   },
   "language": {
     "label": "语言",
-    "ko": "한국어",
-    "en": "English",
-    "ja": "日本語",
+    "ko": "韩语",
+    "en": "英语",
+    "ja": "日语",
     "zh": "中文",
-    "es": "Español"
+    "es": "西班牙语"
   },
   "auth": {
     "login": {

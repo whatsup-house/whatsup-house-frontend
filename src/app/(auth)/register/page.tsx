@@ -728,7 +728,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* 4. 이메일(ID) */}
+          {/* 4. 이메일(아이디) */}
           {visible(4) && (
             <div ref={(node) => { fieldRefs.current[4] = node }} className="animate-field-reveal flex flex-col gap-1">
               <Input
