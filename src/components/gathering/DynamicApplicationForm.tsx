@@ -145,9 +145,25 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
     try {
       if (isGuestMode) {
         const result = await guestMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
+        if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'PAYMENT_PENDING') {
+          router.push(`/payments/random-table?bookingNumber=${encodeURIComponent(result.bookingNumber)}`)
+          return
+        }
+        if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'CONFIRMED') {
+          router.push(`/gatherings/${gathering.id}/apply/confirmed?bookingNumber=${encodeURIComponent(result.bookingNumber)}`)
+          return
+        }
         router.push(`/gatherings/${gathering.id}/apply/complete?bookingNumber=${result.bookingNumber}`)
       } else {
-        await memberMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
+        const result = await memberMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
+        if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'PAYMENT_PENDING') {
+          router.push(`/payments/random-table?applicationId=${encodeURIComponent(result.id)}`)
+          return
+        }
+        if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'CONFIRMED') {
+          router.push(`/gatherings/${gathering.id}/apply/confirmed`)
+          return
+        }
         router.push(`/gatherings/${gathering.id}/apply/complete`)
       }
     } catch (err) {

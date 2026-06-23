@@ -85,7 +85,9 @@ export default function ApplicationResultView({
               <div>
                 <p className="text-xs text-tag-text">{isRandomTable ? '참가 방식' : t('price')}</p>
                 <p className="text-sm font-medium text-foreground">
-                  {isRandomTable ? '이용권 1회 사용 완료' : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
+                  {isRandomTable
+                    ? mode === 'confirmed' ? '이용권 1회 사용 완료' : '심사 승인 후 이용권으로 참가해요'
+                    : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
                 </p>
               </div>
             </div>

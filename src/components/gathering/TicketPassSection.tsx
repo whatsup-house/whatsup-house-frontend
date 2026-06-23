@@ -6,12 +6,10 @@ import { useTranslations } from 'next-intl'
 import { Card, Button } from '@/components/ui'
 import { useMyTickets } from '@/lib/hooks/useTickets'
 import { useAuthStore } from '@/lib/store/authStore'
-import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
 
 // 우연한 식탁(RANDOM_TABLE) 게더링 상세에 노출되는 이용권 선결제 섹션. (KAN-260)
 export default function TicketPassSection() {
   const t = useTranslations('gathering.ticketPass')
-  const tPayment = useTranslations('payment.account')
   const { isLoggedIn } = useAuthStore()
   const { data } = useMyTickets()
   const router = useRouter()
@@ -58,14 +56,6 @@ export default function TicketPassSection() {
               {data?.accountStatus === 'BLOCKED' && '차단된 계정은 이용권을 구매할 수 없어요.'}
             </div>
           )}
-
-          <div className="mt-3 bg-tag-bg rounded-input px-4 py-3 flex flex-col gap-1">
-            <p className="text-xs text-tag-text">{t('depositAccount')}</p>
-            <p className="text-sm font-semibold text-foreground">
-              {tPayment('bankName')} {PAYMENT_ACCOUNT.accountNumber}
-            </p>
-            <p className="text-xs text-tag-text">{t('accountHolder', { holder: tPayment('accountHolder') })}</p>
-          </div>
         </>
       ) : (
         <p className="text-sm text-primary font-medium">{t('loginRequired')}</p>
