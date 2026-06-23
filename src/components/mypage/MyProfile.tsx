@@ -32,12 +32,12 @@ function ProfileRow({ label, value }: { label: string; value: string | null | un
 function ProfileCharacter({ url, alt }: { url: string | null; alt: string }) {
   const [src, setSrc] = useState(url || FALLBACK_CHARACTER)
   return (
-    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-tag-bg">
+    <div className="relative h-28 w-28 shrink-0">
       <Image
         src={src}
         alt={alt}
         fill
-        sizes="80px"
+        sizes="112px"
         className="object-contain"
         onError={() => {
           if (src !== FALLBACK_CHARACTER) setSrc(FALLBACK_CHARACTER)
