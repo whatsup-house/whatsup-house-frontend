@@ -12,6 +12,7 @@
     "errors": {
       "UNKNOWN": "不明なエラーが発生しました。もう一度お試しください。",
       "EMAIL_ALREADY_EXISTS": "すでに使用中のメールです",
+      "EMAIL_NOT_VERIFIED": "メール認証を完了してください。",
       "NICKNAME_ALREADY_EXISTS": "すでに使用中のニックネームです",
       "INVALID_CREDENTIALS": "メールまたはパスワードをご確認ください。",
       "USER_NOT_FOUND": "一致する登録情報が見つかりません。",
@@ -959,6 +960,7 @@
   "errors": {
     "UNKNOWN": "不明なエラーが発生しました。もう一度お試しください。",
     "EMAIL_ALREADY_EXISTS": "すでに使用中のメールです",
+    "EMAIL_NOT_VERIFIED": "メール認証を完了してください。",
     "NICKNAME_ALREADY_EXISTS": "すでに使用中のニックネームです",
     "INVALID_CREDENTIALS": "メールまたはパスワードをご確認ください。",
     "USER_NOT_FOUND": "一致する登録情報が見つかりません。",

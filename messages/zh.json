@@ -12,6 +12,7 @@
     "errors": {
       "UNKNOWN": "出了点问题。请再试一次。",
       "EMAIL_ALREADY_EXISTS": "该电子邮件已被使用。",
+      "EMAIL_NOT_VERIFIED": "请完成电子邮件验证。",
       "NICKNAME_ALREADY_EXISTS": "该昵称已被使用。",
       "INVALID_CREDENTIALS": "请检查您的电子邮件或密码。",
       "USER_NOT_FOUND": "我们找不到匹配的账号信息。",
@@ -959,6 +960,7 @@
   "errors": {
     "UNKNOWN": "出了点问题。请再试一次。",
     "EMAIL_ALREADY_EXISTS": "该电子邮件已被使用。",
+    "EMAIL_NOT_VERIFIED": "请完成电子邮件验证。",
     "NICKNAME_ALREADY_EXISTS": "该昵称已被使用。",
     "INVALID_CREDENTIALS": "请检查您的电子邮件或密码。",
     "USER_NOT_FOUND": "我们找不到匹配的账号信息。",

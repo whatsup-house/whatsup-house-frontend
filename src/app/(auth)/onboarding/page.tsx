@@ -100,8 +100,13 @@ export default function OnboardingPage() {
         },
         onError: (error) => {
           const code = getApiErrorCode(error)
-          if (code === 'EMAIL_ALREADY_EXISTS') {
-            sessionStorage.setItem(REGISTER_EMAIL_ERROR_KEY, tCommon('errors.EMAIL_ALREADY_EXISTS'))
+          if (code === 'EMAIL_ALREADY_EXISTS' || code === 'EMAIL_NOT_VERIFIED') {
+            sessionStorage.setItem(
+              REGISTER_EMAIL_ERROR_KEY,
+              code === 'EMAIL_ALREADY_EXISTS'
+                ? tCommon('errors.EMAIL_ALREADY_EXISTS')
+                : tCommon('errors.EMAIL_NOT_VERIFIED')
+            )
             router.push('/register')
             return
           }

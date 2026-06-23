@@ -12,6 +12,7 @@
     "errors": {
       "UNKNOWN": "Something went wrong. Please try again.",
       "EMAIL_ALREADY_EXISTS": "This email is already in use.",
+      "EMAIL_NOT_VERIFIED": "Please complete email verification.",
       "NICKNAME_ALREADY_EXISTS": "This nickname is already in use.",
       "INVALID_CREDENTIALS": "Please check your email or password.",
       "USER_NOT_FOUND": "We could not find matching account information.",
@@ -959,6 +960,7 @@
   "errors": {
     "UNKNOWN": "Something went wrong. Please try again.",
     "EMAIL_ALREADY_EXISTS": "This email is already in use.",
+    "EMAIL_NOT_VERIFIED": "Please complete email verification.",
     "NICKNAME_ALREADY_EXISTS": "This nickname is already in use.",
     "INVALID_CREDENTIALS": "Please check your email or password.",
     "USER_NOT_FOUND": "We could not find matching account information.",

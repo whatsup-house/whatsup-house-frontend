@@ -115,3 +115,11 @@ export const requestGuestEmailVerification = async (email: string): Promise<void
 export const confirmGuestEmailVerification = async (email: string, code: string): Promise<void> => {
   await apiClient.post('/api/auth/guest-email-verification/confirm', { email, code })
 }
+
+export const requestRegisterEmailVerification = async (email: string): Promise<void> => {
+  await apiClient.post('/api/auth/register-email-verification/request', { email })
+}
+
+export const confirmRegisterEmailVerification = async (email: string, code: string): Promise<void> => {
+  await apiClient.post('/api/auth/register-email-verification/confirm', { email, code })
+}
