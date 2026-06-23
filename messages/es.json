@@ -12,6 +12,7 @@
     "errors": {
       "UNKNOWN": "Algo salió mal. Por favor inténtalo de nuevo.",
       "EMAIL_ALREADY_EXISTS": "Este correo electrónico ya está en uso.",
+      "EMAIL_NOT_VERIFIED": "Por favor completa la verificación de correo electrónico.",
       "NICKNAME_ALREADY_EXISTS": "Este apodo ya está en uso.",
       "INVALID_CREDENTIALS": "Por favor revisa tu correo electrónico o contraseña.",
       "USER_NOT_FOUND": "No pudimos encontrar información de cuenta coincidente.",
@@ -959,6 +960,7 @@
   "errors": {
     "UNKNOWN": "Algo salió mal. Por favor inténtalo de nuevo.",
     "EMAIL_ALREADY_EXISTS": "Este correo electrónico ya está en uso.",
+    "EMAIL_NOT_VERIFIED": "Por favor completa la verificación de correo electrónico.",
     "NICKNAME_ALREADY_EXISTS": "Este apodo ya está en uso.",
     "INVALID_CREDENTIALS": "Por favor revisa tu correo electrónico o contraseña.",
     "USER_NOT_FOUND": "No pudimos encontrar información de cuenta coincidente.",

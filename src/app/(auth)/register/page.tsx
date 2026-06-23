@@ -9,6 +9,7 @@ import dayjs, { type Dayjs } from 'dayjs'
 import { CalendarDays, ChevronLeft, ChevronRight, Eye, EyeOff, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Button, Input } from '@/components/ui'
+import { confirmRegisterEmailVerification, requestRegisterEmailVerification } from '@/lib/api/auth'
 import { useCheckEmail, useCheckNickname } from '@/lib/hooks/useAuth'
 import { getAge } from '@/lib/utils/date'
 import type { Gender } from '@/lib/api/types'
@@ -380,6 +381,14 @@ export default function RegisterPage() {
   const [birthDateDraft, setBirthDateDraft] = useState<string | null>(null)
   const [isBirthCalendarOpen, setIsBirthCalendarOpen] = useState(false)
   const [birthCalendarMonthValue, setBirthCalendarMonthValue] = useState<string | null>(null)
+  const [emailRequested, setEmailRequested] = useState(false)
+  const [requestedEmail, setRequestedEmail] = useState('')
+  const [emailCode, setEmailCode] = useState('')
+  const [emailVerified, setEmailVerified] = useState(false)
+  const [verifiedEmail, setVerifiedEmail] = useState('')
+  const [emailBusy, setEmailBusy] = useState(false)
+  const [emailVerificationError, setEmailVerificationError] = useState<string | null>(null)
+  const [secondsLeft, setSecondsLeft] = useState(0)
   const fieldRefs = useRef<Array<HTMLDivElement | null>>([])
   const birthCalendarPanelRef = useRef<HTMLDivElement | null>(null)
   const previousRevealLevelRef = useRef(0)
@@ -427,6 +436,7 @@ export default function RegisterPage() {
   const password = useWatch({ control, name: 'password' }) ?? ''
   const passwordConfirmValue = useWatch({ control, name: 'passwordConfirm' }) ?? ''
   const phoneValue = useWatch({ control, name: 'phone' }) ?? ''
+  const normalizedEmail = emailValue.trim().toLowerCase()
 
   const passwordValid = password.length >= 8 && PASSWORD_REGEX.test(password)
   const confirmMatch = passwordConfirmValue.length > 0 && passwordConfirmValue === password
@@ -462,6 +472,11 @@ export default function RegisterPage() {
       if (saved.gender) setValue('gender', saved.gender)
       if (saved.birthDate) setValue('birthDate', saved.birthDate)
       if (saved.phone) setValue('phone', saved.phone)
+      if (saved.emailVerified && saved.email) {
+        const normalizedSavedEmail = String(saved.email).trim().toLowerCase()
+        setEmailVerified(true)
+        setVerifiedEmail(normalizedSavedEmail)
+      }
 
       const emailError = sessionStorage.getItem(REGISTER_EMAIL_ERROR_KEY)
       if (emailError) {
@@ -534,6 +549,10 @@ export default function RegisterPage() {
   const genderReady = !!genderValue
   const passwordReady = passwordValid && confirmMatch
   const phoneReady = /^\d{11}$/.test(phoneValue)
+  const emailVerificationReady = EMAIL_REGEX.test(emailValue)
+    && emailAvailable === true
+    && emailVerified
+    && verifiedEmail === normalizedEmail
   const delayedNameReady = useDebouncedValue(nameReady, REVEAL_DELAY_MS)
   const delayedGenderReady = useDebouncedValue(genderReady, REVEAL_DELAY_MS)
   const delayedBirthReady = useDebouncedValue(birthValid, REVEAL_DELAY_MS)
@@ -545,7 +564,7 @@ export default function RegisterPage() {
     delayedGenderReady,                                             // 1 성별
     delayedBirthReady,                                              // 2 생년월일
     nicknameValue.length >= 2 && nicknameAvailable === true,        // 3 닉네임
-    EMAIL_REGEX.test(emailValue) && emailAvailable === true,        // 4 이메일
+    emailVerificationReady,                                         // 4 이메일 인증
     delayedPasswordReady,                                           // 5 비밀번호
     delayedPhoneReady,                                              // 6 연락처
     delayedTermsReady,                                              // 7 약관
@@ -579,10 +598,78 @@ export default function RegisterPage() {
     return () => window.clearTimeout(timer)
   }, [isBirthCalendarOpen])
 
+  useEffect(() => {
+    const activeEmail = emailVerified ? verifiedEmail : emailRequested ? requestedEmail : ''
+    if (!activeEmail || activeEmail === normalizedEmail) return
+    setEmailRequested(false)
+    setRequestedEmail('')
+    setEmailVerified(false)
+    setVerifiedEmail('')
+    setEmailCode('')
+    setSecondsLeft(0)
+    setEmailVerificationError(null)
+  }, [emailRequested, emailVerified, normalizedEmail, requestedEmail, verifiedEmail])
+
+  useEffect(() => {
+    if (!emailRequested || emailVerified || secondsLeft <= 0) return
+    const timer = window.setInterval(() => {
+      setSecondsLeft((prev) => Math.max(prev - 1, 0))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [emailRequested, emailVerified, secondsLeft])
+
+  const requestEmailCode = async () => {
+    if (!EMAIL_REGEX.test(emailValue)) {
+      setEmailVerificationError(t('validation.email'))
+      return
+    }
+    if (emailAvailable !== true || isCheckingEmail) {
+      setEmailVerificationError('사용 가능한 이메일인지 먼저 확인해 주세요.')
+      return
+    }
+    setEmailBusy(true)
+    setEmailVerificationError(null)
+    try {
+      await requestRegisterEmailVerification(emailValue)
+      setEmailRequested(true)
+      setRequestedEmail(normalizedEmail)
+      setEmailVerified(false)
+      setVerifiedEmail('')
+      setEmailCode('')
+      setSecondsLeft(300)
+    } catch {
+      setEmailVerificationError('인증번호 발송에 실패했어요.')
+    } finally {
+      setEmailBusy(false)
+    }
+  }
+
+  const confirmEmailCode = async () => {
+    if (!/^\d{6}$/.test(emailCode)) {
+      setEmailVerificationError('6자리 인증번호를 입력해주세요.')
+      return
+    }
+    setEmailBusy(true)
+    setEmailVerificationError(null)
+    try {
+      await confirmRegisterEmailVerification(emailValue, emailCode)
+      setEmailVerified(true)
+      setVerifiedEmail(normalizedEmail)
+    } catch {
+      setEmailVerificationError('인증번호가 올바르지 않거나 만료됐어요.')
+    } finally {
+      setEmailBusy(false)
+    }
+  }
+
   const handleValid = (data: FormValues) => {
     if (!allRequired) return
     if (nicknameAvailable === false) return
     if (emailAvailable === false) return
+    if (!emailVerificationReady) {
+      setError('email', { type: 'manual', message: '이메일 인증을 완료해 주세요.' })
+      return
+    }
     if (debouncedNickname.length >= 2 && isCheckingNickname) return
     if (isCheckingEmail) return
     clearErrors('email')
@@ -597,6 +684,7 @@ export default function RegisterPage() {
       // BE(KAN-257) 전환 전까지 호환을 위해 만 나이도 함께 보관한다.
       age: getAge(data.birthDate),
       phone: data.phone,
+      emailVerified: true,
       checkedTerms,
     }))
     router.push('/onboarding')
@@ -732,6 +820,51 @@ export default function RegisterPage() {
                 ) : emailAvailable === false ? (
                   <p className="text-xs text-primary pl-1">{tCommon('errors.EMAIL_ALREADY_EXISTS')}</p>
                 ) : null
+              )}
+              {EMAIL_REGEX.test(emailValue) && emailAvailable === true && (
+                <div className="mt-2 flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    size="default"
+                    onClick={requestEmailCode}
+                    disabled={emailBusy || emailVerificationReady}
+                  >
+                    {emailVerificationReady ? '이메일 인증 완료' : emailRequested ? '인증번호 재발송' : '인증번호 요청'}
+                  </Button>
+                  {emailRequested && !emailVerificationReady && (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <div className="relative min-w-0 flex-1">
+                          <input
+                            value={emailCode}
+                            onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            inputMode="numeric"
+                            placeholder="6자리 인증번호"
+                            className="w-full rounded-input border border-tag-bg bg-card px-4 py-3 pr-16 text-sm"
+                          />
+                          {secondsLeft > 0 && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold tabular-nums text-primary">
+                              {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, '0')}
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="primary"
+                          size="default"
+                          onClick={confirmEmailCode}
+                          disabled={emailBusy || secondsLeft === 0}
+                        >
+                          확인
+                        </Button>
+                      </div>
+                      {secondsLeft === 0 && <p className="text-xs text-tag-text">인증번호가 만료됐어요. 재발송해주세요.</p>}
+                    </div>
+                  )}
+                  {emailVerificationReady && <p className="text-xs text-green-600 pl-1">이메일 인증이 완료됐어요.</p>}
+                  {emailVerificationError && <p className="text-xs text-primary pl-1">{emailVerificationError}</p>}
+                </div>
               )}
             </div>
           )}
