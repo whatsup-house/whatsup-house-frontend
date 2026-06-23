@@ -136,16 +136,7 @@ export default function ApplicationResultView({
             >
               이용권 구매 페이지로 이동
             </Button>
-          ) : bookingNumber ? (
-            <Button
-              variant="outlined"
-              size="lg"
-              className="w-full"
-              onClick={() => router.push('/applications/check')}
-            >
-              {t('checkWithBookingNumber')}
-            </Button>
-          ) : (
+          ) : bookingNumber ? null : (
             <Button
               variant="outlined"
               size="lg"
