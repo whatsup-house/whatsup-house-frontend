@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Pencil, LayoutDashboard, Ticket } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
@@ -14,12 +15,34 @@ import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
 import PasswordChangeDialog from '@/components/mypage/PasswordChangeDialog'
 
+// characterUrl 미존재/이미지 로드 실패 시 사용할 로컬 기본 캐릭터 (KAN-285)
+const FALLBACK_CHARACTER = '/assets/job/DEFAULT_SUIT.png'
+
 function ProfileRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null
   return (
     <div className="flex justify-between py-3 border-b border-tag-bg/50 last:border-b-0">
       <span className="text-sm text-tag-text">{label}</span>
       <span className="text-sm text-foreground font-medium">{value}</span>
+    </div>
+  )
+}
+
+// 직업 기반 캐릭터 이미지. 로드 실패 시 기본 캐릭터(DEFAULT_SUIT)로 폴백한다. (KAN-285)
+function ProfileCharacter({ url, alt }: { url: string | null; alt: string }) {
+  const [src, setSrc] = useState(url || FALLBACK_CHARACTER)
+  return (
+    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-tag-bg">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="80px"
+        className="object-contain"
+        onError={() => {
+          if (src !== FALLBACK_CHARACTER) setSrc(FALLBACK_CHARACTER)
+        }}
+      />
     </div>
   )
 }
@@ -92,8 +115,8 @@ export default function MyProfile() {
     )}
     <div className="min-h-screen bg-background">
       <div className="px-6 py-6 flex flex-col gap-4">
-        {/* 프로필 요약 */}
-        <div className="bg-card rounded-card p-5 flex flex-col items-center gap-3 relative">
+        {/* 프로필 요약 — 좌측 직업 캐릭터 / 우측 닉네임·한줄소개·마일리지 (KAN-285) */}
+        <div className="bg-card rounded-card p-5 flex items-center gap-4 relative">
           <button
             onClick={() => setShowEdit(true)}
             className="absolute top-4 right-4 min-w-[36px] min-h-[36px] flex items-center justify-center text-tag-text"
@@ -101,24 +124,28 @@ export default function MyProfile() {
           >
             <Pencil size={16} />
           </button>
-          <div className="w-16 h-16 rounded-full bg-tag-bg flex items-center justify-center text-2xl">
-            🐾
-          </div>
-          <div className="text-center">
-            <h2 className="text-lg font-bold text-foreground">{profile.nickname}</h2>
+          <ProfileCharacter
+            key={profile.characterUrl ?? 'default'}
+            url={profile.characterUrl}
+            alt={profile.nickname}
+          />
+          <div className="flex-1 min-w-0 flex flex-col items-start gap-1.5">
+            <h2 className="text-lg font-bold text-foreground truncate max-w-full pr-7">
+              {profile.nickname}
+            </h2>
             {(profile.intro ?? profile.bio) && (
-              <p className="text-sm text-tag-text mt-1">{profile.intro ?? profile.bio}</p>
+              <p className="text-sm text-tag-text line-clamp-2">{profile.intro ?? profile.bio}</p>
             )}
+            <Link
+              href="/mypage/mileage"
+              className="bg-tag-bg rounded-full px-4 py-1.5 flex items-center gap-1 mt-1"
+            >
+              <span className="text-sm font-semibold text-foreground">
+                {t('mileage', { mileage: (profile.mileage ?? 0).toLocaleString() })}
+              </span>
+              <span className="text-xs text-tag-text">›</span>
+            </Link>
           </div>
-          <Link
-            href="/mypage/mileage"
-            className="bg-tag-bg rounded-full px-4 py-1.5 flex items-center gap-1"
-          >
-            <span className="text-sm font-semibold text-foreground">
-              {t('mileage', { mileage: (profile.mileage ?? 0).toLocaleString() })}
-            </span>
-            <span className="text-xs text-tag-text">›</span>
-          </Link>
         </div>
 
         {/* 우연한 식탁 이용권 잔여 (KAN-260) */}
