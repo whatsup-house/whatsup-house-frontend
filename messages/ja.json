@@ -125,8 +125,6 @@
       "bioLabel": "一言紹介",
       "optional": "（任意）",
       "bioPlaceholder": "自分を一言で紹介してください",
-      "instagramLabel": "Instagram ID",
-      "instagramPlaceholder": "@なしでIDのみ入力してください",
       "jobLabel": "職業",
       "mbtiLabel": "MBTI",
       "mbtiResult": "{mbti}タイプですね！",
@@ -159,9 +157,6 @@
       "passwordConfirmPlaceholder": "パスワードを再入力してください",
       "phoneLabel": "連絡先",
       "phonePlaceholder": "01012345678（11桁）",
-      "additionalInfo": "任意の収集項目",
-      "instagramLabel": "Instagram ID",
-      "instagramPlaceholder": "@なしでIDのみ入力してください",
       "checking": "確認中...",
       "duplicateCheckFailed": "重複確認に失敗しました",
       "nicknameAvailable": "使用できるニックネームです",
@@ -206,7 +201,6 @@
         "password": "パスワードは英字＋数字を含む8文字以上で設定してください",
         "passwordConfirm": "パスワードを再入力してください",
         "phone": "電話番号は11桁の数字で入力してください",
-        "instagramMax": "Instagram IDは100文字以内で入力してください",
         "passwordMismatch": "パスワードが一致しません"
       },
       "policies": {

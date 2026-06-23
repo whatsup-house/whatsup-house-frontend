@@ -125,8 +125,6 @@
       "bioLabel": "한 줄 소개",
       "optional": "(선택)",
       "bioPlaceholder": "나를 한 줄로 소개해주세요",
-      "instagramLabel": "인스타그램 아이디",
-      "instagramPlaceholder": "@ 없이 아이디만 입력해주세요",
       "jobLabel": "직업",
       "mbtiLabel": "MBTI",
       "mbtiResult": "{mbti} 유형이군요!",
@@ -159,9 +157,6 @@
       "passwordConfirmPlaceholder": "비밀번호를 다시 입력해주세요",
       "phoneLabel": "연락처",
       "phonePlaceholder": "01012345678 (11자리)",
-      "additionalInfo": "선택 수집항목",
-      "instagramLabel": "인스타그램 아이디",
-      "instagramPlaceholder": "@ 없이 아이디만 입력해주세요",
       "checking": "확인 중...",
       "duplicateCheckFailed": "중복 확인에 실패했습니다",
       "nicknameAvailable": "사용 가능한 닉네임입니다",
@@ -206,7 +201,6 @@
         "password": "비밀번호는 영문+숫자 포함 8자 이상으로 설정해주세요",
         "passwordConfirm": "비밀번호를 다시 입력해주세요",
         "phone": "전화번호는 11자리 숫자여야 합니다",
-        "instagramMax": "인스타그램 아이디는 100자 이하여야 합니다",
         "passwordMismatch": "비밀번호가 불일치합니다"
       },
       "policies": {
