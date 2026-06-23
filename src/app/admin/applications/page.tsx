@@ -189,13 +189,19 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
 
 const APP_STATUS_LABEL: Record<string, string> = {
   PENDING: '대기',
+  PAYMENT_PENDING: '입금확인중',
   CONFIRMED: '확정',
   ATTENDED: '출석',
+  REJECTED: '반려',
+  CANCELLED: '취소',
 }
 const APP_STATUS_STYLE: Record<string, string> = {
   PENDING: 'bg-[#F5F5F5] text-[#767676]',
+  PAYMENT_PENDING: 'bg-[#FFF3E0] text-[#EF6C00]',
   CONFIRMED: 'bg-[#E3F2FD] text-[#1976D2]',
   ATTENDED: 'bg-[#E8F5E9] text-[#4CAF50]',
+  REJECTED: 'bg-[#FEF3F3] text-red-500',
+  CANCELLED: 'bg-[#F5F5F5] text-[#767676]',
 }
 const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
   PENDING: 'CONFIRMED',
@@ -290,7 +296,15 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {!p.paid ? (
+                  {p.gatheringType === 'RANDOM_TABLE' ? (
+                    <span className={`text-xs font-medium ${
+                      p.status === 'CONFIRMED' || p.status === 'ATTENDED'
+                        ? 'text-[#4CAF50]'
+                        : 'text-[#C8392B]'
+                    }`}>
+                      {p.status === 'CONFIRMED' || p.status === 'ATTENDED' ? '이용권 처리' : '이용권 확인중'}
+                    </span>
+                  ) : !p.paid ? (
                     <span className="text-[12px] text-[#BBBBBB]">무료</span>
                   ) : p.status === 'CONFIRMED' || p.status === 'ATTENDED' ? (
                     // 선확정 후입금: 확정(또는 출석)된 신청만 입금을 받으므로 그때만 체크박스를 노출한다. (KAN-243)
@@ -335,7 +349,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   )
 }
 
-// ─── 입금 대기 큐 ───────────────────────────────────────────────────────
+// ─── 우연한식탁 이용권 입금확인 큐 ─────────────────────────────────────
 function DepositQueue() {
   const { data: deposits = [], isLoading } = usePendingDeposits()
   const { mutate: confirmDeposit, isPending } = useConfirmDeposit()
@@ -351,8 +365,8 @@ function DepositQueue() {
   if (deposits.length === 0) {
     return (
       <div className="bg-white rounded-[12px] p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
-        <p className="text-base font-medium text-[#1A1A1A] mb-1">입금 대기 중인 요청이 없어요</p>
-        <p className="text-sm text-[#767676]">고객이 이용권 입금을 요청하면 여기에 오래된 순으로 표시돼요.</p>
+        <p className="text-base font-medium text-[#1A1A1A] mb-1">우연한식탁 이용권 입금확인 요청이 없어요</p>
+        <p className="text-sm text-[#767676]">고객이 이용권 구매 요청 후 입금하면 여기에 오래된 순으로 표시돼요.</p>
       </div>
     )
   }
@@ -440,9 +454,9 @@ export default function AdminApplicationsPage() {
         <h1 className="font-bold text-[22px] text-foreground">참가자 관리</h1>
       </div>
 
-      {/* 뷰 전환: 게더링별 조회 / 입금 대기 큐 (게더링 가로지른 시간순) */}
+      {/* 뷰 전환: 게더링별 조회 / 우연한식탁 이용권 입금확인 큐 */}
       <div className="flex gap-2 mb-5">
-        {([['byGathering', '게더링별 조회'], ['deposits', '입금 대기']] as const).map(([key, label]) => (
+        {([['byGathering', '게더링별 조회'], ['deposits', '우연한식탁 이용권 입금확인']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setView(key)}

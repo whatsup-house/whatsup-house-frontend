@@ -10,7 +10,7 @@ import type { ApplicationStatus, GuestOverview } from '@/lib/api/types'
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
   PENDING: '심사중',
-  PAYMENT_PENDING: '입금 확인중',
+  PAYMENT_PENDING: '입금확인중',
   CONFIRMED: '참가 확정',
   REJECTED: '승인 거절',
   CANCELLED: '취소',
@@ -71,8 +71,11 @@ export default function GuestOverviewPage() {
 
         <Card className="mt-6 p-5 bg-primary-light">
           <div className="flex items-center gap-2 text-primary"><Ticket size={20} /><strong>보유 이용권</strong></div>
+          <p className="mt-2 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary">
+            우연한식탁 전용 이용권
+          </p>
           <p className="mt-4 text-3xl font-bold text-primary">{overview.totalRemaining}회</p>
-          <p className="mt-1 text-xs text-tag-text">현재 사용 가능한 잔여 횟수</p>
+          <p className="mt-1 text-xs text-tag-text">우연한식탁 신청에만 사용할 수 있는 잔여 횟수예요.</p>
         </Card>
 
         <section className="mt-7">

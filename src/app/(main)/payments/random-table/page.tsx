@@ -19,8 +19,9 @@ function PaymentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
+  const applicationId = searchParams.get('applicationId')
   const { isLoggedIn, isInitialized } = useRequireAuth()
-  const memberTickets = useMyTickets()
+  const memberTickets = useMyTickets(applicationId)
   const guestTickets = useGuestTickets(bookingNumber)
   const memberPurchase = usePurchaseTicketPass()
   const guestPurchase = usePurchaseGuestTicketPass()
@@ -30,10 +31,10 @@ function PaymentContent() {
 
   useEffect(() => {
     if (isInitialized && !isLoggedIn && !bookingNumber) {
-      const target = '/payments/random-table'
+      const target = `/payments/random-table${applicationId ? `?applicationId=${encodeURIComponent(applicationId)}` : ''}`
       router.replace(`/login?returnUrl=${encodeURIComponent(target)}`)
     }
-  }, [bookingNumber, isInitialized, isLoggedIn, router])
+  }, [applicationId, bookingNumber, isInitialized, isLoggedIn, router])
 
   const isGuestPurchase = Boolean(bookingNumber)
   const data = isGuestPurchase ? guestTickets.data : memberTickets.data
@@ -46,8 +47,12 @@ function PaymentContent() {
 
   const product = PRODUCTS.find((item) => item.product === selected)!
   const canPurchase = data?.purchasable === true
-  const pendingPass = requestedPass ?? data?.passes.find((pass) => pass.status === 'PENDING') ?? null
-  const confirmedPass = data?.passes.find((pass) => pass.paymentConfirmedAt !== null) ?? null
+  const matchesCurrentApplication = (pass: TicketPass) => {
+    if (!applicationId && !bookingNumber) return true
+    return !data?.applicationId || pass.applicationId === data.applicationId
+  }
+  const pendingPass = requestedPass ?? data?.passes.find((pass) => pass.status === 'PENDING' && matchesCurrentApplication(pass)) ?? null
+  const confirmedPass = data?.passes.find((pass) => pass.paymentConfirmedAt !== null && matchesCurrentApplication(pass)) ?? null
   const displayPass = pendingPass ?? confirmedPass
   const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt)
   const submit = async () => {
@@ -56,10 +61,10 @@ function PaymentContent() {
         const pass = await guestPurchase.mutateAsync({ bookingNumber, product: selected })
         setRequestedPass(pass)
       } else {
-        await memberPurchase.mutateAsync({ product: selected })
+        const pass = await memberPurchase.mutateAsync({ product: selected, applicationId })
+        setRequestedPass(pass)
       }
       showToast(`${product.label} 구매 요청이 접수됐어요.`, 'welcome')
-      if (!bookingNumber) router.push('/mypage')
     } catch (error) {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message
       showToast(message ?? '이용권 구매 요청에 실패했어요.', 'error')
@@ -72,7 +77,12 @@ function PaymentContent() {
       <p className="text-sm text-tag-text mb-6">
         {isPaymentComplete ? '참가 확정 정보를 확인해 주세요.' : displayPass ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}
       </p>
-      {bookingNumber && <Card className="p-4 mb-4 bg-tag-bg"><p className="text-xs text-tag-text">신청 예약번호</p><p className="font-bold text-primary mt-1">{bookingNumber}</p></Card>}
+      {(bookingNumber || applicationId) && (
+        <Card className="p-4 mb-4 bg-tag-bg">
+          <p className="text-xs text-tag-text">{bookingNumber ? '신청 예약번호' : '신청 ID'}</p>
+          <p className="font-bold text-primary mt-1">{bookingNumber ?? applicationId}</p>
+        </Card>
+      )}
       {displayPass ? (
         isPaymentComplete ? (
           <>
@@ -119,7 +129,7 @@ function PaymentContent() {
             </Card>
             <p className="mb-4 text-center text-xs text-tag-text">입금 확인 → 이용권 1회 자동 사용 → 신청 확정</p>
             <div className="flex min-h-[56px] w-full items-center justify-center rounded-button bg-[#E5968D] text-lg font-bold text-white">
-              입금 확인중
+              입금확인중
             </div>
           </>
         )

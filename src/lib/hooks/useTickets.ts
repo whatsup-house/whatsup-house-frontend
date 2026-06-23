@@ -4,11 +4,11 @@ import { useAuthStore } from '@/lib/store/authStore'
 import type { GuestTicketPurchaseRequest, TicketPurchaseRequest } from '@/lib/api/types'
 
 // 내 이용권/잔여 조회. 로그인 상태에서만 실행하며, 미배포 BE에선 실패해도 graceful하게 처리한다.
-export function useMyTickets() {
+export function useMyTickets(applicationId?: string | null) {
   const { isLoggedIn } = useAuthStore()
   return useQuery({
-    queryKey: ['my-tickets'],
-    queryFn: fetchMyTickets,
+    queryKey: ['my-tickets', applicationId ?? null],
+    queryFn: () => fetchMyTickets(applicationId),
     enabled: isLoggedIn,
     retry: false,
     staleTime: 1000 * 30,

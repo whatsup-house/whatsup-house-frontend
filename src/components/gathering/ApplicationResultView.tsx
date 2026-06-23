@@ -23,12 +23,16 @@ interface ApplicationResultViewProps {
   gathering: GatheringDetail
   mode: Mode
   bookingNumber?: string | null
+  applicationId?: string | null
+  paymentConfirmed?: boolean
 }
 
 export default function ApplicationResultView({
   gathering,
   mode,
   bookingNumber,
+  applicationId,
+  paymentConfirmed = false,
 }: ApplicationResultViewProps) {
   const t = useTranslations('gathering.apply.result')
   const locale = useLocale()
@@ -37,6 +41,12 @@ export default function ApplicationResultView({
   const formattedDate = formatLocalizedFullDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
   const isRandomTable = gathering.gatheringType === 'RANDOM_TABLE'
+  const needsRandomTableTicket = isRandomTable && mode === 'completed' && Boolean(applicationId || bookingNumber)
+  const randomTablePaymentUrl = `/payments/random-table?${
+    applicationId
+      ? `applicationId=${encodeURIComponent(applicationId)}`
+      : `bookingNumber=${encodeURIComponent(bookingNumber ?? '')}`
+  }`
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -85,17 +95,48 @@ export default function ApplicationResultView({
               <div>
                 <p className="text-xs text-tag-text">{isRandomTable ? '참가 방식' : t('price')}</p>
                 <p className="text-sm font-medium text-foreground">
-                  {isRandomTable ? '이용권 1회 사용 완료' : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
+                  {isRandomTable
+                    ? mode === 'confirmed' ? '이용권 1회 사용 완료' : '이용권 구매 후 참가 확정'
+                    : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
                 </p>
               </div>
             </div>
           </div>
         </Card>
 
-        {mode === 'confirmed' && !isRandomTable && <PaymentAccountCard price={gathering.price ?? 0} />}
+        {needsRandomTableTicket && (
+          <Card className="w-full p-5 mb-4 border border-primary/20 bg-primary-light">
+            <div className="flex items-start gap-3">
+              <CreditCard size={18} className="text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="text-base font-bold text-foreground mb-2">이용권 구매가 필요해요</p>
+                <p className="text-sm text-tag-text leading-relaxed">
+                  심사는 승인됐어요. 이용권 구매 요청 후 입금이 확인되면 이 모임에 이용권 1회가 자동 사용되고 참가가 최종 확정돼요.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {mode === 'confirmed' && !isRandomTable && (
+          paymentConfirmed ? (
+            <PaymentConfirmedCard />
+          ) : (
+            <PaymentAccountCard price={gathering.price ?? 0} />
+          )
+        )}
 
         <div className="w-full flex flex-col gap-3 mt-4">
-          {bookingNumber ? (
+          {needsRandomTableTicket ? (
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full"
+              onClick={() => router.push(randomTablePaymentUrl)}
+            >
+              이용권 구매 페이지로 이동
+            </Button>
+          ) : bookingNumber ? (
             <Button
               variant="outlined"
               size="lg"
@@ -123,6 +164,25 @@ export default function ApplicationResultView({
             {t('goHome')}
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function PaymentConfirmedCard() {
+  return (
+    <div className="w-full mb-4">
+      <div className="bg-primary-light rounded-card px-5 py-4 flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle size={16} className="text-primary shrink-0" />
+          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-primary">
+            입금완료
+          </span>
+        </div>
+        <p className="text-base font-bold text-foreground">예약이 최종 확정됐어요</p>
+        <p className="text-sm text-tag-text">
+          당일 모임 시간과 장소를 확인하고 편하게 와 주세요.
+        </p>
       </div>
     </div>
   )
@@ -189,7 +249,13 @@ function PaymentAccountCard({ price }: { price: number }) {
         <div className="flex items-center gap-2">
           <CreditCard size={16} className="text-primary shrink-0" />
           <p className="text-xs text-tag-text">{t('paymentAccount')}</p>
+          <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-primary">
+            입금확인중
+          </span>
         </div>
+        <p className="text-sm font-bold text-foreground">
+          아래 계좌로 입금해 주시면 관리자가 최대한 빨리 확인해 드려요.
+        </p>
 
         <button
           type="button"
@@ -216,7 +282,9 @@ function PaymentAccountCard({ price }: { price: number }) {
           </div>
         </div>
       </div>
-      <p className="text-xs text-tag-text mt-2 px-1">{t('accountCopyHelp')}</p>
+      <p className="text-xs text-tag-text mt-2 px-1">
+        입금 완료 메일을 받으면 예약이 최종 확정된 상태예요.
+      </p>
     </div>
   )
 }

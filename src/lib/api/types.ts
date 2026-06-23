@@ -50,6 +50,7 @@ export type RandomTableEligibility = 'UNREVIEWED' | 'APPROVED' | 'REJECTED' | 'S
 
 export interface TicketPass {
   id: string
+  applicationId: string | null
   product: TicketProduct
   productLabel: string
   totalCount: number
@@ -68,6 +69,7 @@ export interface MyTickets {
   purchasable: boolean
   totalRemaining: number
   passes: TicketPass[]
+  applicationId: string | null
   gatheringId: string | null
 }
 
@@ -81,6 +83,7 @@ export interface GuestOverview {
 
 export interface TicketPurchaseRequest {
   product: TicketProduct
+  applicationId?: string | null
 }
 
 export interface GuestTicketPurchaseRequest extends TicketPurchaseRequest {

@@ -2,8 +2,10 @@ import apiClient from './client'
 import type { ApiResponse, GuestTicketPurchaseRequest, MyTickets, TicketPass, TicketPurchaseRequest } from './types'
 
 // 내 이용권/잔여 조회
-export const fetchMyTickets = async (): Promise<MyTickets> => {
-  const response = await apiClient.get<ApiResponse<MyTickets>>('/api/tickets/me')
+export const fetchMyTickets = async (applicationId?: string | null): Promise<MyTickets> => {
+  const response = await apiClient.get<ApiResponse<MyTickets>>('/api/tickets/me', {
+    params: applicationId ? { applicationId } : undefined,
+  })
   return response.data.data
 }
 

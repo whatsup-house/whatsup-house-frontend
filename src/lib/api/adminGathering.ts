@@ -120,7 +120,7 @@ function toLocationBody(data: Partial<LocationItem>) {
   }
 }
 
-export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'ATTENDED'
+export type ApplicationStatus = 'PENDING' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'ATTENDED' | 'REJECTED' | 'CANCELLED'
 
 export interface AdminApplicationItem {
   id: string
@@ -136,6 +136,7 @@ export interface AdminApplicationItem {
   status: ApplicationStatus
   paid: boolean              // 유료 게더링 여부 (입금 체크 노출 대상). (KAN-243)
   paymentConfirmed: boolean  // 입금 확인 여부
+  gatheringType?: GatheringType
   createdAt: string
   isGuest: boolean
 }
