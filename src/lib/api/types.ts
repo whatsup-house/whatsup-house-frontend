@@ -490,6 +490,7 @@ export interface UserProfile {
   interests: string[] | null
   mileage?: number
   avatarUrl: string | null
+  characterUrl: string | null
   admin?: boolean
 }
 
