@@ -10,7 +10,7 @@ import type { ApplicationStatus, GuestOverview } from '@/lib/api/types'
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
   PENDING: '심사중',
-  PAYMENT_PENDING: '입금 확인중',
+  PAYMENT_PENDING: '입금확인중',
   CONFIRMED: '참가 확정',
   REJECTED: '승인 거절',
   CANCELLED: '취소',

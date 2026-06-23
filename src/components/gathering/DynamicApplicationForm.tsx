@@ -157,7 +157,7 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
       } else {
         const result = await memberMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'PAYMENT_PENDING') {
-          router.push(`/payments/random-table?applicationId=${encodeURIComponent(result.id)}`)
+          router.push(`/gatherings/${gathering.id}/apply/complete?applicationId=${encodeURIComponent(result.id)}`)
           return
         }
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'CONFIRMED') {

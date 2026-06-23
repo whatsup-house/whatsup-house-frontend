@@ -652,11 +652,11 @@
         "CONFIRMED": "확정",
         "CANCELLED": "취소됨",
         "ATTENDED": "참석 완료",
-        "PAYMENT_PENDING": "결제 대기",
+        "PAYMENT_PENDING": "입금확인중",
         "REJECTED": "심사 거절"
       },
       "payment": {
-        "PENDING": "입금 확인 중",
+        "PENDING": "입금확인중",
         "CONFIRMED": "입금 완료"
       },
       "emptyFiltered": "해당 상태의 신청 내역이 없어요.",

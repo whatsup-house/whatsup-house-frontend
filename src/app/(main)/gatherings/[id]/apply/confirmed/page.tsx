@@ -9,6 +9,7 @@ import ApplicationResultView from '@/components/gathering/ApplicationResultView'
 function ApplyConfirmedContent({ id }: { id: string }) {
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
+  const paymentConfirmed = searchParams.get('payment') === 'confirmed'
   const { data: gathering, isLoading } = useGatheringDetail(id)
 
   if (isLoading || !gathering) {
@@ -24,6 +25,7 @@ function ApplyConfirmedContent({ id }: { id: string }) {
       gathering={gathering}
       mode="confirmed"
       bookingNumber={bookingNumber}
+      paymentConfirmed={paymentConfirmed}
     />
   )
 }

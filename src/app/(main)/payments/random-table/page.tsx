@@ -129,7 +129,7 @@ function PaymentContent() {
             </Card>
             <p className="mb-4 text-center text-xs text-tag-text">입금 확인 → 이용권 1회 자동 사용 → 신청 확정</p>
             <div className="flex min-h-[56px] w-full items-center justify-center rounded-button bg-[#E5968D] text-lg font-bold text-white">
-              입금 확인중
+              입금확인중
             </div>
           </>
         )

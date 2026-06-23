@@ -9,6 +9,7 @@ import ApplicationResultView from '@/components/gathering/ApplicationResultView'
 function ApplyCompleteContent({ id }: { id: string }) {
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
+  const applicationId = searchParams.get('applicationId')
   const { data: gathering, isLoading } = useGatheringDetail(id)
 
   if (isLoading || !gathering) {
@@ -24,6 +25,7 @@ function ApplyCompleteContent({ id }: { id: string }) {
       gathering={gathering}
       mode="completed"
       bookingNumber={bookingNumber}
+      applicationId={applicationId}
     />
   )
 }
