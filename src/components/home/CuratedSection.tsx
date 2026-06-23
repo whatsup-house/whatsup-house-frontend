@@ -71,9 +71,9 @@ export default function CuratedSection() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
-              <p className="text-[11px] text-tag-text/70 mt-0.5">
-                {[item.eventDate, item.locationName].filter(Boolean).join(' · ')}
-              </p>
+              {item.locationName && (
+                <p className="text-[11px] text-tag-text/70 mt-0.5 truncate">{item.locationName}</p>
+              )}
             </div>
           </button>
         ))}
