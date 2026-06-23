@@ -48,10 +48,18 @@ export type TicketProduct = 'RANDOM_TABLE_ONE' | 'RANDOM_TABLE_FOUR'
 export type ParticipantAccountStatus = 'ACTIVE' | 'BLOCKED'
 export type RandomTableEligibility = 'UNREVIEWED' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
 
+export interface TicketProductItem {
+  id: string
+  name: string
+  sessionCount: number
+  price: number
+}
+
 export interface TicketPass {
   id: string
   applicationId: string | null
-  product: TicketProduct
+  productId: string | null
+  product: TicketProduct | null
   productLabel: string
   totalCount: number
   remainingCount: number
@@ -82,7 +90,8 @@ export interface GuestOverview {
 }
 
 export interface TicketPurchaseRequest {
-  product: TicketProduct
+  productId?: string | null
+  product?: TicketProduct | null
   applicationId?: string | null
 }
 

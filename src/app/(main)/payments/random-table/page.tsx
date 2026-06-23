@@ -4,16 +4,11 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, Ticket } from 'lucide-react'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
-import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseTicketPass } from '@/lib/hooks/useTickets'
+import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseTicketPass, useTicketProducts } from '@/lib/hooks/useTickets'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useToastStore } from '@/lib/store/toastStore'
 import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
-import type { TicketPass, TicketProduct } from '@/lib/api/types'
-
-const PRODUCTS = [
-  { product: 'RANDOM_TABLE_ONE' as TicketProduct, label: '1회권', price: 10000, description: '이번 모임만 가볍게 참여해요' },
-  { product: 'RANDOM_TABLE_FOUR' as TicketProduct, label: '4회권', price: 40000, description: '여러 번 참여할 계획이라면 편리해요' },
-]
+import type { TicketPass } from '@/lib/api/types'
 
 function PaymentContent() {
   const router = useRouter()
@@ -21,12 +16,13 @@ function PaymentContent() {
   const bookingNumber = searchParams.get('bookingNumber')
   const applicationId = searchParams.get('applicationId')
   const { isLoggedIn, isInitialized } = useRequireAuth()
+  const productsQuery = useTicketProducts()
   const memberTickets = useMyTickets(applicationId)
   const guestTickets = useGuestTickets(bookingNumber)
   const memberPurchase = usePurchaseTicketPass()
   const guestPurchase = usePurchaseGuestTicketPass()
   const showToast = useToastStore((state) => state.show)
-  const [selected, setSelected] = useState<TicketProduct>('RANDOM_TABLE_ONE')
+  const [selected, setSelected] = useState<string | null>(null)
   const [requestedPass, setRequestedPass] = useState<TicketPass | null>(null)
 
   useEffect(() => {
@@ -38,14 +34,16 @@ function PaymentContent() {
 
   const isGuestPurchase = Boolean(bookingNumber)
   const data = isGuestPurchase ? guestTickets.data : memberTickets.data
-  const isLoading = isGuestPurchase ? guestTickets.isLoading : memberTickets.isLoading
+  const isLoading = productsQuery.isLoading || (isGuestPurchase ? guestTickets.isLoading : memberTickets.isLoading)
   const purchase = isGuestPurchase ? guestPurchase : memberPurchase
 
   if (!isInitialized || (!isGuestPurchase && !isLoggedIn) || isLoading) {
     return <div className="flex justify-center py-24"><LoadingSpinner size="lg" /></div>
   }
 
-  const product = PRODUCTS.find((item) => item.product === selected)!
+  const products = productsQuery.data ?? []
+  const selectedProductId = selected ?? products[0]?.id ?? null
+  const product = products.find((item) => item.id === selectedProductId) ?? products[0]
   const canPurchase = data?.purchasable === true
   const matchesCurrentApplication = (pass: TicketPass) => {
     if (!applicationId && !bookingNumber) return true
@@ -56,15 +54,19 @@ function PaymentContent() {
   const displayPass = pendingPass ?? confirmedPass
   const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt)
   const submit = async () => {
+    if (!product) {
+      showToast('구매 가능한 이용권 상품이 없어요.', 'error')
+      return
+    }
     try {
       if (bookingNumber) {
-        const pass = await guestPurchase.mutateAsync({ bookingNumber, product: selected })
+        const pass = await guestPurchase.mutateAsync({ bookingNumber, productId: product.id })
         setRequestedPass(pass)
       } else {
-        const pass = await memberPurchase.mutateAsync({ product: selected, applicationId })
+        const pass = await memberPurchase.mutateAsync({ productId: product.id, applicationId })
         setRequestedPass(pass)
       }
-      showToast(`${product.label} 구매 요청이 접수됐어요.`, 'welcome')
+      showToast(`${product.name} 구매 요청이 접수됐어요.`, 'welcome')
     } catch (error) {
       const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message
       showToast(message ?? '이용권 구매 요청에 실패했어요.', 'error')
@@ -135,17 +137,23 @@ function PaymentContent() {
         )
       ) : (
         <>
+          {products.length === 0 ? (
+            <Card className="p-5 mb-5 text-sm text-tag-text">현재 구매 가능한 이용권 상품이 없어요.</Card>
+          ) : (
           <div className="grid grid-cols-2 gap-3 mb-5">
-            {PRODUCTS.map((item) => {
-              const active = selected === item.product
-              return <button key={item.product} type="button" onClick={() => setSelected(item.product)} className={`relative text-left rounded-card border p-4 ${active ? 'border-primary bg-primary-light' : 'border-tag-bg bg-card'}`}>
+            {products.map((item) => {
+              const active = selectedProductId === item.id
+              const label = item.name.replace(/^우연한 식탁\s*/, '')
+              const description = item.sessionCount === 1 ? '이번 모임만 가볍게 참여해요' : `${item.sessionCount}번 참여할 계획이라면 편리해요`
+              return <button key={item.id} type="button" onClick={() => setSelected(item.id)} className={`relative text-left rounded-card border p-4 ${active ? 'border-primary bg-primary-light' : 'border-tag-bg bg-card'}`}>
                 {active && <Check size={16} className="absolute right-3 top-3 text-primary" />}
-                <p className="font-bold">{item.label}</p><p className="text-lg font-bold text-primary mt-2">{item.price.toLocaleString()}원</p><p className="text-xs text-tag-text mt-2">{item.description}</p>
+                <p className="font-bold">{label}</p><p className="text-lg font-bold text-primary mt-2">{item.price.toLocaleString()}원</p><p className="text-xs text-tag-text mt-2">{description}</p>
               </button>
             })}
           </div>
+          )}
           {!canPurchase && <Card className="p-4 mb-4 text-sm text-tag-text">심사 승인 후 구매할 수 있어요. 현재 자격: {data?.randomTableEligibility ?? '확인 중'}</Card>}
-          <Button variant="primary" size="lg" className="w-full" disabled={!canPurchase} isLoading={purchase.isPending} onClick={submit}>{product.label} 구매 요청</Button>
+          <Button variant="primary" size="lg" className="w-full" disabled={!canPurchase || !product} isLoading={purchase.isPending} onClick={submit}>{product?.name ?? '이용권'} 구매 요청</Button>
         </>
       )}
     </div>
