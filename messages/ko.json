@@ -125,6 +125,8 @@
       "bioLabel": "한 줄 소개",
       "optional": "(선택)",
       "bioPlaceholder": "나를 한 줄로 소개해주세요",
+      "instagramLabel": "인스타그램 아이디",
+      "instagramPlaceholder": "@ 없이 아이디만 입력해주세요",
       "jobLabel": "직업",
       "mbtiLabel": "MBTI",
       "mbtiResult": "{mbti} 유형이군요!",

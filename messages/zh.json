@@ -125,6 +125,8 @@
       "bioLabel": "简短的个人简介",
       "optional": "（可选）",
       "bioPlaceholder": "用一行介绍自己",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "请输入不带 @ 的 ID",
       "jobLabel": "职位",
       "mbtiLabel": "MBTI",
       "mbtiResult": "所以你是{mbti}！",

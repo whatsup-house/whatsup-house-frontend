@@ -125,6 +125,8 @@
       "bioLabel": "一言紹介",
       "optional": "（任意）",
       "bioPlaceholder": "自分を一言で紹介してください",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "@なしでIDのみ入力してください",
       "jobLabel": "職業",
       "mbtiLabel": "MBTI",
       "mbtiResult": "{mbti}タイプですね！",
