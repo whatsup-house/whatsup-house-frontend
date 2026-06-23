@@ -29,7 +29,6 @@ type FormValues = {
   password: string
   passwordConfirm: string
   phone: string
-  instagramId?: string
 }
 type PolicyId = 'terms' | 'privacy'
 
@@ -403,7 +402,6 @@ export default function RegisterPage() {
           .regex(PASSWORD_REGEX, t('validation.password')),
         passwordConfirm: z.string().min(1, t('validation.passwordConfirm')),
         phone: z.string().regex(/^\d{11}$/, t('validation.phone')),
-        instagramId: z.string().max(100, t('validation.instagramMax')).optional(),
       }).refine((data) => data.password === data.passwordConfirm, {
         message: t('validation.passwordMismatch'),
         path: ['passwordConfirm'],
@@ -464,7 +462,6 @@ export default function RegisterPage() {
       if (saved.gender) setValue('gender', saved.gender)
       if (saved.birthDate) setValue('birthDate', saved.birthDate)
       if (saved.phone) setValue('phone', saved.phone)
-      if (saved.instagramId) setValue('instagramId', saved.instagramId)
 
       const emailError = sessionStorage.getItem(REGISTER_EMAIL_ERROR_KEY)
       if (emailError) {
@@ -589,7 +586,6 @@ export default function RegisterPage() {
     if (debouncedNickname.length >= 2 && isCheckingNickname) return
     if (isCheckingEmail) return
     clearErrors('email')
-    const normalizedInstagramId = data.instagramId?.trim().replace(/^@+/, '')
 
     sessionStorage.setItem(REGISTER_SESSION_KEY, JSON.stringify({
       email: data.email,
@@ -601,7 +597,6 @@ export default function RegisterPage() {
       // BE(KAN-257) 전환 전까지 호환을 위해 만 나이도 함께 보관한다.
       age: getAge(data.birthDate),
       phone: data.phone,
-      instagramId: normalizedInstagramId || undefined,
       checkedTerms,
     }))
     router.push('/onboarding')
@@ -851,20 +846,6 @@ export default function RegisterPage() {
                   )}
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* 선택 수집항목 */}
-          {visible(7) && (
-            <div className="animate-field-reveal flex flex-col gap-3">
-              <p className="text-sm font-semibold text-foreground">{t('additionalInfo')}</p>
-              <Input
-                label={t('instagramLabel')}
-                placeholder={t('instagramPlaceholder')}
-                maxLength={100}
-                {...register('instagramId')}
-                error={errors.instagramId?.message}
-              />
             </div>
           )}
 
