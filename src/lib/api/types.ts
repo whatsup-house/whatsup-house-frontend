@@ -116,6 +116,7 @@ export interface RegisterRequest {
   birthDate?: string // 생년월일 (YYYY-MM-DD). BE(KAN-257)에서 영속화 후 age 계산에 사용
   phone?: string   // 11 digits
   intro?: string
+  instagramId?: string
   job?: string
   mbti?: string
 }

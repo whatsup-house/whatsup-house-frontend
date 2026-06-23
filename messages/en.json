@@ -125,6 +125,8 @@
       "bioLabel": "Short bio",
       "optional": "(optional)",
       "bioPlaceholder": "Introduce yourself in one line",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "Enter your ID without @",
       "jobLabel": "Job",
       "mbtiLabel": "MBTI",
       "mbtiResult": "So you are {mbti}!",
