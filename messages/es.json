@@ -159,6 +159,9 @@
       "passwordConfirmPlaceholder": "Ingrese su contraseña nuevamente",
       "phoneLabel": "Número de contacto",
       "phonePlaceholder": "01012345678 (11 dígitos)",
+      "additionalInfo": "Información opcional",
+      "instagramLabel": "ID de Instagram",
+      "instagramPlaceholder": "Introduce tu ID sin @",
       "checking": "Comprobando...",
       "duplicateCheckFailed": "Error en la comprobación de duplicados",
       "nicknameAvailable": "Este apodo está disponible",
@@ -203,6 +206,7 @@
         "password": "Utilice al menos 8 caracteres con letras y números.",
         "passwordConfirm": "Por favor ingrese su contraseña nuevamente",
         "phone": "El número de teléfono debe tener 11 dígitos.",
+        "instagramMax": "El ID de Instagram debe tener 100 caracteres o menos",
         "passwordMismatch": "Las contraseñas no coinciden"
       },
       "policies": {

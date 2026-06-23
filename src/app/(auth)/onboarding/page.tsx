@@ -27,6 +27,7 @@ interface Step1Data {
   age: number
   birthDate: string
   phone?: string
+  instagramId?: string
 }
 
 export default function OnboardingPage() {
@@ -39,7 +40,6 @@ export default function OnboardingPage() {
   // 마운트 후에만 sessionStorage를 읽어 파생한다. (KAN-219)
   const [mounted, setMounted] = useState(false)
   const [bio, setBio] = useState('')
-  const [instagramId, setInstagramId] = useState('')
   const [job, setJob] = useState('')
   const [mbti, setMbti] = useState<(string | null)[]>([null, null, null, null])
   const [formError, setFormError] = useState<string | null>(null)
@@ -82,13 +82,11 @@ export default function OnboardingPage() {
     if (!step1Data) return
     setFormError(null)
 
-    const normalizedInstagramId = instagramId.trim().replace(/^@+/, '')
-
     registerAndLogin.mutate(
       {
         ...step1Data,
         intro: bio || undefined,
-        instagramId: normalizedInstagramId || undefined,
+        instagramId: step1Data.instagramId || undefined,
         job: job || undefined,
         mbti: mbtiString,
       },
@@ -148,19 +146,6 @@ export default function OnboardingPage() {
             onChange={(e) => setBio(e.target.value)}
             placeholder={t('bioPlaceholder')}
             maxLength={500}
-            className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-foreground">
-            {t('instagramLabel')} <span className="text-tag-text font-normal">{t('optional')}</span>
-          </label>
-          <input
-            value={instagramId}
-            onChange={(e) => setInstagramId(e.target.value)}
-            placeholder={t('instagramPlaceholder')}
-            maxLength={100}
             className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
