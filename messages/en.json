@@ -125,6 +125,8 @@
       "bioLabel": "Short bio",
       "optional": "(optional)",
       "bioPlaceholder": "Introduce yourself in one line",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "Enter your ID without @",
       "jobLabel": "Job",
       "mbtiLabel": "MBTI",
       "mbtiResult": "So you are {mbti}!",
@@ -157,6 +159,9 @@
       "passwordConfirmPlaceholder": "Enter your password again",
       "phoneLabel": "Contact number",
       "phonePlaceholder": "01012345678 (11 digits)",
+      "additionalInfo": "Optional information",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "Enter your ID without @",
       "checking": "Checking...",
       "duplicateCheckFailed": "Duplicate check failed",
       "nicknameAvailable": "This nickname is available",
@@ -201,6 +206,7 @@
         "password": "Use at least 8 characters with letters and numbers",
         "passwordConfirm": "Please enter your password again",
         "phone": "Phone number must be 11 digits",
+        "instagramMax": "Instagram ID must be 100 characters or less",
         "passwordMismatch": "Passwords do not match"
       },
       "policies": {

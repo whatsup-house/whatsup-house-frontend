@@ -27,6 +27,7 @@ interface Step1Data {
   age: number
   birthDate: string
   phone?: string
+  instagramId?: string
 }
 
 export default function OnboardingPage() {
@@ -84,7 +85,8 @@ export default function OnboardingPage() {
     registerAndLogin.mutate(
       {
         ...step1Data,
-        bio: bio || undefined,
+        intro: bio || undefined,
+        instagramId: step1Data.instagramId || undefined,
         job: job || undefined,
         mbti: mbtiString,
       },
@@ -143,7 +145,7 @@ export default function OnboardingPage() {
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder={t('bioPlaceholder')}
-            maxLength={100}
+            maxLength={500}
             className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>

@@ -125,6 +125,8 @@
       "bioLabel": "简短的个人简介",
       "optional": "（可选）",
       "bioPlaceholder": "用一行介绍自己",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "请输入不带 @ 的 ID",
       "jobLabel": "职位",
       "mbtiLabel": "MBTI",
       "mbtiResult": "所以你是{mbti}！",
@@ -157,6 +159,9 @@
       "passwordConfirmPlaceholder": "再次输入您的密码",
       "phoneLabel": "联系电话",
       "phonePlaceholder": "01012345678（11位）",
+      "additionalInfo": "可选收集项目",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "请输入不带 @ 的 ID",
       "checking": "正在检查...",
       "duplicateCheckFailed": "重复检查失败",
       "nicknameAvailable": "此昵称可用",
@@ -201,6 +206,7 @@
         "password": "使用至少 8 个字母和数字字符",
         "passwordConfirm": "请再次输入您的密码",
         "phone": "电话号码必须是 11 位数字",
+        "instagramMax": "Instagram ID 不得超过 100 个字符",
         "passwordMismatch": "密码不匹配"
       },
       "policies": {
