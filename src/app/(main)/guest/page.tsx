@@ -25,6 +25,19 @@ const STATUS_LABEL: Record<ApplicationStatus, string> = {
   ATTENDED: '참석 완료',
 }
 
+function getGuestApplicationHref(application: GuestOverview['applications'][number]) {
+  const bookingNumber = encodeURIComponent(application.bookingNumber)
+  if (application.status === 'PAYMENT_PENDING' && application.gathering.gatheringType === 'RANDOM_TABLE') {
+    return `/payments/random-table?bookingNumber=${bookingNumber}`
+  }
+  if (application.status === 'PAYMENT_PENDING'
+    || application.status === 'CONFIRMED'
+    || application.status === 'ATTENDED') {
+    return `/gatherings/${application.gathering.id}/apply/confirmed?bookingNumber=${bookingNumber}`
+  }
+  return `/applications/check?bookingNumber=${bookingNumber}`
+}
+
 export default function GuestOverviewPage() {
   const router = useRouter()
   const restoredSession = readGuestLookupSession()
@@ -145,13 +158,7 @@ export default function GuestOverviewPage() {
                 key={application.id}
                 type="button"
                 className="w-full text-left"
-                onClick={() => {
-                  if (application.status === 'CONFIRMED' || application.status === 'ATTENDED') {
-                    router.push(`/gatherings/${application.gathering.id}/apply/confirmed?bookingNumber=${encodeURIComponent(application.bookingNumber)}`)
-                  } else {
-                    router.push(`/applications/check?bookingNumber=${encodeURIComponent(application.bookingNumber)}`)
-                  }
-                }}
+                onClick={() => router.push(getGuestApplicationHref(application))}
               >
                 <Card className="p-4">
                   <div className="flex items-start justify-between gap-3">
