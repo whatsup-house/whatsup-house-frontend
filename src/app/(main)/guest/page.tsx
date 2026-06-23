@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Mail, Ticket, CalendarDays } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui'
@@ -23,9 +23,18 @@ export default function GuestOverviewPage() {
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [codeSent, setCodeSent] = useState(false)
+  const [secondsLeft, setSecondsLeft] = useState(0)
   const [overview, setOverview] = useState<GuestOverview | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!codeSent || secondsLeft <= 0) return
+    const timer = window.setInterval(() => {
+      setSecondsLeft((prev) => Math.max(prev - 1, 0))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [codeSent, secondsLeft])
 
   const requestCode = async () => {
     if (!/^01\d{8,9}$/.test(phone.replace(/-/g, ''))) {
@@ -41,6 +50,8 @@ export default function GuestOverviewPage() {
     try {
       await requestGuestEmailVerification(email.trim())
       setCodeSent(true)
+      setCode('')
+      setSecondsLeft(300)
     } catch {
       setError('인증번호 발송에 실패했어요.')
     } finally {
@@ -49,6 +60,14 @@ export default function GuestOverviewPage() {
   }
 
   const verifyAndLoad = async () => {
+    if (secondsLeft === 0) {
+      setError('인증번호가 만료됐어요. 재발송해주세요.')
+      return
+    }
+    if (!/^\d{6}$/.test(code)) {
+      setError('6자리 인증번호를 입력해주세요.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
@@ -118,12 +137,32 @@ export default function GuestOverviewPage() {
         <Card className="mt-7 space-y-4 p-5">
           <Input label="연락처" placeholder="01012345678" value={phone} onChange={(event) => setPhone(event.target.value)} disabled={codeSent} />
           <Input label="이메일" type="email" placeholder="email@example.com" value={email} onChange={(event) => setEmail(event.target.value)} disabled={codeSent} />
-          {codeSent && <Input label="인증번호" inputMode="numeric" maxLength={6} placeholder="6자리 인증번호" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} />}
+          {codeSent && (
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-foreground">인증번호</label>
+              <div className="relative">
+                <input
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="6자리 인증번호"
+                  value={code}
+                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="w-full rounded-input border border-tag-bg bg-card px-4 py-3 pr-16 text-foreground placeholder:text-tag-text focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                {secondsLeft > 0 && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold tabular-nums text-primary">
+                    {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, '0')}
+                  </span>
+                )}
+              </div>
+              {secondsLeft === 0 && <p className="text-xs text-tag-text">인증번호가 만료됐어요. 재발송해주세요.</p>}
+            </div>
+          )}
           {error && <p className="text-sm text-primary">{error}</p>}
-          <Button className="w-full" size="lg" isLoading={loading} onClick={codeSent ? verifyAndLoad : requestCode}>
+          <Button className="w-full" size="lg" isLoading={loading} disabled={codeSent && secondsLeft === 0} onClick={codeSent ? verifyAndLoad : requestCode}>
             {codeSent ? '인증하고 이용내역 보기' : '인증번호 받기'}
           </Button>
-          {codeSent && <button type="button" className="w-full text-xs text-tag-text underline" onClick={() => { setCodeSent(false); setCode(''); setError('') }}>연락처·이메일 다시 입력</button>}
+          {codeSent && <button type="button" className="w-full text-xs text-tag-text underline" onClick={() => { setCodeSent(false); setCode(''); setSecondsLeft(0); setError('') }}>연락처·이메일 다시 입력</button>}
         </Card>
       </div>
     </main>
