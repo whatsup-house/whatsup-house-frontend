@@ -27,7 +27,7 @@ export default function TicketPassSection() {
       </div>
 
       <p className="text-sm text-tag-text mb-3 leading-relaxed">
-        {t('description')}
+        우연한 식탁은 이용권으로 참여해요. 신청 심사 승인 후 이용권을 구매할 수 있고, 보유 이용권이 있으면 참가 확정 시 1회가 사용됩니다.
       </p>
 
       {isLoggedIn ? (
@@ -58,7 +58,7 @@ export default function TicketPassSection() {
           )}
         </>
       ) : (
-        <p className="text-sm text-primary font-medium">{t('loginRequired')}</p>
+        <p className="text-sm text-primary font-medium">로그인하면 이용권과 심사 상태를 확인할 수 있어요.</p>
       )}
     </Card>
   )

@@ -51,6 +51,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
 
   const formattedDate = formatLocalizedFullDate(eventDate, locale)
   const timeRange = formatTimeRange(startTime, endTime)
+  const isRandomTable = gatheringType === 'RANDOM_TABLE'
   const duration = getDurationParts(startTime, endTime)
   const durationStr = duration
     ? duration.minutes > 0
@@ -193,13 +194,21 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               </div>
             </div>
 
-            {/* 참가비 */}
+            {/* 참가비 / 우연한 식탁 이용권 */}
             <div className="flex items-start gap-3">
               <CreditCard size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-tag-text mb-0.5">{t('priceLabel')}</p>
+                <p className="text-xs text-tag-text mb-0.5">{isRandomTable ? '필요 이용권' : t('priceLabel')}</p>
                 <p className="text-lg font-bold text-foreground">
-                  {t('price', { price: price.toLocaleString(locale) })} <span className="text-xs font-normal text-tag-text">{t('onsitePayment')}</span>
+                  {isRandomTable ? (
+                    <>
+                      1회 <span className="text-xs font-normal text-tag-text">({price.toLocaleString(locale)}원 상당)</span>
+                    </>
+                  ) : (
+                    <>
+                      {t('price', { price: price.toLocaleString(locale) })} <span className="text-xs font-normal text-tag-text">{t('onsitePayment')}</span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -218,7 +227,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
         </Card>
 
         {/* 우연한 식탁 이용권 선결제 (KAN-260) */}
-        {gatheringType === 'RANDOM_TABLE' && <TicketPassSection />}
+        {isRandomTable && <TicketPassSection />}
 
         {/* 게더링 설명 */}
         <div className="mb-6">
