@@ -65,14 +65,14 @@ export default function AdminTicketsPage() {
     setNewForm(emptyForm)
   }
 
-  const handleUpdate = async (id: string) => {
-    const form = editing[id]
+  const handleUpdate = async (product: TicketProductItem) => {
+    const form = editing[product.id] ?? toForm(product)
     const message = validate(form)
     if (message) {
       alert(message)
       return
     }
-    await updateMutation.mutateAsync({ id, data: toPayload(form) })
+    await updateMutation.mutateAsync({ id: product.id, data: toPayload(form) })
   }
 
   const handleDelete = async (product: TicketProductItem) => {
@@ -177,7 +177,7 @@ export default function AdminTicketsPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => handleUpdate(product.id)}
+                    onClick={() => handleUpdate(product)}
                     disabled={updateMutation.isPending}
                     className="inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#1A1A1A] px-4 py-3 text-sm font-bold text-white disabled:opacity-50"
                   >
