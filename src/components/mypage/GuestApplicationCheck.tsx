@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calendar } from 'lucide-react'
+import { Calendar, Ticket } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { requestGuestEmailVerification, confirmGuestEmailVerification } from '@/lib/api/auth'
-import { fetchGuestApplications } from '@/lib/api/application'
+import { fetchGuestOverview } from '@/lib/api/guest'
 import { Button, Card, Input } from '@/components/ui'
 import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
 import { formatLocalizedFullDate } from '@/lib/utils/date'
-import type { ApplicationListItem, ApplicationStatus } from '@/lib/api/types'
+import type { ApplicationListItem, ApplicationStatus, GuestOverview } from '@/lib/api/types'
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 const GUEST_LOOKUP_SESSION_KEY = 'whatsup_guest_application_lookup'
@@ -78,15 +78,17 @@ function ResultCard({ item }: { item: ApplicationListItem }) {
   const locale = useLocale()
   const router = useRouter()
   const formattedDate = formatLocalizedFullDate(item.gathering.eventDate, locale)
+  const isRandomTable = item.gathering.gatheringType === 'RANDOM_TABLE'
   const isConfirmed = item.status === 'CONFIRMED'
   const isPaymentPending = item.status === 'PAYMENT_PENDING'
-  const clickable = isConfirmed || isPaymentPending
+  const isAttended = item.status === 'ATTENDED'
+  const clickable = isConfirmed || isPaymentPending || isAttended
 
   const go = () => {
-    if (isConfirmed) {
+    if (isPaymentPending && isRandomTable) {
+      router.push(`/payments/random-table?bookingNumber=${encodeURIComponent(item.bookingNumber)}`)
+    } else if (isConfirmed || isAttended || isPaymentPending) {
       router.push(`/gatherings/${item.gathering.id}/apply/confirmed?bookingNumber=${item.bookingNumber}`)
-    } else if (isPaymentPending) {
-      router.push(`/payments/random-table?bookingNumber=${item.bookingNumber}`)
     }
   }
 
@@ -125,8 +127,8 @@ function ResultCard({ item }: { item: ApplicationListItem }) {
           <p className="text-sm text-tag-text">{formattedDate}</p>
         </div>
 
-        {isPaymentPending && <p className="text-xs text-primary text-center mt-3">결제하러 가기 →</p>}
-        {isConfirmed && <p className="text-xs text-primary text-center mt-3">참가 확정 내역 보기 →</p>}
+        {isPaymentPending && <p className="text-xs text-primary text-center mt-3">{isRandomTable ? '이용권 구매하러 가기 →' : '입금 안내 보기 →'}</p>}
+        {(isConfirmed || isAttended) && <p className="text-xs text-primary text-center mt-3">참가 확정 내역 보기 →</p>}
       </Card>
     </div>
   )
@@ -144,11 +146,11 @@ export default function GuestApplicationCheck() {
   const [emailBusy, setEmailBusy] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(0)
-  const [results, setResults] = useState<ApplicationListItem[] | null>(null)
+  const [overview, setOverview] = useState<GuestOverview | null>(null)
 
-  const loadGuestApplications = useCallback(async (targetPhone: string, targetEmail: string) => {
-    const list = await fetchGuestApplications(targetPhone, targetEmail)
-    setResults(list)
+  const loadGuestOverview = useCallback(async (targetPhone: string, targetEmail: string) => {
+    const data = await fetchGuestOverview(targetPhone, targetEmail)
+    setOverview(data)
   }, [])
 
   // 인증번호 유효시간(5분) 카운트다운
@@ -161,12 +163,12 @@ export default function GuestApplicationCheck() {
   useEffect(() => {
     const session = readGuestLookupSession()
     if (!session) return
-    loadGuestApplications(session.phone, session.email).catch(() => {
+    loadGuestOverview(session.phone, session.email).catch(() => {
       clearGuestLookupSession()
       setEmailVerified(false)
       setEmailError('인증이 만료됐어요. 이메일 인증을 다시 진행해주세요.')
     })
-  }, [loadGuestApplications])
+  }, [loadGuestOverview])
 
   const requestCode = async () => {
     const normalizedEmail = normalizeEmail(email)
@@ -182,7 +184,7 @@ export default function GuestApplicationCheck() {
       setEmailVerified(false)
       setEmailCode('')
       setSecondsLeft(300)
-      setResults(null)
+      setOverview(null)
       clearGuestLookupSession()
     } catch (error) {
       setEmailError(getApiErrorStatus(error) === 429
@@ -213,7 +215,7 @@ export default function GuestApplicationCheck() {
       setPhone(normalizedPhone)
       setEmail(normalizedEmail)
       writeGuestLookupSession(normalizedPhone, normalizedEmail)
-      await loadGuestApplications(normalizedPhone, normalizedEmail)
+      await loadGuestOverview(normalizedPhone, normalizedEmail)
     } catch {
       setEmailError('인증번호가 올바르지 않거나 만료됐어요.')
     } finally {
@@ -234,7 +236,7 @@ export default function GuestApplicationCheck() {
               setPhone(normalizePhone(e.target.value))
               if (emailVerified) {
                 setEmailVerified(false)
-                setResults(null)
+                setOverview(null)
                 clearGuestLookupSession()
               }
             }}
@@ -255,7 +257,7 @@ export default function GuestApplicationCheck() {
               setEmailVerified(false)
               setEmailCode('')
               setSecondsLeft(0)
-              setResults(null)
+              setOverview(null)
               clearGuestLookupSession()
             }}
             placeholder="guest@example.com"
@@ -309,16 +311,31 @@ export default function GuestApplicationCheck() {
         {emailError && <p className="text-xs text-primary">{emailError}</p>}
       </div>
 
-      {results !== null &&
-        (results.length === 0 ? (
+      {overview !== null && (
+        <>
+          <Card className="mt-6 p-5 bg-primary-light">
+            <div className="flex items-center gap-2 text-primary">
+              <Ticket size={20} />
+              <strong>보유 이용권</strong>
+            </div>
+            <p className="mt-2 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary">
+              우연한식탁 전용 이용권
+            </p>
+            <p className="mt-4 text-3xl font-bold text-primary">{overview.totalRemaining}회</p>
+            <p className="mt-1 text-xs text-tag-text">우연한식탁 신청에만 사용할 수 있는 잔여 횟수예요.</p>
+          </Card>
+
+          {overview.applications.length === 0 ? (
           <p className="text-sm text-tag-text text-center mt-8">{t('notFound')}</p>
         ) : (
           <div className="mt-6 flex flex-col gap-3">
-            {results.map((item) => (
+            {overview.applications.map((item) => (
               <ResultCard key={item.id} item={item} />
             ))}
           </div>
-        ))}
+          )}
+        </>
+      )}
     </div>
   )
 }

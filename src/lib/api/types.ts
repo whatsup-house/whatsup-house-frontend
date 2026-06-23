@@ -221,6 +221,7 @@ export interface ApplicationListItem {
     title: string
     eventDate: string
     thumbnailUrl: string | null
+    gatheringType?: GatheringType
   }
   createdAt: string
 }
