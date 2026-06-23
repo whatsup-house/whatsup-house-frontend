@@ -1,11 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Mail, Ticket, CalendarDays } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui'
 import { confirmGuestEmailVerification, requestGuestEmailVerification } from '@/lib/api/auth'
 import { fetchGuestOverview } from '@/lib/api/guest'
+import {
+  clearGuestLookupSession,
+  getApiErrorStatus,
+  normalizeGuestEmail,
+  normalizeGuestPhone,
+  readGuestLookupSession,
+  writeGuestLookupSession,
+} from '@/lib/utils/guestLookupSession'
 import type { ApplicationStatus, GuestOverview } from '@/lib/api/types'
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
@@ -19,14 +27,20 @@ const STATUS_LABEL: Record<ApplicationStatus, string> = {
 
 export default function GuestOverviewPage() {
   const router = useRouter()
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
+  const restoredSession = readGuestLookupSession()
+  const [phone, setPhone] = useState(restoredSession?.phone ?? '')
+  const [email, setEmail] = useState(restoredSession?.email ?? '')
   const [code, setCode] = useState('')
   const [codeSent, setCodeSent] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(0)
   const [overview, setOverview] = useState<GuestOverview | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const loadOverview = useCallback(async (targetPhone: string, targetEmail: string) => {
+    const data = await fetchGuestOverview(targetPhone, targetEmail)
+    setOverview(data)
+  }, [])
 
   useEffect(() => {
     if (!codeSent || secondsLeft <= 0) return
@@ -36,24 +50,45 @@ export default function GuestOverviewPage() {
     return () => window.clearInterval(timer)
   }, [codeSent, secondsLeft])
 
+  useEffect(() => {
+    const session = readGuestLookupSession()
+    if (!session) return
+    setLoading(true)
+    setError('')
+    loadOverview(session.phone, session.email)
+      .catch(() => {
+        clearGuestLookupSession()
+        setError('인증이 만료됐어요. 이메일 인증을 다시 진행해주세요.')
+      })
+      .finally(() => setLoading(false))
+  }, [loadOverview])
+
   const requestCode = async () => {
-    if (!/^01\d{8,9}$/.test(phone.replace(/-/g, ''))) {
+    const normalizedPhone = normalizeGuestPhone(phone)
+    const normalizedEmail = normalizeGuestEmail(email)
+    if (!/^01\d{8,9}$/.test(normalizedPhone)) {
       setError('올바른 연락처를 입력해 주세요.')
       return
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       setError('올바른 이메일을 입력해 주세요.')
       return
     }
     setLoading(true)
     setError('')
     try {
-      await requestGuestEmailVerification(email.trim())
+      await requestGuestEmailVerification(normalizedEmail)
+      setPhone(normalizedPhone)
+      setEmail(normalizedEmail)
       setCodeSent(true)
       setCode('')
       setSecondsLeft(300)
-    } catch {
-      setError('인증번호 발송에 실패했어요.')
+      setOverview(null)
+      clearGuestLookupSession()
+    } catch (cause) {
+      setError(getApiErrorStatus(cause) === 429
+        ? '인증번호 요청이 너무 잦아요. 잠시 후 다시 시도해주세요.'
+        : '인증번호 발송에 실패했어요.')
     } finally {
       setLoading(false)
     }
@@ -71,9 +106,13 @@ export default function GuestOverviewPage() {
     setLoading(true)
     setError('')
     try {
-      await confirmGuestEmailVerification(email.trim(), code.trim())
-      const data = await fetchGuestOverview(phone.replace(/-/g, ''), email.trim())
-      setOverview(data)
+      const normalizedPhone = normalizeGuestPhone(phone)
+      const normalizedEmail = normalizeGuestEmail(email)
+      await confirmGuestEmailVerification(normalizedEmail, code.trim())
+      setPhone(normalizedPhone)
+      setEmail(normalizedEmail)
+      writeGuestLookupSession(normalizedPhone, normalizedEmail)
+      await loadOverview(normalizedPhone, normalizedEmail)
     } catch (cause) {
       const message = (cause as { response?: { data?: { message?: string } } })?.response?.data?.message
       setError(message ?? '인증번호 또는 입력 정보를 확인해 주세요.')
@@ -135,7 +174,7 @@ export default function GuestOverviewPage() {
         <p className="mt-2 text-sm text-tag-text">신청할 때 사용한 연락처와 이메일을 인증해 주세요.</p>
 
         <Card className="mt-7 space-y-4 p-5">
-          <Input label="연락처" placeholder="01012345678" value={phone} onChange={(event) => setPhone(event.target.value)} disabled={codeSent} />
+          <Input label="연락처" placeholder="01012345678" value={phone} onChange={(event) => setPhone(normalizeGuestPhone(event.target.value))} disabled={codeSent} />
           <Input label="이메일" type="email" placeholder="email@example.com" value={email} onChange={(event) => setEmail(event.target.value)} disabled={codeSent} />
           {codeSent && (
             <div className="flex flex-col gap-1">
@@ -162,7 +201,7 @@ export default function GuestOverviewPage() {
           <Button className="w-full" size="lg" isLoading={loading} disabled={codeSent && secondsLeft === 0} onClick={codeSent ? verifyAndLoad : requestCode}>
             {codeSent ? '인증하고 이용내역 보기' : '인증번호 받기'}
           </Button>
-          {codeSent && <button type="button" className="w-full text-xs text-tag-text underline" onClick={() => { setCodeSent(false); setCode(''); setSecondsLeft(0); setError('') }}>연락처·이메일 다시 입력</button>}
+          {codeSent && <button type="button" className="w-full text-xs text-tag-text underline" onClick={() => { setCodeSent(false); setCode(''); setSecondsLeft(0); setOverview(null); clearGuestLookupSession(); setError('') }}>연락처·이메일 다시 입력</button>}
         </Card>
       </div>
     </main>

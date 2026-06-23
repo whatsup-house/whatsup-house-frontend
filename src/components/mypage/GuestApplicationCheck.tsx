@@ -9,60 +9,17 @@ import { fetchGuestOverview } from '@/lib/api/guest'
 import { Button, Card, Input } from '@/components/ui'
 import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
 import { formatLocalizedFullDate } from '@/lib/utils/date'
+import {
+  clearGuestLookupSession,
+  getApiErrorStatus,
+  normalizeGuestEmail,
+  normalizeGuestPhone,
+  readGuestLookupSession,
+  writeGuestLookupSession,
+} from '@/lib/utils/guestLookupSession'
 import type { ApplicationListItem, ApplicationStatus, GuestOverview } from '@/lib/api/types'
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
-const GUEST_LOOKUP_SESSION_KEY = 'whatsup_guest_application_lookup'
-const VERIFIED_SESSION_TTL_MS = 30 * 60 * 1000
-
-interface GuestLookupSession {
-  phone: string
-  email: string
-  verifiedAt: number
-}
-
-function normalizePhone(value: string) {
-  return value.replace(/\D/g, '').slice(0, 11)
-}
-
-function normalizeEmail(value: string) {
-  return value.trim().toLowerCase()
-}
-
-function readGuestLookupSession(): GuestLookupSession | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = window.sessionStorage.getItem(GUEST_LOOKUP_SESSION_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as GuestLookupSession
-    if (!parsed.phone || !parsed.email || Date.now() - parsed.verifiedAt > VERIFIED_SESSION_TTL_MS) {
-      window.sessionStorage.removeItem(GUEST_LOOKUP_SESSION_KEY)
-      return null
-    }
-    return parsed
-  } catch {
-    window.sessionStorage.removeItem(GUEST_LOOKUP_SESSION_KEY)
-    return null
-  }
-}
-
-function writeGuestLookupSession(phone: string, email: string) {
-  if (typeof window === 'undefined') return
-  window.sessionStorage.setItem(GUEST_LOOKUP_SESSION_KEY, JSON.stringify({
-    phone,
-    email,
-    verifiedAt: Date.now(),
-  }))
-}
-
-function clearGuestLookupSession() {
-  if (typeof window === 'undefined') return
-  window.sessionStorage.removeItem(GUEST_LOOKUP_SESSION_KEY)
-}
-
-function getApiErrorStatus(error: unknown) {
-  return (error as { response?: { status?: number } })?.response?.status
-}
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
   PENDING: 'bg-tag-bg text-tag-text',
@@ -171,7 +128,7 @@ export default function GuestApplicationCheck() {
   }, [loadGuestOverview])
 
   const requestCode = async () => {
-    const normalizedEmail = normalizeEmail(email)
+    const normalizedEmail = normalizeGuestEmail(email)
     if (!EMAIL_PATTERN.test(normalizedEmail)) {
       setEmailError('올바른 이메일을 입력해주세요.')
       return
@@ -197,8 +154,8 @@ export default function GuestApplicationCheck() {
 
   // 인증 확인 → 성공 시 그 사람(전화+이메일)의 신청 목록을 바로 조회한다.
   const confirmCode = async () => {
-    const normalizedPhone = normalizePhone(phone)
-    const normalizedEmail = normalizeEmail(email)
+    const normalizedPhone = normalizeGuestPhone(phone)
+    const normalizedEmail = normalizeGuestEmail(email)
     if (!normalizedPhone) {
       setEmailError('연락처를 입력해주세요.')
       return
@@ -233,7 +190,7 @@ export default function GuestApplicationCheck() {
           <Input
             value={phone}
             onChange={(e) => {
-              setPhone(normalizePhone(e.target.value))
+              setPhone(normalizeGuestPhone(e.target.value))
               if (emailVerified) {
                 setEmailVerified(false)
                 setOverview(null)
