@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Calendar } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -12,6 +12,57 @@ import { formatLocalizedFullDate } from '@/lib/utils/date'
 import type { ApplicationListItem, ApplicationStatus } from '@/lib/api/types'
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+const GUEST_LOOKUP_SESSION_KEY = 'whatsup_guest_application_lookup'
+const VERIFIED_SESSION_TTL_MS = 30 * 60 * 1000
+
+interface GuestLookupSession {
+  phone: string
+  email: string
+  verifiedAt: number
+}
+
+function normalizePhone(value: string) {
+  return value.replace(/\D/g, '').slice(0, 11)
+}
+
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function readGuestLookupSession(): GuestLookupSession | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.sessionStorage.getItem(GUEST_LOOKUP_SESSION_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as GuestLookupSession
+    if (!parsed.phone || !parsed.email || Date.now() - parsed.verifiedAt > VERIFIED_SESSION_TTL_MS) {
+      window.sessionStorage.removeItem(GUEST_LOOKUP_SESSION_KEY)
+      return null
+    }
+    return parsed
+  } catch {
+    window.sessionStorage.removeItem(GUEST_LOOKUP_SESSION_KEY)
+    return null
+  }
+}
+
+function writeGuestLookupSession(phone: string, email: string) {
+  if (typeof window === 'undefined') return
+  window.sessionStorage.setItem(GUEST_LOOKUP_SESSION_KEY, JSON.stringify({
+    phone,
+    email,
+    verifiedAt: Date.now(),
+  }))
+}
+
+function clearGuestLookupSession() {
+  if (typeof window === 'undefined') return
+  window.sessionStorage.removeItem(GUEST_LOOKUP_SESSION_KEY)
+}
+
+function getApiErrorStatus(error: unknown) {
+  return (error as { response?: { status?: number } })?.response?.status
+}
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
   PENDING: 'bg-tag-bg text-tag-text',
@@ -83,16 +134,22 @@ function ResultCard({ item }: { item: ApplicationListItem }) {
 
 export default function GuestApplicationCheck() {
   const t = useTranslations('mypage.guestApplication')
+  const restoredSession = readGuestLookupSession()
 
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState(restoredSession?.phone ?? '')
+  const [email, setEmail] = useState(restoredSession?.email ?? '')
   const [emailCode, setEmailCode] = useState('')
   const [emailRequested, setEmailRequested] = useState(false)
-  const [emailVerified, setEmailVerified] = useState(false)
+  const [emailVerified, setEmailVerified] = useState(Boolean(restoredSession))
   const [emailBusy, setEmailBusy] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(0)
   const [results, setResults] = useState<ApplicationListItem[] | null>(null)
+
+  const loadGuestApplications = useCallback(async (targetPhone: string, targetEmail: string) => {
+    const list = await fetchGuestApplications(targetPhone, targetEmail)
+    setResults(list)
+  }, [])
 
   // 인증번호 유효시간(5분) 카운트다운
   useEffect(() => {
@@ -101,22 +158,36 @@ export default function GuestApplicationCheck() {
     return () => clearTimeout(timer)
   }, [secondsLeft])
 
+  useEffect(() => {
+    const session = readGuestLookupSession()
+    if (!session) return
+    loadGuestApplications(session.phone, session.email).catch(() => {
+      clearGuestLookupSession()
+      setEmailVerified(false)
+      setEmailError('인증이 만료됐어요. 이메일 인증을 다시 진행해주세요.')
+    })
+  }, [loadGuestApplications])
+
   const requestCode = async () => {
-    if (!EMAIL_PATTERN.test(email)) {
+    const normalizedEmail = normalizeEmail(email)
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
       setEmailError('올바른 이메일을 입력해주세요.')
       return
     }
     setEmailBusy(true)
     setEmailError(null)
     try {
-      await requestGuestEmailVerification(email)
+      await requestGuestEmailVerification(normalizedEmail)
       setEmailRequested(true)
       setEmailVerified(false)
       setEmailCode('')
       setSecondsLeft(300)
       setResults(null)
-    } catch {
-      setEmailError('인증번호 발송에 실패했어요.')
+      clearGuestLookupSession()
+    } catch (error) {
+      setEmailError(getApiErrorStatus(error) === 429
+        ? '인증번호 요청이 너무 잦아요. 잠시 후 다시 시도해주세요.'
+        : '인증번호 발송에 실패했어요.')
     } finally {
       setEmailBusy(false)
     }
@@ -124,7 +195,9 @@ export default function GuestApplicationCheck() {
 
   // 인증 확인 → 성공 시 그 사람(전화+이메일)의 신청 목록을 바로 조회한다.
   const confirmCode = async () => {
-    if (!phone.trim()) {
+    const normalizedPhone = normalizePhone(phone)
+    const normalizedEmail = normalizeEmail(email)
+    if (!normalizedPhone) {
       setEmailError('연락처를 입력해주세요.')
       return
     }
@@ -135,10 +208,12 @@ export default function GuestApplicationCheck() {
     setEmailBusy(true)
     setEmailError(null)
     try {
-      await confirmGuestEmailVerification(email, emailCode)
+      await confirmGuestEmailVerification(normalizedEmail, emailCode)
       setEmailVerified(true)
-      const list = await fetchGuestApplications(phone.trim(), email.trim())
-      setResults(list)
+      setPhone(normalizedPhone)
+      setEmail(normalizedEmail)
+      writeGuestLookupSession(normalizedPhone, normalizedEmail)
+      await loadGuestApplications(normalizedPhone, normalizedEmail)
     } catch {
       setEmailError('인증번호가 올바르지 않거나 만료됐어요.')
     } finally {
@@ -155,10 +230,18 @@ export default function GuestApplicationCheck() {
           <label className="block text-sm font-medium text-foreground mb-1.5">{t('phone')}</label>
           <Input
             value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+            onChange={(e) => {
+              setPhone(normalizePhone(e.target.value))
+              if (emailVerified) {
+                setEmailVerified(false)
+                setResults(null)
+                clearGuestLookupSession()
+              }
+            }}
             placeholder="01012345678"
             inputMode="tel"
             className="w-full"
+            disabled={emailVerified}
           />
         </div>
 
@@ -173,6 +256,7 @@ export default function GuestApplicationCheck() {
               setEmailCode('')
               setSecondsLeft(0)
               setResults(null)
+              clearGuestLookupSession()
             }}
             placeholder="guest@example.com"
             inputMode="email"
