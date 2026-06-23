@@ -20,6 +20,8 @@ type FormValues = {
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
   PENDING: 'bg-tag-bg text-tag-text',
+  PAYMENT_PENDING: 'bg-blue-50 text-blue-700',
+  REJECTED: 'bg-red-50 text-red-700',
   CONFIRMED: 'bg-primary-light text-primary',
   CANCELLED: 'bg-tag-bg text-tag-text opacity-60',
   ATTENDED: 'bg-primary-light text-primary',

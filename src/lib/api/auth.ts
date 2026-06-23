@@ -107,3 +107,11 @@ export const checkEmail = async (email: string): Promise<boolean> => {
   )
   return response.data.data.available
 }
+
+export const requestGuestEmailVerification = async (email: string): Promise<void> => {
+  await apiClient.post('/api/auth/guest-email-verification/request', { email })
+}
+
+export const confirmGuestEmailVerification = async (email: string, code: string): Promise<void> => {
+  await apiClient.post('/api/auth/guest-email-verification/confirm', { email, code })
+}

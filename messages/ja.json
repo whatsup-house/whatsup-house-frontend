@@ -651,7 +651,9 @@
         "PENDING": "確認中",
         "CONFIRMED": "確定",
         "CANCELLED": "キャンセル済み",
-        "ATTENDED": "参加完了"
+        "ATTENDED": "参加完了",
+        "PAYMENT_PENDING": "入金待ち",
+        "REJECTED": "審査却下"
       },
       "payment": {
         "PENDING": "入金確認中",

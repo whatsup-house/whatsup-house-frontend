@@ -651,7 +651,9 @@
         "PENDING": "Under review",
         "CONFIRMED": "Confirmed",
         "CANCELLED": "Cancelled",
-        "ATTENDED": "Attended"
+        "ATTENDED": "Attended",
+        "PAYMENT_PENDING": "Awaiting payment",
+        "REJECTED": "Rejected"
       },
       "payment": {
         "PENDING": "Deposit pending",

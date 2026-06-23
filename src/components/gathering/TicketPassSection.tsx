@@ -1,11 +1,11 @@
 'use client'
 
 import { Ticket } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Card, Button } from '@/components/ui'
-import { useMyTickets, usePurchaseTicketPass } from '@/lib/hooks/useTickets'
+import { useMyTickets } from '@/lib/hooks/useTickets'
 import { useAuthStore } from '@/lib/store/authStore'
-import { useToastStore } from '@/lib/store/toastStore'
 import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
 
 // 우연한 식탁(RANDOM_TABLE) 게더링 상세에 노출되는 이용권 선결제 섹션. (KAN-260)
@@ -14,23 +14,12 @@ export default function TicketPassSection() {
   const tPayment = useTranslations('payment.account')
   const { isLoggedIn } = useAuthStore()
   const { data } = useMyTickets()
-  const purchase = usePurchaseTicketPass()
-  const showToast = useToastStore((s) => s.show)
+  const router = useRouter()
 
   const totalRemaining = data?.totalRemaining ?? 0
   const hasPending = data?.passes?.some((p) => p.status === 'PENDING') ?? false
 
-  const handlePurchase = () => {
-    purchase.mutate(
-      { product: 'RANDOM_TABLE_FOUR' },
-      {
-        onSuccess: () =>
-          showToast(t('purchaseSuccess'), 'welcome'),
-        onError: () =>
-          showToast(t('purchaseFailed'), 'error'),
-      },
-    )
-  }
+  const eligibility = data?.randomTableEligibility
 
   return (
     <Card className="p-4 mb-6 border border-primary/20">
@@ -56,15 +45,19 @@ export default function TicketPassSection() {
             </p>
           )}
 
-          <Button
-            variant="primary"
-            size="lg"
-            className="w-full"
-            onClick={handlePurchase}
-            isLoading={purchase.isPending}
-          >
-            {t('purchase')}
-          </Button>
+          {data?.purchasable ? (
+            <Button variant="primary" size="lg" className="w-full"
+              onClick={() => router.push('/payments/random-table')}>
+              1회권·4회권 선택하기
+            </Button>
+          ) : (
+            <div className="rounded-input bg-tag-bg px-4 py-3 text-sm text-tag-text">
+              {eligibility === 'UNREVIEWED' && '신청 심사 승인 후 이용권을 구매할 수 있어요.'}
+              {eligibility === 'REJECTED' && '현재 우연한 식탁 참여 자격이 승인되지 않았어요.'}
+              {eligibility === 'SUSPENDED' && '현재 우연한 식탁 참여 자격이 정지되어 있어요.'}
+              {data?.accountStatus === 'BLOCKED' && '차단된 계정은 이용권을 구매할 수 없어요.'}
+            </div>
+          )}
 
           <div className="mt-3 bg-tag-bg rounded-input px-4 py-3 flex flex-col gap-1">
             <p className="text-xs text-tag-text">{t('depositAccount')}</p>

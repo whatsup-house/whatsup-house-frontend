@@ -36,6 +36,7 @@ export default function ApplicationResultView({
 
   const formattedDate = formatLocalizedFullDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
+  const isRandomTable = gathering.gatheringType === 'RANDOM_TABLE'
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -82,16 +83,16 @@ export default function ApplicationResultView({
             <div className="flex items-center gap-3">
               <CreditCard size={16} className="text-tag-text shrink-0" />
               <div>
-                <p className="text-xs text-tag-text">{t('price')}</p>
+                <p className="text-xs text-tag-text">{isRandomTable ? '참가 방식' : t('price')}</p>
                 <p className="text-sm font-medium text-foreground">
-                  {t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
+                  {isRandomTable ? '이용권 1회 사용 완료' : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
                 </p>
               </div>
             </div>
           </div>
         </Card>
 
-        {mode === 'confirmed' && <PaymentAccountCard price={gathering.price ?? 0} />}
+        {mode === 'confirmed' && !isRandomTable && <PaymentAccountCard price={gathering.price ?? 0} />}
 
         <div className="w-full flex flex-col gap-3 mt-4">
           {bookingNumber ? (

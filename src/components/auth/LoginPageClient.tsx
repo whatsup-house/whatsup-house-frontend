@@ -136,10 +136,17 @@ export default function LoginPageClient() {
 
         <Link
           href="/register"
-          className="block w-full px-0 py-5 text-center text-[13px] font-medium text-tag-text"
+          className="block w-full px-0 pb-3 pt-5 text-center text-[13px] font-medium text-tag-text"
         >
           {t('noAccount')}{' '}
           <span className="font-bold text-primary underline underline-offset-4">{tCommon('register')}</span>
+        </Link>
+
+        <Link
+          href="/guest"
+          className="block w-full pb-5 text-center text-[13px] font-bold text-primary underline underline-offset-4"
+        >
+          비회원 이용내역 조회
         </Link>
       </div>
     </div>

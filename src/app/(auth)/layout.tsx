@@ -26,6 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <AppShell>
       <div className="flex-1 lg:min-h-0 lg:overflow-y-auto">{children}</div>
+      {pathname === '/login' && <BottomNav />}
     </AppShell>
   )
 }

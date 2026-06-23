@@ -60,7 +60,7 @@ export default function BottomNav() {
           const isActive =
             item.href === '/'
               ? pathname === '/'
-              : pathname.startsWith(item.href)
+              : pathname.startsWith(item.href) || (item.href === '/mypage' && pathname === '/login')
           const Icon = item.icon
 
           if (item.requireLogin) {

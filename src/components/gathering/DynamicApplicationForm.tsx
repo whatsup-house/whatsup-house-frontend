@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, CheckCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -13,6 +13,7 @@ import {
 } from '@/lib/hooks/useApplications'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { useAuthStore } from '@/lib/store/authStore'
+import { requestGuestEmailVerification, confirmGuestEmailVerification } from '@/lib/api/auth'
 import { resolveApiErrorMessage } from '@/lib/utils/apiError'
 import type {
   GatheringDetail,
@@ -73,6 +74,19 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
   const [answers, setAnswers] = useState<Record<string, FieldValue>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [emailCode, setEmailCode] = useState('')
+  const [emailRequested, setEmailRequested] = useState(false)
+  const [emailVerified, setEmailVerified] = useState(false)
+  const [emailBusy, setEmailBusy] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [secondsLeft, setSecondsLeft] = useState(0)
+
+  // 인증번호 유효시간(5분) 카운트다운. 0이 되면 만료된다.
+  useEffect(() => {
+    if (secondsLeft <= 0) return
+    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [secondsLeft])
 
   // 회원은 시스템 예약 질문(이름/연락처)을 계정값으로 처리하므로 폼에서 숨긴다.
   const questions = useMemo<FormQuestionDetail[]>(() => {
@@ -102,6 +116,11 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitError(null)
+
+    if (isGuestMode && !emailVerified) {
+      setSubmitError('이메일 인증을 완료해주세요.')
+      return
+    }
 
     // 필수 검증
     const nextErrors: Record<string, string> = {}
@@ -149,6 +168,28 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
   }
 
   const isPending = isGuestMode ? guestMutation.isPending : memberMutation.isPending
+  const emailQuestion = questions.find((q) => q.questionKey === 'email')
+  const guestEmail = emailQuestion ? String(getValue(emailQuestion) ?? '').trim() : ''
+
+  const requestEmailCode = async () => {
+    if (!guestEmail) { setEmailError('이메일을 먼저 입력해주세요.'); return }
+    setEmailBusy(true); setEmailError(null)
+    try {
+      await requestGuestEmailVerification(guestEmail)
+      setEmailRequested(true); setEmailVerified(false); setEmailCode(''); setSecondsLeft(300)
+    } catch { setEmailError('인증번호 발송에 실패했어요.') }
+    finally { setEmailBusy(false) }
+  }
+
+  const confirmEmailCode = async () => {
+    if (!/^\d{6}$/.test(emailCode)) { setEmailError('6자리 인증번호를 입력해주세요.'); return }
+    setEmailBusy(true); setEmailError(null)
+    try {
+      await confirmGuestEmailVerification(guestEmail, emailCode)
+      setEmailVerified(true)
+    } catch { setEmailError('인증번호가 올바르지 않거나 만료됐어요.') }
+    finally { setEmailBusy(false) }
+  }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
@@ -184,13 +225,36 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
 
       <div className="flex flex-col gap-5">
         {questions.map((q) => (
-          <DynamicQuestionField
-            key={q.questionId}
-            question={q}
-            value={getValue(q)}
-            error={errors[q.questionId]}
-            onChange={(value) => setValue(q.questionId, value)}
-          />
+          <div key={q.questionId} className="flex flex-col gap-2">
+            <DynamicQuestionField question={q} value={getValue(q)} error={errors[q.questionId]}
+              onChange={(value) => {
+                setValue(q.questionId, value)
+                if (q.questionKey === 'email') { setEmailRequested(false); setEmailVerified(false); setEmailCode(''); setSecondsLeft(0) }
+              }} />
+            {isGuestMode && q.questionKey === 'email' && (
+              <div className="flex flex-col gap-2">
+                <Button type="button" variant="outlined" size="default" onClick={requestEmailCode} disabled={emailBusy || emailVerified}>
+                  {emailVerified ? '이메일 인증 완료' : emailRequested ? '인증번호 재발송' : '인증번호 요청'}
+                </Button>
+                {emailRequested && !emailVerified && <div className="flex flex-col gap-1">
+                  <div className="flex gap-2 items-center">
+                    <div className="relative flex-1 min-w-0">
+                      <input value={emailCode} onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        inputMode="numeric" placeholder="6자리 인증번호" className="w-full px-4 py-3 pr-16 rounded-input border border-tag-bg bg-card text-sm" />
+                      {secondsLeft > 0 && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-primary tabular-nums">
+                          {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, '0')}
+                        </span>
+                      )}
+                    </div>
+                    <Button type="button" variant="primary" size="default" onClick={confirmEmailCode} disabled={emailBusy || secondsLeft === 0}>확인</Button>
+                  </div>
+                  {secondsLeft === 0 && <p className="text-xs text-tag-text">인증번호가 만료됐어요. 재발송해주세요.</p>}
+                </div>}
+                {emailError && <p className="text-xs text-primary">{emailError}</p>}
+              </div>
+            )}
+          </div>
         ))}
       </div>
 

@@ -44,7 +44,9 @@ export interface GatheringDetail extends GatheringListItem {
 
 // 우연한 식탁 이용권 (KAN-260)
 export type TicketPassStatus = 'PENDING' | 'ACTIVE' | 'USED_UP' | 'CANCELLED'
-export type TicketProduct = 'RANDOM_TABLE_FOUR'
+export type TicketProduct = 'RANDOM_TABLE_ONE' | 'RANDOM_TABLE_FOUR'
+export type ParticipantAccountStatus = 'ACTIVE' | 'BLOCKED'
+export type RandomTableEligibility = 'UNREVIEWED' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
 
 export interface TicketPass {
   id: string
@@ -55,15 +57,34 @@ export interface TicketPass {
   status: TicketPassStatus
   createdAt: string
   activatedAt: string | null
+  purchaseAmount: number
+  paymentDeadline: string | null
+  paymentConfirmedAt: string | null
 }
 
 export interface MyTickets {
+  accountStatus: ParticipantAccountStatus
+  randomTableEligibility: RandomTableEligibility
+  purchasable: boolean
   totalRemaining: number
   passes: TicketPass[]
+  gatheringId: string | null
+}
+
+export interface GuestOverview {
+  name: string
+  randomTableEligibility: RandomTableEligibility
+  totalRemaining: number
+  passes: TicketPass[]
+  applications: ApplicationListItem[]
 }
 
 export interface TicketPurchaseRequest {
   product: TicketProduct
+}
+
+export interface GuestTicketPurchaseRequest extends TicketPurchaseRequest {
+  bookingNumber: string
 }
 
 // 달력 dot 표시용 (날짜별 대표 게더링 상태)
@@ -172,7 +193,7 @@ export interface JobGroup {
 }
 
 // 내 신청 내역 타입
-export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
+export type ApplicationStatus = 'PENDING' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED' | 'ATTENDED'
 
 // 입금 상태. 유료 게더링에서만 내려오며, 무료 게더링은 null(표시하지 않음). (KAN-243)
 export type PaymentStatus = 'PENDING' | 'CONFIRMED'

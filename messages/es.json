@@ -571,7 +571,7 @@
   "review": {
     "photoReview": "📷 Revisión de fotos",
     "anonymous": "anónimo",
-      "countForGathering": "{count} reseñas para este encuentro",
+    "countForGathering": "{count} reseñas para este encuentro",
     "sort": {
       "likes": "Recomendadas",
       "latest": "Más recientes"
@@ -651,7 +651,9 @@
         "PENDING": "En revisión",
         "CONFIRMED": "Confirmada",
         "CANCELLED": "Cancelada",
-        "ATTENDED": "Asistencia completada"
+        "ATTENDED": "Asistencia completada",
+        "PAYMENT_PENDING": "Pago pendiente",
+        "REJECTED": "Rechazado"
       },
       "payment": {
         "PENDING": "Depósito pendiente",
