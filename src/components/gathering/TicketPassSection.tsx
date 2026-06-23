@@ -2,6 +2,7 @@
 
 import { Ticket } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Card, Button } from '@/components/ui'
 import { useMyTickets } from '@/lib/hooks/useTickets'
 import { useAuthStore } from '@/lib/store/authStore'
@@ -9,6 +10,8 @@ import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
 
 // 우연한 식탁(RANDOM_TABLE) 게더링 상세에 노출되는 이용권 선결제 섹션. (KAN-260)
 export default function TicketPassSection() {
+  const t = useTranslations('gathering.ticketPass')
+  const tPayment = useTranslations('payment.account')
   const { isLoggedIn } = useAuthStore()
   const { data } = useMyTickets()
   const router = useRouter()
@@ -22,23 +25,23 @@ export default function TicketPassSection() {
     <Card className="p-4 mb-6 border border-primary/20">
       <div className="flex items-center gap-2 mb-3">
         <Ticket size={18} className="text-primary shrink-0" />
-        <h2 className="text-base font-bold text-foreground">우연한 식탁 이용권</h2>
+        <h2 className="text-base font-bold text-foreground">{t('title')}</h2>
       </div>
 
       <p className="text-sm text-tag-text mb-3 leading-relaxed">
-        우연한 식탁은 이용권으로 참여해요. 4회권을 미리 결제해두면 매번 따로 결제하지 않아도 됩니다.
+        {t('description')}
       </p>
 
       {isLoggedIn ? (
         <>
           <div className="flex items-center justify-between bg-tag-bg rounded-input px-4 py-3 mb-3">
-            <span className="text-sm text-tag-text">남은 이용권</span>
-            <span className="text-base font-bold text-primary">{totalRemaining}회</span>
+            <span className="text-sm text-tag-text">{t('remaining')}</span>
+            <span className="text-base font-bold text-primary">{t('remainingCount', { count: totalRemaining })}</span>
           </div>
 
           {hasPending && (
             <p className="text-xs text-tag-text mb-3 pl-1">
-              입금 확인 대기 중인 이용권이 있어요. 관리자 확인 후 활성화됩니다.
+              {t('pendingNotice')}
             </p>
           )}
 
@@ -57,15 +60,15 @@ export default function TicketPassSection() {
           )}
 
           <div className="mt-3 bg-tag-bg rounded-input px-4 py-3 flex flex-col gap-1">
-            <p className="text-xs text-tag-text">입금 계좌 (신청 후 입금)</p>
+            <p className="text-xs text-tag-text">{t('depositAccount')}</p>
             <p className="text-sm font-semibold text-foreground">
-              {PAYMENT_ACCOUNT.bankName} {PAYMENT_ACCOUNT.accountNumber}
+              {tPayment('bankName')} {PAYMENT_ACCOUNT.accountNumber}
             </p>
-            <p className="text-xs text-tag-text">예금주 {PAYMENT_ACCOUNT.accountHolder}</p>
+            <p className="text-xs text-tag-text">{t('accountHolder', { holder: tPayment('accountHolder') })}</p>
           </div>
         </>
       ) : (
-        <p className="text-sm text-primary font-medium">로그인 후 이용권을 구매할 수 있어요.</p>
+        <p className="text-sm text-primary font-medium">{t('loginRequired')}</p>
       )}
     </Card>
   )

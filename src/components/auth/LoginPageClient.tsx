@@ -7,12 +7,10 @@ import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle, ChevronLeft } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useLogin } from '@/lib/hooks/useAuth'
-import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { safeReturnUrl } from '@/lib/utils/url'
-import LanguageSwitcher from '@/components/layout/LanguageSwitcher'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
 type LoginFormValues = { email: string; password: string }
@@ -25,7 +23,6 @@ export default function LoginPageClient() {
   const returnUrl = safeReturnUrl(rawReturnUrl)
   const isWithdrawn = searchParams.get('withdrawn') === '1'
   const loginMutation = useLogin(returnUrl)
-  const handleBack = useBackNavigation('/')
 
   const loginSchema = useMemo(
     () =>
@@ -51,28 +48,14 @@ export default function LoginPageClient() {
   const hasLoginError = loginMutation.isError
 
   return (
-    <main className="min-h-screen bg-background">
+    <div className="bg-background">
       <AuthOnlyRedirect redirectTo={returnUrl} />
-      <header className="sticky top-0 z-30 border-b border-tag-bg/60 bg-background">
-        <div className="flex h-14 items-center justify-between px-1">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground"
-            aria-label={tCommon('back')}
-          >
-            <ChevronLeft size={22} />
-          </button>
-          <h1 className="text-base font-bold text-foreground">{t('title')}</h1>
-          <LanguageSwitcher />
-        </div>
-      </header>
 
-      <div className="flex min-h-[calc(100vh-56px)] flex-col px-7 pb-4 pt-9">
+      <div className="flex min-h-[calc(100vh-120px)] flex-col px-7 pb-4 pt-9">
         <section className="mb-9 flex flex-col items-center text-center">
           <Image
             src="/assets/whatsup-logo.png"
-            alt="와썹하우스"
+            alt={tCommon('brand')}
             width={168}
             height={168}
             priority
@@ -166,6 +149,6 @@ export default function LoginPageClient() {
           비회원 이용내역 조회
         </Link>
       </div>
-    </main>
+    </div>
   )
 }

@@ -3,20 +3,12 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Calendar, MapPin, Hash } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useApplicationByToken } from '@/lib/hooks/useApplications'
 import { Card, LoadingSpinner } from '@/components/ui'
 import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
+import { formatLocalizedFullDate } from '@/lib/utils/date'
 import type { ApplicationStatus } from '@/lib/api/types'
-import dayjs from 'dayjs'
-
-const STATUS_LABEL: Record<ApplicationStatus, string> = {
-  PENDING: '검토 중',
-  PAYMENT_PENDING: '결제 대기',
-  REJECTED: '심사 거절',
-  CONFIRMED: '확정',
-  CANCELLED: '취소됨',
-  ATTENDED: '참석 완료',
-}
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
   PENDING: 'bg-tag-bg text-tag-text',
@@ -32,6 +24,9 @@ interface TokenApplicationCheckProps {
 }
 
 export default function TokenApplicationCheck({ token }: TokenApplicationCheckProps) {
+  const t = useTranslations('mypage.guestApplication')
+  const tApplications = useTranslations('mypage.applications')
+  const locale = useLocale()
   const router = useRouter()
   const { data, isLoading, isError } = useApplicationByToken(token)
 
@@ -47,24 +42,24 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
     return (
       <div className="px-5 py-16 flex flex-col items-center text-center">
         <p className="text-4xl mb-4">🔗</p>
-        <h1 className="text-lg font-bold text-foreground mb-2">유효하지 않은 링크입니다</h1>
-        <p className="text-sm text-tag-text mb-8">링크가 만료됐거나 올바르지 않아요</p>
+        <h1 className="text-lg font-bold text-foreground mb-2">{t('invalidTitle')}</h1>
+        <p className="text-sm text-tag-text mb-8">{t('invalidDescription')}</p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Link
             href="/applications/check"
             className="text-sm text-primary underline text-center"
           >
-            예약번호로 직접 조회하기
+            {t('checkDirectly')}
           </Link>
           <Link href="/" className="text-sm text-tag-text text-center">
-            홈으로 돌아가기
+            {t('goHome')}
           </Link>
         </div>
       </div>
     )
   }
 
-  const formattedDate = dayjs(data.gathering.eventDate).format('YYYY년 M월 D일 (ddd)')
+  const formattedDate = formatLocalizedFullDate(data.gathering.eventDate, locale)
   const startTime = data.gathering.startTime?.slice(0, 5)
   const isConfirmed = data.status === 'CONFIRMED'
 
@@ -76,8 +71,8 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
 
   return (
     <div className="px-5 py-8">
-      <h1 className="text-xl font-bold text-foreground mb-2">신청 내역</h1>
-      <p className="text-sm text-tag-text mb-6">아래에서 신청 정보를 확인하세요</p>
+      <h1 className="text-xl font-bold text-foreground mb-2">{t('title')}</h1>
+      <p className="text-sm text-tag-text mb-6">{t('description')}</p>
 
       <div
         className={isConfirmed ? 'cursor-pointer transition-opacity hover:opacity-90' : ''}
@@ -103,7 +98,7 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
             <div className="flex items-center gap-1.5 ml-auto">
               <PaymentStatusBadge status={data.status === 'CONFIRMED' || data.status === 'ATTENDED' ? data.paymentStatus : null} />
               <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[data.status]}`}>
-                {STATUS_LABEL[data.status]}
+                {tApplications(`status.${data.status}`)}
               </span>
             </div>
           </div>
@@ -129,14 +124,14 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
           <div className="bg-primary-light rounded-card px-4 py-3 flex items-center gap-2">
             <Hash size={14} className="text-primary shrink-0" />
             <div>
-              <p className="text-xs text-tag-text">예약번호</p>
+              <p className="text-xs text-tag-text">{t('bookingNumber')}</p>
               <p className="text-sm font-bold text-primary tracking-wider">{data.bookingNumber}</p>
             </div>
           </div>
 
           {isConfirmed && (
             <p className="text-xs text-primary text-center mt-4">
-              카드를 누르면 예약 확정 페이지로 이동해요
+              {t('confirmedHelp')}
             </p>
           )}
         </Card>
@@ -144,10 +139,10 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
 
       <div className="mt-8 flex flex-col gap-3 items-center">
         <Link href="/login" className="text-sm text-primary underline">
-          로그인하고 내 신청 내역 보기
+          {t('loginToView')}
         </Link>
         <Link href="/" className="text-sm text-tag-text">
-          홈으로 돌아가기
+          {t('goHome')}
         </Link>
       </div>
     </div>

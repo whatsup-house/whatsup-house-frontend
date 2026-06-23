@@ -1,4 +1,5 @@
 import { MapPin } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import GatheringCard from './GatheringCard'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ApiErrorMessage from '@/components/ui/ApiErrorMessage'
@@ -12,12 +13,14 @@ interface MapViewProps {
 }
 
 export default function MapView({ gatherings, isLoading, isError, onRetry }: MapViewProps) {
+  const t = useTranslations('gathering.map')
+
   return (
     <div>
       {/* 지도 영역 (추후 Kakao Maps 연동 예정) */}
       <div className="h-52 mx-4 rounded-card bg-tag-bg flex flex-col items-center justify-center gap-2 mb-4">
         <MapPin size={32} className="text-tag-text opacity-40" />
-        <span className="text-sm text-tag-text opacity-60">지도 연동 예정</span>
+        <span className="text-sm text-tag-text opacity-60">{t('comingSoon')}</span>
       </div>
 
       {/* 주변 게더링 목록 */}
@@ -32,7 +35,7 @@ export default function MapView({ gatherings, isLoading, isError, onRetry }: Map
           <>
             {gatherings.length > 0 && (
               <p className="text-sm font-semibold text-foreground mb-3">
-                이 지역 예정 게더링 {gatherings.length}개
+                {t('nearbyCount', { count: gatherings.length })}
               </p>
             )}
             <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4">

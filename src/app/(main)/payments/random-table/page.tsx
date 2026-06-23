@@ -113,8 +113,8 @@ function PaymentContent() {
             </Card>
             <Card className="p-5 mb-4">
               <p className="text-xs text-tag-text mb-2">입금 계좌</p>
-              <p className="font-semibold">{PAYMENT_ACCOUNT.bankName} {PAYMENT_ACCOUNT.accountNumber}</p>
-              <p className="text-sm text-tag-text mt-2">예금주 {PAYMENT_ACCOUNT.accountHolder}</p>
+              <p className="font-semibold">우리은행 {PAYMENT_ACCOUNT.accountNumber}</p>
+              <p className="text-sm text-tag-text mt-2">예금주 와썹하우스</p>
               <p className="text-lg font-bold text-primary mt-3">{displayPass.purchaseAmount.toLocaleString()}원</p>
             </Card>
             <p className="mb-4 text-center text-xs text-tag-text">입금 확인 → 이용권 1회 자동 사용 → 신청 확정</p>

@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
 import ReviewImageFallback from '@/components/ui/ReviewImageFallback'
@@ -53,6 +54,7 @@ function SkeletonCard() {
 }
 
 export default function ReviewsSection() {
+  const t = useTranslations('home.reviews')
   const { data, isLoading } = useHomeReviews()
   const reviews = data ?? []
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -64,10 +66,10 @@ export default function ReviewsSection() {
       <div className="flex items-center justify-between px-4 mb-3">
         <div className="flex items-center gap-2">
           <div className="w-1 h-[18px] rounded-full bg-primary" />
-          <span className="text-[15px] font-bold text-foreground">다녀온 사람들의 후기</span>
+          <span className="text-[15px] font-bold text-foreground">{t('title')}</span>
         </div>
         <Link href="/reviews" className="text-xs text-tag-text/70 min-h-[36px] flex items-center">
-          전체보기 ›
+          {t('viewAll')}
         </Link>
       </div>
 

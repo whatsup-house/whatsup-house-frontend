@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { MoreVertical, User } from 'lucide-react'
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import { useToggleReviewLike, useDeleteReview } from '@/lib/hooks/useReview'
 import { useAuthStore } from '@/lib/store/authStore'
@@ -44,13 +45,14 @@ function DeleteConfirmDialog({
   onCancel: () => void
   isPending: boolean
 }) {
+  const t = useTranslations('review.card')
   return (
     <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-6">
       <div className="w-full max-w-sm bg-card rounded-2xl overflow-hidden shadow-xl">
         <div className="px-5 pt-6 pb-5 text-center">
-          <p className="text-sm font-bold text-foreground mb-1.5">리뷰를 삭제하시겠어요?</p>
+          <p className="text-sm font-bold text-foreground mb-1.5">{t('deleteTitle')}</p>
           <p className="text-xs text-tag-text leading-relaxed">
-            적립된 마일리지는 회수되지 않습니다.
+            {t('deleteDescription')}
           </p>
         </div>
         <div className="flex border-t border-tag-bg/60">
@@ -59,14 +61,14 @@ function DeleteConfirmDialog({
             disabled={isPending}
             className="flex-1 py-3.5 text-sm font-semibold text-tag-text border-r border-tag-bg/60 active:bg-tag-bg/40 transition-colors"
           >
-            취소
+            {t('cancel')}
           </button>
           <button
             onClick={onConfirm}
             disabled={isPending}
             className="flex-1 py-3.5 text-sm font-semibold text-red-500 active:bg-red-50 transition-colors disabled:opacity-50"
           >
-            {isPending ? '삭제 중…' : '삭제'}
+            {isPending ? t('deleting') : t('delete')}
           </button>
         </div>
       </div>
@@ -81,6 +83,7 @@ export default function ReviewCard({
   onToast,
   onDeleted,
 }: ReviewCardProps) {
+  const t = useTranslations('review.card')
   const { userId } = useAuthStore()
   const isMyReview = isLoggedIn && review.userId === userId
   const [liked, setLiked] = useState(false)
@@ -108,7 +111,7 @@ export default function ReviewCard({
 
   const handleLike = () => {
     if (!isLoggedIn) {
-      onToast('로그인이 필요한 기능이에요')
+      onToast(t('loginRequired'))
       return
     }
     const prevLiked = liked
@@ -131,17 +134,17 @@ export default function ReviewCard({
     doDelete(review.reviewId, {
       onSuccess: () => {
         setShowDeleteConfirm(false)
-        onToast('리뷰가 삭제됐어요')
+        onToast(t('deleteSuccess'))
       },
       onError: () => {
         setShowDeleteConfirm(false)
-        onToast('삭제에 실패했어요. 다시 시도해주세요')
+        onToast(t('deleteFailed'))
       },
     })
   }
 
-  const authorName = review.nickname ?? '익명'
-  const gatheringTitle = review.gatheringTitle ?? '게더링'
+  const authorName = review.nickname ?? t('anonymous')
+  const gatheringTitle = review.gatheringTitle ?? t('gatheringFallback')
 
   return (
     <>
@@ -155,14 +158,14 @@ export default function ReviewCard({
             <div className="flex items-center gap-1.5 mb-0.5">
               {review.reviewType === 'PHOTO' && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 bg-primary-light text-primary">
-                  📷 포토리뷰
+                  {t('photoReview')}
                 </span>
               )}
             </div>
             <p className="text-[11px] text-tag-text truncate">
               <span>{authorName}</span>
               <span className="mx-1">·</span>
-              {dayjs(review.createdAt).format('YYYY.MM.DD')} 작성
+              {t('writtenAt', { date: dayjs(review.createdAt).format('YYYY.MM.DD') })}
             </p>
           </div>
           {isMyReview && (
@@ -170,7 +173,7 @@ export default function ReviewCard({
               <button
                 onClick={() => setShowMenu((o) => !o)}
                 className="p-1 min-w-[32px] min-h-[32px] flex items-center justify-center"
-                aria-label="더보기"
+                aria-label={t('more')}
               >
                 <MoreVertical size={18} className="text-tag-text" />
               </button>
@@ -180,7 +183,7 @@ export default function ReviewCard({
                     onClick={() => { setShowMenu(false); setShowDeleteConfirm(true) }}
                     className="w-full text-left px-4 py-2.5 text-sm font-semibold text-red-500 active:bg-red-50 transition-colors"
                   >
-                    삭제
+                    {t('delete')}
                   </button>
                 </div>
               )}
@@ -225,7 +228,7 @@ export default function ReviewCard({
           <button
             onClick={handleLike}
             className="flex items-center gap-1.5 min-h-[36px]"
-            aria-label={liked ? '추천 취소' : '추천'}
+            aria-label={liked ? t('unlike') : t('like')}
           >
             <HeartIcon filled={liked} />
             <span className={`text-sm font-medium ${liked ? 'text-primary' : 'text-tag-text'}`}>

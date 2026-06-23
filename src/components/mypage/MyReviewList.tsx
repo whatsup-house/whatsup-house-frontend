@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import ReviewCard from '@/components/gathering/ReviewCard'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyReviews } from '@/lib/hooks/useReview'
@@ -8,6 +9,8 @@ import { useMyReviews } from '@/lib/hooks/useReview'
 type SortType = 'latest' | 'recommended'
 
 export default function MyReviewList() {
+  const t = useTranslations('mypage.reviews')
+  const tReview = useTranslations('review')
   const { isLoggedIn } = useAuthStore()
   const [sort, setSort] = useState<SortType>('latest')
   const [page, setPage] = useState(0)
@@ -26,13 +29,13 @@ export default function MyReviewList() {
 
   if (isLoading) {
     return (
-      <p className="py-8 text-center text-sm text-tag-text">불러오는 중...</p>
+      <p className="py-8 text-center text-sm text-tag-text">{t('loading')}</p>
     )
   }
 
   if (reviews.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-tag-text">아직 작성한 후기가 없어요</p>
+      <p className="py-8 text-center text-sm text-tag-text">{t('empty')}</p>
     )
   }
 
@@ -48,7 +51,7 @@ export default function MyReviewList() {
               sort === s ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
             }`}
           >
-            {s === 'latest' ? '최신순' : '추천순'}
+            {s === 'latest' ? tReview('sort.latest') : tReview('sort.likes')}
           </button>
         ))}
       </div>
@@ -71,7 +74,7 @@ export default function MyReviewList() {
           onClick={() => setPage((p) => p + 1)}
           className="w-full py-3 text-sm font-medium text-tag-text border border-tag-bg rounded-card"
         >
-          더보기
+          {t('more')}
         </button>
       )}
 

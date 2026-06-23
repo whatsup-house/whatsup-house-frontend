@@ -41,7 +41,7 @@ function MiniCalendar({ year, month, selectedDate, dotDates, onSelectDate, onCha
   while (cells.length % 7 !== 0) cells.push(null)
 
   return (
-    <div className="bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-5 shrink-0 w-[320px]">
+    <div className="bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-5 shrink-0 w-full max-w-[360px] lg:w-[320px]">
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => { const d = firstDay.subtract(1, 'month'); onChangeMonth(d.year(), d.month() + 1) }}
@@ -157,7 +157,7 @@ export default function GatheringDateSelector({ selectedGatheringId, onSelect }:
   const selectedDayjs = dayjs(selectedDate)
 
   return (
-    <div className="flex gap-6 items-start">
+    <div className="flex flex-col lg:flex-row gap-6 items-start">
       <MiniCalendar
         year={currentYear}
         month={currentMonth}
@@ -167,7 +167,7 @@ export default function GatheringDateSelector({ selectedGatheringId, onSelect }:
         onChangeMonth={(y, m) => { setCurrentYear(y); setCurrentMonth(m) }}
       />
 
-      <div className="flex-1 min-w-0">
+      <div className="w-full flex-1 min-w-0">
         <p className="text-sm font-bold text-[#1A1A1A] mb-3">
           {selectedDayjs.format('M월 D일')} 게더링
           {dayGatherings.length > 0 && <span className="ml-2 text-[#767676] font-normal">{dayGatherings.length}건</span>}

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { Home, User, Compass } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { getAnimalEmoji } from '@/lib/utils/animalProfile'
@@ -16,12 +17,13 @@ function isValidImageSrc(url: string): boolean {
 }
 
 function MyTabIcon({ avatarUrl, animalType }: { avatarUrl?: string | null; animalType?: string | null }) {
+  const t = useTranslations('nav')
   const validAvatarUrl = typeof avatarUrl === 'string' && avatarUrl.trim().length > 0 && isValidImageSrc(avatarUrl) ? avatarUrl : null
   if (validAvatarUrl) {
     return (
       <Image
         src={validAvatarUrl}
-        alt="프로필"
+        alt={t('profileAlt')}
         width={24}
         height={24}
         className="rounded-full object-cover"
@@ -35,6 +37,7 @@ function MyTabIcon({ avatarUrl, animalType }: { avatarUrl?: string | null; anima
 }
 
 export default function BottomNav() {
+  const t = useTranslations('nav')
   const pathname = usePathname()
   const router = useRouter()
   const { isLoggedIn, isInitialized, requireAuth } = useRequireAuth()
@@ -45,9 +48,9 @@ export default function BottomNav() {
   }
 
   const navItems = [
-    { href: '/', icon: Home, label: '홈', requireLogin: false },
-    { href: '/gatherings', icon: Compass, label: '게더링', requireLogin: false },
-    { href: '/mypage', icon: User, label: '마이', requireLogin: true },
+    { href: '/', icon: Home, label: t('tabs.home'), requireLogin: false },
+    { href: '/gatherings', icon: Compass, label: t('tabs.gatherings'), requireLogin: false },
+    { href: '/mypage', icon: User, label: t('tabs.my'), requireLogin: true },
   ]
 
   return (

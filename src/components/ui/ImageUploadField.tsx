@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { CropContext, CropRatio } from '@/lib/api/types'
 import ImageCropEditor from './ImageCropEditor'
 
@@ -36,6 +37,7 @@ export default function ImageUploadField({
   label,
   rounded = false,
 }: ImageUploadFieldProps) {
+  const t = useTranslations('ui.imageUpload')
   const inputRef = useRef<HTMLInputElement>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
 
@@ -89,7 +91,7 @@ export default function ImageUploadField({
             {previewUrl && (
               <img
                 src={previewUrl}
-                alt="업로드 이미지"
+                alt={t('alt')}
                 className={`absolute inset-0 w-full h-full object-cover ${rounded ? 'rounded-full' : ''}`}
               />
             )}
@@ -117,7 +119,7 @@ export default function ImageUploadField({
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <polyline points="21 15 16 10 5 21" />
                   </svg>
-                  <span className="text-xs">사진 선택</span>
+                  <span className="text-xs">{t('selectPhoto')}</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2.5 px-4">
@@ -139,14 +141,14 @@ export default function ImageUploadField({
                     </svg>
                   </div>
                   <span className="text-sm font-bold text-foreground whitespace-nowrap">
-                    사진 불러오기
+                    {t('loadPhoto')}
                   </span>
                   {cropRatio && (
                     <div className="flex items-center gap-1.5 text-[11.5px] text-tag-text whitespace-nowrap">
                       <span className="px-1.5 py-0.5 rounded bg-tag-bg text-tag-text text-[10px] font-bold tracking-wide">
                         {cropRatio}
                       </span>
-                      <span>비율로 보여져요</span>
+                      <span>{t('ratioHint')}</span>
                     </div>
                   )}
                 </div>
@@ -156,7 +158,7 @@ export default function ImageUploadField({
             {/* 호버 편집 힌트 (이미지 있을 때) */}
             {previewUrl && !isUploading && (
               <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
-                <span className="text-white text-xs font-medium">변경</span>
+                <span className="text-white text-xs font-medium">{t('change')}</span>
               </div>
             )}
           </div>
@@ -169,7 +171,7 @@ export default function ImageUploadField({
             onClick={onClear}
             className="mt-1.5 text-xs text-tag-text hover:text-red-500 transition-colors"
           >
-            이미지 제거
+            {t('remove')}
           </button>
         )}
       </div>

@@ -97,26 +97,26 @@ export default function AdminGatheringsPage() {
     <div className="flex gap-6">
       <div className="flex-1 min-w-0">
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
           <h1 className="font-bold text-[22px] text-foreground">게더링 관리</h1>
           <button
             id="btn-gathering-add"
             onClick={handleOpenCreate}
-            className="px-5 h-11 bg-primary text-white rounded-[12px] font-medium text-sm hover:opacity-90 transition-opacity"
+            className="self-start sm:self-auto px-5 h-11 bg-primary text-white rounded-[12px] font-medium text-sm hover:opacity-90 transition-opacity"
           >
             + 게더링 추가
           </button>
         </div>
 
         {/* 상태 필터 */}
-        <div className="bg-white rounded-[12px] p-4 mb-4 flex gap-2 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+        <div className="bg-white rounded-[12px] p-4 mb-4 flex gap-2 overflow-x-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
           {STATUS_OPTIONS.map((s) => (
             <button
               key={s}
               id={`filter-status-${s}`}
               onClick={() => { setStatusFilter(s); setPage(0) }}
               className={`
-                px-4 h-9 rounded-full text-sm font-medium transition-all
+                shrink-0 px-4 h-9 rounded-full text-sm font-medium transition-all
                 ${statusFilter === s
                   ? 'bg-primary text-white'
                   : 'border border-[#E0E0E0] text-[#767676] hover:border-primary'
@@ -129,8 +129,8 @@ export default function AdminGatheringsPage() {
         </div>
 
         {/* 테이블 */}
-        <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-x-auto">
+          <table className="w-full min-w-[920px]">
             <thead>
               <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
                 {['게더링명', '날짜/시간', '장소', '참가비', '신청현황', '상태', '큐레이션', '액션'].map((col) => (

@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
 import type { GatheringDetail } from '@/lib/api/types'
-import { formatKoreanShortDate, formatTime } from '@/lib/utils/date'
+import { formatLocalizedShortDate, formatTime } from '@/lib/utils/date'
 
 interface ApplyModalProps {
   gathering: GatheringDetail
@@ -22,6 +23,9 @@ export default function ApplyModal({
   onLoginApply,
   onGuestApply,
 }: ApplyModalProps) {
+  const t = useTranslations('gathering.apply.modal')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
   // body 스크롤 방지
   useEffect(() => {
     if (isOpen) {
@@ -36,7 +40,7 @@ export default function ApplyModal({
 
   if (!isOpen) return null
 
-  const formattedDate = formatKoreanShortDate(gathering.eventDate)
+  const formattedDate = formatLocalizedShortDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
 
   return (
@@ -56,7 +60,7 @@ export default function ApplyModal({
 
         {/* 제목 */}
         <h2 className="text-lg font-bold text-foreground text-center mb-5">
-          신청 방법을 선택해주세요
+          {t('title')}
         </h2>
 
         {/* 게더링 정보 */}
@@ -89,8 +93,8 @@ export default function ApplyModal({
             className="w-full flex-col gap-0.5 !py-3.5"
             onClick={onLoginApply}
           >
-            <span className="font-bold">로그인하고 신청하기</span>
-            <span className="text-xs font-normal opacity-80">마일리지 적립 및 예약 내역 확인이 가능해요</span>
+            <span className="font-bold">{t('memberApply')}</span>
+            <span className="text-xs font-normal opacity-80">{t('memberApplyDescription')}</span>
           </Button>
 
           <Button
@@ -99,8 +103,8 @@ export default function ApplyModal({
             className="w-full flex-col gap-0.5 !py-3.5"
             onClick={onGuestApply}
           >
-            <span className="font-bold">로그인 없이 신청하기</span>
-            <span className="text-xs font-normal opacity-60">마일리지 적립이 되지 않아요</span>
+            <span className="font-bold">{t('guestApply')}</span>
+            <span className="text-xs font-normal opacity-60">{t('guestApplyDescription')}</span>
           </Button>
         </div>
 
@@ -109,7 +113,7 @@ export default function ApplyModal({
           onClick={onClose}
           className="w-full text-center text-sm text-tag-text mt-5 py-2 min-h-[44px]"
         >
-          취소
+          {tCommon('cancel')}
         </button>
       </div>
     </div>

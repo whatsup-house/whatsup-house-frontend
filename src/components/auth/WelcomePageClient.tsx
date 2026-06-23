@@ -4,12 +4,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { safeReturnUrl } from '@/lib/utils/url'
 import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
 import { isDesktopViewport } from '@/lib/utils/viewport'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
 export default function WelcomePageClient() {
+  const t = useTranslations('auth.welcome')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get('returnUrl')
@@ -32,7 +35,7 @@ export default function WelcomePageClient() {
       <AuthOnlyRedirect redirectTo={redirectTo} />
       <Image
         src="/assets/host-1.jpg"
-        alt="와썹하우스 호스트"
+        alt={t('hostAlt')}
         fill
         priority
         sizes="390px"
@@ -43,7 +46,7 @@ export default function WelcomePageClient() {
 
       <section className="absolute inset-x-0 top-24 z-10 flex flex-col items-center px-6 text-center">
         <h1 className="font-brand-kr text-[38px] font-bold leading-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
-          와썹하우스
+          {t('brand')}
         </h1>
         <p className="font-brand-script text-[30px] leading-none text-white/90 drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
           What&apos;s up house
@@ -55,20 +58,20 @@ export default function WelcomePageClient() {
           href={loginHref}
           className="flex min-h-[52px] w-full items-center justify-center rounded-button bg-primary px-5 py-4 text-[15px] font-bold text-white shadow-[0_6px_20px_rgba(0,0,0,0.18)]"
         >
-          로그인
+          {tCommon('login')}
         </Link>
         <Link
           href="/register"
           className="flex min-h-[52px] w-full items-center justify-center rounded-button bg-card px-5 py-4 text-[15px] font-bold text-foreground shadow-[0_6px_20px_rgba(0,0,0,0.18)]"
         >
-          회원가입
+          {tCommon('register')}
         </Link>
         <Link
           href="/"
           onClick={markWelcomeSeen}
           className="self-center px-2 py-3 text-[13px] font-medium text-white/80 underline decoration-white/40 underline-offset-4"
         >
-          비회원으로 시작하기
+          {t('guestStart')}
         </Link>
       </section>
     </main>

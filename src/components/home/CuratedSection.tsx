@@ -2,10 +2,12 @@
 
 import { useRouter } from 'next/navigation'
 import { Flame } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import { useCuratedGatherings } from '@/lib/hooks/useHome'
 
 export default function CuratedSection() {
+  const t = useTranslations('home.curated')
   const router = useRouter()
   const { data, isLoading } = useCuratedGatherings()
   const gatherings = data ?? []
@@ -15,7 +17,7 @@ export default function CuratedSection() {
       <div className="px-4 pt-5 pb-2">
         <div className="flex items-center gap-2 mb-3">
           <Flame size={14} className="text-primary fill-primary" strokeWidth={0} />
-          <span className="text-[15px] font-bold text-foreground">이번 주 가장 많이 본 게더링</span>
+          <span className="text-[15px] font-bold text-foreground">{t('title')}</span>
         </div>
         <div className="flex flex-col gap-3">
           {[1, 2, 3].map((i) => (
@@ -39,14 +41,14 @@ export default function CuratedSection() {
     <div className="px-4 pt-5 pb-2">
       <div className="flex items-center gap-2 mb-3">
         <Flame size={14} className="text-primary fill-primary" strokeWidth={0} />
-        <span className="text-[15px] font-bold text-foreground">이번 주 가장 많이 본 게더링</span>
+        <span className="text-[15px] font-bold text-foreground">{t('title')}</span>
       </div>
       <div className="flex flex-col gap-3">
         {gatherings.map((item, index) => (
           <button
             key={item.id}
             type="button"
-            aria-label={`${index + 1}위 ${item.title}`}
+            aria-label={t('rankLabel', { rank: index + 1, title: item.title })}
             className="flex items-center gap-3 bg-card rounded-2xl p-2.5 border border-tag-bg/40 text-left w-full"
             onClick={() => router.push(`/gatherings/${item.id}`)}
           >

@@ -25,14 +25,14 @@ export default function AdminUsersPage() {
   return (
     <div className="flex gap-6">
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between mb-5">
           <h1 className="font-bold text-[22px] text-foreground">회원 관리</h1>
           <span className="text-sm text-[#767676]">총 {data?.totalElements ?? 0}명</span>
         </div>
 
         <form
           onSubmit={handleSearch}
-          className="bg-white rounded-[12px] p-4 mb-4 flex gap-3 shadow-[0_2px_12px_rgba(0,0,0,0.08)]"
+          className="bg-white rounded-[12px] p-4 mb-4 flex flex-col sm:flex-row gap-3 shadow-[0_2px_12px_rgba(0,0,0,0.08)]"
         >
           <input
             id="input-user-search"
@@ -40,7 +40,7 @@ export default function AdminUsersPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="닉네임 또는 이메일로 검색"
-            className="flex-1 h-11 px-4 border border-[#E0E0E0] rounded-input text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1 min-w-0 h-11 px-4 border border-tag-bg rounded-input text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <button
             type="submit"
@@ -59,8 +59,8 @@ export default function AdminUsersPage() {
           )}
         </form>
 
-        <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-x-auto">
+          <table className="w-full min-w-[900px]">
             <thead>
               <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
                 {['닉네임', '연락처', '이메일', '신청/출석', '마일리지', '가입일', '구분', '상세'].map((col) => (

@@ -2,9 +2,8 @@
 
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { CalendarDot } from '@/lib/api/types'
-
-const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
 // 달력 점 색상 분기 (KAN-164)
 // 취소: 날짜 무관 비활성(회색) / 과거: 진행 완료(회색) / 예정·모집중: primary
@@ -28,6 +27,8 @@ interface CalendarViewProps {
 export default function CalendarView({
   year, month, selectedDate, dots, onSelectDate, onChangeMonth,
 }: CalendarViewProps) {
+  const t = useTranslations('gathering.calendar')
+  const dayLabels = t.raw('dayLabels') as string[]
   const firstDay = dayjs(`${year}-${String(month).padStart(2, '0')}-01`)
   const startDayOfWeek = firstDay.day()
   const daysInMonth = firstDay.daysInMonth()
@@ -52,18 +53,18 @@ export default function CalendarView({
     <div className="bg-card rounded-card p-4 mx-4">
       {/* 월 헤더 */}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={handlePrev} className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
+        <button onClick={handlePrev} className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label={t('previousMonth')}>
           <ChevronLeft size={20} className="text-tag-text" />
         </button>
-        <span className="font-semibold text-foreground">{year}년 {month}월</span>
-        <button onClick={handleNext} className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center">
+        <span className="font-semibold text-foreground">{t('monthTitle', { year, month })}</span>
+        <button onClick={handleNext} className="p-1 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label={t('nextMonth')}>
           <ChevronRight size={20} className="text-tag-text" />
         </button>
       </div>
 
       {/* 요일 헤더 */}
       <div className="grid grid-cols-7 mb-1">
-        {DAY_LABELS.map((d, i) => (
+        {dayLabels.map((d, i) => (
           <div
             key={d}
             className={`text-center text-xs font-medium py-1 ${i === 0 ? 'text-primary' : 'text-tag-text'}`}

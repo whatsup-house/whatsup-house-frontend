@@ -1,31 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Search, Hash, Calendar } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCheckGuestApplication } from '@/lib/hooks/useApplications'
 import { Button, Card, Input } from '@/components/ui'
 import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
+import { formatLocalizedFullDate } from '@/lib/utils/date'
 import type { ApplicationStatus, GuestApplicationCheckResponse } from '@/lib/api/types'
-import dayjs from 'dayjs'
 
-const schema = z.object({
-  bookingNumber: z.string().min(1, '예약번호를 입력해주세요'),
-  phone: z.string().min(10, '연락처를 입력해주세요').max(11, '올바른 연락처를 입력해주세요'),
-})
-
-type FormValues = z.infer<typeof schema>
-
-const STATUS_LABEL: Record<ApplicationStatus, string> = {
-  PENDING: '검토 중',
-  PAYMENT_PENDING: '결제 대기',
-  REJECTED: '심사 거절',
-  CONFIRMED: '확정',
-  CANCELLED: '취소됨',
-  ATTENDED: '참석 완료',
+type FormValues = {
+  bookingNumber: string
+  phone: string
 }
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
@@ -42,8 +32,11 @@ interface ResultCardProps {
 }
 
 function ResultCard({ result }: ResultCardProps) {
+  const t = useTranslations('mypage.guestApplication')
+  const tApplications = useTranslations('mypage.applications')
+  const locale = useLocale()
   const router = useRouter()
-  const formattedDate = dayjs(result.gathering.eventDate).format('YYYY년 M월 D일 (ddd)')
+  const formattedDate = formatLocalizedFullDate(result.gathering.eventDate, locale)
   const isConfirmed = result.status === 'CONFIRMED'
 
   const goToConfirmed = () => {
@@ -71,11 +64,11 @@ function ResultCard({ result }: ResultCardProps) {
     >
       <Card className="w-full p-5">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-xs text-tag-text">신청 내역</p>
+          <p className="text-xs text-tag-text">{t('resultLabel')}</p>
           <div className="flex items-center gap-1.5">
             <PaymentStatusBadge status={result.status === 'CONFIRMED' || result.status === 'ATTENDED' ? result.paymentStatus : null} />
             <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[result.status]}`}>
-              {STATUS_LABEL[result.status]}
+              {tApplications(`status.${result.status}`)}
             </span>
           </div>
         </div>
@@ -90,14 +83,14 @@ function ResultCard({ result }: ResultCardProps) {
         <div className="bg-primary-light rounded-card px-4 py-3 flex items-center gap-2">
           <Hash size={14} className="text-primary shrink-0" />
           <div>
-            <p className="text-xs text-tag-text">예약번호</p>
+            <p className="text-xs text-tag-text">{t('bookingNumber')}</p>
             <p className="text-sm font-bold text-primary tracking-wider">{result.bookingNumber}</p>
           </div>
         </div>
 
         {isConfirmed && (
           <p className="text-xs text-primary text-center mt-4">
-            카드를 누르면 예약 확정 페이지로 이동해요
+            {t('confirmedHelp')}
           </p>
         )}
       </Card>
@@ -106,8 +99,17 @@ function ResultCard({ result }: ResultCardProps) {
 }
 
 export default function GuestApplicationCheck() {
+  const t = useTranslations('mypage.guestApplication')
   const checkMutation = useCheckGuestApplication()
   const [notFound, setNotFound] = useState(false)
+  const schema = useMemo(
+    () =>
+      z.object({
+        bookingNumber: z.string().min(1, t('validation.bookingNumber')),
+        phone: z.string().min(10, t('validation.phoneRequired')).max(11, t('validation.phoneInvalid')),
+      }),
+    [t],
+  )
 
   const {
     register,
@@ -125,12 +127,12 @@ export default function GuestApplicationCheck() {
   return (
     <div className="px-5 py-8">
       <p className="text-sm text-tag-text mb-8">
-        예약번호와 연락처로 신청 내역을 확인할 수 있어요
+        {t('intro')}
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">예약번호</label>
+          <label className="block text-sm font-medium text-foreground mb-1.5">{t('bookingNumber')}</label>
           <Input
             {...register('bookingNumber')}
             placeholder="WH260421A3F2"
@@ -142,7 +144,7 @@ export default function GuestApplicationCheck() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">연락처</label>
+          <label className="block text-sm font-medium text-foreground mb-1.5">{t('phone')}</label>
           <Input
             {...register('phone')}
             placeholder="01012345678"
@@ -161,13 +163,13 @@ export default function GuestApplicationCheck() {
           disabled={checkMutation.isPending}
         >
           <Search size={16} className="mr-1" />
-          {checkMutation.isPending ? '조회 중...' : '조회하기'}
+          {checkMutation.isPending ? t('checking') : t('check')}
         </Button>
       </form>
 
       {notFound && (
         <p className="text-sm text-tag-text text-center mt-6">
-          예약번호 또는 연락처를 확인해주세요
+          {t('notFound')}
         </p>
       )}
 
