@@ -84,7 +84,7 @@ export default function OnboardingPage() {
     registerAndLogin.mutate(
       {
         ...step1Data,
-        bio: bio || undefined,
+        intro: bio || undefined,
         job: job || undefined,
         mbti: mbtiString,
       },
