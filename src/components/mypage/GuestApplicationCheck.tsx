@@ -70,8 +70,7 @@ function ResultCard({ item }: { item: ApplicationListItem }) {
       }
     >
       <Card className="w-full p-5">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-xs text-tag-text">예약번호 {item.bookingNumber}</p>
+        <div className="flex items-center justify-end mb-4">
           <div className="flex items-center gap-1.5">
             <PaymentStatusBadge status={!isDepositPending && (item.status === 'CONFIRMED' || item.status === 'ATTENDED') ? item.paymentStatus : null} />
             <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[displayStatus]}`}>
