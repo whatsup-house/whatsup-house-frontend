@@ -427,7 +427,9 @@
     },
     "curated": {
       "title": "Encuentros seleccionados",
-      "rankLabel": "No. {rank} {title}"
+      "rankLabel": "No. {rank} {title}",
+      "nearestOpen": "Próxima apertura · {date}",
+      "noOpen": "Sin fechas abiertas"
     },
     "reviews": {
       "title": "Reseñas de participantes",
