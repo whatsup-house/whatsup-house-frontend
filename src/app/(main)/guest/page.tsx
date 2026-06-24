@@ -35,7 +35,7 @@ function getGuestApplicationHref(application: GuestOverview['applications'][numb
     || application.status === 'ATTENDED') {
     return `/gatherings/${application.gathering.id}/apply/confirmed?bookingNumber=${bookingNumber}`
   }
-  return `/applications/check?bookingNumber=${bookingNumber}`
+  return `/guest/applications/${bookingNumber}`
 }
 
 export default function GuestOverviewPage() {

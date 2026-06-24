@@ -10,6 +10,7 @@ function ApplyCompleteContent({ id }: { id: string }) {
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
   const applicationId = searchParams.get('applicationId')
+  const applicationStatus = searchParams.get('status')
   const { data: gathering, isLoading } = useGatheringDetail(id)
 
   if (isLoading || !gathering) {
@@ -26,6 +27,7 @@ function ApplyCompleteContent({ id }: { id: string }) {
       mode="completed"
       bookingNumber={bookingNumber}
       applicationId={applicationId}
+      applicationStatus={applicationStatus}
     />
   )
 }

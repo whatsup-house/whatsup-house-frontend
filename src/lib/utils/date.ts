@@ -80,7 +80,9 @@ export function getDurationParts(startTime: string | null | undefined, endTime: 
 
   const startMinutes = parseInt(startTime.slice(0, 2), 10) * 60 + parseInt(startTime.slice(3, 5), 10)
   const endMinutes = parseInt(endTime.slice(0, 2), 10) * 60 + parseInt(endTime.slice(3, 5), 10)
-  const durationMinutes = endMinutes - startMinutes
+  const durationMinutes = endMinutes > startMinutes
+    ? endMinutes - startMinutes
+    : endMinutes + 24 * 60 - startMinutes
 
   if (durationMinutes <= 0) return null
 

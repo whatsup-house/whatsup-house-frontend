@@ -72,6 +72,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <span className="text-sm text-white/80 font-medium truncate">{nickname ?? '관리자'}</span>
       </div>
+      <Link
+        href="/"
+        className="mb-1 flex items-center gap-3 w-full px-3 py-2.5 rounded-input text-sm text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+      >
+        <Home size={18} />
+        <span>서비스 홈으로</span>
+      </Link>
       <button
         onClick={() => logoutMutation.mutate()}
         className="flex items-center gap-3 w-full px-3 py-2.5 rounded-input text-sm text-white/50 hover:bg-white/10 hover:text-white transition-colors"

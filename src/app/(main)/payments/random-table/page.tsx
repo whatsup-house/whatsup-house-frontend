@@ -52,7 +52,8 @@ function PaymentContent() {
   const pendingPass = requestedPass ?? data?.passes.find((pass) => pass.status === 'PENDING' && matchesCurrentApplication(pass)) ?? null
   const confirmedPass = data?.passes.find((pass) => pass.paymentConfirmedAt !== null && matchesCurrentApplication(pass)) ?? null
   const displayPass = pendingPass ?? confirmedPass
-  const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt)
+  const isApplicationConfirmed = data?.applicationStatus === 'CONFIRMED' || data?.applicationStatus === 'ATTENDED'
+  const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt && isApplicationConfirmed)
   const submit = async () => {
     if (!product) {
       showToast('구매 가능한 이용권 상품이 없어요.', 'error')
@@ -152,7 +153,11 @@ function PaymentContent() {
             })}
           </div>
           )}
-          {!canPurchase && <Card className="p-4 mb-4 text-sm text-tag-text">심사 승인 후 구매할 수 있어요. 현재 자격: {data?.randomTableEligibility ?? '확인 중'}</Card>}
+          {!canPurchase && (
+            <Card className="p-4 mb-4 text-sm text-tag-text">
+              심사가 완료되면 이용권을 구매할 수 있어요. 승인 안내를 받은 뒤 다시 확인해 주세요.
+            </Card>
+          )}
           <Button variant="primary" size="lg" className="w-full" disabled={!canPurchase || !product} isLoading={purchase.isPending} onClick={submit}>{product?.name ?? '이용권'} 구매 요청</Button>
         </>
       )}

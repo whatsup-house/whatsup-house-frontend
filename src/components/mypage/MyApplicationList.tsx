@@ -98,25 +98,30 @@ export default function MyApplicationList() {
         <div className="flex flex-col gap-3">
           {applications.map((item) => {
             const isConfirmed = item.status === 'CONFIRMED'
+            const isRandomTablePaymentPending = item.status === 'PAYMENT_PENDING' && item.gathering.gatheringType === 'RANDOM_TABLE'
+            const clickable = isConfirmed || isRandomTablePaymentPending
+            const goDetail = () => {
+              if (isRandomTablePaymentPending) {
+                router.push(`/payments/random-table?applicationId=${encodeURIComponent(item.id)}`)
+                return
+              }
+              router.push(`/gatherings/${item.gathering.id}/apply/confirmed`)
+            }
             return (
             <div
               key={item.id}
               className={`bg-card rounded-card p-4 ${
-                isConfirmed ? 'cursor-pointer transition-colors hover:bg-card/80' : ''
+                clickable ? 'cursor-pointer transition-colors hover:bg-card/80' : ''
               }`}
-              onClick={
-                isConfirmed
-                  ? () => router.push(`/gatherings/${item.gathering.id}/apply/confirmed`)
-                  : undefined
-              }
-              role={isConfirmed ? 'button' : undefined}
-              tabIndex={isConfirmed ? 0 : undefined}
+              onClick={clickable ? goDetail : undefined}
+              role={clickable ? 'button' : undefined}
+              tabIndex={clickable ? 0 : undefined}
               onKeyDown={
-                isConfirmed
+                clickable
                   ? (e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        router.push(`/gatherings/${item.gathering.id}/apply/confirmed`)
+                        goDetail()
                       }
                     }
                   : undefined
