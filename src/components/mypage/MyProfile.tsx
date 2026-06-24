@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl'
 import { useMyProfile, useLogout } from '@/lib/hooks/useAuth'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyTickets } from '@/lib/hooks/useTickets'
-import { useJobs } from '@/lib/hooks/useJobs'
+import { useLocalizedJobs } from '@/lib/hooks/useLocalizedJobs'
 import Button from '@/components/ui/Button'
 import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
@@ -54,7 +54,7 @@ export default function MyProfile() {
   const { isLoggedIn, isInitialized } = useRequireAuth()
   const { data: profile, isLoading } = useMyProfile()
   const { data: tickets } = useMyTickets()
-  const { data: jobGroups } = useJobs()
+  const { data: jobGroups } = useLocalizedJobs()
   const logout = useLogout()
   const [showEdit, setShowEdit] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
@@ -161,6 +161,7 @@ export default function MyProfile() {
 
         {/* 상세 정보 */}
         <div className="bg-card rounded-card px-5">
+          <ProfileRow label={t('email')} value={profile.email} />
           <ProfileRow label={t('phone')} value={profile.phone} />
           <ProfileRow
             label={t('gender')}
