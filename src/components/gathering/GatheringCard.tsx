@@ -17,16 +17,13 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
   const {
     id, title, eventDate, startTime, price,
     maxAttendees, thumbnailUrl,
-    status, location,
-    category, categoryLabel, tags,
+    status, location, tags,
   } = gathering
 
   // 과거 모집중 게더링은 진행 완료로 보정해 표시 (KAN-164)
   const effectiveStatus = getEffectiveStatus(status, eventDate)
 
-  // 카테고리/태그 칩 — BE 미제공 시 표시하지 않는다 (KAN-305)
-  const displayCategory = categoryLabel ?? category
-  const hasChips = Boolean(displayCategory) || (tags?.length ?? 0) > 0
+  const hasChips = (tags?.length ?? 0) > 0
   const thumbnailPosition = title === '우연한 식탁' ? 'center 32%' : undefined
 
   return (
@@ -61,11 +58,6 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
 
           {hasChips && (
             <div className="flex flex-wrap gap-1.5 mb-2">
-              {displayCategory && (
-                <span className="rounded-full bg-primary-light px-2 py-0.5 text-xs font-medium text-primary">
-                  {displayCategory}
-                </span>
-              )}
               {tags?.map((tag) => (
                 <span key={tag} className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">
                   #{tag}

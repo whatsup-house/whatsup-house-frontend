@@ -31,9 +31,7 @@ export interface GatheringListItem {
     naverMapUrl?: string | null
     kakaoMapUrl?: string | null
   } | null
-  // 카테고리/태그 — BE(KAN-304)에서 제공. 미제공 시 칩 미표시 (KAN-305)
-  category?: string | null
-  categoryLabel?: string | null
+  // 태그 — BE(KAN-304)에서 제공. 미제공 시 칩 미표시 (KAN-305)
   tags?: string[] | null
 }
 
