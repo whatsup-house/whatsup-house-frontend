@@ -44,6 +44,7 @@ export interface AdminGatheringDetail {
   maxAttendees: number
   status: string
   thumbnailUrl: string | null
+  tags?: string[] | null
   location: { id: string; name: string; address: string } | null
 }
 
@@ -60,6 +61,7 @@ export interface GatheringCreateRequest {
   price: number
   capacity: number
   thumbnailUrl?: string
+  tags?: string[]
   moodTags?: string[]
   activityTags?: string[]
   mileageReward?: number
@@ -79,6 +81,7 @@ function toGatheringRequestBody(data: GatheringCreateRequest) {
     price: data.price,
     maxAttendees: data.capacity,
     thumbnailUrl: data.thumbnailUrl,
+    tags: data.tags ?? data.moodTags,
     gatheringType: data.gatheringType,
   }
 }

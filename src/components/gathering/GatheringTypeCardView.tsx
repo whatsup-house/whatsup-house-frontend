@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, ChevronDown, Coffee } from 'lucide-react'
+import { Check, ChevronDown, Coffee, SlidersHorizontal } from 'lucide-react'
 import dayjs from 'dayjs'
 import { useLocale, useTranslations } from 'next-intl'
 import Badge from '@/components/ui/Badge'
@@ -21,6 +21,7 @@ import { formatLocalizedShortDate } from '@/lib/utils/date'
 
 const FILTERS: GatheringTypeFilter[] = ['all', 'open', 'completed']
 const SORTS: GatheringTypeSort[] = ['popular', 'latest', 'oldest']
+const TAG_FILTERS = ['푸드', '파티', '자기계발', '외국어', '취미', '게임', '액티비티', '나들이']
 
 interface DropdownOption<T extends string> {
   value: T
@@ -84,9 +85,8 @@ function CompactDropdown<T extends string>({ value, options, onChange, ariaLabel
                       onChange(option.value)
                       setOpen(false)
                     }}
-                    className={`flex min-h-9 w-full items-center justify-between gap-2 px-3 text-left text-xs font-medium transition-colors ${
-                      selected ? 'bg-primary-light text-primary' : 'text-foreground'
-                    } ${index > 0 ? 'border-t border-tag-bg/40' : ''}`}
+                    className={`flex min-h-9 w-full items-center justify-between gap-2 px-3 text-left text-xs font-medium transition-colors ${selected ? 'bg-primary-light text-primary' : 'text-foreground'
+                      } ${index > 0 ? 'border-t border-tag-bg/40' : ''}`}
                   >
                     <span className="truncate">{option.label}</span>
                     {selected && <Check size={13} className="shrink-0" />}
@@ -101,12 +101,114 @@ function CompactDropdown<T extends string>({ value, options, onChange, ariaLabel
   )
 }
 
+interface TagFilterButtonProps {
+  selectedTags: string[]
+  onToggleTag: (tag: string) => void
+  onClear: () => void
+}
+
+function TagFilterButton({ selectedTags, onToggleTag, onClear }: TagFilterButtonProps) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((next) => !next)}
+        className={`relative flex h-8 min-w-8 items-center justify-center rounded-full border px-2 shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary ${
+          open ? 'z-40' : ''
+        } ${
+          selectedTags.length > 0
+            ? 'border-primary bg-primary-light text-primary'
+            : 'border-tag-bg/70 bg-card text-tag-text'
+        }`}
+        aria-label="태그 필터"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
+        <SlidersHorizontal size={16} />
+        {selectedTags.length > 0 && (
+          <span className="ml-1 min-w-4 rounded-full bg-primary px-1 text-[10px] font-bold leading-4 text-white">
+            {selectedTags.length}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-20" aria-hidden="true" onClick={() => setOpen(false)} />
+          <div
+            role="dialog"
+            aria-label="태그 필터"
+            className="absolute right-0 top-[calc(100%+10px)] z-30 w-[calc(100vw-32px)] max-w-[320px] overflow-visible rounded-card border border-tag-bg bg-background shadow-lg"
+          >
+            <span className="absolute -top-2 right-3 h-4 w-4 rotate-45 border-l border-t border-tag-bg bg-background" />
+            <div className="relative z-10 rounded-card bg-background p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-bold text-foreground">태그</p>
+                {selectedTags.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={onClear}
+                    className="rounded-full px-2 py-1 text-xs font-medium text-tag-text transition-colors hover:bg-tag-bg"
+                  >
+                    초기화
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {TAG_FILTERS.map((tag) => {
+                  const selected = selectedTags.includes(tag)
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => onToggleTag(tag)}
+                      className={`flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-semibold transition-colors ${
+                        selected
+                          ? 'bg-primary text-white'
+                          : 'bg-tag-bg text-tag-text hover:bg-primary-light hover:text-primary'
+                      }`}
+                      aria-pressed={selected}
+                    >
+                      {selected && <Check size={12} />}
+                      #{tag}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function GatheringTypeCardView() {
   const t = useTranslations('gathering.typeView')
   const locale = useLocale()
   const router = useRouter()
   const [filter, setFilter] = useState<GatheringTypeFilter>('all')
   const [sort, setSort] = useState<GatheringTypeSort>('popular')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const filterOptions = FILTERS.map((value) => ({ value, label: t(`filter.${value}`) }))
   const sortOptions = SORTS.map((value) => ({ value, label: t(`sort.${value}`) }))
 
@@ -114,8 +216,21 @@ export default function GatheringTypeCardView() {
   const { data: curated } = useCuratedGatherings()
 
   const today = dayjs().format('YYYY-MM-DD')
-  const curatedTitles = curated?.map((c) => c.title) ?? []
-  const cards = data ? buildGatheringTypeCards(data, { today, filter, sort, curatedTitles }) : []
+  const curatedTitles = useMemo(() => curated?.map((c) => c.title) ?? [], [curated])
+  const cardsByStatus = useMemo(
+    () => (data ? buildGatheringTypeCards(data, { today, filter, sort, curatedTitles }) : []),
+    [data, today, filter, sort, curatedTitles],
+  )
+  const cards = useMemo(() => {
+    if (selectedTags.length === 0) return cardsByStatus
+    return cardsByStatus.filter((card) => card.tags?.some((tag) => selectedTags.includes(tag)))
+  }, [cardsByStatus, selectedTags])
+
+  const handleToggleTag = (tag: string) => {
+    setSelectedTags((prev) => (
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
+    ))
+  }
 
   return (
     <div className="px-4">
@@ -139,6 +254,11 @@ export default function GatheringTypeCardView() {
             options={sortOptions}
             onChange={setSort}
             ariaLabel={t('sortLabel')}
+          />
+          <TagFilterButton
+            selectedTags={selectedTags}
+            onToggleTag={handleToggleTag}
+            onClear={() => setSelectedTags([])}
           />
         </div>
       </div>
@@ -172,6 +292,7 @@ export default function GatheringTypeCardView() {
                     src={card.thumbnailUrl}
                     alt={card.title}
                     className="object-cover"
+                    style={card.title === '우연한 식탁' ? { objectPosition: 'center 32%' } : undefined}
                     sizes="(max-width: 390px) 50vw, 195px"
                   />
                 ) : (
@@ -187,13 +308,8 @@ export default function GatheringTypeCardView() {
                 <h3 className="text-sm font-semibold leading-snug text-foreground line-clamp-1">
                   {card.title}
                 </h3>
-                {(card.categoryLabel ?? card.category) || (card.tags?.length ?? 0) > 0 ? (
+                {(card.tags?.length ?? 0) > 0 ? (
                   <div className="flex flex-wrap gap-1 -mt-0.5">
-                    {(card.categoryLabel ?? card.category) && (
-                      <span className="rounded-full bg-primary-light px-1.5 py-0.5 text-[11px] font-medium text-primary">
-                        {card.categoryLabel ?? card.category}
-                      </span>
-                    )}
                     {card.tags?.map((tag) => (
                       <span key={tag} className="rounded-full bg-tag-bg px-1.5 py-0.5 text-[11px] text-tag-text">
                         #{tag}

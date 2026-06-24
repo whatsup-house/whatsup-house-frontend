@@ -89,6 +89,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
     if (detail.startTime) setValue('startTime', detail.startTime.slice(0, 5))
     if (detail.endTime) setValue('endTime', detail.endTime.slice(0, 5))
     setValue('thumbnailUrl', detail.thumbnailUrl ?? '')
+    setValue('moodTagsText', detail.tags?.join(',') ?? '')
   }, [detail, setValue])
 
   const onSubmit = (values: FormValues) => {
@@ -104,7 +105,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
       thumbnailUrl: values.thumbnailUrl || undefined,
       mileageReward: values.mileageReward ?? 500,
       howToRun: values.howToRunText ? values.howToRunText.split('\n').filter(Boolean) : [],
-      moodTags: values.moodTagsText ? values.moodTagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      tags: values.moodTagsText ? values.moodTagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
     }
 
     if (isEdit) {
