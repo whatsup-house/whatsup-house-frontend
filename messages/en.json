@@ -459,17 +459,25 @@
       "dateTitle": "Gatherings on {month}/{day}",
       "emptyTitle": "No gatherings on this day.",
       "emptyDescription": "Try another day :)",
-      "calendarView": "Calendar view",
+      "calendarView": "Calendar",
       "mapView": "Map view",
-      "cardView": "By type"
+      "cardView": "Browse"
     },
     "typeView": {
-      "title": "Browse gatherings by type",
+      "title": "Meet the gatherings of Whatsup House",
       "emptyTitle": "No gatherings yet.",
       "emptyDescription": "New gatherings are coming soon :)",
-      "nearestOpen": "Next opening · {date}",
-      "noOpen": "No open schedule · {date}",
-      "scheduleCount": "{count} schedules"
+      "scheduleCount": "{count} schedules",
+      "filter": {
+        "all": "All",
+        "open": "Open",
+        "completed": "Completed"
+      },
+      "sort": {
+        "popular": "Popular",
+        "latest": "Newest",
+        "oldest": "Oldest"
+      }
     },
     "card": {
       "price": "₩{price}",

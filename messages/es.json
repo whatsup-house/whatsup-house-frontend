@@ -459,17 +459,25 @@
       "dateTitle": "Encuentros el {month}/{day}",
       "emptyTitle": "No hay encuentros en este día.",
       "emptyDescription": "Prueba otro día:)",
-      "calendarView": "Vista de calendario",
+      "calendarView": "Calendario",
       "mapView": "Vista de mapa",
-      "cardView": "Por tipo"
+      "cardView": "Explorar"
     },
     "typeView": {
-      "title": "Explora encuentros por tipo",
+      "title": "Descubre los encuentros de Whatsup House",
       "emptyTitle": "Aún no hay encuentros.",
       "emptyDescription": "Pronto habrá nuevos encuentros :)",
-      "nearestOpen": "Próxima apertura · {date}",
-      "noOpen": "Sin fechas abiertas · {date}",
-      "scheduleCount": "{count} fechas"
+      "scheduleCount": "{count} fechas",
+      "filter": {
+        "all": "Todos",
+        "open": "Abiertos",
+        "completed": "Finalizados"
+      },
+      "sort": {
+        "popular": "Popular",
+        "latest": "Recientes",
+        "oldest": "Antiguos"
+      }
     },
     "card": {
       "price": "₩{price}",

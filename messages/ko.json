@@ -459,17 +459,25 @@
       "dateTitle": "{month}월 {day}일 열리는 게더링",
       "emptyTitle": "이 날은 게더링이 없어요.",
       "emptyDescription": "다른 날을 골라보세요 :)",
-      "calendarView": "달력으로 보기",
+      "calendarView": "달력",
       "mapView": "지도로 보기",
-      "cardView": "종류별 보기"
+      "cardView": "모아보기"
     },
     "typeView": {
-      "title": "게더링 종류별로 둘러보기",
+      "title": "와썹하우스의 게더링을 만나보세요",
       "emptyTitle": "아직 게더링이 없어요.",
       "emptyDescription": "곧 새로운 게더링이 열릴 거예요 :)",
-      "nearestOpen": "가장 가까운 모집 · {date}",
-      "noOpen": "모집 중 일정 없음 · {date}",
-      "scheduleCount": "총 {count}개 일정"
+      "scheduleCount": "총 {count}개 일정",
+      "filter": {
+        "all": "전체",
+        "open": "모집중",
+        "completed": "진행완료"
+      },
+      "sort": {
+        "popular": "인기순",
+        "latest": "최신순",
+        "oldest": "오래된순"
+      }
     },
     "card": {
       "price": "{price}원",

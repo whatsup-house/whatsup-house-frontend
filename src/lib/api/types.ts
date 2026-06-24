@@ -23,6 +23,7 @@ export interface GatheringListItem {
   maxAttendees: number
   status: GatheringStatus
   thumbnailUrl: string | null
+  createdAt?: string     // 등록일 (ISO datetime) — 목록 정렬용 (KAN-295)
   location: {
     id: string
     name: string

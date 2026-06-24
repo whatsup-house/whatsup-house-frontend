@@ -459,17 +459,25 @@
       "dateTitle": "{month}/{day} 聚会",
       "emptyTitle": "这一天没有聚会。",
       "emptyDescription": "改天再试试:)",
-      "calendarView": "日历视图",
+      "calendarView": "日历",
       "mapView": "地图视图",
-      "cardView": "按类型"
+      "cardView": "汇总"
     },
     "typeView": {
-      "title": "按类型浏览聚会",
+      "title": "来认识 Whatsup House 的聚会",
       "emptyTitle": "还没有聚会。",
       "emptyDescription": "新的聚会即将开放 :)",
-      "nearestOpen": "最近招募 · {date}",
-      "noOpen": "暂无招募日程 · {date}",
-      "scheduleCount": "共{count}个日程"
+      "scheduleCount": "共{count}个日程",
+      "filter": {
+        "all": "全部",
+        "open": "招募中",
+        "completed": "已完成"
+      },
+      "sort": {
+        "popular": "人气",
+        "latest": "最新",
+        "oldest": "最早"
+      }
     },
     "card": {
       "price": "₩{price}",

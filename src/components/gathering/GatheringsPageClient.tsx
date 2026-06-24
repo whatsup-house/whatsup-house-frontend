@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dayjs from 'dayjs'
 import CalendarView from '@/components/gathering/CalendarView'
 import GatheringList from '@/components/gathering/GatheringList'
@@ -8,9 +9,15 @@ import ViewToggle from '@/components/gathering/ViewToggle'
 import GatheringTypeCardView from '@/components/gathering/GatheringTypeCardView'
 import { useGatherings, useCalendarDots } from '@/lib/hooks/useGatherings'
 
-export default function GatheringsPageClient() {
+function GatheringsContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const today = dayjs()
-  const [view, setView] = useState<'calendar' | 'card'>('calendar')
+
+  // 뷰 상태를 URL(?view=card)에 유지해, 상세 진입 후 뒤로가기 시 모아보기가 복원되도록 한다. (KAN-295)
+  const [view, setView] = useState<'calendar' | 'card'>(
+    searchParams.get('view') === 'card' ? 'card' : 'calendar',
+  )
   const [selectedDate, setSelectedDate] = useState(today.format('YYYY-MM-DD'))
   const [currentYear, setCurrentYear] = useState(today.year())
   const [currentMonth, setCurrentMonth] = useState(today.month() + 1)
@@ -23,10 +30,22 @@ export default function GatheringsPageClient() {
     setCurrentMonth(month)
   }
 
+  const handleViewChange = (next: 'calendar' | 'card') => {
+    setView(next)
+    const params = new URLSearchParams(searchParams.toString())
+    if (next === 'card') {
+      params.set('view', 'card')
+    } else {
+      params.delete('view')
+    }
+    const query = params.toString()
+    router.replace(query ? `/gatherings?${query}` : '/gatherings', { scroll: false })
+  }
+
   return (
     <div className="min-h-screen bg-background pb-6">
       <div className="pt-4">
-        <ViewToggle view={view} onChange={setView} />
+        <ViewToggle view={view} onChange={handleViewChange} />
       </div>
 
       {view === 'calendar' ? (
@@ -55,5 +74,13 @@ export default function GatheringsPageClient() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function GatheringsPageClient() {
+  return (
+    <Suspense fallback={null}>
+      <GatheringsContent />
+    </Suspense>
   )
 }
