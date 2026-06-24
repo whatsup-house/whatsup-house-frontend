@@ -213,8 +213,8 @@ export interface JobGroup {
 // 내 신청 내역 타입
 export type ApplicationStatus = 'PENDING' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED' | 'ATTENDED'
 
-// 입금 상태. 유료 게더링에서만 내려오며, 무료 게더링은 null(표시하지 않음). (KAN-243)
-export type PaymentStatus = 'PENDING' | 'CONFIRMED'
+// 결제 상태. 무료 게더링은 FREE로 내려오며, 유료 우연한 식탁 이용권 결제는 별도 도메인에서 처리한다.
+export type PaymentStatus = 'PENDING' | 'CONFIRMED' | 'FREE'
 
 export interface ApplicationListItem {
   id: string

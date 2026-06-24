@@ -684,7 +684,8 @@
       },
       "payment": {
         "PENDING": "入金確認中",
-        "CONFIRMED": "入金完了"
+        "CONFIRMED": "入金完了",
+        "FREE": "無料"
       },
       "emptyFiltered": "該当状態の申請履歴がありません。",
       "empty": "まだ申請したギャザリングがありません。",

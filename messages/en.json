@@ -684,7 +684,8 @@
       },
       "payment": {
         "PENDING": "Deposit pending",
-        "CONFIRMED": "Deposit complete"
+        "CONFIRMED": "Deposit complete",
+        "FREE": "Free"
       },
       "emptyFiltered": "No applications with this status.",
       "empty": "You have not applied for any gatherings yet.",

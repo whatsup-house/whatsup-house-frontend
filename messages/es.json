@@ -684,7 +684,8 @@
       },
       "payment": {
         "PENDING": "Depósito pendiente",
-        "CONFIRMED": "Depósito completo"
+        "CONFIRMED": "Depósito completo",
+        "FREE": "Gratis"
       },
       "emptyFiltered": "No hay solicitudes con este estado.",
       "empty": "Aún no has solicitado ningún encuentro.",

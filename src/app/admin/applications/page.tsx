@@ -296,7 +296,9 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {p.gatheringType === 'RANDOM_TABLE' ? (
+                  {p.free ? (
+                    <span className="text-[12px] text-[#BBBBBB]">무료</span>
+                  ) : p.gatheringType === 'RANDOM_TABLE' ? (
                     <span className={`text-xs font-medium ${
                       p.status === 'CONFIRMED' || p.status === 'ATTENDED'
                         ? 'text-[#4CAF50]'

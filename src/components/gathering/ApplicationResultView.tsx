@@ -43,9 +43,10 @@ export default function ApplicationResultView({
   const formattedDate = formatLocalizedFullDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
   const isRandomTable = gathering.gatheringType === 'RANDOM_TABLE'
+  const isFreeGathering = (gathering.price ?? 0) === 0
   const normalizedApplicationStatus = applicationStatus as ApplicationStatus | null
   const isRandomTablePaymentPending = normalizedApplicationStatus === 'PAYMENT_PENDING'
-  const needsRandomTableTicket = isRandomTable && mode === 'completed' && isRandomTablePaymentPending && Boolean(applicationId || bookingNumber)
+  const needsRandomTableTicket = isRandomTable && !isFreeGathering && mode === 'completed' && isRandomTablePaymentPending && Boolean(applicationId || bookingNumber)
   const randomTablePaymentUrl = `/payments/random-table?${
     applicationId
       ? `applicationId=${encodeURIComponent(applicationId)}`
@@ -100,10 +101,14 @@ export default function ApplicationResultView({
                 <p className="text-xs text-tag-text">{isRandomTable ? '참가 방식' : t('price')}</p>
                 <p className="text-sm font-medium text-foreground">
                   {isRandomTable
-                    ? mode === 'confirmed'
-                      ? '이용권 1회 사용 완료'
-                      : isRandomTablePaymentPending ? '이용권 구매 후 참가 확정' : '심사 완료 후 이용권 구매'
-                    : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
+                    ? isFreeGathering
+                      ? mode === 'confirmed' ? '무료 참여 확정' : '심사 완료 후 무료 참여'
+                      : mode === 'confirmed'
+                        ? '이용권 1회 사용 완료'
+                        : isRandomTablePaymentPending ? '이용권 구매 후 참가 확정' : '심사 완료 후 이용권 구매'
+                    : isFreeGathering
+                      ? '무료'
+                      : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
                 </p>
               </div>
             </div>
@@ -125,7 +130,9 @@ export default function ApplicationResultView({
         )}
 
         {mode === 'confirmed' && !isRandomTable && (
-          paymentConfirmed ? (
+          isFreeGathering ? (
+            <FreeConfirmedCard />
+          ) : paymentConfirmed ? (
             <PaymentConfirmedCard />
           ) : (
             <PaymentAccountCard price={gathering.price ?? 0} />
@@ -179,6 +186,25 @@ function PaymentConfirmedCard() {
         <p className="text-base font-bold text-foreground">예약이 최종 확정됐어요</p>
         <p className="text-sm text-tag-text">
           당일 모임 시간과 장소를 확인하고 편하게 와 주세요.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function FreeConfirmedCard() {
+  return (
+    <div className="w-full mb-4">
+      <div className="bg-primary-light rounded-card px-5 py-4 flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle size={16} className="text-primary shrink-0" />
+          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-primary">
+            무료
+          </span>
+        </div>
+        <p className="text-base font-bold text-foreground">참여가 확정됐어요</p>
+        <p className="text-sm text-tag-text">
+          결제 없이 당일 모임 시간과 장소를 확인하고 편하게 와 주세요.
         </p>
       </div>
     </div>

@@ -684,7 +684,8 @@
       },
       "payment": {
         "PENDING": "存款待处理",
-        "CONFIRMED": "存款完成"
+        "CONFIRMED": "存款完成",
+        "FREE": "免费"
       },
       "emptyFiltered": "没有具有此状态的应用程序。",
       "empty": "您还没有申请参加任何聚会。",
