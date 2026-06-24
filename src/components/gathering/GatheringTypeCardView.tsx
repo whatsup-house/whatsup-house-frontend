@@ -153,7 +153,7 @@ export default function GatheringTypeCardView() {
 
       {!isLoading && !isError && cards.length === 0 && (
         <div className="border border-dashed border-tag-bg rounded-card">
-          <EmptyState icon={Coffee} title={t('emptyTitle')} description={t('emptyDescription')} />
+          <EmptyState icon={Coffee} illustration="/NoGathering.png" title={t('emptyTitle')} description={t('emptyDescription')} />
         </div>
       )}
 
