@@ -427,7 +427,9 @@
     },
     "curated": {
       "title": "Most viewed gatherings this week",
-      "rankLabel": "No. {rank} {title}"
+      "rankLabel": "No. {rank} {title}",
+      "nearestOpen": "Next opening · {date}",
+      "noOpen": "No open schedule"
     },
     "reviews": {
       "title": "Reviews from guests",

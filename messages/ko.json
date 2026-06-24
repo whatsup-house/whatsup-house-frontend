@@ -427,7 +427,9 @@
     },
     "curated": {
       "title": "이번 주 가장 많이 본 게더링",
-      "rankLabel": "{rank}위 {title}"
+      "rankLabel": "{rank}위 {title}",
+      "nearestOpen": "가장 가까운 모집 · {date}",
+      "noOpen": "모집 일정 없음"
     },
     "reviews": {
       "title": "다녀온 사람들의 후기",

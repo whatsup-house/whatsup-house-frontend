@@ -427,7 +427,9 @@
     },
     "curated": {
       "title": "今週よく見られたギャザリング",
-      "rankLabel": "{rank}位 {title}"
+      "rankLabel": "{rank}位 {title}",
+      "nearestOpen": "最短の募集 · {date}",
+      "noOpen": "募集中の日程なし"
     },
     "reviews": {
       "title": "参加者のレビュー",

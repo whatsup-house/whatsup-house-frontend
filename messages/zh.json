@@ -427,7 +427,9 @@
     },
     "curated": {
       "title": "精选聚会",
-      "rankLabel": "编号 {rank} {title}"
+      "rankLabel": "编号 {rank} {title}",
+      "nearestOpen": "最近招募 · {date}",
+      "noOpen": "暂无招募日程"
     },
     "reviews": {
       "title": "参加者评价",
