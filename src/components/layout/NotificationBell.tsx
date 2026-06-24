@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, X, CheckCircle, Gift, Heart, type LucideIcon } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -40,6 +40,21 @@ export default function NotificationBell() {
 
   const unreadCount = unread?.unreadCount ?? 0
 
+  // 모달 열림 동안 ESC 키 닫기 + body 스크롤 잠금. (KAN-303)
+  useEffect(() => {
+    if (!open) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [open])
+
   const handleSelect = (item: NotificationItem) => {
     if (!item.isRead) markRead.mutate(item.id)
     setOpen(false)
@@ -67,15 +82,25 @@ export default function NotificationBell() {
           onClick={() => setOpen(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('label')}
             className="w-[90vw] max-w-[420px] h-[70vh] bg-background rounded-card shadow-lg flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-tag-bg">
-              <h2 className="text-base font-bold text-foreground">{t('label')}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-foreground">{t('label')}</h2>
+                {isLoggedIn && unreadCount > 0 && (
+                  <span className="min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-primary text-white text-[11px] font-bold leading-none">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => setOpen(false)}
                 aria-label={t('close')}
-                className="p-1 text-tag-text min-w-[36px] min-h-[36px] flex items-center justify-center"
+                className="p-1 text-tag-text min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full hover:bg-tag-bg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -144,8 +169,11 @@ export default function NotificationBell() {
 
 function EmptyMessage({ text }: { text: string }) {
   return (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-sm text-tag-text">{text}</p>
+    <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
+      <div className="w-14 h-14 rounded-full bg-tag-bg flex items-center justify-center">
+        <Bell size={26} className="text-tag-text" />
+      </div>
+      <p className="text-sm text-tag-text break-keep">{text}</p>
     </div>
   )
 }
