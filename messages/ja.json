@@ -512,6 +512,7 @@
       "priceLabel": "参加費",
       "price": "{price}ウォン",
       "onsitePayment": "（現地決済）",
+      "free": "無料",
       "mileageReward": "マイレージ付与",
       "descriptionTitle": "こんなギャザリングです",
       "howToRunTitle": "このように進行します",

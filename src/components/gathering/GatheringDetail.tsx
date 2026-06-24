@@ -52,6 +52,8 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const formattedDate = formatLocalizedFullDate(eventDate, locale)
   const timeRange = formatTimeRange(startTime, endTime)
   const isRandomTable = gatheringType === 'RANDOM_TABLE'
+  // 참가비 0원으로 만든 우연한 식탁은 이용권 없이 승인만으로 참여(무료). 이용권 안내를 노출하지 않는다.
+  const isFreeRandomTable = isRandomTable && price === 0
   const duration = getDurationParts(startTime, endTime)
   const durationStr = duration
     ? duration.minutes > 0
@@ -198,9 +200,11 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <div className="flex items-start gap-3">
               <CreditCard size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-tag-text mb-0.5">{isRandomTable ? '필요 이용권' : t('priceLabel')}</p>
+                <p className="text-xs text-tag-text mb-0.5">{isRandomTable && !isFreeRandomTable ? '필요 이용권' : t('priceLabel')}</p>
                 <p className="text-lg font-bold text-foreground">
-                  {isRandomTable ? (
+                  {isFreeRandomTable ? (
+                    t('free')
+                  ) : isRandomTable ? (
                     <>
                       1회 <span className="text-xs font-normal text-tag-text">({price.toLocaleString(locale)}원 상당)</span>
                     </>
@@ -226,8 +230,8 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
           </div>
         </Card>
 
-        {/* 우연한 식탁 이용권 선결제 (KAN-260) */}
-        {isRandomTable && <TicketPassSection />}
+        {/* 우연한 식탁 이용권 선결제 (KAN-260). 무료 우연한 식탁은 이용권이 필요 없어 노출하지 않는다. */}
+        {isRandomTable && !isFreeRandomTable && <TicketPassSection />}
 
         {/* 게더링 설명 */}
         <div className="mb-6">

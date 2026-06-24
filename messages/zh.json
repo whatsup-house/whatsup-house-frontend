@@ -512,6 +512,7 @@
       "priceLabel": "费用",
       "price": "₩{price}",
       "onsitePayment": "（现场付费）",
+      "free": "免费",
       "mileageReward": "积分奖励",
       "descriptionTitle": "关于本次聚会",
       "howToRunTitle": "它是如何运作的",

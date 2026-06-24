@@ -512,6 +512,7 @@
       "priceLabel": "참가비",
       "price": "{price}원",
       "onsitePayment": "(현장 결제)",
+      "free": "무료",
       "mileageReward": "마일리지 적립",
       "descriptionTitle": "이런 게더링이에요",
       "howToRunTitle": "이렇게 진행돼요",
