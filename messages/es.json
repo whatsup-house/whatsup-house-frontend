@@ -460,7 +460,16 @@
       "emptyTitle": "No hay encuentros en este día.",
       "emptyDescription": "Prueba otro día:)",
       "calendarView": "Vista de calendario",
-      "mapView": "Vista de mapa"
+      "mapView": "Vista de mapa",
+      "cardView": "Por tipo"
+    },
+    "typeView": {
+      "title": "Explora encuentros por tipo",
+      "emptyTitle": "Aún no hay encuentros.",
+      "emptyDescription": "Pronto habrá nuevos encuentros :)",
+      "nearestOpen": "Próxima apertura · {date}",
+      "noOpen": "Sin fechas abiertas · {date}",
+      "scheduleCount": "{count} fechas"
     },
     "card": {
       "price": "₩{price}",

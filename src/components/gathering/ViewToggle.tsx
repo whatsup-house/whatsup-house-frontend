@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl'
 
-type View = 'calendar' | 'map'
+type View = 'calendar' | 'card'
 
 interface ViewToggleProps {
   view: View
@@ -21,12 +21,12 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
         {t('calendarView')}
       </button>
       <button
-        onClick={() => onChange('map')}
+        onClick={() => onChange('card')}
         className={`flex-1 py-2 text-sm font-medium rounded-full transition-colors ${
-          view === 'map' ? 'bg-primary text-white' : 'text-tag-text'
+          view === 'card' ? 'bg-primary text-white' : 'text-tag-text'
         }`}
       >
-        {t('mapView')}
+        {t('cardView')}
       </button>
     </div>
   )

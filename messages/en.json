@@ -460,7 +460,16 @@
       "emptyTitle": "No gatherings on this day.",
       "emptyDescription": "Try another day :)",
       "calendarView": "Calendar view",
-      "mapView": "Map view"
+      "mapView": "Map view",
+      "cardView": "By type"
+    },
+    "typeView": {
+      "title": "Browse gatherings by type",
+      "emptyTitle": "No gatherings yet.",
+      "emptyDescription": "New gatherings are coming soon :)",
+      "nearestOpen": "Next opening · {date}",
+      "noOpen": "No open schedule · {date}",
+      "scheduleCount": "{count} schedules"
     },
     "card": {
       "price": "₩{price}",

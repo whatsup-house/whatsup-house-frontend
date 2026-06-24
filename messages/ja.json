@@ -460,7 +460,16 @@
       "emptyTitle": "この日はギャザリングがありません。",
       "emptyDescription": "別の日を選んでみてください :)",
       "calendarView": "カレンダーで見る",
-      "mapView": "地図で見る"
+      "mapView": "地図で見る",
+      "cardView": "種類別"
+    },
+    "typeView": {
+      "title": "ゲザリングを種類別に見る",
+      "emptyTitle": "まだゲザリングがありません。",
+      "emptyDescription": "新しいゲザリングがまもなく開かれます :)",
+      "nearestOpen": "最短の募集 · {date}",
+      "noOpen": "募集中の日程なし · {date}",
+      "scheduleCount": "全{count}件の日程"
     },
     "card": {
       "price": "{price}ウォン",

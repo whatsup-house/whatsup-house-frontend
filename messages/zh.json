@@ -460,7 +460,16 @@
       "emptyTitle": "这一天没有聚会。",
       "emptyDescription": "改天再试试:)",
       "calendarView": "日历视图",
-      "mapView": "地图视图"
+      "mapView": "地图视图",
+      "cardView": "按类型"
+    },
+    "typeView": {
+      "title": "按类型浏览聚会",
+      "emptyTitle": "还没有聚会。",
+      "emptyDescription": "新的聚会即将开放 :)",
+      "nearestOpen": "最近招募 · {date}",
+      "noOpen": "暂无招募日程 · {date}",
+      "scheduleCount": "共{count}个日程"
     },
     "card": {
       "price": "₩{price}",

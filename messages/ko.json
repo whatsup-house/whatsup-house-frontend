@@ -460,7 +460,16 @@
       "emptyTitle": "이 날은 게더링이 없어요.",
       "emptyDescription": "다른 날을 골라보세요 :)",
       "calendarView": "달력으로 보기",
-      "mapView": "지도로 보기"
+      "mapView": "지도로 보기",
+      "cardView": "종류별 보기"
+    },
+    "typeView": {
+      "title": "게더링 종류별로 둘러보기",
+      "emptyTitle": "아직 게더링이 없어요.",
+      "emptyDescription": "곧 새로운 게더링이 열릴 거예요 :)",
+      "nearestOpen": "가장 가까운 모집 · {date}",
+      "noOpen": "모집 중 일정 없음 · {date}",
+      "scheduleCount": "총 {count}개 일정"
     },
     "card": {
       "price": "{price}원",
