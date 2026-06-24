@@ -467,7 +467,11 @@
       "title": "ワッツアップハウスのギャザリングに出会いましょう",
       "emptyTitle": "まだギャザリングがありません。",
       "emptyDescription": "新しいギャザリングがまもなく開かれます :)",
+      "nearestOpen": "最短の募集 · {date}",
+      "noOpen": "募集中の日程なし",
       "scheduleCount": "全{count}件の日程",
+      "filterLabel": "ギャザリングの状態フィルター",
+      "sortLabel": "ギャザリングの並び替え",
       "filter": {
         "all": "すべて",
         "open": "募集中",

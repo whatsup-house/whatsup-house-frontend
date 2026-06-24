@@ -11,19 +11,27 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
   const t = useTranslations('gathering.list')
 
   return (
-    <div className="flex bg-tag-bg rounded-full p-1 mx-4">
+    <div className="relative grid grid-cols-2 bg-tag-bg rounded-full p-1 mx-4 overflow-hidden">
+      <span
+        aria-hidden="true"
+        className={`absolute left-1 top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full bg-primary shadow-sm transition-transform duration-300 ease-out ${
+          view === 'card' ? 'translate-x-full' : 'translate-x-0'
+        }`}
+      />
       <button
+        type="button"
         onClick={() => onChange('calendar')}
-        className={`flex-1 py-2 text-sm font-medium rounded-full transition-colors ${
-          view === 'calendar' ? 'bg-primary text-white' : 'text-tag-text'
+        className={`relative z-10 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${
+          view === 'calendar' ? 'text-white' : 'text-tag-text'
         }`}
       >
         {t('calendarView')}
       </button>
       <button
+        type="button"
         onClick={() => onChange('card')}
-        className={`flex-1 py-2 text-sm font-medium rounded-full transition-colors ${
-          view === 'card' ? 'bg-primary text-white' : 'text-tag-text'
+        className={`relative z-10 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${
+          view === 'card' ? 'text-white' : 'text-tag-text'
         }`}
       >
         {t('cardView')}

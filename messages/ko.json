@@ -467,9 +467,13 @@
       "title": "와썹하우스의 게더링을 만나보세요",
       "emptyTitle": "아직 게더링이 없어요.",
       "emptyDescription": "곧 새로운 게더링이 열릴 거예요 :)",
+      "nearestOpen": "가장 가까운 모집 · {date}",
+      "noOpen": "모집 일정 없음",
       "scheduleCount": "총 {count}개 일정",
+      "filterLabel": "게더링 상태 필터",
+      "sortLabel": "게더링 정렬",
       "filter": {
-        "all": "전체",
+        "all": "전체보기",
         "open": "모집중",
         "completed": "진행완료"
       },

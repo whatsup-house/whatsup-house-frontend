@@ -467,7 +467,11 @@
       "title": "Descubre los encuentros de Whatsup House",
       "emptyTitle": "Aún no hay encuentros.",
       "emptyDescription": "Pronto habrá nuevos encuentros :)",
+      "nearestOpen": "Próxima apertura · {date}",
+      "noOpen": "Sin fechas abiertas",
       "scheduleCount": "{count} fechas",
+      "filterLabel": "Filtro de estado del encuentro",
+      "sortLabel": "Orden de encuentros",
       "filter": {
         "all": "Todos",
         "open": "Abiertos",

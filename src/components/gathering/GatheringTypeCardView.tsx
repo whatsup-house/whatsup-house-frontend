@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Coffee } from 'lucide-react'
+import { Check, ChevronDown, Coffee } from 'lucide-react'
 import dayjs from 'dayjs'
 import { useLocale, useTranslations } from 'next-intl'
 import Badge from '@/components/ui/Badge'
@@ -22,12 +22,93 @@ import { formatLocalizedShortDate } from '@/lib/utils/date'
 const FILTERS: GatheringTypeFilter[] = ['all', 'open', 'completed']
 const SORTS: GatheringTypeSort[] = ['popular', 'latest', 'oldest']
 
+interface DropdownOption<T extends string> {
+  value: T
+  label: string
+}
+
+interface CompactDropdownProps<T extends string> {
+  value: T
+  options: DropdownOption<T>[]
+  onChange: (value: T) => void
+  ariaLabel: string
+}
+
+function CompactDropdown<T extends string>({ value, options, onChange, ariaLabel }: CompactDropdownProps<T>) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const current = options.find((option) => option.value === value) ?? options[0]
+
+  useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((next) => !next)}
+        className="flex h-8 items-center gap-1.5 rounded-full border border-tag-bg/70 bg-card px-2.5 text-xs font-semibold text-tag-text shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className="truncate">{current.label}</span>
+        <ChevronDown size={14} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-[calc(100%+6px)] z-30 min-w-[112px] overflow-hidden rounded-xl border border-tag-bg/60 bg-card shadow-lg">
+          <ul role="listbox" aria-label={ariaLabel} className="py-1">
+            {options.map((option, index) => {
+              const selected = option.value === value
+              return (
+                <li key={option.value}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    onClick={() => {
+                      onChange(option.value)
+                      setOpen(false)
+                    }}
+                    className={`flex min-h-9 w-full items-center justify-between gap-2 px-3 text-left text-xs font-medium transition-colors ${
+                      selected ? 'bg-primary-light text-primary' : 'text-foreground'
+                    } ${index > 0 ? 'border-t border-tag-bg/40' : ''}`}
+                  >
+                    <span className="truncate">{option.label}</span>
+                    {selected && <Check size={13} className="shrink-0" />}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function GatheringTypeCardView() {
   const t = useTranslations('gathering.typeView')
   const locale = useLocale()
   const router = useRouter()
   const [filter, setFilter] = useState<GatheringTypeFilter>('all')
   const [sort, setSort] = useState<GatheringTypeSort>('popular')
+  const filterOptions = FILTERS.map((value) => ({ value, label: t(`filter.${value}`) }))
+  const sortOptions = SORTS.map((value) => ({ value, label: t(`sort.${value}`) }))
 
   const { data, isLoading, isError, refetch } = useGatheringsAll()
   const { data: curated } = useCuratedGatherings()
@@ -38,37 +119,27 @@ export default function GatheringTypeCardView() {
 
   return (
     <div className="px-4">
-      <h2 className="text-base font-semibold text-foreground mb-3">{t('title')}</h2>
-
-      {/* 필터 / 정렬 */}
-      <div className="mb-4 flex flex-col gap-2">
-        <div className="flex gap-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFilter(f)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                filter === f ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-              }`}
-            >
-              {t(`filter.${f}`)}
-            </button>
-          ))}
+      <div className="mb-3">
+        <div className="mb-2 flex items-center gap-2">
+          <div className="w-1 h-[18px] rounded-full bg-primary" />
+          <h2 className="text-[20px] font-bold leading-snug text-foreground">{t('title')}</h2>
         </div>
-        <div className="flex gap-2">
-          {SORTS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setSort(s)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                sort === s ? 'bg-primary/10 text-primary' : 'text-tag-text'
-              }`}
-            >
-              {t(`sort.${s}`)}
-            </button>
-          ))}
+        <div className="mb-2 h-px bg-tag-bg" />
+
+        {/* 필터 / 정렬 */}
+        <div className="flex justify-end gap-1.5">
+          <CompactDropdown
+            value={filter}
+            options={filterOptions}
+            onChange={setFilter}
+            ariaLabel={t('filterLabel')}
+          />
+          <CompactDropdown
+            value={sort}
+            options={sortOptions}
+            onChange={setSort}
+            ariaLabel={t('sortLabel')}
+          />
         </div>
       </div>
 
@@ -116,9 +187,15 @@ export default function GatheringTypeCardView() {
                 <h3 className="text-sm font-semibold leading-snug text-foreground line-clamp-1">
                   {card.title}
                 </h3>
-                {card.displayDate && (
+                {card.displayDate ? (
                   <p className="text-xs text-tag-text line-clamp-1">
-                    {formatLocalizedShortDate(card.displayDate, locale)}
+                    {card.representativeStatus === 'OPEN'
+                      ? t('nearestOpen', { date: formatLocalizedShortDate(card.displayDate, locale) })
+                      : formatLocalizedShortDate(card.displayDate, locale)}
+                  </p>
+                ) : (
+                  <p className="text-xs text-tag-text line-clamp-1">
+                    {t('noOpen')}
                   </p>
                 )}
                 <p className="text-[11px] text-tag-text/70">

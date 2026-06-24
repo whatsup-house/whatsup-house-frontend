@@ -467,7 +467,11 @@
       "title": "来认识 Whatsup House 的聚会",
       "emptyTitle": "还没有聚会。",
       "emptyDescription": "新的聚会即将开放 :)",
+      "nearestOpen": "最近招募 · {date}",
+      "noOpen": "暂无招募日程",
       "scheduleCount": "共{count}个日程",
+      "filterLabel": "聚会状态筛选",
+      "sortLabel": "聚会排序",
       "filter": {
         "all": "全部",
         "open": "招募中",
