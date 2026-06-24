@@ -1,8 +1,12 @@
 'use client'
 
+import { useMemo, useState } from 'react'
+import dayjs from 'dayjs'
 import { Input } from '@/components/ui'
+import JobSelect from '@/components/auth/JobSelect'
 import { useTranslations } from 'next-intl'
 import type { FormQuestionDetail } from '@/lib/api/types'
+import { getAge } from '@/lib/utils/date'
 
 const MBTI_ROWS = [
   ['E', 'S', 'F', 'J'],
@@ -19,6 +23,100 @@ interface DynamicQuestionFieldProps {
   value: FieldValue | undefined
   error?: string
   onChange: (value: FieldValue) => void
+}
+
+const MIN_BIRTH_YEAR = dayjs().subtract(120, 'year').year()
+const MAX_BIRTH_YEAR = dayjs().subtract(14, 'year').year()
+
+function getMonthDays(year: string, month: string) {
+  if (!year || !month) return 31
+  return dayjs(`${year}-${month.padStart(2, '0')}-01`).daysInMonth()
+}
+
+function BirthDateAgeField({
+  label,
+  required,
+  error,
+  onChange,
+}: {
+  label: string
+  required: boolean
+  error?: string
+  onChange: (value: number) => void
+}) {
+  const [year, setYear] = useState('')
+  const [month, setMonth] = useState('')
+  const [day, setDay] = useState('')
+  const birthYears = useMemo(
+    () => Array.from({ length: MAX_BIRTH_YEAR - MIN_BIRTH_YEAR + 1 }, (_, index) => String(MAX_BIRTH_YEAR - index)),
+    [],
+  )
+  const daysInMonth = getMonthDays(year, month)
+  const selectedDate = year && month && day
+    ? `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+    : ''
+  const selectedAge = selectedDate ? getAge(selectedDate) : NaN
+
+  const update = (nextYear: string, nextMonth: string, nextDay: string) => {
+    const maxDay = getMonthDays(nextYear, nextMonth)
+    const normalizedDay = nextDay && Number(nextDay) > maxDay ? String(maxDay) : nextDay
+    setYear(nextYear)
+    setMonth(nextMonth)
+    setDay(normalizedDay)
+
+    if (!nextYear || !nextMonth || !normalizedDay) return
+    const date = `${nextYear}-${nextMonth.padStart(2, '0')}-${normalizedDay.padStart(2, '0')}`
+    const age = getAge(date)
+    if (!Number.isNaN(age)) onChange(age)
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-sm font-medium text-foreground">
+        {label}
+        {required && <span className="text-primary"> *</span>}
+      </label>
+      <div className="grid grid-cols-3 gap-2">
+        <select
+          value={year}
+          onChange={(event) => update(event.target.value, month, day)}
+          className="h-[46px] rounded-input border border-tag-bg bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="출생 연도"
+        >
+          <option value="">연도</option>
+          {birthYears.map((birthYear) => (
+            <option key={birthYear} value={birthYear}>{birthYear}년</option>
+          ))}
+        </select>
+        <select
+          value={month}
+          onChange={(event) => update(year, event.target.value, day)}
+          className="h-[46px] rounded-input border border-tag-bg bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="출생 월"
+        >
+          <option value="">월</option>
+          {Array.from({ length: 12 }, (_, index) => String(index + 1)).map((birthMonth) => (
+            <option key={birthMonth} value={birthMonth}>{birthMonth}월</option>
+          ))}
+        </select>
+        <select
+          value={day}
+          onChange={(event) => update(year, month, event.target.value)}
+          className="h-[46px] rounded-input border border-tag-bg bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="출생 일"
+        >
+          <option value="">일</option>
+          {Array.from({ length: daysInMonth }, (_, index) => String(index + 1)).map((birthDay) => (
+            <option key={birthDay} value={birthDay}>{birthDay}일</option>
+          ))}
+        </select>
+      </div>
+      {!Number.isNaN(selectedAge) && (
+        <p className="text-xs text-tag-text pl-1">만 {selectedAge}세</p>
+      )}
+      {error && <p className="text-xs text-primary pl-1">{error}</p>}
+    </div>
+  )
 }
 
 export default function DynamicQuestionField({
@@ -41,6 +139,28 @@ export default function DynamicQuestionField({
       {required && <span className="text-primary"> *</span>}
     </label>
   )
+
+  // 단답/숫자
+  if (questionKey === 'age') {
+    return (
+      <BirthDateAgeField
+        label={label}
+        required={required}
+        error={error}
+        onChange={onChange}
+      />
+    )
+  }
+
+  if (questionKey === 'job' || questionKey === 'job_category') {
+    return (
+      <div className="flex flex-col gap-2">
+        {labelNode}
+        <JobSelect value={typeof value === 'string' ? value : ''} onChange={onChange} placeholder={placeholder ?? undefined} />
+        {error && <p className="text-xs text-primary pl-1">{error}</p>}
+      </div>
+    )
+  }
 
   // 단답/숫자
   if (type === 'SHORT_TEXT' || type === 'NUMBER') {

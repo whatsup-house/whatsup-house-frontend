@@ -6,6 +6,7 @@ import { Calendar, ClipboardList, Clock, Hash } from 'lucide-react'
 import { useLocale } from 'next-intl'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import { useMyApplicationDetail } from '@/lib/hooks/useApplications'
+import { useLocalizedJobs } from '@/lib/hooks/useLocalizedJobs'
 import { formatLocalizedFullDate, formatTime } from '@/lib/utils/date'
 import type { AnswerView, ApplicationStatus } from '@/lib/api/types'
 
@@ -27,15 +28,33 @@ const STATUS_TEXT: Partial<Record<ApplicationStatus, { label: string; title: str
   },
 }
 
-function formatAnswerValue(value: AnswerView['value']) {
-  if (Array.isArray(value)) return value.join(', ')
+const GENDER_LABEL: Record<string, string> = {
+  MALE: '남성',
+  FEMALE: '여성',
+}
+
+function formatAnswerValue(
+  answer: AnswerView,
+  jobLabels: Record<string, string>,
+) {
+  const formatSingleValue = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined || value === '') return '미입력'
+    const text = String(value)
+    if (answer.questionKey === 'gender') return GENDER_LABEL[text] ?? text
+    if (answer.questionKey === 'job' || answer.questionKey === 'job_category') return jobLabels[text] ?? text
+    return text
+  }
+
+  if (Array.isArray(answer.value)) return answer.value.map((value) => formatSingleValue(value)).join(', ')
+  const value = answer.value
   if (value === null || value === undefined || value === '') return '미입력'
-  return String(value)
+  return formatSingleValue(value)
 }
 
 function MyApplicationDetailContent({ id }: { id: string }) {
   const router = useRouter()
   const locale = useLocale()
+  const { data: jobGroups } = useLocalizedJobs()
   const { data: detail, isLoading, isError, refetch } = useMyApplicationDetail(id)
 
   if (isLoading) {
@@ -71,6 +90,9 @@ function MyApplicationDetailContent({ id }: { id: string }) {
   }
   const eventDate = formatLocalizedFullDate(detail.gathering.eventDate, locale)
   const startTime = formatTime(detail.gathering.startTime)
+  const jobLabels = Object.fromEntries(
+    (jobGroups ?? []).flatMap((group) => group.jobs.map((job) => [job.code, job.label])),
+  )
 
   return (
     <main className="min-h-screen bg-background px-5 py-7">
@@ -127,7 +149,7 @@ function MyApplicationDetailContent({ id }: { id: string }) {
                 <div key={`${answer.questionKey}-${answer.label}`} className="py-3 first:pt-0 last:pb-0">
                   <p className="text-xs font-medium text-tag-text">{answer.label}</p>
                   <p className="mt-1 whitespace-pre-wrap break-words text-sm font-semibold leading-relaxed text-foreground">
-                    {formatAnswerValue(answer.value)}
+                    {formatAnswerValue(answer, jobLabels)}
                   </p>
                 </div>
               ))}
