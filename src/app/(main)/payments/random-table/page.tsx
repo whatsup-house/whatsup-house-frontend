@@ -121,7 +121,10 @@ function PaymentContent() {
               className="w-full"
               onClick={() => {
                 if (data?.gatheringId) {
-                  router.push(`/gatherings/${data.gatheringId}/apply/confirmed${bookingNumber ? `?bookingNumber=${encodeURIComponent(bookingNumber)}` : ''}`)
+                  const query = bookingNumber
+                    ? `bookingNumber=${encodeURIComponent(bookingNumber)}`
+                    : data.applicationId ? `applicationId=${encodeURIComponent(data.applicationId)}` : ''
+                  router.push(`/gatherings/${data.gatheringId}/apply/confirmed${query ? `?${query}` : ''}`)
                 }
               }}
               disabled={!data?.gatheringId}

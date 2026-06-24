@@ -15,6 +15,7 @@ import { useMyProfile } from '@/lib/hooks/useAuth'
 import { useAuthStore } from '@/lib/store/authStore'
 import { requestGuestEmailVerification, confirmGuestEmailVerification } from '@/lib/api/auth'
 import { resolveApiErrorMessage } from '@/lib/utils/apiError'
+import { normalizeGuestEmail, normalizeGuestPhone, writeGuestLookupSession } from '@/lib/utils/guestLookupSession'
 import type {
   GatheringDetail,
   FormQuestionDetail,
@@ -57,6 +58,16 @@ function prefillFromProfile(question: FormQuestionDetail, profile: UserProfile):
     default:
       return undefined
   }
+}
+
+function getAnswerByQuestionKey(
+  questions: FormQuestionDetail[],
+  answers: Record<string, FieldValue>,
+  questionKey: string,
+) {
+  const question = questions.find((item) => item.questionKey === questionKey)
+  const value = question ? answers[question.questionId] : undefined
+  return typeof value === 'string' ? value : ''
 }
 
 export default function DynamicApplicationForm({ gathering, forceGuest = false }: DynamicApplicationFormProps) {
@@ -145,6 +156,11 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
     try {
       if (isGuestMode) {
         const result = await guestMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
+        const guestPhone = normalizeGuestPhone(getAnswerByQuestionKey(questions, answers, 'phone'))
+        const guestEmail = normalizeGuestEmail(getAnswerByQuestionKey(questions, answers, 'email'))
+        if (guestPhone && guestEmail) {
+          writeGuestLookupSession(guestPhone, guestEmail)
+        }
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'PAYMENT_PENDING') {
           router.push(`/payments/random-table?bookingNumber=${encodeURIComponent(result.bookingNumber)}`)
           return
@@ -161,10 +177,10 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
           return
         }
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'CONFIRMED') {
-          router.push(`/gatherings/${gathering.id}/apply/confirmed`)
+          router.push(`/gatherings/${gathering.id}/apply/confirmed?applicationId=${encodeURIComponent(result.id)}`)
           return
         }
-        router.push(`/gatherings/${gathering.id}/apply/complete?status=${result.status}`)
+        router.push(`/gatherings/${gathering.id}/apply/complete?applicationId=${encodeURIComponent(result.id)}&status=${result.status}`)
       }
     } catch (err) {
       setSubmitError(resolveApiErrorMessage(err, tCommon))
