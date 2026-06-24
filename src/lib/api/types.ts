@@ -80,6 +80,7 @@ export interface MyTickets {
   passes: TicketPass[]
   applicationId: string | null
   gatheringId: string | null
+  applicationStatus?: ApplicationStatus | null
 }
 
 export interface GuestOverview {

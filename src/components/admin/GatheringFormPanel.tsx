@@ -20,7 +20,7 @@ const schema = z.object({
   startTime: z.string().min(1, '시작 시간을 입력해주세요'),
   endTime: z.string().min(1, '종료 시간을 입력해주세요'),
   price: z.number({ error: '참가비를 입력해주세요' }).min(0, '참가비는 0원 이상이어야 합니다'),
-  capacity: z.number({ error: '정원을 입력해주세요' }).int().min(1).max(20, '정원은 최대 20명입니다'),
+  capacity: z.number({ error: '정원을 입력해주세요' }).int().min(1).max(30, '정원은 최대 30명입니다'),
   thumbnailUrl: z.string().optional(),
   moodTagsText: z.string().optional(),
   mileageReward: z.number().optional(),
@@ -234,10 +234,10 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
                 {...register('price', { valueAsNumber: true })}
               />
               <Input
-                label="모집 정원 (최대 20) *"
+                label="모집 정원 (최대 30) *"
                 type="number"
                 min={1}
-                max={20}
+                max={30}
                 error={errors.capacity?.message}
                 {...register('capacity', { valueAsNumber: true })}
               />

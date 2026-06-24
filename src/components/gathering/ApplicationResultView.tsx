@@ -15,7 +15,7 @@ import {
 import { Button, Card } from '@/components/ui'
 import { formatLocalizedFullDate, formatTime } from '@/lib/utils/date'
 import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
-import type { GatheringDetail } from '@/lib/api/types'
+import type { ApplicationStatus, GatheringDetail } from '@/lib/api/types'
 
 type Mode = 'completed' | 'confirmed'
 
@@ -24,6 +24,7 @@ interface ApplicationResultViewProps {
   mode: Mode
   bookingNumber?: string | null
   applicationId?: string | null
+  applicationStatus?: string | null
   paymentConfirmed?: boolean
 }
 
@@ -32,6 +33,7 @@ export default function ApplicationResultView({
   mode,
   bookingNumber,
   applicationId,
+  applicationStatus,
   paymentConfirmed = false,
 }: ApplicationResultViewProps) {
   const t = useTranslations('gathering.apply.result')
@@ -41,7 +43,9 @@ export default function ApplicationResultView({
   const formattedDate = formatLocalizedFullDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
   const isRandomTable = gathering.gatheringType === 'RANDOM_TABLE'
-  const needsRandomTableTicket = isRandomTable && mode === 'completed' && Boolean(applicationId || bookingNumber)
+  const normalizedApplicationStatus = applicationStatus as ApplicationStatus | null
+  const isRandomTablePaymentPending = normalizedApplicationStatus === 'PAYMENT_PENDING'
+  const needsRandomTableTicket = isRandomTable && mode === 'completed' && isRandomTablePaymentPending && Boolean(applicationId || bookingNumber)
   const randomTablePaymentUrl = `/payments/random-table?${
     applicationId
       ? `applicationId=${encodeURIComponent(applicationId)}`
@@ -96,7 +100,9 @@ export default function ApplicationResultView({
                 <p className="text-xs text-tag-text">{isRandomTable ? '참가 방식' : t('price')}</p>
                 <p className="text-sm font-medium text-foreground">
                   {isRandomTable
-                    ? mode === 'confirmed' ? '이용권 1회 사용 완료' : '이용권 구매 후 참가 확정'
+                    ? mode === 'confirmed'
+                      ? '이용권 1회 사용 완료'
+                      : isRandomTablePaymentPending ? '이용권 구매 후 참가 확정' : '심사 완료 후 이용권 구매'
                     : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
                 </p>
               </div>

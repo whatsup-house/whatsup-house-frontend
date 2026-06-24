@@ -153,18 +153,18 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
           router.push(`/gatherings/${gathering.id}/apply/confirmed?bookingNumber=${encodeURIComponent(result.bookingNumber)}`)
           return
         }
-        router.push(`/gatherings/${gathering.id}/apply/complete?bookingNumber=${result.bookingNumber}`)
+        router.push(`/gatherings/${gathering.id}/apply/complete?bookingNumber=${result.bookingNumber}&status=${result.status}`)
       } else {
         const result = await memberMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'PAYMENT_PENDING') {
-          router.push(`/gatherings/${gathering.id}/apply/complete?applicationId=${encodeURIComponent(result.id)}`)
+          router.push(`/gatherings/${gathering.id}/apply/complete?applicationId=${encodeURIComponent(result.id)}&status=${result.status}`)
           return
         }
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'CONFIRMED') {
           router.push(`/gatherings/${gathering.id}/apply/confirmed`)
           return
         }
-        router.push(`/gatherings/${gathering.id}/apply/complete`)
+        router.push(`/gatherings/${gathering.id}/apply/complete?status=${result.status}`)
       }
     } catch (err) {
       setSubmitError(resolveApiErrorMessage(err, tCommon))
