@@ -8,6 +8,7 @@ import { useApplicationByToken } from '@/lib/hooks/useApplications'
 import { Card, LoadingSpinner } from '@/components/ui'
 import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
 import { formatLocalizedFullDate } from '@/lib/utils/date'
+import { getApplicationDisplayStatus, isDepositPendingApplication } from '@/lib/utils/applicationDisplay'
 import type { ApplicationStatus } from '@/lib/api/types'
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
@@ -62,6 +63,8 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
   const formattedDate = formatLocalizedFullDate(data.gathering.eventDate, locale)
   const startTime = data.gathering.startTime?.slice(0, 5)
   const isConfirmed = data.status === 'CONFIRMED'
+  const isDepositPending = isDepositPendingApplication(data.status, data.paymentStatus)
+  const displayStatus = getApplicationDisplayStatus(data.status, data.paymentStatus)
 
   const goToConfirmed = () => {
     router.push(
@@ -96,9 +99,9 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
               <p className="text-sm font-medium text-foreground">{data.applicantName}</p>
             )}
             <div className="flex items-center gap-1.5 ml-auto">
-              <PaymentStatusBadge status={data.status === 'CONFIRMED' || data.status === 'ATTENDED' ? data.paymentStatus : null} />
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[data.status]}`}>
-                {tApplications(`status.${data.status}`)}
+              <PaymentStatusBadge status={!isDepositPending && (data.status === 'CONFIRMED' || data.status === 'ATTENDED') ? data.paymentStatus : null} />
+              <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[displayStatus]}`}>
+                {tApplications(`status.${displayStatus}`)}
               </span>
             </div>
           </div>
@@ -131,7 +134,7 @@ export default function TokenApplicationCheck({ token }: TokenApplicationCheckPr
 
           {isConfirmed && (
             <p className="text-xs text-primary text-center mt-4">
-              {t('confirmedHelp')}
+              {isDepositPending ? '입금 안내를 확인해 주세요.' : t('confirmedHelp')}
             </p>
           )}
         </Card>

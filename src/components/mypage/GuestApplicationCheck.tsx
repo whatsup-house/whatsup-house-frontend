@@ -17,6 +17,7 @@ import {
   readGuestLookupSession,
   writeGuestLookupSession,
 } from '@/lib/utils/guestLookupSession'
+import { getApplicationDisplayStatus, isDepositPendingApplication } from '@/lib/utils/applicationDisplay'
 import type { ApplicationListItem, ApplicationStatus, GuestOverview } from '@/lib/api/types'
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
@@ -39,6 +40,8 @@ function ResultCard({ item }: { item: ApplicationListItem }) {
   const isConfirmed = item.status === 'CONFIRMED'
   const isPaymentPending = item.status === 'PAYMENT_PENDING'
   const isAttended = item.status === 'ATTENDED'
+  const isDepositPending = isDepositPendingApplication(item.status, item.paymentStatus)
+  const displayStatus = getApplicationDisplayStatus(item.status, item.paymentStatus)
   const clickable = isConfirmed || isPaymentPending || isAttended
 
   const go = () => {
@@ -70,9 +73,9 @@ function ResultCard({ item }: { item: ApplicationListItem }) {
         <div className="flex items-center justify-between mb-4">
           <p className="text-xs text-tag-text">예약번호 {item.bookingNumber}</p>
           <div className="flex items-center gap-1.5">
-            <PaymentStatusBadge status={item.status === 'CONFIRMED' || item.status === 'ATTENDED' ? item.paymentStatus : null} />
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[item.status]}`}>
-              {tApplications(`status.${item.status}`)}
+            <PaymentStatusBadge status={!isDepositPending && (item.status === 'CONFIRMED' || item.status === 'ATTENDED') ? item.paymentStatus : null} />
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[displayStatus]}`}>
+              {tApplications(`status.${displayStatus}`)}
             </span>
           </div>
         </div>
@@ -84,8 +87,8 @@ function ResultCard({ item }: { item: ApplicationListItem }) {
           <p className="text-sm text-tag-text">{formattedDate}</p>
         </div>
 
-        {isPaymentPending && <p className="text-xs text-primary text-center mt-3">{isRandomTable ? '이용권 구매하러 가기 →' : '입금 안내 보기 →'}</p>}
-        {(isConfirmed || isAttended) && <p className="text-xs text-primary text-center mt-3">참가 확정 내역 보기 →</p>}
+        {(isPaymentPending || isDepositPending) && <p className="text-xs text-primary text-center mt-3">{isRandomTable ? '이용권 구매하러 가기 →' : '입금 안내 보기 →'}</p>}
+        {(isConfirmed || isAttended) && !isDepositPending && <p className="text-xs text-primary text-center mt-3">참가 확정 내역 보기 →</p>}
       </Card>
     </div>
   )

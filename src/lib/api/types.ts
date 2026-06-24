@@ -610,6 +610,7 @@ export interface ApplicationDetail {
   name: string | null
   phone: string | null
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
   gathering: {
     id: string
     title: string
