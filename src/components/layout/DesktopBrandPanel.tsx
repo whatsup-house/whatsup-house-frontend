@@ -29,12 +29,16 @@ export default function DesktopBrandPanel() {
       {/* 브랜드 카피 (앱 프레임 좌측 오버레이) */}
       <aside className="pointer-events-none relative hidden text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-1 lg:flex-col lg:justify-center lg:gap-8 lg:px-14 lg:py-16">
         <div>
-          <h2 className="font-brand-kr text-[44px] font-bold leading-tight drop-shadow-[0_2px_18px_rgba(0,0,0,0.5)]">
-            {t('brand')}
-          </h2>
-          <p className="font-brand-script text-[28px] leading-none text-white/90">
-            What&apos;s up house
-          </p>
+          <div className="inline-flex">
+            <Image
+              src="/assets/whatsup-transparent-logo.png"
+              alt="와썹하우스"
+              width={1007}
+              height={413}
+              priority
+              className="h-auto w-[320px] object-contain drop-shadow-[0_3px_18px_rgba(0,0,0,0.42)]"
+            />
+          </div>
         </div>
 
         <div>
