@@ -461,8 +461,29 @@
       "dateTitle": "{month}月{day}日に開かれるギャザリング",
       "emptyTitle": "この日はギャザリングがありません。",
       "emptyDescription": "別の日を選んでみてください :)",
-      "calendarView": "カレンダーで見る",
-      "mapView": "地図で見る"
+      "calendarView": "カレンダー",
+      "mapView": "地図で見る",
+      "cardView": "まとめ"
+    },
+    "typeView": {
+      "title": "ワッツアップハウスのギャザリングに出会いましょう",
+      "emptyTitle": "まだギャザリングがありません。",
+      "emptyDescription": "新しいギャザリングがまもなく開かれます :)",
+      "nearestOpen": "最短の募集 · {date}",
+      "noOpen": "募集中の日程なし",
+      "scheduleCount": "全{count}件の日程",
+      "filterLabel": "ギャザリングの状態フィルター",
+      "sortLabel": "ギャザリングの並び替え",
+      "filter": {
+        "all": "すべて",
+        "open": "募集中",
+        "completed": "完了"
+      },
+      "sort": {
+        "popular": "人気順",
+        "latest": "新着順",
+        "oldest": "古い順"
+      }
     },
     "card": {
       "price": "{price}ウォン",
