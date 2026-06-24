@@ -14,6 +14,7 @@ import {
   readGuestLookupSession,
   writeGuestLookupSession,
 } from '@/lib/utils/guestLookupSession'
+import { getApplicationDisplayStatus } from '@/lib/utils/applicationDisplay'
 import type { ApplicationStatus, GuestOverview } from '@/lib/api/types'
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
@@ -36,6 +37,11 @@ function getGuestApplicationHref(application: GuestOverview['applications'][numb
     return `/gatherings/${application.gathering.id}/apply/confirmed?bookingNumber=${bookingNumber}`
   }
   return `/guest/applications/${bookingNumber}`
+}
+
+function getGuestApplicationStatusLabel(application: GuestOverview['applications'][number]) {
+  const displayStatus = getApplicationDisplayStatus(application.status, application.paymentStatus)
+  return STATUS_LABEL[displayStatus]
 }
 
 export default function GuestOverviewPage() {
@@ -163,7 +169,7 @@ export default function GuestOverviewPage() {
                 <Card className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div><p className="font-bold">{application.gathering.title}</p><p className="mt-1 text-xs text-tag-text">{application.gathering.eventDate} · {application.bookingNumber}</p></div>
-                    <span className="shrink-0 text-xs font-bold text-primary">{STATUS_LABEL[application.status]}</span>
+                    <span className="shrink-0 text-xs font-bold text-primary">{getGuestApplicationStatusLabel(application)}</span>
                   </div>
                 </Card>
               </button>

@@ -7,8 +7,8 @@ import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
 import { useMyApplicationsMe, useCancelApplication } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
-import PaymentStatusBadge from '@/components/mypage/PaymentStatusBadge'
 import { formatLocalizedNumericDate } from '@/lib/utils/date'
+import { getApplicationDisplayStatus } from '@/lib/utils/applicationDisplay'
 import type { ApplicationStatus } from '@/lib/api/types'
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
@@ -103,6 +103,7 @@ export default function MyApplicationList() {
             const clickable = isConfirmed || isRandomTablePaymentPending || showsApplicationDetail
             const canCancel = item.status === 'PENDING' || item.status === 'PAYMENT_PENDING'
             const cannotCancel = item.status === 'CONFIRMED' || item.status === 'ATTENDED'
+            const displayStatus = getApplicationDisplayStatus(item.status, item.paymentStatus)
             const goDetail = () => {
               if (isRandomTablePaymentPending) {
                 router.push(`/payments/random-table?applicationId=${encodeURIComponent(item.id)}`)
@@ -112,7 +113,7 @@ export default function MyApplicationList() {
                 router.push(`/mypage/applications/${encodeURIComponent(item.id)}`)
                 return
               }
-              router.push(`/gatherings/${item.gathering.id}/apply/confirmed`)
+              router.push(`/gatherings/${item.gathering.id}/apply/confirmed?applicationId=${encodeURIComponent(item.id)}`)
             }
             return (
             <div
@@ -153,10 +154,9 @@ export default function MyApplicationList() {
                       {item.gathering.title}
                     </p>
                     <div className="shrink-0 flex flex-col items-end gap-1">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[item.status]}`}>
-                        {t(`status.${item.status}`)}
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[displayStatus]}`}>
+                        {t(`status.${displayStatus}`)}
                       </span>
-                      <PaymentStatusBadge status={item.status === 'CONFIRMED' || item.status === 'ATTENDED' ? item.paymentStatus : null} />
                     </div>
                   </div>
                   <p className="text-xs text-tag-text mt-1">
