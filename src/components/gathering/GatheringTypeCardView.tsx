@@ -187,6 +187,20 @@ export default function GatheringTypeCardView() {
                 <h3 className="text-sm font-semibold leading-snug text-foreground line-clamp-1">
                   {card.title}
                 </h3>
+                {(card.categoryLabel ?? card.category) || (card.tags?.length ?? 0) > 0 ? (
+                  <div className="flex flex-wrap gap-1 -mt-0.5">
+                    {(card.categoryLabel ?? card.category) && (
+                      <span className="rounded-full bg-primary-light px-1.5 py-0.5 text-[11px] font-medium text-primary">
+                        {card.categoryLabel ?? card.category}
+                      </span>
+                    )}
+                    {card.tags?.map((tag) => (
+                      <span key={tag} className="rounded-full bg-tag-bg px-1.5 py-0.5 text-[11px] text-tag-text">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
                 {card.displayDate ? (
                   <p className="text-xs text-tag-text line-clamp-1">
                     {card.representativeStatus === 'OPEN'
