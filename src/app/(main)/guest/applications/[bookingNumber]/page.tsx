@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calendar, ClipboardList, Clock, Hash, Ticket } from 'lucide-react'
+import { Calendar, ClipboardList, Clock, Ticket } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import { fetchGuestApplicationDetail } from '@/lib/api/application'
@@ -106,14 +106,6 @@ function GuestApplicationDetailContent({ bookingNumber }: { bookingNumber: strin
           <p className="text-xs font-bold text-primary">{status.label}</p>
           <h1 className="mt-2 text-xl font-bold leading-snug text-foreground">{status.title}</h1>
           <p className="mt-2 text-sm leading-relaxed text-tag-text">{status.description}</p>
-        </Card>
-
-        <Card className="p-5">
-          <div className="flex items-center gap-2 text-primary">
-            <Hash size={18} />
-            <p className="text-xs font-medium text-tag-text">예약번호</p>
-          </div>
-          <p className="mt-2 text-lg font-bold text-primary">{detail.bookingNumber}</p>
         </Card>
 
         <Card className="p-5">
