@@ -138,7 +138,7 @@ export default function ProfileEditOverlay({ profile, onClose }: ProfileEditOver
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background lg:flex lg:items-center lg:justify-center lg:overflow-hidden lg:bg-foreground/30 lg:p-4">
+    <div className="fixed lg:absolute inset-0 z-50 overflow-y-auto bg-background lg:flex lg:items-center lg:justify-center lg:overflow-hidden lg:bg-foreground/30 lg:p-4">
       <div className="mx-auto max-w-[390px] lg:max-h-[90vh] lg:w-full lg:max-w-[400px] lg:overflow-y-auto lg:rounded-card lg:bg-background lg:shadow-2xl">
       <header className="sticky top-0 z-10 bg-background border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
