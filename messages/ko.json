@@ -684,7 +684,8 @@
       },
       "payment": {
         "PENDING": "입금확인중",
-        "CONFIRMED": "입금 완료"
+        "CONFIRMED": "입금 완료",
+        "FREE": "무료"
       },
       "emptyFiltered": "해당 상태의 신청 내역이 없어요.",
       "empty": "아직 신청한 게더링이 없어요.",
