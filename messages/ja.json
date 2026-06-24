@@ -716,7 +716,7 @@
     "tabs": {
       "profile": "プロフィール",
       "applications": "申請履歴",
-      "reviews": "レビュー"
+      "reviews": "自分のレビュー"
     },
     "mileage": {
       "balanceAsOf": "{time}時点の保有マイレージ",
