@@ -84,9 +84,8 @@ function CompactDropdown<T extends string>({ value, options, onChange, ariaLabel
                       onChange(option.value)
                       setOpen(false)
                     }}
-                    className={`flex min-h-9 w-full items-center justify-between gap-2 px-3 text-left text-xs font-medium transition-colors ${
-                      selected ? 'bg-primary-light text-primary' : 'text-foreground'
-                    } ${index > 0 ? 'border-t border-tag-bg/40' : ''}`}
+                    className={`flex min-h-9 w-full items-center justify-between gap-2 px-3 text-left text-xs font-medium transition-colors ${selected ? 'bg-primary-light text-primary' : 'text-foreground'
+                      } ${index > 0 ? 'border-t border-tag-bg/40' : ''}`}
                   >
                     <span className="truncate">{option.label}</span>
                     {selected && <Check size={13} className="shrink-0" />}
@@ -172,6 +171,7 @@ export default function GatheringTypeCardView() {
                     src={card.thumbnailUrl}
                     alt={card.title}
                     className="object-cover"
+                    style={card.title === '우연한 식탁' ? { objectPosition: 'center 42%' } : undefined}
                     sizes="(max-width: 390px) 50vw, 195px"
                   />
                 ) : (

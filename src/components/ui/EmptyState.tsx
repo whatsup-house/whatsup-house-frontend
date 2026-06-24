@@ -24,13 +24,13 @@ export default function EmptyState({
   const showIllustration = Boolean(illustration) && !illustrationFailed
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+    <div className={`flex flex-col items-center justify-center gap-3 text-center ${showIllustration ? 'py-3' : 'py-12'}`}>
       {showIllustration ? (
-        <div className="relative w-40 h-40">
+        <div className="relative h-[284px] w-full max-w-[284px] -translate-y-3">
           <AppImage
             src={illustration as string}
             alt={illustrationAlt ?? title}
-            sizes="160px"
+            sizes="284px"
             className="object-contain"
             onError={() => setIllustrationFailed(true)}
           />
@@ -38,10 +38,8 @@ export default function EmptyState({
       ) : (
         <Icon size={48} className="text-tag-text opacity-50" />
       )}
-      <p className="text-base font-semibold text-foreground">{title}</p>
-      {description && (
-        <p className="text-sm text-tag-text">{description}</p>
-      )}
+      {!showIllustration && <p className="text-base font-semibold text-foreground">{title}</p>}
+      {!showIllustration && description && <p className="text-sm text-tag-text">{description}</p>}
     </div>
   )
 }

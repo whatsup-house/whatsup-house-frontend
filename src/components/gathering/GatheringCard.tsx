@@ -27,6 +27,7 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
   // 카테고리/태그 칩 — BE 미제공 시 표시하지 않는다 (KAN-305)
   const displayCategory = categoryLabel ?? category
   const hasChips = Boolean(displayCategory) || (tags?.length ?? 0) > 0
+  const thumbnailPosition = title === '우연한 식탁' ? 'center 32%' : undefined
 
   return (
     <Link href={`/gatherings/${id}`}>
@@ -34,7 +35,13 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
         {/* 썸네일 */}
         <div className="relative w-full aspect-video bg-tag-bg">
           {thumbnailUrl ? (
-            <AppImage src={thumbnailUrl} alt={title} className="object-cover" sizes="(max-width: 390px) 100vw, 390px" />
+            <AppImage
+              src={thumbnailUrl}
+              alt={title}
+              className="object-cover"
+              style={thumbnailPosition ? { objectPosition: thumbnailPosition } : undefined}
+              sizes="(max-width: 390px) 100vw, 390px"
+            />
           ) : (
             <div className="w-full h-full bg-tag-bg" />
           )}
