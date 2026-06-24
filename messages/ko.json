@@ -716,7 +716,7 @@
     "tabs": {
       "profile": "프로필",
       "applications": "신청 내역",
-      "reviews": "후기"
+      "reviews": "내가 쓴 후기"
     },
     "mileage": {
       "balanceAsOf": "{time} 기준 보유 마일리지",

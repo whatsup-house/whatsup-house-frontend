@@ -716,7 +716,7 @@
     "tabs": {
       "profile": "Perfil",
       "applications": "Solicitudes",
-      "reviews": "Reseñas"
+      "reviews": "Mis reseñas"
     },
     "mileage": {
       "balanceAsOf": "Saldo de puntos a partir del {time}",
