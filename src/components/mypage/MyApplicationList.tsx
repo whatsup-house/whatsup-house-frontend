@@ -99,10 +99,17 @@ export default function MyApplicationList() {
           {applications.map((item) => {
             const isConfirmed = item.status === 'CONFIRMED'
             const isRandomTablePaymentPending = item.status === 'PAYMENT_PENDING' && item.gathering.gatheringType === 'RANDOM_TABLE'
-            const clickable = isConfirmed || isRandomTablePaymentPending
+            const showsApplicationDetail = item.status === 'PENDING' || item.status === 'REJECTED' || item.status === 'CANCELLED'
+            const clickable = isConfirmed || isRandomTablePaymentPending || showsApplicationDetail
+            const canCancel = item.status === 'PENDING' || item.status === 'PAYMENT_PENDING'
+            const cannotCancel = item.status === 'CONFIRMED' || item.status === 'ATTENDED'
             const goDetail = () => {
               if (isRandomTablePaymentPending) {
                 router.push(`/payments/random-table?applicationId=${encodeURIComponent(item.id)}`)
+                return
+              }
+              if (showsApplicationDetail) {
+                router.push(`/mypage/applications/${encodeURIComponent(item.id)}`)
                 return
               }
               router.push(`/gatherings/${item.gathering.id}/apply/confirmed`)
@@ -159,12 +166,14 @@ export default function MyApplicationList() {
                 </div>
               </div>
 
-              {(item.status === 'PENDING' || item.status === 'CONFIRMED') && (
+              {(canCancel || cannotCancel) && (
                 <div
                   className="mt-3 pt-3 border-t border-tag-bg/50"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {confirmingId === item.id ? (
+                  {cannotCancel ? (
+                    <span className="text-xs text-tag-text">취소불가</span>
+                  ) : confirmingId === item.id ? (
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs text-tag-text">{t('cancelConfirmQuestion')}</p>
                       <div className="flex gap-2">

@@ -79,6 +79,7 @@ export interface MyTickets {
   totalRemaining: number
   passes: TicketPass[]
   applicationId: string | null
+  bookingNumber?: string | null
   gatheringId: string | null
   applicationStatus?: ApplicationStatus | null
 }
