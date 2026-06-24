@@ -13,6 +13,10 @@ export interface GatheringTypeCard {
   representativeStatus: GatheringStatus
   // 카드에 표시할 날짜. 진행완료 등 미표시 상황은 null. (KAN-295)
   displayDate: string | null
+  // 대표 게더링의 카테고리/태그 — 미제공 시 칩 미표시 (KAN-305)
+  category: string | null
+  categoryLabel: string | null
+  tags: string[] | null
 }
 
 interface BuildOptions {
@@ -87,6 +91,9 @@ export function buildGatheringTypeCards(
       representativeId: representative.id,
       representativeStatus: getEffectiveStatus(representative.status, representative.eventDate),
       displayDate,
+      category: representative.category ?? null,
+      categoryLabel: representative.categoryLabel ?? null,
+      tags: representative.tags ?? null,
     })
   }
 
