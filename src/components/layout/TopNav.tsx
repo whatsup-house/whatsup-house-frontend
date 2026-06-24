@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
+import { useNavigationStore } from '@/lib/store/navigationStore'
 import LanguageSwitcher from './LanguageSwitcher'
 import NotificationBell from './NotificationBell'
 
@@ -47,13 +48,17 @@ export default function TopNav() {
   const t = useTranslations('nav')
   const tCommon = useTranslations('common')
   const pathname = usePathname()
+  const stackLength = useNavigationStore((state) => state.stack.length)
   const handleBack = useBackNavigation(getFallbackPath(pathname))
 
   if (HIDDEN_PATTERNS.some((pattern) => pattern.test(pathname))) {
     return null
   }
 
-  const canGoBack = !ROOT_PATHS.has(pathname)
+  // 첫 진입 화면(루트 탭의 최초 진입)이 아니면 항상 뒤로가기를 노출한다.
+  // - 앱 내 이동 기록이 있으면(stack > 1) 루트 탭이어도 노출 (홈→게더링 이동 등)
+  // - 루트 탭이 아닌 화면은 딥링크 첫 진입이어도 노출 (fallback 경로로 이동)
+  const canGoBack = stackLength > 1 || !ROOT_PATHS.has(pathname)
   const titleKey = getTitleKey(pathname)
   const title = titleKey ? t(`titles.${titleKey}`) : ''
 
