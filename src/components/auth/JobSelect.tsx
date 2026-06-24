@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Search, ChevronDown, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useJobs } from '@/lib/hooks/useJobs'
+import { useLocalizedJobs } from '@/lib/hooks/useLocalizedJobs'
 
 interface JobSelectProps {
   value: string
@@ -15,7 +15,7 @@ interface JobSelectProps {
 // value/onChange는 직업 "코드"를 다룬다(라벨이 아님). 미선택은 빈 문자열.
 export default function JobSelect({ value, onChange, placeholder }: JobSelectProps) {
   const t = useTranslations('auth.onboarding.jobSelect')
-  const { data: groups } = useJobs()
+  const { data: groups } = useLocalizedJobs()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -117,8 +117,10 @@ export default function JobSelect({ value, onChange, placeholder }: JobSelectPro
               <li className="px-4 py-3 text-sm text-tag-text">{t('empty')}</li>
             )}
             {filtered.map((group) => (
-              <li key={group.category}>
-                <p className="px-4 pt-2 pb-1 text-xs text-tag-text">{group.categoryLabel}</p>
+              <li key={group.category} className="border-t border-tag-bg first:border-t-0">
+                <p className="px-4 pt-2.5 pb-1.5 bg-tag-bg/40 text-xs font-semibold uppercase tracking-wide text-tag-text">
+                  {group.categoryLabel}
+                </p>
                 <ul>
                   {group.jobs.map((job) => (
                     <li key={job.code}>
