@@ -458,6 +458,16 @@ export interface AdminHomeReview {
   createdAt: string
 }
 
+export type AdminHomeReviewSort = 'LATEST' | 'LIKES'
+
+export interface AdminHomeReviewPage {
+  content: AdminHomeReview[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 export interface ReviewHomeFeaturedRequest {
   isHomeFeatured: boolean
   homeDisplayOrder?: number
