@@ -37,6 +37,7 @@ export default function GatheringList({ date, gatherings, isLoading, isError, on
         <div className="border border-dashed border-tag-bg rounded-card">
           <EmptyState
             icon={Coffee}
+            illustration="/NoGathering.png"
             title={t('emptyTitle')}
             description={t('emptyDescription')}
           />
