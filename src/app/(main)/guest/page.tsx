@@ -168,7 +168,7 @@ export default function GuestOverviewPage() {
               >
                 <Card className="p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div><p className="font-bold">{application.gathering.title}</p><p className="mt-1 text-xs text-tag-text">{application.gathering.eventDate} · {application.bookingNumber}</p></div>
+                    <div><p className="font-bold">{application.gathering.title}</p><p className="mt-1 text-xs text-tag-text">{application.gathering.eventDate}</p></div>
                     <span className="shrink-0 text-xs font-bold text-primary">{getGuestApplicationStatusLabel(application)}</span>
                   </div>
                 </Card>
