@@ -17,6 +17,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   '/mypage': 'mypage',
   '/mypage/mileage': 'mileage',
   '/applications/check': 'applicationCheck',
+  '/applications/result': 'applicationCheck',
   '/login': 'login',
   '/register': 'register',
   '/onboarding': 'onboarding',

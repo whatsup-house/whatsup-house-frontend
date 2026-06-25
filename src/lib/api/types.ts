@@ -252,6 +252,7 @@ export interface ApplicationTokenCheckResponse {
   bookingNumber: string
   status: ApplicationStatus
   paymentStatus?: PaymentStatus | null
+  ticketRemainingCount?: number | null
   applicantName: string | null
   gathering: {
     id: string
@@ -623,6 +624,7 @@ export interface ApplicationDetail {
   phone: string | null
   status: ApplicationStatus
   paymentStatus?: PaymentStatus | null
+  ticketRemainingCount?: number | null
   gathering: {
     id: string
     title: string

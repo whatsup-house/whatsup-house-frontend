@@ -75,6 +75,7 @@ export default function ApplicationResultRoute({
       applicationId={applicationId}
       applicationStatus={latestStatus as ApplicationStatus | null}
       paymentConfirmed={paymentConfirmed}
+      ticketRemainingCount={application?.ticketRemainingCount}
     />
   )
 }

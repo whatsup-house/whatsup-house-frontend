@@ -52,7 +52,6 @@ function PaymentContent() {
   }
 
   const products = productsQuery.data ?? []
-  const displayBookingNumber = bookingNumber ?? memberApplicationDetail.data?.bookingNumber ?? data?.bookingNumber ?? null
   const selectedProductId = selected ?? products[0]?.id ?? null
   const product = products.find((item) => item.id === selectedProductId) ?? products[0]
   const canPurchase = data?.purchasable === true
@@ -91,12 +90,6 @@ function PaymentContent() {
       <p className="text-sm text-tag-text mb-6">
         {isPaymentComplete ? '참가 확정 정보를 확인해 주세요.' : displayPass ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}
       </p>
-      {displayBookingNumber && (
-        <Card className="p-4 mb-4 bg-tag-bg">
-          <p className="text-xs text-tag-text">신청 예약번호</p>
-          <p className="font-bold text-primary mt-1">{displayBookingNumber}</p>
-        </Card>
-      )}
       {displayPass ? (
         isPaymentComplete ? (
           <>
