@@ -85,9 +85,7 @@ export default function GatheringDetailPage({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-tag-text">{t('priceLabel')}</p>
-            <p className="text-lg font-bold text-foreground">
-              {gathering.price === 0 ? t('free') : t('price', { price: gathering.price.toLocaleString(locale) })}
-            </p>
+            <p className="text-lg font-bold text-foreground">{t('price', { price: gathering.price.toLocaleString(locale) })}</p>
           </div>
           <div className="flex items-center gap-2">
             {isRecruiting ? (
