@@ -9,8 +9,9 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { getAnimalEmoji } from '@/lib/utils/animalProfile'
 
-// /gatherings/[id] 및 하위 경로(/apply, /apply/complete 등)에서 숨김
-const HIDDEN_PATTERNS = [/^\/gatherings\/[^/]+/]
+// 게더링 상세(/gatherings/[id])에서만 숨긴다. 하단에 신청하기 스티키 바가 있기 때문.
+// /apply, /apply/complete 등 하위 경로에는 바텀 네비를 노출한다.
+const HIDDEN_PATTERNS = [/^\/gatherings\/[^/]+$/]
 
 function isValidImageSrc(url: string): boolean {
   return url.startsWith('/') || url.startsWith('http://') || url.startsWith('https://')
