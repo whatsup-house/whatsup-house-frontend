@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { MapPin, Clock, CalendarDays } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import Badge from '@/components/ui/Badge'
 import AppImage from '@/components/ui/AppImage'
 import type { GatheringListItem } from '@/lib/api/types'
-import { formatKoreanShortDate } from '@/lib/utils/date'
+import { formatLocalizedShortDate } from '@/lib/utils/date'
 import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
 
 interface GatheringCardProps {
@@ -11,14 +12,19 @@ interface GatheringCardProps {
 }
 
 export default function GatheringCard({ gathering }: GatheringCardProps) {
+  const t = useTranslations('gathering.card')
+  const locale = useLocale()
   const {
     id, title, eventDate, startTime, price,
     maxAttendees, thumbnailUrl,
-    status, location,
+    status, location, tags,
   } = gathering
 
   // 과거 모집중 게더링은 진행 완료로 보정해 표시 (KAN-164)
   const effectiveStatus = getEffectiveStatus(status, eventDate)
+
+  const hasChips = (tags?.length ?? 0) > 0
+  const thumbnailPosition = title === '우연한 식탁' ? 'center 32%' : undefined
 
   return (
     <Link href={`/gatherings/${id}`}>
@@ -26,7 +32,13 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
         {/* 썸네일 */}
         <div className="relative w-full aspect-video bg-tag-bg">
           {thumbnailUrl ? (
-            <AppImage src={thumbnailUrl} alt={title} className="object-cover" sizes="(max-width: 390px) 100vw, 390px" />
+            <AppImage
+              src={thumbnailUrl}
+              alt={title}
+              className="object-cover"
+              style={thumbnailPosition ? { objectPosition: thumbnailPosition } : undefined}
+              sizes="(max-width: 390px) 100vw, 390px"
+            />
           ) : (
             <div className="w-full h-full bg-tag-bg" />
           )}
@@ -44,10 +56,20 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
             {title}
           </h3>
 
+          {hasChips && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {tags?.map((tag) => (
+                <span key={tag} className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-col gap-1 text-sm text-tag-text mb-3">
             <div className="flex items-center gap-1.5">
               <CalendarDays size={13} />
-              <span>{formatKoreanShortDate(eventDate)}</span>
+              <span>{formatLocalizedShortDate(eventDate, locale)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock size={13} />
@@ -60,8 +82,8 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="font-bold text-foreground">{price.toLocaleString()}원</span>
-            <span className="text-xs text-tag-text">최대 {maxAttendees}명</span>
+            <span className="font-bold text-foreground">{t('price', { price: price.toLocaleString(locale) })}</span>
+            <span className="text-xs text-tag-text">{t('capacity', { count: maxAttendees })}</span>
           </div>
         </div>
       </div>

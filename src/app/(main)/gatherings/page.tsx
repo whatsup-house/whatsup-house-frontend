@@ -1,18 +1,23 @@
 import type { Metadata } from 'next'
 import dayjs from 'dayjs'
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
+import { getTranslations } from 'next-intl/server'
 import { makeQueryClient } from '@/lib/utils/queryClient'
 import { prefetchGatheringsQueries } from '@/lib/hooks/useGatherings'
 import GatheringsPageClient from '@/components/gathering/GatheringsPageClient'
 
-export const metadata: Metadata = {
-  title: '게더링 | 와썹하우스',
-  description: '날짜별 소셜 게더링 일정을 확인하고 신청하세요.',
-  openGraph: {
-    title: '게더링 | 와썹하우스',
-    description: '날짜별 소셜 게더링 일정을 확인하고 신청하세요.',
-    type: 'website',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.gatherings')
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      type: 'website',
+    },
+  }
 }
 
 export const dynamic = 'force-dynamic'

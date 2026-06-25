@@ -2,17 +2,20 @@
 
 import { use } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { LoadingSpinner, ApiErrorMessage } from '@/components/ui'
 import DynamicApplicationForm from '@/components/gathering/DynamicApplicationForm'
 import AppImage from '@/components/ui/AppImage'
-import { formatKoreanNumericDate, formatTime } from '@/lib/utils/date'
+import { formatLocalizedNumericDate, formatTime } from '@/lib/utils/date'
 
 export default function ApplyPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  const t = useTranslations('gathering.apply.form')
+  const locale = useLocale()
   const { id } = use(params)
   const searchParams = useSearchParams()
   const forceGuest = searchParams.get('type') === 'guest'
@@ -31,14 +34,14 @@ export default function ApplyPage({
     return (
       <div className="min-h-screen bg-background px-4 pt-20">
         <ApiErrorMessage
-          message="게더링 정보를 불러올 수 없습니다."
+          message={t('gatheringLoadFailed')}
           onRetry={() => { refetch() }}
         />
       </div>
     )
   }
 
-  const formattedDate = formatKoreanNumericDate(gathering.eventDate)
+  const formattedDate = formatLocalizedNumericDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
 
   return (

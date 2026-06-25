@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import ReviewCard from './ReviewCard'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useAllReviews, useReviewLocate } from '@/lib/hooks/useReview'
@@ -15,9 +16,10 @@ function GatheringDropdown({ value, onChange, options }: {
   onChange: (id: string) => void
   options: Array<{ id: string; title: string }>
 }) {
+  const t = useTranslations('review')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const allOptions = [{ id: 'all', title: '전체 게더링' }, ...options]
+  const allOptions = [{ id: 'all', title: t('allGatherings') }, ...options]
   const current = allOptions.find((g) => g.id === value)
 
   useEffect(() => {
@@ -34,7 +36,7 @@ function GatheringDropdown({ value, onChange, options }: {
         onClick={() => setOpen((o) => !o)}
         className="flex w-fit items-center gap-1.5 px-3 py-2 rounded-full border border-tag-bg/60 bg-card text-sm font-semibold text-tag-text max-w-[220px]"
       >
-        <span className="truncate">{current?.title ?? '전체 게더링'}</span>
+        <span className="truncate">{current?.title ?? t('allGatherings')}</span>
         <ChevronDown size={14} className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -63,13 +65,14 @@ function Pagination({ page, totalPages, onChange }: {
   totalPages: number
   onChange: (p: number) => void
 }) {
+  const t = useTranslations('pagination')
   if (totalPages <= 1) return null
   return (
     <div className="flex items-center justify-center gap-1 py-5">
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 0}
-        aria-label="이전 페이지"
+        aria-label={t('previous')}
         className="w-8 h-8 rounded-full flex items-center justify-center text-foreground bg-card shadow-sm disabled:opacity-40 disabled:bg-transparent disabled:shadow-none transition-opacity"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -92,7 +95,7 @@ function Pagination({ page, totalPages, onChange }: {
       <button
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages - 1}
-        aria-label="다음 페이지"
+        aria-label={t('next')}
         className="w-8 h-8 rounded-full flex items-center justify-center text-foreground bg-card shadow-sm disabled:opacity-40 disabled:bg-transparent disabled:shadow-none transition-opacity"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -104,6 +107,7 @@ function Pagination({ page, totalPages, onChange }: {
 }
 
 export default function AllReviewList() {
+  const t = useTranslations('review')
   const { isLoggedIn } = useAuthStore()
   const searchParams = useSearchParams()
   const highlightId = searchParams.get('highlight')
@@ -179,7 +183,7 @@ export default function AllReviewList() {
                 sort === s ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
               }`}
             >
-              {s === 'LIKES' ? '추천순' : '최신순'}
+              {s === 'LIKES' ? t('sort.likes') : t('sort.latest')}
             </button>
           ))}
         </div>
@@ -187,13 +191,13 @@ export default function AllReviewList() {
 
       {/* 로딩 */}
       {isLoading && (
-        <p className="py-8 text-center text-sm text-tag-text">불러오는 중...</p>
+        <p className="py-8 text-center text-sm text-tag-text">{t('loading')}</p>
       )}
 
       {/* 빈 상태 */}
       {!isLoading && reviews.length === 0 && (
         <p className="py-8 text-center text-sm text-tag-text">
-          아직 후기가 없어요. 첫 번째 후기를 남겨보세요!
+          {t('empty')}
         </p>
       )}
 

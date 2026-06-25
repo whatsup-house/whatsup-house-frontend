@@ -23,6 +23,7 @@ export interface GatheringListItem {
   maxAttendees: number
   status: GatheringStatus
   thumbnailUrl: string | null
+  createdAt?: string     // 등록일 (ISO datetime) — 목록 정렬용 (KAN-295)
   location: {
     id: string
     name: string
@@ -30,6 +31,8 @@ export interface GatheringListItem {
     naverMapUrl?: string | null
     kakaoMapUrl?: string | null
   } | null
+  // 태그 — BE(KAN-304)에서 제공. 미제공 시 칩 미표시 (KAN-305)
+  tags?: string[] | null
 }
 
 export interface GatheringDetail extends GatheringListItem {
@@ -44,26 +47,61 @@ export interface GatheringDetail extends GatheringListItem {
 
 // 우연한 식탁 이용권 (KAN-260)
 export type TicketPassStatus = 'PENDING' | 'ACTIVE' | 'USED_UP' | 'CANCELLED'
-export type TicketProduct = 'RANDOM_TABLE_FOUR'
+export type TicketProduct = 'RANDOM_TABLE_ONE' | 'RANDOM_TABLE_FOUR'
+export type ParticipantAccountStatus = 'ACTIVE' | 'BLOCKED'
+export type RandomTableEligibility = 'UNREVIEWED' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
+
+export interface TicketProductItem {
+  id: string
+  name: string
+  sessionCount: number
+  price: number
+}
 
 export interface TicketPass {
   id: string
-  product: TicketProduct
+  applicationId: string | null
+  productId: string | null
+  product: TicketProduct | null
   productLabel: string
   totalCount: number
   remainingCount: number
   status: TicketPassStatus
   createdAt: string
   activatedAt: string | null
+  purchaseAmount: number
+  paymentDeadline: string | null
+  paymentConfirmedAt: string | null
 }
 
 export interface MyTickets {
+  accountStatus: ParticipantAccountStatus
+  randomTableEligibility: RandomTableEligibility
+  purchasable: boolean
   totalRemaining: number
   passes: TicketPass[]
+  applicationId: string | null
+  bookingNumber?: string | null
+  gatheringId: string | null
+  applicationStatus?: ApplicationStatus | null
+}
+
+export interface GuestOverview {
+  name: string
+  randomTableEligibility: RandomTableEligibility
+  totalRemaining: number
+  passes: TicketPass[]
+  applications: ApplicationListItem[]
 }
 
 export interface TicketPurchaseRequest {
-  product: TicketProduct
+  productId?: string | null
+  product?: TicketProduct | null
+  applicationId?: string | null
+}
+
+export interface GuestTicketPurchaseRequest extends TicketPurchaseRequest {
+  bookingNumber: string
 }
 
 // 달력 dot 표시용 (날짜별 대표 게더링 상태)
@@ -94,7 +132,8 @@ export interface RegisterRequest {
   age: number      // @NotNull in backend — birthDate 기준 만 나이(BE 전환 전까지 호환용 전송)
   birthDate?: string // 생년월일 (YYYY-MM-DD). BE(KAN-257)에서 영속화 후 age 계산에 사용
   phone?: string   // 11 digits
-  bio?: string
+  intro?: string
+  instagramId?: string
   job?: string
   mbti?: string
 }
@@ -159,11 +198,23 @@ export interface ProfileUpdateRequest {
   interests?: string[]
 }
 
-// 내 신청 내역 타입
-export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
+// 직업 카탈로그 (KAN-270)
+export interface JobItem {
+  code: string
+  label: string
+}
 
-// 입금 상태. 유료 게더링에서만 내려오며, 무료 게더링은 null(표시하지 않음). (KAN-243)
-export type PaymentStatus = 'PENDING' | 'CONFIRMED'
+export interface JobGroup {
+  category: string
+  categoryLabel: string
+  jobs: JobItem[]
+}
+
+// 내 신청 내역 타입
+export type ApplicationStatus = 'PENDING' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED' | 'ATTENDED'
+
+// 결제 상태. 무료 게더링은 FREE로 내려오며, 유료 우연한 식탁 이용권 결제는 별도 도메인에서 처리한다.
+export type PaymentStatus = 'PENDING' | 'CONFIRMED' | 'FREE'
 
 export interface ApplicationListItem {
   id: string
@@ -175,6 +226,7 @@ export interface ApplicationListItem {
     title: string
     eventDate: string
     thumbnailUrl: string | null
+    gatheringType?: GatheringType
   }
   createdAt: string
 }
@@ -200,6 +252,7 @@ export interface ApplicationTokenCheckResponse {
   bookingNumber: string
   status: ApplicationStatus
   paymentStatus?: PaymentStatus | null
+  ticketRemainingCount?: number | null
   applicantName: string | null
   gathering: {
     id: string
@@ -408,6 +461,16 @@ export interface AdminHomeReview {
   createdAt: string
 }
 
+export type AdminHomeReviewSort = 'LATEST' | 'LIKES'
+
+export interface AdminHomeReviewPage {
+  content: AdminHomeReview[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 export interface ReviewHomeFeaturedRequest {
   isHomeFeatured: boolean
   homeDisplayOrder?: number
@@ -457,6 +520,7 @@ export interface UserProfile {
   interests: string[] | null
   mileage?: number
   avatarUrl: string | null
+  characterUrl: string | null
   admin?: boolean
 }
 
@@ -559,6 +623,8 @@ export interface ApplicationDetail {
   name: string | null
   phone: string | null
   status: ApplicationStatus
+  paymentStatus?: PaymentStatus | null
+  ticketRemainingCount?: number | null
   gathering: {
     id: string
     title: string
@@ -659,4 +725,23 @@ export interface AdminApplicationDetail {
   userId: string | null
   createdAt: string
   answers: AnswerView[]
+}
+
+// 인앱 알림 (KAN-262)
+export type NotificationType = 'PARTICIPATION_CONFIRMED' | 'MILEAGE_EARNED' | 'REVIEW_LIKE_MILESTONE'
+// 알림 클릭 시 이동 대상 (FE가 라우트로 매핑)
+export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS'
+
+export interface NotificationItem {
+  id: string
+  type: NotificationType
+  title: string
+  content: string | null
+  link: NotificationLink | null
+  isRead: boolean
+  createdAt: string
+}
+
+export interface UnreadCountResponse {
+  unreadCount: number
 }

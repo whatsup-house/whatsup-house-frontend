@@ -1,21 +1,58 @@
 import dayjs from 'dayjs'
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
-const FULL_WEEKDAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+const LOCALE_MAP = {
+  ko: 'ko-KR',
+  en: 'en-US',
+  ja: 'ja-JP',
+  zh: 'zh-CN',
+  es: 'es-ES',
+} as const
+
+export type AppLocale = keyof typeof LOCALE_MAP
+
+function intlLocale(locale: string): string {
+  return LOCALE_MAP[locale as AppLocale] ?? LOCALE_MAP.ko
+}
+
+export function formatLocalizedShortDate(date: string, locale: string): string {
+  const d = dayjs(date)
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short',
+  }).format(d.toDate())
+}
+
+export function formatLocalizedFullDate(date: string, locale: string): string {
+  const d = dayjs(date)
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+  }).format(d.toDate())
+}
+
+export function formatLocalizedNumericDate(date: string, locale: string): string {
+  const d = dayjs(date)
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+  }).format(d.toDate())
+}
 
 export function formatKoreanShortDate(date: string): string {
-  const d = dayjs(date)
-  return `${d.month() + 1}월 ${d.date()}일 (${WEEKDAYS[d.day()]})`
+  return formatLocalizedShortDate(date, 'ko')
 }
 
 export function formatKoreanFullDate(date: string): string {
-  const d = dayjs(date)
-  return `${d.year()}년 ${d.month() + 1}월 ${d.date()}일 ${FULL_WEEKDAYS[d.day()]}`
+  return formatLocalizedFullDate(date, 'ko')
 }
 
 export function formatKoreanNumericDate(date: string): string {
-  const d = dayjs(date)
-  return `${d.year()}. ${String(d.month() + 1).padStart(2, '0')}. ${String(d.date()).padStart(2, '0')} (${WEEKDAYS[d.day()]})`
+  return formatLocalizedNumericDate(date, 'ko')
 }
 
 // 생년월일(YYYY-MM-DD) 기준 만 나이를 계산한다. 유효하지 않으면 NaN.
@@ -38,16 +75,19 @@ export function formatTimeRange(startTime: string | null | undefined, endTime: s
   return `${start} - ${end}`
 }
 
-export function formatDuration(startTime: string | null | undefined, endTime: string | null | undefined): string {
-  if (!startTime || !endTime) return ''
+export function getDurationParts(startTime: string | null | undefined, endTime: string | null | undefined): { hours: number; minutes: number } | null {
+  if (!startTime || !endTime) return null
 
   const startMinutes = parseInt(startTime.slice(0, 2), 10) * 60 + parseInt(startTime.slice(3, 5), 10)
   const endMinutes = parseInt(endTime.slice(0, 2), 10) * 60 + parseInt(endTime.slice(3, 5), 10)
-  const durationMinutes = endMinutes - startMinutes
+  const durationMinutes = endMinutes > startMinutes
+    ? endMinutes - startMinutes
+    : endMinutes + 24 * 60 - startMinutes
 
-  if (durationMinutes <= 0) return ''
+  if (durationMinutes <= 0) return null
 
-  const hours = Math.floor(durationMinutes / 60)
-  const minutes = durationMinutes % 60
-  return minutes > 0 ? `${hours}시간 ${minutes}분` : `${hours}시간`
+  return {
+    hours: Math.floor(durationMinutes / 60),
+    minutes: durationMinutes % 60,
+  }
 }

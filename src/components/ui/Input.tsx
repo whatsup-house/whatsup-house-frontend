@@ -4,14 +4,15 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
   requiredMark?: boolean
+  labelClassName?: string
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, requiredMark, className, ...props }, ref) => {
+  ({ label, error, requiredMark, className, labelClassName, ...props }, ref) => {
     return (
       <div className="flex flex-col gap-1">
         {label && (
-          <label className="text-sm font-medium text-foreground">
+          <label className={labelClassName ?? 'text-sm font-medium text-foreground'}>
             {label}
             {requiredMark && <span className="text-primary"> *</span>}
           </label>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Flame, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import { useHeroCarousel } from '@/lib/hooks/useHome'
 import { findStoryByTitle } from '@/lib/constants/stories'
@@ -17,6 +18,7 @@ function CarouselSkeleton() {
 }
 
 export default function HeroCarousel() {
+  const t = useTranslations('home.hero')
   const { data: slides, isLoading } = useHeroCarousel()
   const [idx, setIdx] = useState(0)
   const touchStartX = useRef(0)
@@ -153,10 +155,10 @@ export default function HeroCarousel() {
               {slide.type === 'CALENDAR' && (
                 <>
                   <p className="text-[11px] font-semibold uppercase tracking-widest opacity-85 mb-1">
-                    이번 달 일정
+                    {t('calendarEyebrow')}
                   </p>
                   <p className="text-lg font-bold">{slide.title}</p>
-                  <p className="text-xs opacity-85 mt-1">탭해서 전체 게더링 보기 →</p>
+                  <p className="text-xs opacity-85 mt-1">{t('calendarCta')}</p>
                 </>
               )}
               {slide.type === 'GATHERING' && (
@@ -165,7 +167,7 @@ export default function HeroCarousel() {
                   {slide.gatheringStatus === 'OPEN' && (
                     <span className="inline-flex items-center gap-1 bg-primary text-white rounded-full px-2.5 py-0.5 text-[10px] font-bold mb-1.5">
                       <Flame size={12} />
-                      모집중
+                      {t('openBadge')}
                     </span>
                   )}
                   <p className="text-xl font-bold mb-1">{slide.title}</p>
@@ -190,7 +192,7 @@ export default function HeroCarousel() {
       {/* 좌우 이동 버튼 (데스크탑 전용) */}
       <button
         type="button"
-        aria-label="이전"
+        aria-label={t('previous')}
         onClick={() => { setIdx((i) => Math.max(0, i - 1)); resetTimer() }}
         className={`absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity lg:flex ${activeIdx > 0 ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       >
@@ -198,7 +200,7 @@ export default function HeroCarousel() {
       </button>
       <button
         type="button"
-        aria-label="다음"
+        aria-label={t('next')}
         onClick={() => { setIdx((i) => Math.min(total - 1, i + 1)); resetTimer() }}
         className={`absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity lg:flex ${activeIdx < total - 1 ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       >

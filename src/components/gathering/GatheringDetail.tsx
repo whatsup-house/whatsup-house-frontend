@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { Card, Badge } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
 import GatheringReviewSection from './GatheringReviewSection'
 import MapLinkButton from './MapLinkButton'
 import TicketPassSection from './TicketPassSection'
 import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
-import { formatDuration, formatKoreanFullDate, formatTimeRange } from '@/lib/utils/date'
+import { formatLocalizedFullDate, formatTimeRange, getDurationParts } from '@/lib/utils/date'
 import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
 import { getNaverMapUrl, getKakaoMapUrl } from '@/lib/utils/mapUrl'
 
@@ -17,6 +18,8 @@ interface GatheringDetailProps {
 }
 
 export default function GatheringDetail({ gathering }: GatheringDetailProps) {
+  const t = useTranslations('gathering.detail')
+  const locale = useLocale()
   const {
     title, status, eventDate, startTime, endTime, location, locationAddress,
     price, maxAttendees, thumbnailUrl,
@@ -46,9 +49,16 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const handlePrevPhoto = () => setPhotoIndex((i) => (i - 1 + photos.length) % photos.length)
   const handleNextPhoto = () => setPhotoIndex((i) => (i + 1) % photos.length)
 
-  const formattedDate = formatKoreanFullDate(eventDate)
+  const formattedDate = formatLocalizedFullDate(eventDate, locale)
   const timeRange = formatTimeRange(startTime, endTime)
-  const durationStr = formatDuration(startTime, endTime)
+  const isRandomTable = gatheringType === 'RANDOM_TABLE'
+  const isFreeGathering = price === 0
+  const duration = getDurationParts(startTime, endTime)
+  const durationStr = duration
+    ? duration.minutes > 0
+      ? t('durationWithMinutes', { hours: duration.hours, minutes: duration.minutes })
+      : t('durationHours', { hours: duration.hours })
+    : ''
 
   return (
     <>
@@ -68,7 +78,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <button
               onClick={handleShare}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm min-h-[44px] min-w-[44px]"
-              aria-label="공유하기"
+              aria-label={t('share')}
             >
               <Share2 size={18} className="text-white" />
             </button>
@@ -80,14 +90,14 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <button
                 onClick={handlePrevPhoto}
                 className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm"
-                aria-label="이전 사진"
+                aria-label={t('previousPhoto')}
               >
                 <ChevronLeft size={18} className="text-white" />
               </button>
               <button
                 onClick={handleNextPhoto}
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm"
-                aria-label="다음 사진"
+                aria-label={t('nextPhoto')}
               >
                 <ChevronRight size={18} className="text-white" />
               </button>
@@ -97,7 +107,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
           {/* 하단 영역: 뱃지 + 도트 인디케이터 */}
           <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
             <span className="bg-primary text-white text-xs font-medium px-3 py-1.5 rounded-full">
-              와썹하우스 주최
+              {t('hostedBy')}
             </span>
             {photos.length > 1 && (
               <div className="flex items-center gap-1.5 mr-1">
@@ -106,7 +116,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
                     key={i}
                     onClick={() => setPhotoIndex(i)}
                     className={`w-1.5 h-1.5 rounded-full transition-all ${i === photoIndex ? 'bg-white' : 'bg-white/40'}`}
-                    aria-label={`${i + 1}번 사진`}
+                    aria-label={t('photoLabel', { index: i + 1 })}
                   />
                 ))}
               </div>
@@ -132,7 +142,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <div className="flex items-start gap-3">
               <Calendar size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-tag-text mb-0.5">날짜</p>
+                <p className="text-xs text-tag-text mb-0.5">{t('date')}</p>
                 <p className="text-sm font-semibold text-foreground">{formattedDate}</p>
               </div>
             </div>
@@ -141,7 +151,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <div className="flex items-start gap-3">
               <Clock size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-tag-text mb-0.5">시간</p>
+                <p className="text-xs text-tag-text mb-0.5">{t('time')}</p>
                 <p className="text-sm font-semibold text-foreground">
                   {timeRange}{durationStr ? ` (${durationStr})` : ''}
                 </p>
@@ -152,7 +162,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <div className="flex items-start gap-3">
               <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div className="flex-1">
-                <p className="text-xs text-tag-text mb-0.5">장소</p>
+                <p className="text-xs text-tag-text mb-0.5">{t('location')}</p>
                 <p className="text-sm font-semibold text-foreground">{location?.name}</p>
                 {(location?.address ?? locationAddress) && (
                   <p className="text-xs text-tag-text mt-0.5 break-keep">
@@ -178,20 +188,30 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <div className="flex items-start gap-3">
               <Users size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div className="flex-1">
-                <p className="text-xs text-tag-text mb-0.5">모집인원</p>
+                <p className="text-xs text-tag-text mb-0.5">{t('capacityLabel')}</p>
                 <p className="text-sm font-semibold text-foreground">
-                  최대 {maxAttendees}명
+                  {t('capacity', { count: maxAttendees })}
                 </p>
               </div>
             </div>
 
-            {/* 참가비 */}
+            {/* 참가비 / 우연한 식탁 이용권 */}
             <div className="flex items-start gap-3">
               <CreditCard size={18} className="text-tag-text mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-tag-text mb-0.5">참가비</p>
+                <p className="text-xs text-tag-text mb-0.5">{isRandomTable && !isFreeGathering ? '필요 이용권' : t('priceLabel')}</p>
                 <p className="text-lg font-bold text-foreground">
-                  {price.toLocaleString()}원 <span className="text-xs font-normal text-tag-text">(현장 결제)</span>
+                  {isRandomTable && !isFreeGathering ? (
+                    <>
+                      1회 <span className="text-xs font-normal text-tag-text">({price.toLocaleString(locale)}원 상당)</span>
+                    </>
+                  ) : isFreeGathering ? (
+                    '무료'
+                  ) : (
+                    <>
+                      {t('price', { price: price.toLocaleString(locale) })} <span className="text-xs font-normal text-tag-text">{t('onsitePayment')}</span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -201,7 +221,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <div className="flex items-start gap-3">
                 <Gift size={18} className="text-tag-text mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs text-tag-text mb-0.5">마일리지 적립</p>
+                  <p className="text-xs text-tag-text mb-0.5">{t('mileageReward')}</p>
                   <p className="text-sm font-semibold text-primary">+{mileageReward.toLocaleString()}M</p>
                 </div>
               </div>
@@ -210,13 +230,13 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
         </Card>
 
         {/* 우연한 식탁 이용권 선결제 (KAN-260) */}
-        {gatheringType === 'RANDOM_TABLE' && <TicketPassSection />}
+        {isRandomTable && !isFreeGathering && <TicketPassSection />}
 
         {/* 게더링 설명 */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-1 h-5 bg-primary rounded-full" />
-            <h2 className="text-base font-bold text-foreground">이런 게더링이에요</h2>
+            <h2 className="text-base font-bold text-foreground">{t('descriptionTitle')}</h2>
           </div>
           <p className="text-sm text-tag-text leading-relaxed whitespace-pre-line">{description}</p>
         </div>
@@ -226,7 +246,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <h2 className="text-base font-bold text-foreground">이렇게 진행돼요</h2>
+              <h2 className="text-base font-bold text-foreground">{t('howToRunTitle')}</h2>
             </div>
             <div className="flex flex-col gap-4">
               {howToRun.map((step, index) => (
@@ -247,11 +267,11 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
             <div className="flex items-start gap-2.5">
               <AlertTriangle size={18} className="text-[#E65100] mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-bold text-foreground mb-2">이런 분은 참여가 어려워요</p>
+                <p className="text-sm font-bold text-foreground mb-2">{t('cautionTitle')}</p>
                 <ul className="text-sm text-tag-text space-y-1.5">
-                  <li>지나친 소란으로 감상을 방해하시는 분</li>
-                  <li>본인의 취향만을 강요하며 타인의 의견을 무시하시는 분</li>
-                  <li>상업적인 목적이나 홍보를 위해 참석하시는 분</li>
+                  <li>{t('caution1')}</li>
+                  <li>{t('caution2')}</li>
+                  <li>{t('caution3')}</li>
                 </ul>
               </div>
             </div>
@@ -263,10 +283,10 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <h2 className="text-base font-bold text-foreground">참가자 후기</h2>
+              <h2 className="text-base font-bold text-foreground">{t('reviewsTitle')}</h2>
             </div>
             {(reviewCount ?? 0) > 0 && (
-              <span className="text-sm text-tag-text">{reviewCount}개</span>
+              <span className="text-sm text-tag-text">{t('reviewCount', { count: reviewCount ?? 0 })}</span>
             )}
           </div>
           <GatheringReviewSection gatheringId={gathering.id} mileageReward={gathering.mileageReward} />
@@ -276,7 +296,7 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
 
     {shareToast && (
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-foreground/90 text-white text-sm px-4 py-2.5 rounded-full shadow-lg z-50 whitespace-nowrap pointer-events-none">
-        링크가 복사되었습니다
+        {t('linkCopied')}
       </div>
     )}
     </>

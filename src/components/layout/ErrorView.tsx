@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Home, ArrowLeft, RotateCcw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 
 interface ErrorViewProps {
@@ -27,6 +28,7 @@ export default function ErrorView({
   showBack = false,
   showHome = true,
 }: ErrorViewProps) {
+  const t = useTranslations('errorView')
   // 헤더(TopNav)의 뒤로가기와 동일하게 동작시키기 위해 같은 훅을 사용한다.
   // 앱 내 이동 기록이 있으면 직전 페이지로, 없으면 홈으로 폴백. (KAN-248)
   const handleBack = useBackNavigation('/')
@@ -49,19 +51,19 @@ export default function ErrorView({
       </p>
 
       {/* eslint-disable-next-line @next/next/no-img-element -- 에러 바운더리/global-error에서도 안전하게 동작하도록 일반 img 사용 */}
-      <img src="/assets/error.png" alt="와썹하우스 에러 안내" className="mb-7 w-full max-w-[220px]" />
+      <img src="/assets/error.png" alt={t('imageAlt')} className="mb-7 w-full max-w-[220px]" />
 
       <div className="flex w-full max-w-[320px] flex-col gap-2.5">
         {onRetry ? (
           <>
             <button type="button" onClick={onRetry} className={primaryCls}>
               <RotateCcw size={17} />
-              다시 시도
+              {t('retry')}
             </button>
             {showHome && (
               <Link href="/" className={outlineCls}>
                 <Home size={17} />
-                홈으로 가기
+                {t('home')}
               </Link>
             )}
           </>
@@ -70,13 +72,13 @@ export default function ErrorView({
             {showHome && (
               <Link href="/" className={primaryCls}>
                 <Home size={17} />
-                홈으로 가기
+                {t('home')}
               </Link>
             )}
             {showBack && (
               <button type="button" onClick={handleBack} className={outlineCls}>
                 <ArrowLeft size={17} />
-                이전 페이지
+                {t('previousPage')}
               </button>
             )}
           </>

@@ -145,7 +145,7 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 w-[480px] h-full bg-card shadow-2xl z-50 flex flex-col">
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] h-full bg-card shadow-2xl z-50 flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-tag-bg">
           <h2 className="font-bold text-[18px] text-foreground">

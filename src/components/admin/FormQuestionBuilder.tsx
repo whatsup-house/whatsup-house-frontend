@@ -142,8 +142,8 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <h2 className="font-bold text-[16px] text-[#1A1A1A]">
             {gatheringTitle ? `${gatheringTitle} — 신청폼` : '신청폼 질문'}
           </h2>
@@ -151,7 +151,7 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
         </div>
         <button
           onClick={() => setEditing('new')}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-input text-sm font-semibold hover:opacity-90 transition-opacity"
+          className="inline-flex items-center justify-center gap-2 self-start sm:self-auto px-4 py-2.5 bg-primary text-white rounded-input text-sm font-semibold hover:opacity-90 transition-opacity"
         >
           <Plus size={16} />
           질문 추가
@@ -167,7 +167,7 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
         ) : (
           <div className="divide-y divide-[#F0EBE8]">
             {questions.map((q, index) => (
-              <div key={q.questionId} className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F0EB] transition-colors">
+              <div key={q.questionId} className="flex flex-wrap sm:flex-nowrap items-center gap-3 px-4 py-3 hover:bg-background transition-colors">
                 <div className="flex flex-col shrink-0">
                   <button
                     onClick={() => moveQuestion(index, -1)}

@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import Link from 'next/link'
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
 import { useGatheringReviews } from '@/lib/hooks/useReview'
@@ -20,6 +21,7 @@ interface GatheringReviewSectionProps {
 }
 
 function HorizontalReviewCard({ review }: { review: ReviewItem }) {
+  const t = useTranslations('review')
   const hasPhoto = review.reviewType === 'PHOTO' && !!review.images?.[0]?.imageUrl
 
   return (
@@ -41,7 +43,7 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
         )}
         {review.reviewType === 'PHOTO' && (
           <span className="absolute top-2 left-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary-light text-primary">
-            📷 포토리뷰
+            {t('photoReview')}
           </span>
         )}
       </div>
@@ -49,7 +51,7 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
       {/* 텍스트 영역 */}
       <div className="flex flex-col flex-1 px-3 pt-2.5 pb-3 min-h-[110px]">
         <p className="text-[11px] text-tag-text mb-1.5">
-          <span className="font-medium">{review.nickname ?? '익명'}</span>
+          <span className="font-medium">{review.nickname ?? t('anonymous')}</span>
           <span className="mx-1">·</span>
           {dayjs(review.createdAt).format('MM.DD')}
         </p>
@@ -68,6 +70,7 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
 }
 
 export default function GatheringReviewSection({ gatheringId, mileageReward }: GatheringReviewSectionProps) {
+  const t = useTranslations('review')
   const { isLoggedIn, userId } = useAuthStore()
   const [sort, setSort] = useState<ReviewSort>('LIKES')
   const [page, setPage] = useState(0)
@@ -94,7 +97,7 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
       {/* 총 개수 + 정렬 탭 */}
       <div className="flex items-center justify-between mb-4">
         {totalElements > 0 ? (
-          <p className="text-xs text-tag-text">이 게더링의 후기 {totalElements}개</p>
+          <p className="text-xs text-tag-text">{t('countForGathering', { count: totalElements })}</p>
         ) : (
           <span />
         )}
@@ -107,7 +110,7 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
                 sort === s ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
               }`}
             >
-              {s === 'LIKES' ? '추천순' : '최신순'}
+              {s === 'LIKES' ? t('sort.likes') : t('sort.latest')}
             </button>
           ))}
         </div>
@@ -115,13 +118,13 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
 
       {/* 로딩 */}
       {isLoading && (
-        <p className="py-8 text-center text-sm text-tag-text">불러오는 중...</p>
+        <p className="py-8 text-center text-sm text-tag-text">{t('loading')}</p>
       )}
 
       {/* 빈 상태 */}
       {!isLoading && reviews.length === 0 && (
         <p className="py-8 text-center text-sm text-tag-text">
-          아직 후기가 없어요. 첫 번째 후기를 남겨보세요!
+          {t('empty')}
         </p>
       )}
 
@@ -147,7 +150,7 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
       {/* ATTENDED + 기작성 안내 */}
       {hasAttended && hasMyReview && (
         <div className="mt-4 bg-tag-bg/60 rounded-2xl px-4 py-3 text-center">
-          <p className="text-xs text-tag-text font-medium">내가 작성한 리뷰가 있어요</p>
+          <p className="text-xs text-tag-text font-medium">{t('alreadyWritten')}</p>
         </div>
       )}
 

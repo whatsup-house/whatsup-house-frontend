@@ -1,5 +1,6 @@
 import { Coffee } from 'lucide-react'
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import GatheringCard from './GatheringCard'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ApiErrorMessage from '@/components/ui/ApiErrorMessage'
@@ -15,12 +16,13 @@ interface GatheringListProps {
 }
 
 export default function GatheringList({ date, gatherings, isLoading, isError, onRetry }: GatheringListProps) {
+  const t = useTranslations('gathering.list')
   const d = dayjs(date)
 
   return (
     <div className="px-4">
       <h2 className="text-base font-semibold text-foreground mb-3">
-        {d.month() + 1}월 {d.date()}일 열리는 게더링
+        {t('dateTitle', { month: d.month() + 1, day: d.date() })}
       </h2>
 
       {isLoading && (
@@ -35,8 +37,9 @@ export default function GatheringList({ date, gatherings, isLoading, isError, on
         <div className="border border-dashed border-tag-bg rounded-card">
           <EmptyState
             icon={Coffee}
-            title="이 날은 게더링이 없어요."
-            description="다른 날을 골라보세요 :)"
+            illustration="/NoGathering.png"
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
           />
         </div>
       )}

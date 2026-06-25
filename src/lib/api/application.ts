@@ -69,6 +69,18 @@ export const checkGuestApplication = async (
   return response.data.data
 }
 
+// 비회원 신청 목록 조회 — 이메일 인증 후 전화+이메일로 본인 신청 전체를 조회한다. (KAN-292)
+export const fetchGuestApplications = async (
+  phone: string,
+  email: string,
+): Promise<ApplicationListItem[]> => {
+  const response = await apiClient.get<ApiResponse<ApplicationListItem[]>>(
+    '/api/applications/guest/list',
+    { params: { phone, email } },
+  )
+  return response.data.data ?? []
+}
+
 export const fetchApplicationByToken = async (token: string): Promise<ApplicationTokenCheckResponse> => {
   const response = await apiClient.get<ApiResponse<ApplicationTokenCheckResponse>>(
     '/api/applications/check',

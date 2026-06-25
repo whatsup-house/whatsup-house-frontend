@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 interface PaginationProps {
   currentPage: number   // 0-indexed
   totalPages: number
@@ -7,6 +9,8 @@ interface PaginationProps {
 }
 
 export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  const t = useTranslations('ui.pagination')
+
   if (totalPages <= 1) return null
 
   const getPageNumbers = (): (number | 'ellipsis')[] => {
@@ -35,7 +39,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         onClick={() => onPageChange(0)}
         disabled={currentPage === 0}
         className={btnClass}
-        aria-label="첫 페이지"
+        aria-label={t('first')}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M11 1L6 6L11 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -48,7 +52,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 0}
         className={btnClass}
-        aria-label="이전 페이지"
+        aria-label={t('previous')}
       >
         <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
           <path d="M6 1L1 6L6 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -81,7 +85,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages - 1}
         className={btnClass}
-        aria-label="다음 페이지"
+        aria-label={t('next')}
       >
         <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
           <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -93,7 +97,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         onClick={() => onPageChange(totalPages - 1)}
         disabled={currentPage === totalPages - 1}
         className={btnClass}
-        aria-label="마지막 페이지"
+        aria-label={t('last')}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

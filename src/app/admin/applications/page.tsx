@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
 import { useCalendarDots } from '@/lib/hooks/useGatherings'
+import { usePendingDeposits, usePendingDepositCount, useConfirmDeposit } from '@/lib/hooks/useAdminTicket'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -56,7 +57,7 @@ function MiniCalendar({ year, month, selectedDate, dotDates, onSelectDate, onCha
   }
 
   return (
-    <div className="bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-5 shrink-0 w-[320px]">
+    <div className="bg-white rounded-[16px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-5 shrink-0 w-full max-w-[360px] lg:w-[320px]">
       {/* 월 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <button
@@ -188,13 +189,19 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
 
 const APP_STATUS_LABEL: Record<string, string> = {
   PENDING: '대기',
+  PAYMENT_PENDING: '입금확인중',
   CONFIRMED: '확정',
   ATTENDED: '출석',
+  REJECTED: '반려',
+  CANCELLED: '취소',
 }
 const APP_STATUS_STYLE: Record<string, string> = {
   PENDING: 'bg-[#F5F5F5] text-[#767676]',
+  PAYMENT_PENDING: 'bg-[#FFF3E0] text-[#EF6C00]',
   CONFIRMED: 'bg-[#E3F2FD] text-[#1976D2]',
   ATTENDED: 'bg-[#E8F5E9] text-[#4CAF50]',
+  REJECTED: 'bg-[#FEF3F3] text-red-500',
+  CANCELLED: 'bg-[#F5F5F5] text-[#767676]',
 }
 const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
   PENDING: 'CONFIRMED',
@@ -225,8 +232,8 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   const attendedCount = participants.filter((p) => p.status === 'ATTENDED').length
 
   return (
-    <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#F0EBE8] flex items-center gap-3">
+    <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-x-auto">
+      <div className="min-w-[1080px] px-4 py-3 border-b border-tag-bg flex items-center gap-3">
         <span className="text-sm font-bold text-[#1A1A1A]">총 {participants.length}명 신청</span>
         {confirmedCount > 0 && (
           <span className="px-2 py-0.5 bg-[#E3F2FD] text-[#1976D2] rounded-full text-xs font-medium">
@@ -239,7 +246,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
           </span>
         )}
       </div>
-      <table className="w-full">
+      <table className="w-full min-w-[1080px]">
         <thead>
           <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
             {['예약번호', '이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '상태', '입금', '삭제'].map((col) => (
@@ -289,7 +296,17 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {!p.paid ? (
+                  {p.free ? (
+                    <span className="text-[12px] text-[#BBBBBB]">무료</span>
+                  ) : p.gatheringType === 'RANDOM_TABLE' ? (
+                    <span className={`text-xs font-medium ${
+                      p.status === 'CONFIRMED' || p.status === 'ATTENDED'
+                        ? 'text-[#4CAF50]'
+                        : 'text-[#C8392B]'
+                    }`}>
+                      {p.status === 'CONFIRMED' || p.status === 'ATTENDED' ? '이용권 처리' : '이용권 확인중'}
+                    </span>
+                  ) : !p.paid ? (
                     <span className="text-[12px] text-[#BBBBBB]">무료</span>
                   ) : p.status === 'CONFIRMED' || p.status === 'ATTENDED' ? (
                     // 선확정 후입금: 확정(또는 출석)된 신청만 입금을 받으므로 그때만 체크박스를 노출한다. (KAN-243)
@@ -334,8 +351,77 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   )
 }
 
+// ─── 우연한식탁 이용권 입금확인 큐 ─────────────────────────────────────
+function DepositQueue() {
+  const { data: deposits = [], isLoading } = usePendingDeposits()
+  const { mutate: confirmDeposit, isPending } = useConfirmDeposit()
+
+  if (isLoading) {
+    return (
+      <div className="h-[200px] flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
+  }
+
+  if (deposits.length === 0) {
+    return (
+      <div className="bg-white rounded-[12px] p-12 text-center shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+        <p className="text-base font-medium text-[#1A1A1A] mb-1">우연한식탁 이용권 입금확인 요청이 없어요</p>
+        <p className="text-sm text-[#767676]">고객이 이용권 구매 요청 후 입금하면 여기에 오래된 순으로 표시돼요.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white rounded-[12px] overflow-x-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-[#F5F0EB] text-[#767676] text-left">
+            {['신청자', '구분', '게더링', '예약번호', '상품', '금액', '요청 시각', '입금확인'].map((col) => (
+              <th key={col} className="px-4 py-3 font-medium whitespace-nowrap">{col}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {deposits.map((d) => (
+            <tr key={d.ticketPassId} className="border-t border-[#F0EDE8]">
+              <td className="px-4 py-3 font-medium text-[#1A1A1A] whitespace-nowrap">{d.applicantName}</td>
+              <td className="px-4 py-3 whitespace-nowrap">
+                <span className={`text-xs px-2 py-0.5 rounded-full ${d.member ? 'bg-[#E8F5E9] text-[#4CAF50]' : 'bg-[#F5F0EB] text-[#767676]'}`}>
+                  {d.member ? '회원' : '비회원'}
+                </span>
+              </td>
+              <td className="px-4 py-3 whitespace-nowrap">{d.gatheringTitle ?? '-'}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-[#767676]">{d.bookingNumber ?? '-'}</td>
+              <td className="px-4 py-3 whitespace-nowrap">{d.productLabel}</td>
+              <td className="px-4 py-3 whitespace-nowrap">{d.amount.toLocaleString()}원</td>
+              <td className="px-4 py-3 whitespace-nowrap text-[#767676]">{dayjs(d.requestedAt).format('M/D HH:mm')}</td>
+              <td className="px-4 py-3 whitespace-nowrap">
+                <button
+                  disabled={isPending}
+                  onClick={() => {
+                    if (confirm(`${d.applicantName}님의 입금을 확인하고 이용권을 발급할까요?`)) {
+                      confirmDeposit(d.ticketPassId)
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-full bg-[#C8392B] text-white text-xs font-medium disabled:opacity-50"
+                >
+                  입금확인
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 // ─── 메인 페이지 ───────────────────────────────────────────────────────
 export default function AdminApplicationsPage() {
+  const [view, setView] = useState<'byGathering' | 'deposits'>('byGathering')
+  const { data: depositCount = 0 } = usePendingDepositCount()
   const today = dayjs()
   const [selectedDate, setSelectedDate] = useState(today.format('YYYY-MM-DD'))
   const [currentYear, setCurrentYear] = useState(today.year())
@@ -370,8 +456,32 @@ export default function AdminApplicationsPage() {
         <h1 className="font-bold text-[22px] text-foreground">참가자 관리</h1>
       </div>
 
+      {/* 뷰 전환: 게더링별 조회 / 우연한식탁 이용권 입금확인 큐 */}
+      <div className="flex gap-2 mb-5">
+        {([['byGathering', '게더링별 조회'], ['deposits', '우연한식탁 이용권 입금확인']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setView(key)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              view === key ? 'bg-[#C8392B] text-white' : 'bg-[#F5F0EB] text-[#767676]'
+            }`}
+          >
+            {label}
+            {key === 'deposits' && depositCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-white text-[#C8392B] text-[11px] font-bold">
+                {depositCount}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {view === 'deposits' ? (
+        <DepositQueue />
+      ) : (
+      <>
       {/* 상단: 캘린더 + 게더링 카드 리스트 */}
-      <div className="flex gap-6 mb-6 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 mb-6 items-start">
         {/* 미니 캘린더 */}
         <MiniCalendar
           year={currentYear}
@@ -383,7 +493,7 @@ export default function AdminApplicationsPage() {
         />
 
         {/* 게더링 카드 영역 */}
-        <div className="flex-1 min-w-0">
+        <div className="w-full flex-1 min-w-0">
           <p className="text-sm font-bold text-[#1A1A1A] mb-3">
             {selectedDayjs.format('M월 D일')} 게더링
             {dayGatherings.length > 0 && (
@@ -423,8 +533,8 @@ export default function AdminApplicationsPage() {
       {/* 하단: 참가자 테이블 */}
       {selectedGatheringId ? (
         <>
-          <div className="flex items-center gap-3 mb-3">
-            <h2 className="font-bold text-[16px] text-[#1A1A1A]">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+            <h2 className="w-full sm:w-auto font-bold text-[16px] text-foreground">
               {selectedGathering?.title} — 참가자 목록
             </h2>
             <span className="px-3 py-1 bg-[#F5F0EB] rounded-full text-sm">
@@ -441,6 +551,8 @@ export default function AdminApplicationsPage() {
           <p className="text-base font-medium text-[#1A1A1A] mb-1">게더링을 선택해주세요</p>
           <p className="text-sm text-[#767676]">위 캘린더에서 날짜를 선택하고, 게더링 카드를 클릭하면 참가자 목록이 표시돼요.</p>
         </div>
+      )}
+      </>
       )}
     </div>
   )

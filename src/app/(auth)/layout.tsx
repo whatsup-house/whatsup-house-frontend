@@ -2,6 +2,8 @@
 
 import { usePathname } from 'next/navigation'
 import AppShell from '@/components/layout/AppShell'
+import BottomNav from '@/components/layout/BottomNav'
+import TopNav from '@/components/layout/TopNav'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -11,9 +13,20 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     return <div className="mobile-layout min-h-screen bg-background">{children}</div>
   }
 
+  if (pathname === '/login' || pathname === '/register') {
+    return (
+      <AppShell>
+        <TopNav />
+        <main className="flex-1 lg:min-h-0 lg:overflow-y-auto">{children}</main>
+        <BottomNav />
+      </AppShell>
+    )
+  }
+
   return (
     <AppShell>
       <div className="flex-1 lg:min-h-0 lg:overflow-y-auto">{children}</div>
+      {pathname === '/login' && <BottomNav />}
     </AppShell>
   )
 }

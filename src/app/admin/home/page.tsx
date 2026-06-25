@@ -1,16 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, EyeOff, Heart, Trash2, Star } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  ImageIcon,
+  EyeOff,
+  Heart,
+  Pencil,
+  Plus,
+  Star,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { useAdminCarouselSlides } from '@/lib/hooks/useAdminHeroCarousel'
 import {
   useAdminHomeReviews,
+  useAdminHomeReviewCandidates,
+  useReorderHomeReviews,
   useSetReviewHomeFeatured,
   useDeleteHomeReview,
 } from '@/lib/hooks/useAdminHomeReview'
 import { HeroCarouselFormPanel } from '@/components/admin/HeroCarouselFormPanel'
-import { LoadingSpinner } from '@/components/ui'
-import type { AdminHeroCarouselSlide, AdminHomeReview, HeroSlideType } from '@/lib/api/types'
+import { LoadingSpinner, Pagination } from '@/components/ui'
+import type {
+  AdminHeroCarouselSlide,
+  AdminHomeReview,
+  AdminHomeReviewSort,
+  HeroSlideType,
+} from '@/lib/api/types'
 
 const TYPE_LABEL: Record<HeroSlideType, string> = {
   GATHERING: '게더링',
@@ -24,37 +42,119 @@ const TYPE_COLOR: Record<HeroSlideType, string> = {
   STORY: 'bg-tag-bg text-tag-text',
 }
 
+const CANDIDATE_PAGE_SIZE = 10
+
 export default function AdminHomePage() {
   const [carouselPanel, setCarouselPanel] = useState<AdminHeroCarouselSlide | 'new' | null>(null)
+  const [reviewPanelOpen, setReviewPanelOpen] = useState(false)
+  const [candidateSort, setCandidateSort] = useState<AdminHomeReviewSort>('LATEST')
+  const [candidatePage, setCandidatePage] = useState(0)
 
   const { data: slides = [], isLoading: slidesLoading, isError: slidesError } = useAdminCarouselSlides()
   const { data: reviews = [], isLoading: reviewsLoading, isError: reviewsError } = useAdminHomeReviews()
-  const { mutate: setFeatured } = useSetReviewHomeFeatured()
+  const {
+    data: reviewCandidates = [],
+    isLoading: candidatesLoading,
+    isError: candidatesError,
+  } = useAdminHomeReviewCandidates(reviewPanelOpen)
+  const {
+    mutate: setFeatured,
+    isPending: isSettingFeatured,
+    variables: featuredVariables,
+  } = useSetReviewHomeFeatured()
+  const {
+    mutate: reorderReviews,
+    isPending: isReordering,
+  } = useReorderHomeReviews()
   const { mutate: removeReview } = useDeleteHomeReview()
 
   const sortedSlides = [...slides].sort((a, b) => a.sortOrder - b.sortOrder)
   const sortedReviews = [...reviews].sort(
     (a, b) => (a.homeDisplayOrder ?? 0) - (b.homeDisplayOrder ?? 0),
   )
+  const featuredReviewIds = new Set(reviews.map((review) => review.reviewId))
+  const filteredReviewCandidates = reviewCandidates
+    .filter((review) => !featuredReviewIds.has(review.reviewId))
+    .sort((a, b) => {
+      if (candidateSort === 'LIKES') {
+        const likeDiff = b.likeCount - a.likeCount
+        if (likeDiff !== 0) return likeDiff
+      }
+      return b.createdAt.localeCompare(a.createdAt)
+    })
+  const candidateTotalPages = Math.ceil(filteredReviewCandidates.length / CANDIDATE_PAGE_SIZE)
+  const pagedReviewCandidates = filteredReviewCandidates.slice(
+    candidatePage * CANDIDATE_PAGE_SIZE,
+    (candidatePage + 1) * CANDIDATE_PAGE_SIZE,
+  )
+  const nextReviewDisplayOrder = Math.max(0, ...reviews.map((review) => review.homeDisplayOrder ?? 0)) + 1
 
+  const reorderSequentially = (orderedReviews: AdminHomeReview[]) => {
+    reorderReviews(
+      orderedReviews.map((review, index) => ({
+        reviewId: review.reviewId,
+        homeDisplayOrder: index + 1,
+      })),
+    )
+  }
+
+  const handleOpenReviewPanel = () => {
+    setCandidatePage(0)
+    setReviewPanelOpen(true)
+  }
+  const handleCandidateSort = (sort: AdminHomeReviewSort) => {
+    setCandidateSort(sort)
+    setCandidatePage(0)
+  }
+  const handleMoveReview = (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= sortedReviews.length) return
+
+    const nextReviews = [...sortedReviews]
+    const current = nextReviews[index]
+    nextReviews[index] = nextReviews[targetIndex]
+    nextReviews[targetIndex] = current
+    reorderSequentially(nextReviews)
+  }
+  const handleFeature = (reviewId: string) => {
+    setFeatured(
+      { reviewId, data: { isHomeFeatured: true, homeDisplayOrder: nextReviewDisplayOrder } },
+      { onSuccess: () => setReviewPanelOpen(false) },
+    )
+  }
   const handleUnfeature = (reviewId: string) => {
-    setFeatured({ reviewId, data: { isHomeFeatured: false } })
+    setFeatured(
+      { reviewId, data: { isHomeFeatured: false } },
+      {
+        onSuccess: () => {
+          const remainingReviews = sortedReviews.filter((review) => review.reviewId !== reviewId)
+          if (remainingReviews.length > 0) reorderSequentially(remainingReviews)
+        },
+      },
+    )
   }
   const handleDelete = (reviewId: string) => {
-    if (confirm('이 리뷰를 삭제할까요? (복구 불가)')) removeReview(reviewId)
+    if (confirm('이 리뷰를 삭제할까요? (복구 불가)')) {
+      removeReview(reviewId, {
+        onSuccess: () => {
+          const remainingReviews = sortedReviews.filter((review) => review.reviewId !== reviewId)
+          if (remainingReviews.length > 0) reorderSequentially(remainingReviews)
+        },
+      })
+    }
   }
 
   return (
     <div className="max-w-[1280px]">
       {/* 헤더 */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-foreground">홈화면 관리</h1>
           <p className="text-sm text-tag-text mt-1">항목을 클릭해 편집하세요</p>
         </div>
         <button
           onClick={() => setCarouselPanel('new')}
-          className="flex items-center gap-1.5 px-4 h-10 bg-primary text-white rounded-[12px] text-sm font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-1.5 self-start px-4 h-10 bg-primary text-white rounded-[12px] text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Plus size={15} />
           슬라이드 추가
@@ -92,14 +192,25 @@ export default function AdminHomePage() {
 
       {/* 홈 후기 섹션 — 실제 리뷰의 홈 노출 관리 */}
       <section>
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1 h-[18px] rounded-full bg-primary" />
-          <span className="text-[15px] font-bold text-foreground">다녀온 사람들의 후기</span>
-          <span className="text-xs text-tag-text ml-1">{sortedReviews.length}개 노출 중</span>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-[18px] rounded-full bg-primary" />
+              <span className="text-[15px] font-bold text-foreground">다녀온 사람들의 후기</span>
+              <span className="text-xs text-tag-text ml-1">{sortedReviews.length}개 노출 중</span>
+            </div>
+            <p className="text-xs text-tag-text mt-2">
+              홈에 노출할 실제 후기를 추가하거나 노출을 해제할 수 있습니다.
+            </p>
+          </div>
+          <button
+            onClick={handleOpenReviewPanel}
+            className="inline-flex items-center justify-center gap-1.5 self-start px-4 h-10 bg-primary text-white rounded-[12px] text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus size={15} />
+            후기 추가
+          </button>
         </div>
-        <p className="text-xs text-tag-text mb-4">
-          홈에 노출 중인 실제 리뷰입니다. (리뷰 추가는 사용자가 작성하며, 여기서는 노출/해제만 관리합니다)
-        </p>
 
         {reviewsLoading ? (
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
@@ -113,10 +224,16 @@ export default function AdminHomePage() {
           </div>
         ) : (
           <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
-            {sortedReviews.map((review) => (
+            {sortedReviews.map((review, index) => (
               <ReviewCard
                 key={review.reviewId}
                 review={review}
+                displayOrder={index + 1}
+                canMoveLeft={index > 0}
+                canMoveRight={index < sortedReviews.length - 1}
+                isReordering={isReordering}
+                onMoveLeft={() => handleMoveReview(index, -1)}
+                onMoveRight={() => handleMoveReview(index, 1)}
                 onUnfeature={() => handleUnfeature(review.reviewId)}
                 onDelete={() => handleDelete(review.reviewId)}
               />
@@ -133,6 +250,23 @@ export default function AdminHomePage() {
           onSuccess={() => setCarouselPanel(null)}
         />
       )}
+
+      {reviewPanelOpen && (
+        <ReviewCandidatePanel
+          reviews={pagedReviewCandidates}
+          isLoading={candidatesLoading}
+          isError={candidatesError}
+          sort={candidateSort}
+          page={candidatePage}
+          totalElements={filteredReviewCandidates.length}
+          totalPages={candidateTotalPages}
+          addingReviewId={isSettingFeatured ? featuredVariables?.reviewId ?? null : null}
+          onSortChange={handleCandidateSort}
+          onPageChange={setCandidatePage}
+          onAdd={handleFeature}
+          onClose={() => setReviewPanelOpen(false)}
+        />
+      )}
     </div>
   )
 }
@@ -146,7 +280,7 @@ function SlideCard({ slide, onClick }: SlideCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative flex-none w-[150px] cursor-pointer rounded-2xl overflow-hidden bg-tag-bg"
+      className="group relative flex-none w-[136px] sm:w-[150px] cursor-pointer rounded-2xl overflow-hidden bg-tag-bg"
       style={{ aspectRatio: '9/16' }}
     >
       {slide.imageUrl && (
@@ -194,13 +328,29 @@ function SlideCard({ slide, onClick }: SlideCardProps) {
 
 interface ReviewCardProps {
   review: AdminHomeReview
+  displayOrder: number
+  canMoveLeft: boolean
+  canMoveRight: boolean
+  isReordering: boolean
+  onMoveLeft: () => void
+  onMoveRight: () => void
   onUnfeature: () => void
   onDelete: () => void
 }
 
-function ReviewCard({ review, onUnfeature, onDelete }: ReviewCardProps) {
+function ReviewCard({
+  review,
+  displayOrder,
+  canMoveLeft,
+  canMoveRight,
+  isReordering,
+  onMoveLeft,
+  onMoveRight,
+  onUnfeature,
+  onDelete,
+}: ReviewCardProps) {
   return (
-    <div className="relative flex-none w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden">
+    <div className="relative flex-none w-[176px] sm:w-[200px] bg-card rounded-2xl border border-tag-bg/40 overflow-hidden">
       {/* 리뷰 이미지 */}
       <div className="relative w-full aspect-square bg-tag-bg">
         {review.imageUrl ? (
@@ -214,11 +364,9 @@ function ReviewCard({ review, onUnfeature, onDelete }: ReviewCardProps) {
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-3xl">📝</div>
         )}
-        {review.homeDisplayOrder != null && (
-          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/50 text-white text-[10px] font-bold flex items-center justify-center">
-            {review.homeDisplayOrder}
-          </div>
-        )}
+        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/50 text-white text-[10px] font-bold flex items-center justify-center">
+          {displayOrder}
+        </div>
       </div>
 
       {/* 텍스트 */}
@@ -231,6 +379,29 @@ function ReviewCard({ review, onUnfeature, onDelete }: ReviewCardProps) {
         </div>
         <p className="text-[10px] text-tag-text font-medium truncate mb-1">{review.gatheringTitle}</p>
         <p className="text-xs text-tag-text leading-relaxed line-clamp-2 mb-2">{review.reviewContent}</p>
+
+        <div className="flex gap-1.5 mb-1.5">
+          <button
+            type="button"
+            onClick={onMoveLeft}
+            disabled={!canMoveLeft || isReordering}
+            title="앞으로 이동"
+            aria-label="앞으로 이동"
+            className="flex-1 inline-flex h-8 items-center justify-center rounded-input border border-tag-bg text-tag-text transition-colors hover:border-foreground disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            <ArrowLeft size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveRight}
+            disabled={!canMoveRight || isReordering}
+            title="뒤로 이동"
+            aria-label="뒤로 이동"
+            className="flex-1 inline-flex h-8 items-center justify-center rounded-input border border-tag-bg text-tag-text transition-colors hover:border-foreground disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            <ArrowRight size={13} />
+          </button>
+        </div>
 
         {/* 액션 */}
         <div className="flex gap-1.5">
@@ -248,6 +419,156 @@ function ReviewCard({ review, onUnfeature, onDelete }: ReviewCardProps) {
             <Trash2 size={11} />
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+interface ReviewCandidatePanelProps {
+  reviews: AdminHomeReview[]
+  isLoading: boolean
+  isError: boolean
+  sort: AdminHomeReviewSort
+  page: number
+  totalElements: number
+  totalPages: number
+  addingReviewId: string | null
+  onSortChange: (sort: AdminHomeReviewSort) => void
+  onPageChange: (page: number) => void
+  onAdd: (reviewId: string) => void
+  onClose: () => void
+}
+
+function ReviewCandidatePanel({
+  reviews,
+  isLoading,
+  isError,
+  sort,
+  page,
+  totalElements,
+  totalPages,
+  addingReviewId,
+  onSortChange,
+  onPageChange,
+  onAdd,
+  onClose,
+}: ReviewCandidatePanelProps) {
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[520px] h-full bg-card shadow-2xl z-50 flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-tag-bg">
+          <div>
+            <h2 className="font-bold text-[18px] text-foreground">홈 노출 후기 추가</h2>
+            <p className="text-xs text-tag-text mt-1">사용자가 작성한 실제 후기 중 미노출 항목만 표시됩니다.</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="min-w-10 min-h-10 inline-flex items-center justify-center text-tag-text hover:text-foreground transition-colors"
+            aria-label="닫기"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-tag-text">총 {totalElements.toLocaleString()}개</p>
+            <div className="flex gap-2">
+              {(['LATEST', 'LIKES'] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => onSortChange(s)}
+                  className={`min-h-9 rounded-full px-3 text-xs font-semibold transition-colors ${
+                    sort === s ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text hover:text-foreground'
+                  }`}
+                >
+                  {s === 'LATEST' ? '최신순' : '인기순'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center py-12"><LoadingSpinner /></div>
+          ) : isError ? (
+            <div className="flex items-center justify-center h-32 border border-dashed border-red-200 rounded-card text-sm text-red-500">
+              후보 후기를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="flex items-center justify-center h-32 border border-dashed border-tag-bg rounded-card text-sm text-tag-text">
+              추가할 수 있는 후기가 없습니다.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3">
+              {reviews.map((review) => (
+                <ReviewCandidateCard
+                  key={review.reviewId}
+                  review={review}
+                  isAdding={addingReviewId === review.reviewId}
+                  onAdd={() => onAdd(review.reviewId)}
+                />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && !isError && totalPages > 1 && (
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
+interface ReviewCandidateCardProps {
+  review: AdminHomeReview
+  isAdding: boolean
+  onAdd: () => void
+}
+
+function ReviewCandidateCard({ review, isAdding, onAdd }: ReviewCandidateCardProps) {
+  return (
+    <div className="flex gap-3 rounded-card border border-tag-bg/60 bg-background p-3">
+      <div className="relative w-20 h-20 shrink-0 rounded-input bg-tag-bg overflow-hidden">
+        {review.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={review.imageUrl}
+            alt={review.nickname}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-tag-text">
+            <ImageIcon size={24} />
+          </div>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-foreground truncate">{review.nickname}</p>
+            <p className="text-xs text-tag-text truncate mt-0.5">{review.gatheringTitle}</p>
+          </div>
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-primary bg-primary/10 rounded px-1.5 py-0.5 shrink-0">
+            <Heart size={10} />{review.likeCount}
+          </span>
+        </div>
+
+        <p className="text-xs text-tag-text leading-relaxed line-clamp-2 mt-2">{review.reviewContent}</p>
+
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={isAdding}
+          className="mt-3 inline-flex min-h-9 items-center justify-center gap-1.5 rounded-input bg-primary px-3 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          <Plus size={13} />
+          {isAdding ? '추가 중...' : '홈에 추가'}
+        </button>
       </div>
     </div>
   )

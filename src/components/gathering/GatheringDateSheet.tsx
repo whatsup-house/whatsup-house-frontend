@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import { useGatheringsByTitle } from '@/lib/hooks/useGatherings'
 import type { GatheringListItem } from '@/lib/api/types'
 
@@ -15,8 +16,6 @@ interface GatheringDateSheetProps {
   onClose: () => void
 }
 
-const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토']
-
 export default function GatheringDateSheet({
   title,
   currentGatheringId,
@@ -24,6 +23,8 @@ export default function GatheringDateSheet({
   isOpen,
   onClose,
 }: GatheringDateSheetProps) {
+  const t = useTranslations('gathering.calendar')
+  const dayNames = t.raw('dayLabels') as string[]
   const router = useRouter()
   const [viewDate, setViewDate] = useState(() => dayjs(currentEventDate))
   const { data: gatherings = [] } = useGatheringsByTitle(title)
@@ -59,7 +60,7 @@ export default function GatheringDateSheet({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+    <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
       <div
         className="relative w-full md:max-w-[430px] bg-card rounded-t-2xl overflow-hidden animate-slide-up"
@@ -75,7 +76,7 @@ export default function GatheringDateSheet({
         <button
           onClick={onClose}
           className="absolute top-3 right-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-tag-text"
-          aria-label="닫기"
+          aria-label={t('close')}
         >
           <X size={18} />
         </button>
@@ -85,17 +86,17 @@ export default function GatheringDateSheet({
           <button
             onClick={() => setViewDate((d) => d.subtract(1, 'month'))}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center text-tag-text"
-            aria-label="이전 달"
+            aria-label={t('previousMonth')}
           >
             <ChevronLeft size={20} />
           </button>
           <span className="text-base font-bold text-foreground">
-            {year}년 {month + 1}월
+            {t('monthTitle', { year, month: month + 1 })}
           </span>
           <button
             onClick={() => setViewDate((d) => d.add(1, 'month'))}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center text-tag-text"
-            aria-label="다음 달"
+            aria-label={t('nextMonth')}
           >
             <ChevronRight size={20} />
           </button>
@@ -103,7 +104,7 @@ export default function GatheringDateSheet({
 
         {/* 요일 헤더 */}
         <div className="grid grid-cols-7 px-3">
-          {DAY_NAMES.map((d) => (
+          {dayNames.map((d) => (
             <div key={d} className="text-center text-xs font-medium text-tag-text py-1.5">
               {d}
             </div>
@@ -141,7 +142,7 @@ export default function GatheringDateSheet({
                   {cell.day}
                 </div>
                 {isCurrent && (
-                  <span className="text-[9px] font-bold text-primary leading-none">현재</span>
+                  <span className="text-[9px] font-bold text-primary leading-none">{t('current')}</span>
                 )}
               </button>
             )

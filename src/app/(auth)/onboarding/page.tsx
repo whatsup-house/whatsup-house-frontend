@@ -3,10 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui'
+import JobSelect from '@/components/auth/JobSelect'
 import { useRegisterAndLogin } from '@/lib/hooks/useAuth'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
 import { useToastStore } from '@/lib/store/toastStore'
+import { getApiErrorCode, resolveApiErrorMessage } from '@/lib/utils/apiError'
 import type { Gender } from '@/lib/api/types'
 import { REGISTER_EMAIL_ERROR_KEY, REGISTER_SESSION_KEY } from '../register/page'
 
@@ -14,20 +17,6 @@ const MBTI_ROWS = [
   ['E', 'S', 'T', 'J'],
   ['I', 'N', 'F', 'P'],
 ] as const
-
-const JOB_OPTIONS = [
-  { value: 'STUDENT', label: '대학생' },
-  { value: 'WORKER', label: '직장인' },
-  { value: 'FREELANCER', label: '프리랜서' },
-  { value: 'OTHER', label: '기타' },
-]
-
-function getErrorMessage(error: unknown): string | null {
-  if (typeof error !== 'object' || error === null || !('response' in error)) return null
-  const response = (error as { response?: { data?: { message?: unknown } } }).response
-  const message = response?.data?.message
-  return typeof message === 'string' ? message : null
-}
 
 interface Step1Data {
   email: string
@@ -41,6 +30,8 @@ interface Step1Data {
 }
 
 export default function OnboardingPage() {
+  const t = useTranslations('auth.onboarding')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const handleBack = useBackNavigation('/register')
   const showToast = useToastStore((s) => s.show)
@@ -48,6 +39,7 @@ export default function OnboardingPage() {
   // 마운트 후에만 sessionStorage를 읽어 파생한다. (KAN-219)
   const [mounted, setMounted] = useState(false)
   const [bio, setBio] = useState('')
+  const [instagramId, setInstagramId] = useState('')
   const [job, setJob] = useState('')
   const [mbti, setMbti] = useState<(string | null)[]>([null, null, null, null])
   const [formError, setFormError] = useState<string | null>(null)
@@ -90,10 +82,13 @@ export default function OnboardingPage() {
     if (!step1Data) return
     setFormError(null)
 
+    const normalizedInstagramId = instagramId.trim().replace(/^@+/, '')
+
     registerAndLogin.mutate(
       {
         ...step1Data,
-        bio: bio || undefined,
+        intro: bio || undefined,
+        instagramId: normalizedInstagramId || undefined,
         job: job || undefined,
         mbti: mbtiString,
       },
@@ -101,19 +96,21 @@ export default function OnboardingPage() {
         onSuccess: () => {
           sessionStorage.removeItem(REGISTER_SESSION_KEY)
           // 가입 완료 후 홈으로 이동하더라도 전역 안내를 유지한다. (KAN-227)
-          showToast(
-            '와썹하우스에 오신 걸 환영해요\n가입 축하 마일리지 1,000M가 적립되었어요.\n마음에 드는 게더링을 둘러보며 첫 모임을 준비해보세요.',
-            'welcome'
-          )
+          showToast(t('welcomeToast'), 'welcome')
         },
         onError: (error) => {
-          const message = getErrorMessage(error)
-          if (message?.includes('이메일')) {
-            sessionStorage.setItem(REGISTER_EMAIL_ERROR_KEY, '이미 사용 중인 이메일이에요')
+          const code = getApiErrorCode(error)
+          if (code === 'EMAIL_ALREADY_EXISTS' || code === 'EMAIL_NOT_VERIFIED') {
+            sessionStorage.setItem(
+              REGISTER_EMAIL_ERROR_KEY,
+              code === 'EMAIL_ALREADY_EXISTS'
+                ? tCommon('errors.EMAIL_ALREADY_EXISTS')
+                : tCommon('errors.EMAIL_NOT_VERIFIED')
+            )
             router.push('/register')
             return
           }
-          setFormError('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
+          setFormError(resolveApiErrorMessage(error, tCommon))
         },
       }
     )
@@ -129,12 +126,12 @@ export default function OnboardingPage() {
           <button
             onClick={handleBack}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label="뒤로가기"
+            aria-label={tCommon('back')}
           >
             <ArrowLeft size={20} className="text-foreground" />
           </button>
           <h1 className="flex-1 text-center text-base font-bold text-foreground pr-11">
-            회원가입
+            {tCommon('register')}
           </h1>
         </div>
       </header>
@@ -145,39 +142,41 @@ export default function OnboardingPage() {
       </div>
 
       <div className="px-6 pt-4 pb-10 flex flex-col gap-6">
-        <p className="text-center text-sm text-tag-text">어떤 분인지 알려주세요 (선택)</p>
+        <p className="text-center text-sm text-tag-text">{t('intro')}</p>
 
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">
-            한 줄 소개 <span className="text-tag-text font-normal">(선택)</span>
+            {t('bioLabel')} <span className="text-tag-text font-normal">{t('optional')}</span>
           </label>
           <input
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="나를 한 줄로 소개해주세요"
+            placeholder={t('bioPlaceholder')}
+            maxLength={500}
+            className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-foreground">
+            {t('instagramLabel')} <span className="text-tag-text font-normal">{t('optional')}</span>
+          </label>
+          <input
+            value={instagramId}
+            onChange={(e) => setInstagramId(e.target.value)}
+            placeholder={t('instagramPlaceholder')}
             maxLength={100}
             className="w-full px-4 py-3 rounded-input border border-tag-bg bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium text-foreground block mb-2">직업</label>
-          <div className="grid grid-cols-2 gap-2">
-            {JOB_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setJob(job === option.value ? '' : option.value)}
-                className={`py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${job === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'}`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          <label className="text-sm font-medium text-foreground block mb-2">{t('jobLabel')}</label>
+          <JobSelect value={job} onChange={setJob} />
         </div>
 
         <div>
-          <label className="text-sm font-medium text-foreground block mb-2">MBTI</label>
+          <label className="text-sm font-medium text-foreground block mb-2">{t('mbtiLabel')}</label>
           <div className="grid grid-cols-4 gap-2">
             {MBTI_ROWS[0].map((letter, colIndex) => (
               <button
@@ -202,7 +201,7 @@ export default function OnboardingPage() {
           </div>
           {mbtiString && (
             <p className="text-center text-sm text-primary font-medium mt-2">
-              {mbtiString} 유형이군요!
+              {t('mbtiResult', { mbti: mbtiString })}
             </p>
           )}
         </div>
@@ -219,7 +218,7 @@ export default function OnboardingPage() {
             className="flex-1"
             onClick={handleBack}
           >
-            이전
+            {tCommon('previous')}
           </Button>
           <Button
             variant="primary"
@@ -228,7 +227,7 @@ export default function OnboardingPage() {
             onClick={handleSubmit}
             isLoading={registerAndLogin.isPending}
           >
-            시작하기
+            {tCommon('start')}
           </Button>
         </div>
       </div>

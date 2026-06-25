@@ -86,7 +86,7 @@ export function useRegisterAndLogin() {
       // 이전 세션의 서버 캐시를 폐기해 새 계정 데이터로 갱신되게 한다. (KAN-249)
       queryClient.clear()
       storeLogin(loginData.user.id, loginData.user.nickname, loginData.user.admin)
-      router.push('/')
+      router.push('/mypage')
     },
   })
 }

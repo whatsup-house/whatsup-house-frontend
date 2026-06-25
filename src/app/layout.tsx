@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Allura, Gowun_Batang, Press_Start_2P } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import { Providers } from './providers'
 import '@/styles/globals.css'
 
@@ -22,21 +24,31 @@ const pressStart2P = Press_Start_2P({
   variable: '--font-press-start',
 })
 
-export const metadata: Metadata = {
-  title: '와썹하우스',
-  description: '잔잔한 게 좋은 사람들의 공간',
-  icons: { icon: '/assets/whatsup-logo.png' },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.root')
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    icons: { icon: '/assets/whatsup-logo.png' },
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // 쿠키 기반 로케일 + 메시지 카탈로그를 서버에서 읽어 Provider로 내려준다. (KAN-264)
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="ko" className={`${gowunBatang.variable} ${allura.variable} ${pressStart2P.variable}`}>
+    <html lang={locale} className={`${gowunBatang.variable} ${allura.variable} ${pressStart2P.variable}`}>
       <body>
-        <Providers>{children}</Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

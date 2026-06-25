@@ -1,0 +1,1138 @@
+{
+  "common": {
+    "back": "Back",
+    "login": "Log in",
+    "register": "Sign up",
+    "start": "Get started",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "next": "Next",
+    "close": "Close",
+    "errors": {
+      "UNKNOWN": "Something went wrong. Please try again.",
+      "EMAIL_ALREADY_EXISTS": "This email is already in use.",
+      "EMAIL_NOT_VERIFIED": "Please complete email verification.",
+      "NICKNAME_ALREADY_EXISTS": "This nickname is already in use.",
+      "INVALID_CREDENTIALS": "Please check your email or password.",
+      "USER_NOT_FOUND": "We could not find matching account information.",
+      "PASSWORD_RESET_FAILED": "Failed to request a password reset.",
+      "INVALID_PASSWORD_RESET_TOKEN": "Please check your password reset link."
+    },
+    "agree": "Agree",
+    "brand": "Whatsup House",
+    "errorBoundary": {
+      "title": "Oops! Something went wrong",
+      "description": "An unexpected error occurred.\nPlease try again in a moment."
+    },
+    "loading": "Loading...",
+    "status": {
+      "OPEN": "Open",
+      "CLOSED": "Closed",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "ATTENDED": "Attended",
+      "PENDING": "Pending"
+    },
+    "retry": "Try again",
+    "globalError": {
+      "title": "Oops! Something went wrong",
+      "description": "The server is having a temporary issue.\nPlease try again in a moment.\nIf it continues, please wait a little longer."
+    }
+  },
+  "language": {
+    "label": "Language",
+    "ko": "Korean",
+    "en": "English",
+    "ja": "Japanese",
+    "zh": "Chinese",
+    "es": "Spanish"
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "tagline": "Let's meet on a cool evening at sunset",
+      "withdrawnNotice": "Your account has been deleted.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "findEmail": "Find ID",
+      "findPassword": "Find password",
+      "credentialError": "Please check your email or password.",
+      "submit": "Log in",
+      "submitting": "Logging in...",
+      "noAccount": "Don't have an account yet?",
+      "validation": {
+        "email": "Please enter a valid email address",
+        "password": "Please enter your password"
+      }
+    },
+    "findEmail": {
+      "title": "Find ID",
+      "nameLabel": "Name",
+      "namePlaceholder": "Name used at sign-up",
+      "phoneLabel": "Phone number",
+      "submit": "Find ID",
+      "submitting": "Checking...",
+      "resultLabel": "Registered email",
+      "resetPassword": "Reset password",
+      "validation": {
+        "nameRequired": "Please enter your name",
+        "nameMax": "Name must be 50 characters or less",
+        "phone": "Please enter an 11-digit phone number"
+      }
+    },
+    "passwordReset": {
+      "request": {
+        "title": "Reset password",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Email address used at sign-up",
+        "submit": "Get reset link",
+        "submitting": "Sending...",
+        "successTitle": "We sent password reset instructions.",
+        "successDescription": "Please check the link in your inbox. If you do not see the email, check your registered email address again.",
+        "findEmail": "Find ID",
+        "validation": {
+          "email": "Please enter a valid email address"
+        }
+      },
+      "confirm": {
+        "title": "New password",
+        "invalidLink": "The reset link is invalid.",
+        "requestAgain": "Get a new link",
+        "newPasswordLabel": "New password",
+        "newPasswordPlaceholder": "At least 8 characters with letters and numbers",
+        "passwordConfirmLabel": "Confirm password",
+        "passwordConfirmPlaceholder": "Enter the new password again",
+        "submit": "Change password",
+        "submitting": "Changing...",
+        "successTitle": "Your password has been changed.",
+        "validation": {
+          "passwordMin": "Password must be at least 8 characters",
+          "passwordPattern": "Password must include letters and numbers",
+          "passwordConfirm": "Please confirm your password",
+          "passwordMismatch": "Passwords do not match"
+        }
+      }
+    },
+    "welcome": {
+      "brand": "Whatsup House",
+      "hostAlt": "Whatsup House host",
+      "guestStart": "Continue as guest"
+    },
+    "onboarding": {
+      "intro": "Tell us about yourself (optional)",
+      "bioLabel": "Short bio",
+      "optional": "(optional)",
+      "bioPlaceholder": "Introduce yourself in one line",
+      "instagramLabel": "Instagram ID",
+      "instagramPlaceholder": "Enter your ID without @",
+      "jobLabel": "Job",
+      "mbtiLabel": "MBTI",
+      "mbtiResult": "So you are {mbti}!",
+      "welcomeToast": "Welcome to Whatsup House\nYour 1,000M sign-up mileage has been added.\nBrowse gatherings you like and get ready for your first meet-up.",
+      "jobSelect": {
+        "placeholder": "Search and select a job",
+        "clear": "Clear selected job",
+        "searchPlaceholder": "Search jobs",
+        "empty": "No results found"
+      }
+    },
+    "register": {
+      "title": "Sign up",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter your name",
+      "genderLabel": "Gender",
+      "gender": {
+        "male": "Male",
+        "female": "Female"
+      },
+      "birthDateLabel": "Date of birth",
+      "agePreview": "Age {age}",
+      "nicknameLabel": "Nickname",
+      "nicknamePlaceholder": "Enter at least 2 characters",
+      "emailLabel": "Email (ID)",
+      "emailPlaceholder": "Enter your email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters with letters and numbers",
+      "passwordConfirmLabel": "Confirm password",
+      "passwordConfirmPlaceholder": "Enter your password again",
+      "phoneLabel": "Contact number",
+      "phonePlaceholder": "01012345678 (11 digits)",
+      "checking": "Checking...",
+      "duplicateCheckFailed": "Duplicate check failed",
+      "nicknameAvailable": "This nickname is available",
+      "emailAvailable": "This email is available",
+      "passwordAvailable": "This password is available",
+      "passwordMatch": "Passwords match",
+      "terms": {
+        "all": "Agree to all",
+        "age": "[Required] I am at least 14 years old",
+        "terms": "[Required] I agree to the Terms of Use",
+        "privacy": "[Required] I agree to the Privacy Policy",
+        "marketing": "[Optional] I agree to receive marketing information"
+      },
+      "calendar": {
+        "dayLabels": [
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat"
+        ],
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "yearSelect": "Select year",
+        "monthSelect": "Select month",
+        "yearOption": "{year}",
+        "monthOption": "{month}",
+        "openBirth": "Open birth date calendar",
+        "closeBirth": "Close birth date calendar"
+      },
+      "validation": {
+        "nameMin": "Please enter at least 2 characters for your name",
+        "gender": "Please select your gender",
+        "birthRequired": "Please select your date of birth",
+        "birthInvalid": "Please enter a valid date of birth",
+        "birthAge": "You must be at least 14 years old to sign up",
+        "nicknameMin": "Please enter at least 2 characters for your nickname",
+        "nicknameMax": "Nickname must be 50 characters or less",
+        "email": "Please enter a valid email address",
+        "password": "Use at least 8 characters with letters and numbers",
+        "passwordConfirm": "Please enter your password again",
+        "phone": "Phone number must be 11 digits",
+        "passwordMismatch": "Passwords do not match"
+      },
+      "policies": {
+        "viewFull": "View full text →",
+        "terms": {
+          "title": "Whatsup House Terms of Use",
+          "summary": "These terms define the conditions for using Whatsup House gathering discovery, applications, and community services, as well as member rights and responsibilities.",
+          "viewFullLabel": "View full terms of use",
+          "sections": [
+            {
+              "title": "Article 1 Purpose",
+              "items": [
+                "These terms set out the procedures and responsibilities between the company and members when using Whatsup House services.",
+                "These terms set out the procedures and responsibilities between the company and members when using Whatsup House services."
+              ]
+            },
+            {
+              "title": "Article 2 Sign-up and account management",
+              "items": [
+                "Members must provide accurate information, manage their own accounts, and follow participation guidelines for gatherings.",
+                "Members must provide accurate information, manage their own accounts, and follow participation guidelines for gatherings.",
+                "Members must provide accurate information, manage their own accounts, and follow participation guidelines for gatherings."
+              ]
+            },
+            {
+              "title": "Article 3 Gathering applications and participation",
+              "items": [
+                "Schedules, venues, capacity, paid participation, cancellation, and refund details may change according to operating conditions and posted notices.",
+                "Schedules, venues, capacity, paid participation, cancellation, and refund details may change according to operating conditions and posted notices.",
+                "Schedules, venues, capacity, paid participation, cancellation, and refund details may change according to operating conditions and posted notices."
+              ]
+            },
+            {
+              "title": "Article 4 Payments, cancellations, and refunds",
+              "items": [
+                "Members must not misuse personal information, submit false applications, disrupt the service, or harm other participants.",
+                "Members must not misuse personal information, submit false applications, disrupt the service, or harm other participants.",
+                "Members must not misuse personal information, submit false applications, disrupt the service, or harm other participants."
+              ]
+            },
+            {
+              "title": "Article 5 Prohibited conduct",
+              "items": [
+                "The company may change or suspend services when necessary for stable operation or unavoidable circumstances.",
+                "The company may change or suspend services when necessary for stable operation or unavoidable circumstances."
+              ]
+            },
+            {
+              "title": "Article 6 Service changes and suspension",
+              "items": [
+                "Disputes will be handled through good-faith consultation and applicable laws.",
+                "Disputes will be handled through good-faith consultation and applicable laws."
+              ]
+            },
+            {
+              "title": "Article 7 Limitation of liability and disputes",
+              "items": [
+                "Disputes will be handled through good-faith consultation and applicable laws.",
+                "Disputes will be handled through good-faith consultation and applicable laws."
+              ]
+            },
+            {
+              "title": "Article 8 Changes to terms",
+              "items": [
+                "Disputes will be handled through good-faith consultation and applicable laws.",
+                "Disputes will be handled through good-faith consultation and applicable laws."
+              ]
+            }
+          ]
+        },
+        "privacy": {
+          "title": "Whatsup House Privacy Policy",
+          "summary": "Whatsup House processes personal information only as needed for sign-up, gathering applications, and safe service operation.",
+          "viewFullLabel": "View full privacy policy",
+          "sections": [
+            {
+              "title": "Article 1 Purpose of processing personal information",
+              "items": [
+                "We process personal information for member identification, account management, fraud prevention, gathering operations, notices, support, service improvement, and statistics.",
+                "We process personal information for member identification, account management, fraud prevention, gathering operations, notices, support, service improvement, and statistics."
+              ]
+            },
+            {
+              "title": "Article 2 Personal information collected",
+              "items": [
+                "Collected information may include required sign-up details, optional profile details entered by members, and automatically collected service usage records.",
+                "Collected information may include required sign-up details, optional profile details entered by members, and automatically collected service usage records.",
+                "Collected information may include required sign-up details, optional profile details entered by members, and automatically collected service usage records."
+              ]
+            },
+            {
+              "title": "Article 3 Retention and use period",
+              "items": [
+                "Personal information is destroyed when the purpose is achieved or membership ends, except where laws require retention.",
+                "Personal information is destroyed when the purpose is achieved or membership ends, except where laws require retention.",
+                "Personal information is destroyed when the purpose is achieved or membership ends, except where laws require retention."
+              ]
+            },
+            {
+              "title": "Article 4 Third-party provision",
+              "items": [
+                "We do not provide personal information externally unless permitted by consent or law, and we announce necessary operational sharing in advance.",
+                "We do not provide personal information externally unless permitted by consent or law, and we announce necessary operational sharing in advance."
+              ]
+            },
+            {
+              "title": "Article 5 Outsourcing of processing",
+              "items": [
+                "Some work may be outsourced for stable service operation, and relevant details will be announced when needed.",
+                "Some work may be outsourced for stable service operation, and relevant details will be announced when needed."
+              ]
+            },
+            {
+              "title": "Article 6 Destruction of personal information",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 7 User rights",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 8 Security measures",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 9 Cookies and automatic collection",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 10 Privacy inquiries",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            },
+            {
+              "title": "Article 11 Changes to this policy",
+              "items": [
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels.",
+                "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent through service settings or support channels."
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "nav": {
+    "profileAlt": "Profile",
+    "tabs": {
+      "home": "Home",
+      "gatherings": "Gatherings",
+      "my": "My"
+    },
+    "titles": {
+      "home": "Home",
+      "gatherings": "Gatherings",
+      "reviews": "Reviews from guests",
+      "social": "Social",
+      "mypage": "My Page",
+      "mileage": "Mileage",
+      "applicationCheck": "Check applications",
+      "login": "Log in",
+      "register": "Sign up",
+      "onboarding": "Onboarding",
+      "applyComplete": "Application complete",
+      "apply": "Apply",
+      "story": "About"
+    }
+  },
+  "desktopBrand": {
+    "brand": "Whatsup House",
+    "headlineLine1": "A calm place",
+    "headlineLine2": "for people who like it easy",
+    "descriptionLine1": "Offline social gatherings for 20s and 30s living solo.",
+    "descriptionLine2": "Browse small, low-pressure meetups on the screen to the right.",
+    "keywords": [
+      "#SmallGroups",
+      "#Offline",
+      "#CalmMeetups",
+      "#20s30s"
+    ]
+  },
+  "notifications": {
+    "label": "Notifications",
+    "close": "Close",
+    "loginRequired": "Log in to check your notifications.",
+    "loading": "Loading...",
+    "empty": "No new notifications.",
+    "delete": "Delete notification"
+  },
+  "errorView": {
+    "imageAlt": "Whatsup House error notice",
+    "retry": "Try again",
+    "home": "Go home",
+    "previousPage": "Previous page"
+  },
+  "notFound": {
+    "title": "Oops! We cannot find that page",
+    "description": "The page you requested may be gone,\nor the address may be incorrect.\nGo back home and start again."
+  },
+  "home": {
+    "hero": {
+      "calendarEyebrow": "This month",
+      "calendarCta": "Tap to view all gatherings →",
+      "openBadge": "Open",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "curated": {
+      "title": "Most viewed gatherings this week",
+      "rankLabel": "No. {rank} {title}",
+      "nearestOpen": "Next opening · {date}",
+      "noOpen": "No open schedule"
+    },
+    "reviews": {
+      "title": "Reviews from guests",
+      "viewAll": "View all ›"
+    }
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "gathering": {
+    "calendar": {
+      "dayLabels": [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
+      "monthTitle": "{month}/{year}",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "close": "Close",
+      "current": "Current"
+    },
+    "list": {
+      "dateTitle": "Gatherings on {month}/{day}",
+      "emptyTitle": "No gatherings on this day.",
+      "emptyDescription": "Try another day :)",
+      "calendarView": "Calendar",
+      "mapView": "Map view",
+      "cardView": "Browse"
+    },
+    "typeView": {
+      "title": "Meet the gatherings of Whatsup House",
+      "emptyTitle": "No gatherings yet.",
+      "emptyDescription": "New gatherings are coming soon :)",
+      "nearestOpen": "Next opening · {date}",
+      "noOpen": "No open schedule",
+      "scheduleCount": "{count} schedules",
+      "filterLabel": "Gathering status filter",
+      "sortLabel": "Gathering sort",
+      "filter": {
+        "all": "All",
+        "open": "Open",
+        "completed": "Completed"
+      },
+      "sort": {
+        "popular": "Popular",
+        "latest": "Newest",
+        "oldest": "Oldest"
+      }
+    },
+    "card": {
+      "price": "₩{price}",
+      "capacity": "Up to {count} people"
+    },
+    "map": {
+      "naverLabel": "View on Naver Map",
+      "naverShort": "Naver",
+      "kakaoLabel": "View on KakaoMap",
+      "kakaoShort": "Kakao",
+      "comingSoon": "Map integration coming soon",
+      "nearbyCount": "{count} upcoming gatherings in this area"
+    },
+    "detail": {
+      "loadFailed": "Could not load gathering information.",
+      "share": "Share",
+      "previousPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "hostedBy": "Hosted by Whatsup House",
+      "photoLabel": "Photo {index}",
+      "date": "Date",
+      "time": "Time",
+      "location": "Location",
+      "capacityLabel": "Capacity",
+      "capacity": "Up to {count} people",
+      "priceLabel": "Fee",
+      "price": "₩{price}",
+      "onsitePayment": "(pay on site)",
+      "mileageReward": "Mileage reward",
+      "descriptionTitle": "About this gathering",
+      "howToRunTitle": "How it works",
+      "cautionTitle": "This may not be a fit if you",
+      "caution1": "Disrupt others with excessive noise",
+      "caution2": "Force your tastes and ignore others’ opinions",
+      "caution3": "Attend for commercial promotion",
+      "reviewsTitle": "Participant reviews",
+      "reviewCount": "{count} reviews",
+      "linkCopied": "Link copied",
+      "durationHours": "{hours} hr",
+      "durationWithMinutes": "{hours} hr {minutes} min",
+      "otherDate": "Other dates",
+      "apply": "Apply",
+      "viewOtherDate": "View other dates",
+      "closed": "Closed"
+    },
+    "apply": {
+      "modal": {
+        "title": "Choose how to apply",
+        "memberApply": "Apply after logging in",
+        "memberApplyDescription": "Earn mileage and check your booking history",
+        "guestApply": "Apply without logging in",
+        "guestApplyDescription": "Mileage will not be earned"
+      },
+      "form": {
+        "requiredError": "This field is required.",
+        "loadFailed": "Could not load the application form.",
+        "gatheringLoadFailed": "Could not load gathering information.",
+        "guestMileageNotice": "Guest applications do not earn mileage.",
+        "loginToApply": "Apply after logging in",
+        "loginBenefitSuffix": "to receive benefits.",
+        "memberMileageNotice": "You will earn {mileage} mileage after attending",
+        "submit": "Complete application"
+      },
+      "question": {
+        "male": "Male",
+        "female": "Female",
+        "multiChoice": "(Multiple selections allowed)",
+        "mbtiResult": "So you are {mbti}!"
+      },
+      "result": {
+        "headline": {
+          "completed": "Application complete! 🎉",
+          "confirmed": "Booking confirmed! 🎉"
+        },
+        "subcopy": {
+          "completed": "The host will confirm your booking after checking it",
+          "confirmed": "See you on the gathering day"
+        },
+        "appliedGathering": "Applied gathering",
+        "dateTime": "Date + time",
+        "location": "Location",
+        "price": "Fee",
+        "priceValue": "₩{price}",
+        "checkWithBookingNumber": "Check application status",
+        "checkInMypage": "Check confirmation in My Page",
+        "goHome": "Go home",
+        "bookingNumber": "Application",
+        "copy": "Copy",
+        "copied": "Copied",
+        "bookingNumberHelp": "You can check your application with phone and email verification",
+        "paymentAccount": "Payment account",
+        "accountHolder": "Account holder",
+        "depositAmount": "Deposit amount",
+        "accountCopyHelp": "Tap the account number to copy it"
+      }
+    },
+    "ticketPass": {
+      "purchaseSuccess": "Your pass purchase request was received.\nThe pass will activate after deposit confirmation.",
+      "purchaseFailed": "Failed to request pass purchase. Please try again later.",
+      "title": "Random Table Pass",
+      "description": "Random Table uses passes. Prepay for a 4-use pass so you do not need to pay every time.",
+      "remaining": "Remaining passes",
+      "remainingCount": "{count} left",
+      "pendingNotice": "You have a pass waiting for deposit confirmation. It will activate after admin confirmation.",
+      "purchase": "Request 4-use pass prepayment",
+      "depositAccount": "Deposit account (pay after request)",
+      "accountHolder": "Account holder {holder}",
+      "loginRequired": "Log in to purchase a pass."
+    }
+  },
+  "review": {
+    "photoReview": "📷 Photo review",
+    "anonymous": "Anonymous",
+    "countForGathering": "{count} reviews for this gathering",
+    "sort": {
+      "likes": "Most liked",
+      "latest": "Newest"
+    },
+    "loading": "Loading...",
+    "empty": "No reviews yet. Be the first to leave one!",
+    "emptyShort": "No reviews yet.",
+    "alreadyWritten": "You already wrote a review",
+    "allGatherings": "All gatherings",
+    "form": {
+      "starLabel": "{score} stars",
+      "success": "Review posted!",
+      "successWithReward": "Review posted! +{mileage}M earned",
+      "imageUploadFailed": "Image upload failed. Please try again.",
+      "title": "Write a review",
+      "textTab": "Text",
+      "photoTab": "Photo",
+      "placeholder": "Share your gathering experience freely",
+      "rewardNotice": "Posting a review earns +{mileage}M mileage",
+      "submitting": "Posting...",
+      "uploading": "Uploading image...",
+      "submit": "Post review"
+    },
+    "card": {
+      "deleteTitle": "Delete this review?",
+      "deleteDescription": "Earned mileage will not be reclaimed.",
+      "cancel": "Cancel",
+      "deleting": "Deleting…",
+      "delete": "Delete",
+      "loginRequired": "Please log in to use this feature",
+      "deleteSuccess": "Review deleted",
+      "deleteFailed": "Failed to delete. Please try again",
+      "anonymous": "Anonymous",
+      "gatheringFallback": "Gathering",
+      "photoReview": "📷 Photo review",
+      "writtenAt": "Written on {date}",
+      "more": "More",
+      "unlike": "Unlike",
+      "like": "Like"
+    }
+  },
+  "mypage": {
+    "profile": {
+      "loadFailed": "Could not load your profile.",
+      "passwordChanged": "Password changed successfully.",
+      "editProfile": "Edit profile",
+      "mileage": "{mileage} mileage",
+      "ticketPass": "Random Table Pass",
+      "ticketRemaining": "{count} left",
+      "phone": "Phone",
+      "gender": "Gender",
+      "genderLabels": {
+        "MALE": "Male",
+        "FEMALE": "Female"
+      },
+      "age": "Age",
+      "ageValue": "{age}",
+      "job": "Job",
+      "mbti": "MBTI",
+      "animalType": "Animal type",
+      "interests": "Interests",
+      "adminDashboard": "Admin dashboard",
+      "logout": "Log out",
+      "changePassword": "Change password",
+      "withdraw": "Delete account",
+      "email": "Email"
+    },
+    "applications": {
+      "loading": "Loading...",
+      "filters": {
+        "all": "All",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "attended": "Attended",
+        "cancelled": "Cancelled"
+      },
+      "status": {
+        "PENDING": "Under review",
+        "CONFIRMED": "Confirmed",
+        "CANCELLED": "Cancelled",
+        "ATTENDED": "Attended",
+        "PAYMENT_PENDING": "Awaiting payment",
+        "REJECTED": "Rejected"
+      },
+      "payment": {
+        "PENDING": "Deposit pending",
+        "CONFIRMED": "Deposit complete",
+        "FREE": "Free"
+      },
+      "emptyFiltered": "No applications with this status.",
+      "empty": "You have not applied for any gatherings yet.",
+      "browseGatherings": "Browse gatherings",
+      "bookingNumber": "Application",
+      "cancelConfirmQuestion": "Cancel this application?",
+      "goBack": "Go back",
+      "cancelling": "Cancelling...",
+      "confirmCancel": "Confirm cancellation",
+      "cancelApplication": "Cancel application"
+    },
+    "password": {
+      "title": "Change password",
+      "currentPassword": "Current password",
+      "currentPasswordPlaceholder": "Current password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "At least 8 characters with letters and numbers",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Enter the new password again",
+      "submitting": "Changing...",
+      "submit": "Change",
+      "validation": {
+        "currentPassword": "Please enter your current password",
+        "newPassword": "Use at least 8 characters with letters and numbers",
+        "confirmPassword": "Please enter the new password again",
+        "mismatch": "New passwords do not match"
+      }
+    },
+    "tabs": {
+      "profile": "Profile",
+      "applications": "Applications",
+      "reviews": "My Reviews"
+    },
+    "mileage": {
+      "balanceAsOf": "Mileage balance as of {time}",
+      "unit": "Mileage",
+      "howToEarnEyebrow": "HOW TO EARN",
+      "howToEarnTitle": "How do I earn it?",
+      "earnMethods": [
+        {
+          "title": "Attend a gathering",
+          "desc": "Earn mileage when you attend a gathering\nand the host marks you present"
+        },
+        {
+          "title": "Write a gathering review",
+          "desc": "Share the atmosphere and your impressions\nwith text or photos"
+        },
+        {
+          "title": "Welcome mileage",
+          "desc": "A small welcome gift\nfor first-time Whatsup House members"
+        }
+      ],
+      "typeLabels": {
+        "SIGNUP": "Welcome signup bonus",
+        "ATTENDANCE": "Gathering attendance",
+        "REVIEW_REWARD": "Gathering review",
+        "REVIEW_UPGRADE": "Photo review upgrade",
+        "ADMIN_ADJUST": "Admin adjustment",
+        "ADMIN_ADJUST_EARN": "Admin credit",
+        "ADMIN_ADJUST_USE": "Admin deduction"
+      },
+      "filters": {
+        "ALL": "All",
+        "EARN": "Earned",
+        "USE": "Used"
+      },
+      "balance": "Balance {balance}M",
+      "empty": {
+        "USE": {
+          "head": "No usage history yet",
+          "body": "Use your mileage to get discounts\non gathering participation fees"
+        },
+        "EARN": {
+          "head": "No earning history yet",
+          "body": "Apply to a gathering that catches your eye\nand meet people offline"
+        },
+        "ALL": {
+          "head": "No mileage history yet",
+          "body": "Attend gatherings or leave reviews\nto earn mileage"
+        }
+      },
+      "browseGatherings": "Browse gatherings",
+      "logEyebrow": "MILEAGE LOG",
+      "logTitle": "Mileage history",
+      "itemCount": "{count} items",
+      "sortLatest": "Newest",
+      "sortOldest": "Oldest"
+    },
+    "profileEdit": {
+      "title": "Edit profile",
+      "basicInfo": "Basic information",
+      "nickname": "Nickname*",
+      "nicknamePlaceholder": "Enter your nickname",
+      "name": "Name*",
+      "namePlaceholder": "Enter your legal name",
+      "gender": "Gender*",
+      "genderLabels": {
+        "MALE": "Male",
+        "FEMALE": "Female"
+      },
+      "age": "Age*",
+      "agePlaceholder": "Enter your age",
+      "phone": "Phone",
+      "additionalInfo": "Additional information",
+      "optional": "(Optional)",
+      "bio": "One-line intro",
+      "bioPlaceholder": "Describe yourself in one line",
+      "instagram": "Instagram ID",
+      "job": "Job",
+      "mbti": "MBTI",
+      "mbtiResult": "You are {mbti}!",
+      "interests": "Interests",
+      "interestPlaceholder": "Enter an interest and add it",
+      "addInterest": "Add interest",
+      "removeInterest": "Remove {interest}",
+      "maxInterests": "Up to 10",
+      "submit": "Save",
+      "submitFailed": "Failed to update your profile. Please try again.",
+      "validation": {
+        "nicknameMin": "Nickname must be at least 2 characters",
+        "nicknameMax": "Nickname must be 50 characters or less",
+        "nameRequired": "Please enter your name",
+        "nameMax": "Name must be 50 characters or less",
+        "phone": "Phone number must be 11 digits",
+        "age": "Please enter a valid age",
+        "bioMax": "Intro must be 100 characters or less",
+        "gender": "Please select a gender."
+      }
+    },
+    "guestApplication": {
+      "intro": "Verify your phone and email to view your applications",
+      "bookingNumber": "Application info",
+      "phone": "Phone",
+      "checking": "Checking...",
+      "check": "Check",
+      "notFound": "Please check your application information",
+      "resultLabel": "Application details",
+      "confirmedHelp": "Tap the card to open the reservation confirmation page.",
+      "invalidTitle": "Invalid link",
+      "invalidDescription": "This link has expired or is not valid.",
+      "checkDirectly": "Check directly",
+      "goHome": "Go home",
+      "title": "Application details",
+      "description": "Check your application information below.",
+      "loginToView": "Log in to view my applications",
+      "validation": {
+        "bookingNumber": "Please enter your application information",
+        "phoneRequired": "Please enter your phone number",
+        "phoneInvalid": "Please enter a valid phone number"
+      }
+    },
+    "reviews": {
+      "loading": "Loading...",
+      "empty": "You have not written any reviews yet",
+      "more": "Load more"
+    },
+    "withdraw": {
+      "title": "Delete account",
+      "description": "Once deleted, your account will be deactivated and you will not be able to log in again.",
+      "passwordConfirm": "Confirm password",
+      "passwordPlaceholder": "Current password",
+      "submitting": "Processing...",
+      "submit": "Delete account",
+      "failed": "Failed to delete your account.",
+      "validation": {
+        "password": "Please enter your password"
+      }
+    }
+  },
+  "social": {
+    "title": "Social Space",
+    "description": "Social features will appear here."
+  },
+  "story": {
+    "fallbackTitle": "About | Whatsup House",
+    "cta": "Browse gatherings",
+    "whatsupHouse": {
+      "tagline": "The space we are creating",
+      "title": "The Whatsup House Story",
+      "description": "Whatsup House is a small offline social gathering platform planned and hosted directly by its founder so people in their 20s and 30s living alone can meet without pressure.",
+      "sections": [
+        {
+          "heading": "What is Whatsup House?",
+          "body": "We wanted to make evenings feel less lonely, even when you live alone. Whatsup House is an offline social gathering platform for one-person households in their 20s and 30s. We create easygoing moments where people can meet and share tastes and everyday stories."
+        },
+        {
+          "heading": "The gatherings we create",
+          "body": "Every gathering is planned and hosted directly by Whatsup House. Each one is kept small, with up to 20 people, so first-time guests can settle in naturally."
+        },
+        {
+          "heading": "How to join",
+          "body": "Browse gatherings you like and apply. No complicated matching, just join a gathering on the date that works for you."
+        }
+      ]
+    }
+  },
+  "ui": {
+    "apiError": {
+      "fallback": "An error occurred.",
+      "retry": "Try again"
+    },
+    "pagination": {
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "scroll": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "toast": {
+      "close": "Close"
+    },
+    "loading": {
+      "label": "Loading"
+    },
+    "imageUpload": {
+      "alt": "Uploaded image",
+      "selectPhoto": "Select photo",
+      "loadPhoto": "Load photo",
+      "ratioHint": "Displayed in this ratio",
+      "change": "Change",
+      "remove": "Remove image"
+    },
+    "imageCrop": {
+      "contextTitle": {
+        "review": "Edit review photo",
+        "carousel": "Edit carousel image",
+        "avatar": "Edit profile image"
+      },
+      "processing": "Processing...",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "dragHint": "Drag to position, use the slider to resize",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "ratio": "Ratio {ratio}",
+      "rotate": "Rotate",
+      "originalSize": "Original size",
+      "confirm": "Confirm",
+      "previewTitle": "Preview",
+      "previewContext": {
+        "avatar": "This is how it will look on your profile",
+        "carousel": "This is how it will look in the home carousel",
+        "review": "This is how it will look below"
+      },
+      "avatarAlt": "Avatar preview",
+      "avatarMask": "Displayed with a circular mask",
+      "cardAlt": "Card preview",
+      "sampleTitle": "A Slow Afternoon Jazz Listening Gathering",
+      "sampleDate": "Sat, May 24 · 14:00 · Seongsu-dong",
+      "listAlt": "List preview",
+      "sampleListTitle": "Like this in lists",
+      "sampleListBody": "The cropped area stays consistent even as the thumbnail gets smaller",
+      "editAgain": "Edit again"
+    },
+    "multiCrop": {
+      "title": "Gathering images",
+      "pending": "Multi-crop coming soon",
+      "steps": [
+        {
+          "label": "Square thumbnail",
+          "description": "Shown on list cards and calendars"
+        },
+        {
+          "label": "Landscape detail image",
+          "description": "Shown at the top of the gathering detail page"
+        }
+      ],
+      "select": "Select an image and crop each step",
+      "selectAgain": "Select again"
+    }
+  },
+  "metadata": {
+    "root": {
+      "title": "Whatsup House",
+      "description": "A space for people who enjoy calm connections"
+    },
+    "home": {
+      "title": "Whatsup House | Social gathering platform for one-person households",
+      "description": "Small offline social gatherings for people in their 20s and 30s living alone. Meet new people in a comfortable way.",
+      "openGraphTitle": "Whatsup House",
+      "openGraphDescription": "Small offline social gatherings for people in their 20s and 30s living alone."
+    },
+    "gatherings": {
+      "title": "Gatherings | Whatsup House",
+      "description": "Check social gathering schedules by date and apply."
+    }
+  },
+  "payment": {
+    "account": {
+      "bankName": "Woori Bank",
+      "accountHolder": "Whatsup House"
+    }
+  },
+  "errors": {
+    "UNKNOWN": "Something went wrong. Please try again.",
+    "EMAIL_ALREADY_EXISTS": "This email is already in use.",
+    "EMAIL_NOT_VERIFIED": "Please complete email verification.",
+    "NICKNAME_ALREADY_EXISTS": "This nickname is already in use.",
+    "INVALID_CREDENTIALS": "Please check your email or password.",
+    "USER_NOT_FOUND": "We could not find matching account information.",
+    "PASSWORD_RESET_FAILED": "Failed to request a password reset.",
+    "INVALID_PASSWORD_RESET_TOKEN": "Please check your password reset link."
+  },
+  "jobs": {
+    "category": {
+      "STUDENT": "Student",
+      "IT_DEV": "IT & Development",
+      "DESIGN_ART": "Design & Art",
+      "MEDIA": "Media & Broadcasting",
+      "MARKETING": "Marketing & Advertising",
+      "FINANCE": "Finance",
+      "LEGAL": "Legal",
+      "MEDICAL": "Medical & Health",
+      "EDUCATION": "Education",
+      "PUBLIC": "Public Service",
+      "SERVICE": "Service",
+      "MANUFACTURING": "Manufacturing & Engineering",
+      "OFFICE": "Office & Professional",
+      "SELF_EMPLOYED": "Self-employed & Freelance",
+      "ETC": "Other"
+    },
+    "item": {
+      "UNIVERSITY_STUDENT": "University Student",
+      "GRADUATE_STUDENT": "Graduate Student",
+      "HIGH_SCHOOL_STUDENT": "High School Student",
+      "EXCHANGE_STUDENT": "Exchange Student",
+      "STUDENT_ETC": "Student (Other)",
+      "SOFTWARE_DEVELOPER": "Developer",
+      "FRONTEND_DEVELOPER": "Frontend Developer",
+      "BACKEND_DEVELOPER": "Backend Developer",
+      "DATA_ANALYST": "Data Analyst",
+      "DATA_SCIENTIST": "Data Scientist",
+      "INFOSEC": "Information Security",
+      "PRODUCT_MANAGER": "PM & Service Planning",
+      "QA_ENGINEER": "QA Engineer",
+      "DEVOPS_ENGINEER": "DevOps Engineer",
+      "IT_ETC": "IT & Development (Other)",
+      "DESIGNER": "Designer",
+      "UX_UI_DESIGNER": "UX/UI Designer",
+      "GRAPHIC_DESIGNER": "Graphic Designer",
+      "VIDEO_DESIGNER": "Video Designer",
+      "ILLUSTRATOR": "Illustrator",
+      "PHOTOGRAPHER": "Photographer",
+      "MUSICIAN": "Musician",
+      "VOCALIST": "Vocalist",
+      "WRITER": "Writer",
+      "DESIGN_ART_ETC": "Design & Art (Other)",
+      "PRODUCER": "PD & Producer",
+      "LIVE_COMMERCE_PD": "Live Commerce PD",
+      "AD_PRODUCER": "Advertising PD",
+      "MEDIA_PRODUCTION": "Media Production",
+      "BROADCAST_WRITER": "Broadcast Writer",
+      "EDITOR": "Editor",
+      "CONTENT_CREATOR": "Creator",
+      "ANNOUNCER": "Announcer",
+      "SPORTS_CASTER": "Sportscaster",
+      "MC_HOST": "MC & Host",
+      "MEDIA_ETC": "Media & Broadcasting (Other)",
+      "MARKETER": "Marketer",
+      "PERFORMANCE_MARKETER": "Performance Marketer",
+      "BRAND_MARKETER": "Brand Marketer",
+      "BEAUTY_MARKETER": "Beauty Marketer",
+      "AD_PLANNER": "Advertising Planner (AE)",
+      "MERCHANDISER": "Merchandiser",
+      "FASHION_MD": "Fashion MD",
+      "PR_SPECIALIST": "PR & Public Relations",
+      "MARKETING_ETC": "Marketing & Advertising (Other)",
+      "BANKER": "Banker",
+      "SECOND_FINANCE": "Non-bank Finance",
+      "TAX_ACCOUNTANT": "Tax Accountant",
+      "ACCOUNTANT": "Accountant",
+      "SECURITIES": "Securities & Investment",
+      "INSURANCE": "Insurance",
+      "FINANCE_OFFICE": "Finance & Accounting Office",
+      "FINANCE_ETC": "Finance (Other)",
+      "LAWYER": "Lawyer",
+      "JUDGE": "Judge",
+      "PROSECUTOR": "Prosecutor",
+      "JUDICIAL_SCRIVENER": "Judicial Scrivener",
+      "PATENT_ATTORNEY": "Patent Attorney",
+      "LABOR_ATTORNEY": "Labor Attorney",
+      "PARALEGAL": "In-house Counsel",
+      "LEGAL_ETC": "Legal (Other)",
+      "NURSE": "Nurse",
+      "DOCTOR": "Doctor",
+      "PHARMACIST": "Pharmacist",
+      "RADIOLOGIC_TECH": "Radiologic Technologist",
+      "PHYSICAL_THERAPIST": "Physical Therapist",
+      "PHARMA_RESEARCHER": "Pharmaceutical Researcher",
+      "DENTAL_COORDINATOR": "Dental Coordinator",
+      "MEDICAL_TECH": "Medical Technologist",
+      "VETERINARIAN": "Veterinarian",
+      "MEDICAL_ETC": "Medical & Health (Other)",
+      "TEACHER": "Teacher",
+      "KINDERGARTEN_TEACHER": "Kindergarten Teacher",
+      "LECTURER": "Lecturer",
+      "PROFESSOR": "Professor",
+      "ACADEMY_INSTRUCTOR": "Academy Instructor",
+      "EDUCATION_ETC": "Education (Other)",
+      "CIVIL_SERVANT": "Civil Servant",
+      "POLICE_OFFICER": "Police Officer",
+      "LOCAL_GOV_OFFICER": "Local Government Officer",
+      "PUBLIC_CORP": "Public Enterprise",
+      "SOLDIER": "Soldier",
+      "FIREFIGHTER": "Firefighter",
+      "SOCIAL_WORKER": "Social Worker",
+      "PUBLIC_ETC": "Public (Other)",
+      "HOTELIER": "Hotelier",
+      "BARISTA": "Barista",
+      "BAKER": "Baker",
+      "CHEF": "Chef",
+      "SECRETARY": "Secretary",
+      "SALES": "Sales",
+      "CALL_CENTER": "Call Center Agent",
+      "RETAIL_STAFF": "Retail Staff",
+      "HAIR_DESIGNER": "Hair Designer",
+      "BEAUTY_WORKER": "Beauty Professional",
+      "FLIGHT_ATTENDANT": "Flight Attendant",
+      "REALTOR": "Real Estate Agent",
+      "SERVICE_ETC": "Service (Other)",
+      "ENGINEER": "Engineer",
+      "SEMICONDUCTOR_ENGINEER": "Semiconductor Engineer",
+      "MECHANICAL_ENGINEER": "Mechanical Engineer",
+      "ELECTRICAL_ENGINEER": "Electrical Engineer",
+      "PROCESS_OPERATOR": "Process Operator",
+      "PRODUCTION_WORKER": "Production Worker",
+      "QUALITY_CONTROL": "Quality Control",
+      "ARCHITECT": "Architect",
+      "MANUFACTURING_ETC": "Manufacturing & Engineering (Other)",
+      "OFFICE_WORKER": "Office Worker",
+      "OFFICE_CLERK": "Office Clerk",
+      "FOREIGN_COMPANY": "Foreign Company Employee",
+      "LARGE_COMPANY": "Large Company Office Worker",
+      "HR": "HR",
+      "GENERAL_AFFAIRS": "General Affairs",
+      "OFFICE_ETC": "Office (Other)",
+      "STARTUP_FOUNDER": "Startup Founder",
+      "SELF_EMPLOYED_OWNER": "Business Owner",
+      "FREELANCER": "Freelancer",
+      "ENTREPRENEUR": "Entrepreneur",
+      "SELF_EMPLOYED_ETC": "Self-employed & Startup (Other)",
+      "JOB_SEEKER": "Job Seeker",
+      "UNEMPLOYED": "Unemployed / Resting",
+      "ETC": "Other"
+    }
+  }
+}

@@ -20,7 +20,7 @@ const schema = z.object({
   startTime: z.string().min(1, '시작 시간을 입력해주세요'),
   endTime: z.string().min(1, '종료 시간을 입력해주세요'),
   price: z.number({ error: '참가비를 입력해주세요' }).min(0, '참가비는 0원 이상이어야 합니다'),
-  capacity: z.number({ error: '정원을 입력해주세요' }).int().min(1).max(20, '정원은 최대 20명입니다'),
+  capacity: z.number({ error: '정원을 입력해주세요' }).int().min(1).max(30, '정원은 최대 30명입니다'),
   thumbnailUrl: z.string().optional(),
   moodTagsText: z.string().optional(),
   mileageReward: z.number().optional(),
@@ -89,6 +89,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
     if (detail.startTime) setValue('startTime', detail.startTime.slice(0, 5))
     if (detail.endTime) setValue('endTime', detail.endTime.slice(0, 5))
     setValue('thumbnailUrl', detail.thumbnailUrl ?? '')
+    setValue('moodTagsText', detail.tags?.join(',') ?? '')
   }, [detail, setValue])
 
   const onSubmit = (values: FormValues) => {
@@ -104,7 +105,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
       thumbnailUrl: values.thumbnailUrl || undefined,
       mileageReward: values.mileageReward ?? 500,
       howToRun: values.howToRunText ? values.howToRunText.split('\n').filter(Boolean) : [],
-      moodTags: values.moodTagsText ? values.moodTagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      tags: values.moodTagsText ? values.moodTagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
     }
 
     if (isEdit) {
@@ -117,7 +118,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 w-[480px] h-full bg-card shadow-2xl z-50 flex flex-col">
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[480px] h-full bg-card shadow-2xl z-50 flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-tag-bg">
           <h2 className="font-bold text-[18px] text-foreground">{isEdit ? '게더링 수정' : '게더링 추가'}</h2>
           <button onClick={onClose} className="text-tag-text text-xl leading-none">✕</button>
@@ -128,7 +129,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
             {!isEdit && (
               <div>
                 <label className="text-sm font-medium text-foreground block mb-1">게더링 유형 *</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {([
                     { value: 'REGULAR', label: '일반', desc: '신청만 받음' },
                     { value: 'RANDOM_TABLE', label: '우연한 식탁', desc: '자동매칭' },
@@ -210,7 +211,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
               {...register('date')}
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 label="시작 시간 *"
                 type="time"
@@ -225,7 +226,7 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 label="참가비 (원) *"
                 type="number"
@@ -234,10 +235,10 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
                 {...register('price', { valueAsNumber: true })}
               />
               <Input
-                label="모집 정원 (최대 20) *"
+                label="모집 정원 (최대 30) *"
                 type="number"
                 min={1}
-                max={20}
+                max={30}
                 error={errors.capacity?.message}
                 {...register('capacity', { valueAsNumber: true })}
               />

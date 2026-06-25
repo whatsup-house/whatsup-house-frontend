@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, AdminApplicationDetail } from './types'
+import type { ApiResponse, AdminApplicationDetail, PaymentStatus } from './types'
 
 // 화면 표시 모델. 백엔드 목록 응답을 getAll에서 이 형태로 매핑한다. (KAN-185)
 export interface AdminGatheringListItem {
@@ -44,6 +44,7 @@ export interface AdminGatheringDetail {
   maxAttendees: number
   status: string
   thumbnailUrl: string | null
+  tags?: string[] | null
   location: { id: string; name: string; address: string } | null
 }
 
@@ -60,6 +61,7 @@ export interface GatheringCreateRequest {
   price: number
   capacity: number
   thumbnailUrl?: string
+  tags?: string[]
   moodTags?: string[]
   activityTags?: string[]
   mileageReward?: number
@@ -79,6 +81,7 @@ function toGatheringRequestBody(data: GatheringCreateRequest) {
     price: data.price,
     maxAttendees: data.capacity,
     thumbnailUrl: data.thumbnailUrl,
+    tags: data.tags ?? data.moodTags,
     gatheringType: data.gatheringType,
   }
 }
@@ -120,7 +123,7 @@ function toLocationBody(data: Partial<LocationItem>) {
   }
 }
 
-export type ApplicationStatus = 'PENDING' | 'CONFIRMED' | 'ATTENDED'
+export type ApplicationStatus = 'PENDING' | 'PAYMENT_PENDING' | 'CONFIRMED' | 'ATTENDED' | 'REJECTED' | 'CANCELLED'
 
 export interface AdminApplicationItem {
   id: string
@@ -135,7 +138,10 @@ export interface AdminApplicationItem {
   referralSource: string | null
   status: ApplicationStatus
   paid: boolean              // 유료 게더링 여부 (입금 체크 노출 대상). (KAN-243)
+  free: boolean              // 참가비 0원 여부
+  paymentStatus?: PaymentStatus | null
   paymentConfirmed: boolean  // 입금 확인 여부
+  gatheringType?: GatheringType
   createdAt: string
   isGuest: boolean
 }

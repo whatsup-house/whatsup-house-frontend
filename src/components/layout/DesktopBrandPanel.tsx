@@ -1,6 +1,5 @@
 import Image from 'next/image'
-
-const KEYWORDS = ['#소규모', '#오프라인', '#잔잔한_모임', '#2030']
+import { useTranslations } from 'next-intl'
 
 /**
  * 데스크탑(lg↑) 전용 브랜드 영역.
@@ -9,6 +8,9 @@ const KEYWORDS = ['#소규모', '#오프라인', '#잔잔한_모임', '#2030']
  * 모바일·태블릿(<1024px)에서는 렌더되지 않는다.
  */
 export default function DesktopBrandPanel() {
+  const t = useTranslations('desktopBrand')
+  const keywords = t.raw('keywords') as string[]
+
   return (
     <>
       {/* 뷰포트 전체 배경 사진 */}
@@ -27,27 +29,31 @@ export default function DesktopBrandPanel() {
       {/* 브랜드 카피 (앱 프레임 좌측 오버레이) */}
       <aside className="pointer-events-none relative hidden text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-1 lg:flex-col lg:justify-center lg:gap-8 lg:px-14 lg:py-16">
         <div>
-          <h2 className="font-brand-kr text-[44px] font-bold leading-tight drop-shadow-[0_2px_18px_rgba(0,0,0,0.5)]">
-            와썹하우스
-          </h2>
-          <p className="font-brand-script text-[28px] leading-none text-white/90">
-            What&apos;s up house
-          </p>
+          <div className="inline-flex">
+            <Image
+              src="/assets/whatsup-transparent-logo.png"
+              alt="와썹하우스"
+              width={1007}
+              height={413}
+              priority
+              className="h-auto w-[320px] object-contain drop-shadow-[0_3px_18px_rgba(0,0,0,0.42)]"
+            />
+          </div>
         </div>
 
         <div>
           <p className="text-[36px] font-bold leading-snug drop-shadow-[0_2px_18px_rgba(0,0,0,0.5)]">
-            잔잔한 게 좋은
+            {t('headlineLine1')}
             <br />
-            사람들의 공간
+            {t('headlineLine2')}
           </p>
           <p className="mt-4 text-[15px] leading-relaxed text-white/85">
-            혼자 사는 2030을 위한 오프라인 소셜 게더링.
+            {t('descriptionLine1')}
             <br />
-            부담 없는 소규모 모임을 오른쪽 화면에서 둘러보세요.
+            {t('descriptionLine2')}
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
-            {KEYWORDS.map((k) => (
+            {keywords.map((k) => (
               <span
                 key={k}
                 className="rounded-full bg-white/15 px-3.5 py-1.5 text-sm font-medium text-white backdrop-blur-sm"

@@ -11,6 +11,7 @@
   --color-tag-text: #5C4033;
   --color-foreground: #171717;
   --color-mileage-earn: #2D7A4F;
+  --color-calendar-dot: #2D7A4F;
 
   --font-pretendard: 'Pretendard', sans-serif;
   --font-brand-kr: var(--font-gowun-batang), serif;
@@ -33,6 +34,10 @@ body {
 
 .font-brand-script {
   font-family: var(--font-allura), cursive;
+}
+
+.bg-calendar-dot {
+  background-color: var(--color-calendar-dot);
 }
 
 /* 에러 페이지 숫자(404/500)용 픽셀 폰트 (KAN-248) */
