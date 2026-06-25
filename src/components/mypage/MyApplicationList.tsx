@@ -162,7 +162,6 @@ export default function MyApplicationList() {
                   <p className="text-xs text-tag-text mt-1">
                     {formatLocalizedNumericDate(item.gathering.eventDate, locale)}
                   </p>
-                  <p className="text-xs text-tag-text mt-0.5">{t('bookingNumber', { bookingNumber: item.bookingNumber })}</p>
                 </div>
               </div>
 

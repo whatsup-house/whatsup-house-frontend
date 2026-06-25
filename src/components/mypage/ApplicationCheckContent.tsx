@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import GuestApplicationCheck from './GuestApplicationCheck'
-import TokenApplicationCheck from './TokenApplicationCheck'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import { useMyApplicationsMe } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
@@ -33,13 +32,27 @@ function MemberBookingRedirect({ bookingNumber }: { bookingNumber: string }) {
         <p className="text-sm leading-relaxed text-tag-text">
           {isError
             ? '신청 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'
-            : '로그인한 계정에서 해당 예약번호의 신청 내역을 찾지 못했어요.'}
+            : '로그인한 계정에서 해당 신청 내역을 찾지 못했어요.'}
         </p>
         <Button className="mt-5 w-full" onClick={() => router.push('/mypage?tab=applications')}>
           내 신청 내역으로 가기
         </Button>
       </Card>
     </main>
+  )
+}
+
+function TokenResultRedirect({ token }: { token: string }) {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace(`/applications/result?token=${encodeURIComponent(token)}`)
+  }, [router, token])
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <LoadingSpinner size="lg" />
+    </div>
   )
 }
 
@@ -50,7 +63,7 @@ export default function ApplicationCheckContent() {
   const { isLoggedIn, isInitialized } = useRequireAuth()
 
   if (token) {
-    return <TokenApplicationCheck token={token} />
+    return <TokenResultRedirect token={token} />
   }
   if (bookingNumber && isInitialized && isLoggedIn) {
     return <MemberBookingRedirect bookingNumber={bookingNumber} />
