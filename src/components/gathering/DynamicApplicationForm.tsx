@@ -202,6 +202,8 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
   const isPending = isGuestMode ? guestMutation.isPending : memberMutation.isPending
   const emailQuestion = questions.find((q) => q.questionKey === 'email')
   const guestEmail = emailQuestion ? String(getValue(emailQuestion) ?? '').trim() : ''
+  const requiredFieldsComplete = questions.every((q) => !q.required || !isEmpty(q, getValue(q)))
+  const canSubmit = requiredFieldsComplete && (!isGuestMode || emailVerified)
 
   const requestEmailCode = async () => {
     if (!guestEmail) { setEmailError('이메일을 먼저 입력해주세요.'); return }
@@ -259,9 +261,9 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
         <p className="text-sm text-tag-text whitespace-pre-line">{form.guideText}</p>
       )}
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-7">
         {questions.map((q) => (
-          <div key={q.questionId} className="flex flex-col gap-2">
+          <div key={q.questionId} className="flex flex-col gap-3">
             <DynamicQuestionField question={q} value={getValue(q)} error={errors[q.questionId]}
               onChange={(value) => {
                 setValue(q.questionId, value)
@@ -297,7 +299,14 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
       {submitError && <p className="text-sm text-primary text-center">{submitError}</p>}
 
       <div className="pt-2 pb-4">
-        <Button type="submit" variant="primary" size="lg" className="w-full" isLoading={isPending}>
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          className="w-full"
+          isLoading={isPending}
+          disabled={!canSubmit}
+        >
           {t('submit')}
         </Button>
       </div>
