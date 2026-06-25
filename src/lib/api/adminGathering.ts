@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, AdminApplicationDetail } from './types'
+import type { ApiResponse, AdminApplicationDetail, PaymentStatus } from './types'
 
 // 화면 표시 모델. 백엔드 목록 응답을 getAll에서 이 형태로 매핑한다. (KAN-185)
 export interface AdminGatheringListItem {
@@ -138,6 +138,8 @@ export interface AdminApplicationItem {
   referralSource: string | null
   status: ApplicationStatus
   paid: boolean              // 유료 게더링 여부 (입금 체크 노출 대상). (KAN-243)
+  free: boolean              // 참가비 0원 여부
+  paymentStatus?: PaymentStatus | null
   paymentConfirmed: boolean  // 입금 확인 여부
   gatheringType?: GatheringType
   createdAt: string

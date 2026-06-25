@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
-import { fetchGuestApplicationDetail, fetchMyApplicationDetail } from '@/lib/api/application'
+import { fetchApplicationByToken, fetchGuestApplicationDetail, fetchMyApplicationDetail } from '@/lib/api/application'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { readGuestLookupSession } from '@/lib/utils/guestLookupSession'
 import { LoadingSpinner } from '@/components/ui'
@@ -26,6 +26,7 @@ export default function ApplicationResultRoute({
   const bookingNumber = searchParams.get('bookingNumber')
   const applicationId = searchParams.get('applicationId')
   const initialStatus = searchParams.get('status')
+  const token = searchParams.get('token')
   const guestSession = readGuestLookupSession()
   const { data: gathering, isLoading: isGatheringLoading } = useGatheringDetail(gatheringId)
 
@@ -39,11 +40,18 @@ export default function ApplicationResultRoute({
   const guestApplication = useQuery({
     queryKey: ['guest-application-detail', guestSession?.phone, bookingNumber],
     queryFn: () => fetchGuestApplicationDetail(guestSession!.phone, bookingNumber!),
-    enabled: Boolean(bookingNumber && guestSession?.phone),
+    enabled: Boolean(bookingNumber && guestSession?.phone && !token),
     retry: false,
   })
 
-  const application = memberApplication.data ?? guestApplication.data
+  const tokenApplication = useQuery({
+    queryKey: ['application', 'token', token],
+    queryFn: () => fetchApplicationByToken(token!),
+    enabled: Boolean(token),
+    retry: false,
+  })
+
+  const application = memberApplication.data ?? guestApplication.data ?? tokenApplication.data
   const latestStatus = application?.status ?? initialStatus
   const mode = latestStatus
     ? isConfirmedStatus(latestStatus) ? 'confirmed' : 'completed'
@@ -51,7 +59,7 @@ export default function ApplicationResultRoute({
   const paymentConfirmed = searchParams.get('payment') === 'confirmed'
     || application?.paymentStatus === 'CONFIRMED'
 
-  if (isGatheringLoading || memberApplication.isLoading || guestApplication.isLoading || !gathering) {
+  if (isGatheringLoading || memberApplication.isLoading || guestApplication.isLoading || tokenApplication.isLoading || !gathering) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-background">
         <LoadingSpinner size="lg" />
@@ -67,6 +75,7 @@ export default function ApplicationResultRoute({
       applicationId={applicationId}
       applicationStatus={latestStatus as ApplicationStatus | null}
       paymentConfirmed={paymentConfirmed}
+      ticketRemainingCount={application?.ticketRemainingCount}
     />
   )
 }

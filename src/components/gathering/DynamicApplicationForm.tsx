@@ -15,7 +15,7 @@ import { useMyProfile } from '@/lib/hooks/useAuth'
 import { useAuthStore } from '@/lib/store/authStore'
 import { requestGuestEmailVerification, confirmGuestEmailVerification } from '@/lib/api/auth'
 import { resolveApiErrorMessage } from '@/lib/utils/apiError'
-import { normalizeGuestEmail, normalizeGuestPhone, writeGuestLookupSession } from '@/lib/utils/guestLookupSession'
+import { getApiErrorStatus, normalizeGuestEmail, normalizeGuestPhone, writeGuestLookupSession } from '@/lib/utils/guestLookupSession'
 import type {
   GatheringDetail,
   FormQuestionDetail,
@@ -209,7 +209,11 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
     try {
       await requestGuestEmailVerification(guestEmail)
       setEmailRequested(true); setEmailVerified(false); setEmailCode(''); setSecondsLeft(300)
-    } catch { setEmailError('인증번호 발송에 실패했어요.') }
+    } catch (error) {
+      setEmailError(getApiErrorStatus(error) === 429
+        ? '인증번호 요청이 너무 잦아요. 잠시 후 다시 시도해주세요.'
+        : '인증번호 발송에 실패했어요.')
+    }
     finally { setEmailBusy(false) }
   }
 

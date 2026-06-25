@@ -8,7 +8,6 @@ import {
   Calendar,
   MapPin,
   CreditCard,
-  Hash,
   Copy,
   Check,
 } from 'lucide-react'
@@ -26,6 +25,7 @@ interface ApplicationResultViewProps {
   applicationId?: string | null
   applicationStatus?: string | null
   paymentConfirmed?: boolean
+  ticketRemainingCount?: number | null
 }
 
 export default function ApplicationResultView({
@@ -35,6 +35,7 @@ export default function ApplicationResultView({
   applicationId,
   applicationStatus,
   paymentConfirmed = false,
+  ticketRemainingCount,
 }: ApplicationResultViewProps) {
   const t = useTranslations('gathering.apply.result')
   const locale = useLocale()
@@ -43,9 +44,13 @@ export default function ApplicationResultView({
   const formattedDate = formatLocalizedFullDate(gathering.eventDate, locale)
   const formattedTime = formatTime(gathering.startTime)
   const isRandomTable = gathering.gatheringType === 'RANDOM_TABLE'
+  const isFreeGathering = (gathering.price ?? 0) === 0
   const normalizedApplicationStatus = applicationStatus as ApplicationStatus | null
   const isRandomTablePaymentPending = normalizedApplicationStatus === 'PAYMENT_PENDING'
-  const needsRandomTableTicket = isRandomTable && mode === 'completed' && isRandomTablePaymentPending && Boolean(applicationId || bookingNumber)
+  const randomTableConfirmedText = ticketRemainingCount != null
+    ? `이용권 1회 사용 완료 · 남은 이용권 ${ticketRemainingCount}회`
+    : '이용권 1회 사용 완료'
+  const needsRandomTableTicket = isRandomTable && !isFreeGathering && mode === 'completed' && isRandomTablePaymentPending && Boolean(applicationId || bookingNumber)
   const randomTablePaymentUrl = `/payments/random-table?${
     applicationId
       ? `applicationId=${encodeURIComponent(applicationId)}`
@@ -68,8 +73,6 @@ export default function ApplicationResultView({
 
         <h1 className="text-2xl font-bold text-foreground mb-2">{t(`headline.${mode}`)}</h1>
         <p className="text-sm text-tag-text mb-8">{t(`subcopy.${mode}`)}</p>
-
-        {bookingNumber && <BookingNumberCard bookingNumber={bookingNumber} />}
 
         <Card className="w-full p-5 mb-4">
           <p className="text-xs text-tag-text mb-1">{t('appliedGathering')}</p>
@@ -100,10 +103,14 @@ export default function ApplicationResultView({
                 <p className="text-xs text-tag-text">{isRandomTable ? '참가 방식' : t('price')}</p>
                 <p className="text-sm font-medium text-foreground">
                   {isRandomTable
-                    ? mode === 'confirmed'
-                      ? '이용권 1회 사용 완료'
-                      : isRandomTablePaymentPending ? '이용권 구매 후 참가 확정' : '심사 완료 후 이용권 구매'
-                    : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
+                    ? isFreeGathering
+                      ? mode === 'confirmed' ? '무료 참여 확정' : '심사 완료 후 무료 참여'
+                      : mode === 'confirmed'
+                        ? randomTableConfirmedText
+                        : isRandomTablePaymentPending ? '이용권 구매 후 참가 확정' : '심사 완료 후 이용권 구매'
+                    : isFreeGathering
+                      ? '무료'
+                      : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
                 </p>
               </div>
             </div>
@@ -125,7 +132,9 @@ export default function ApplicationResultView({
         )}
 
         {mode === 'confirmed' && !isRandomTable && (
-          paymentConfirmed ? (
+          isFreeGathering ? (
+            <FreeConfirmedCard />
+          ) : paymentConfirmed ? (
             <PaymentConfirmedCard />
           ) : (
             <PaymentAccountCard price={gathering.price ?? 0} />
@@ -185,40 +194,21 @@ function PaymentConfirmedCard() {
   )
 }
 
-function BookingNumberCard({ bookingNumber }: { bookingNumber: string }) {
-  const t = useTranslations('gathering.apply.result')
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(bookingNumber)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // clipboard 미지원 환경: silent
-    }
-  }
-
+function FreeConfirmedCard() {
   return (
     <div className="w-full mb-4">
-      <div className="bg-primary-light rounded-card px-5 py-4 flex items-center gap-3">
-        <Hash size={18} className="text-primary shrink-0" />
-        <div className="flex-1">
-          <p className="text-xs text-tag-text">{t('bookingNumber')}</p>
-          <p className="text-base font-bold text-primary tracking-wider">{bookingNumber}</p>
+      <div className="bg-primary-light rounded-card px-5 py-4 flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle size={16} className="text-primary shrink-0" />
+          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-primary">
+            무료
+          </span>
         </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-primary font-medium shrink-0"
-        >
-          {copied ? <Check size={14} /> : <Copy size={14} />}
-          {copied ? t('copied') : t('copy')}
-        </button>
+        <p className="text-base font-bold text-foreground">참여가 확정됐어요</p>
+        <p className="text-sm text-tag-text">
+          결제 없이 당일 모임 시간과 장소를 확인하고 편하게 와 주세요.
+        </p>
       </div>
-      <p className="text-xs text-tag-text mt-2 px-1">
-        {t('bookingNumberHelp')}
-      </p>
     </div>
   )
 }
