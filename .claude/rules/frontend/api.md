@@ -1,6 +1,7 @@
 # API Rules
 
 이 문서는 프론트엔드 API 레이어 작성 규칙을 정의한다.
+우선순위: **[CRITICAL]** 위반 시 머지 불가 / **[HIGH]** 리뷰에서 반드시 지적 / **[MEDIUM]** 가능하면 수정
 
 ---
 
@@ -100,9 +101,9 @@ export function useSubmitApplication() {
 
 ## 7. 금지 사항
 
-- 컴포넌트에서 `apiClient`를 직접 import
-- 컴포넌트에서 `lib/api/*.ts` 함수를 직접 import
-- `lib/api/types.ts` 외부에 API 타입 인라인 정의
-- `lib/api/client.ts` 임의 수정
-- API 함수 안에 try-catch 작성 (훅에서 처리)
-- 하드코딩된 API URL 사용 (반드시 apiClient 사용)
+- [CRITICAL] 컴포넌트에서 `apiClient`를 직접 import
+- [CRITICAL] 컴포넌트에서 `lib/api/*.ts` 함수를 직접 import
+- [CRITICAL] `lib/api/client.ts` 임의 수정
+- [HIGH] `lib/api/types.ts` 외부에 API 타입 인라인 정의
+- [HIGH] 하드코딩된 API URL 사용 (반드시 apiClient 사용)
+- [MEDIUM] API 함수 안에 try-catch 작성 (훅에서 처리)

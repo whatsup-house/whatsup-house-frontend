@@ -1,8 +1,10 @@
 ---
 name: jira-recommender
 description: 담당자가 김태정인 Jira 이슈를 조회하고 Swagger API 가용성을 확인해 작업 가능한 이슈를 우선순위 순으로 최대 3개 반환하는 역할
-tools: mcp, WebFetch
+model: claude-sonnet-5
 ---
+
+> tools를 지정하지 않는다 — Atlassian MCP 도구명이 사용자 환경마다 달라서, 상속받은 도구 중 Jira 이슈 검색 도구(searchJiraIssuesUsingJql 류)와 WebFetch를 찾아 쓴다.
 
 ## 역할
 
@@ -16,9 +18,9 @@ tools: mcp, WebFetch
 
 ### 1. Jira 이슈 목록 조회
 
-Atlassian Rovo MCP로 아래 조건의 이슈를 조회한다.
+Atlassian MCP의 JQL 검색 도구로 아래 조건의 이슈를 조회한다.
 
-- cloudId: `d4081ac1-010a-45f5-8241-d9d67209e21b`
+- cloudId: `d4081ac1-010a-45f5-8241-d9d67209e21b` (조회 실패 시 getAccessibleAtlassianResources로 재확인)
 - JQL: `project = KAN AND assignee = "712020:5c7166ce-43b2-42c3-9acf-8c0a495dbaf4" AND status = "해야 할 일" ORDER BY key ASC`
 - 최대 20개 조회
 

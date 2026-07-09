@@ -1,6 +1,7 @@
 # Component Rules
 
 이 문서는 프론트엔드 컴포넌트 작성 시 따라야 할 규칙을 정의한다.
+우선순위: **[CRITICAL]** 위반 시 머지 불가 / **[HIGH]** 리뷰에서 반드시 지적 / **[MEDIUM]** 가능하면 수정
 
 ---
 
@@ -98,9 +99,9 @@ import { useGatherings } from '@/lib/hooks/useGatherings'
 
 ## 7. 금지 사항
 
-- UI 컴포넌트(`components/ui/`)에 도메인 로직 작성
-- 컴포넌트 내에서 `apiClient` 직접 import
-- props에 서버 응답 객체 전체를 그대로 전달
-- `any` 타입 사용
-- 불필요한 `use client` 추가
-- 임의 hex 색상 직접 사용
+- [CRITICAL] 컴포넌트 내에서 `apiClient` 직접 import
+- [CRITICAL] `any` 타입 사용
+- [HIGH] UI 컴포넌트(`components/ui/`)에 도메인 로직 작성
+- [HIGH] props에 서버 응답 객체 전체를 그대로 전달
+- [MEDIUM] 불필요한 `use client` 추가
+- [MEDIUM] 임의 hex 색상 직접 사용

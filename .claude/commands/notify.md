@@ -26,7 +26,7 @@ Mattermost 웹훅 URL이 설정되지 않았습니다.
 
 ## Jira 이슈 제목 조회
 
-Atlassian Rovo MCP로 이슈 제목을 가져온다.
+Atlassian MCP로 이슈 제목을 가져온다.
 
 - cloudId: `d4081ac1-010a-45f5-8241-d9d67209e21b`
 - issueIdOrKey: `ISSUE_KEY`
@@ -71,16 +71,18 @@ Atlassian Rovo MCP로 이슈 제목을 가져온다.
 
 ## 웹훅 전송
 
-아래 bash 명령으로 전송한다. JSON 이스케이프를 위해 jq를 사용한다.
+JSON 이스케이프는 `node`로 처리한다 (Next.js 프로젝트라 node는 항상 있다 — jq/python 의존 금지).
 
 ```bash
 MESSAGE="{위에서 구성한 메시지}"
 
+BODY=$(node -e 'console.log(JSON.stringify({ text: process.argv[1] }))' "$MESSAGE")
+
 curl -s -o /dev/null -w "%{http_code}" \
   -X POST \
   -H 'Content-Type: application/json' \
-  -d "$(jq -n --arg text "$MESSAGE" '{"text": $text}')" \
-  "{웹훅 URL}"
+  -d "$BODY" \
+  "$WEBHOOK_URL"
 ```
 
 응답 코드가 200이면 "✅ Mattermost 알림 전송 완료"를 출력한다.
@@ -92,11 +94,7 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 TYPE = success 인 경우에만 실행한다.
 
-Atlassian Rovo MCP로 이슈를 "완료"로 전환한다.
-
-- cloudId: `d4081ac1-010a-45f5-8241-d9d67209e21b`
-- issueIdOrKey: `ISSUE_KEY`
-- transition ID: `51`
+Atlassian MCP로 이슈를 "완료"로 전환한다. transition ID를 하드코딩하지 말고 `getTransitionsForJiraIssue`로 조회해 이름이 "완료"인 전환을 사용한다.
 
 성공 시 "✅ Jira 이슈 ISSUE_KEY → 완료 전환 완료"를 출력한다.
 실패 시 "⚠️ Jira 상태 전환 실패 (수동으로 변경 필요)"를 출력한다.

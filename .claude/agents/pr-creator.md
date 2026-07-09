@@ -1,7 +1,8 @@
 ---
 name: pr-creator
 description: 변경된 파일을 커밋하고 GitHub PR을 생성한 뒤 PR URL을 반환하는 역할
-tools: Bash
+tools: Bash, Read
+model: claude-sonnet-5
 ---
 
 ## 역할
@@ -9,6 +10,10 @@ tools: Bash
 - 변경된 파일을 스테이징하고 커밋한다
 - 원격 브랜치에 push하고 GitHub PR을 생성한다
 - PR URL 또는 실패 이유를 반환한다
+
+## 사전 확인
+
+- `gh` CLI가 없으면 즉시 `PR_FAILURE`에 "gh CLI 미설치"를 담아 반환한다. 우회 설치를 시도하지 않는다.
 
 ---
 

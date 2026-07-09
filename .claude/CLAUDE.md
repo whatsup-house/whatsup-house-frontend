@@ -15,11 +15,11 @@
 
 ## 1. 기술 스택
 
-- **프레임워크**: Next.js 16.2.2 (App Router) + React 19
+- **프레임워크**: Next.js 16 (App Router) + React 19 — 정확한 버전은 package.json 확인
 - **언어**: TypeScript
 - **스타일링**: Tailwind CSS v4
 - **서버 상태**: TanStack React Query v5
-- **클라이언트 상태**: Zustand v5 (persist)
+- **클라이언트 상태**: Zustand v5 (메모리 전용 — persist 미사용, 토큰은 HttpOnly 쿠키라 클라이언트 저장 금지)
 - **HTTP 클라이언트**: Axios (HttpOnly 쿠키 기반 인증, `withCredentials`로 자동 전송)
 - **폼**: React Hook Form + Zod
 - **아이콘**: Lucide React
@@ -139,6 +139,13 @@ components/         → 훅만 호출, API 함수 직접 import 금지
 
 - 테스트는 무조건 작성하지 않는다.
 - 핵심 비즈니스 로직, 변경 위험이 높은 유틸 함수 위주로만 작성한다.
+- 실행 검증이 필요하면 Playwright e2e(`e2e/`) 또는 `.claude/skills/webapp-testing/` 스킬(dev 서버 기동 + 브라우저 자동화)을 사용한다.
+
+## 8.5 에이전트 구성
+
+- 서브에이전트는 `.claude/agents/`에 정의: `build-validator`(haiku), `frontend-reviewer`(opus), `jira-recommender`, `pr-creator` (sonnet)
+- 기본 모델은 Sonnet 5, 판단력이 필요한 리뷰만 Opus 4.8 (settings.json + 에이전트 frontmatter로 관리)
+- 리뷰/검증 에이전트에는 파일 **경로만** 전달한다. 내용 복붙 금지 — 에이전트가 직접 읽는다.
 
 ---
 
