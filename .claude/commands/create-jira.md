@@ -137,7 +137,7 @@ Jira에 등록할까요?
 
 ## 4단계: Jira 이슈 생성
 
-3단계에서 확정한 이슈를 **각각** `mcp__claude_ai_Atlassian_Rovo__createJiraIssue`로 생성한다. (FE/BE로 나뉘었거나 여러 사안이면 이슈 개수만큼 반복 생성한다.)
+3단계에서 확정한 이슈를 **각각** Atlassian MCP의 이슈 생성 도구(createJiraIssue 류 — 도구명 접두사는 환경마다 다름)로 생성한다. (FE/BE로 나뉘었거나 여러 사안이면 이슈 개수만큼 반복 생성한다.)
 
 - cloudId: `d4081ac1-010a-45f5-8241-d9d67209e21b`
 - projectKey: `KAN`

@@ -7,7 +7,7 @@
 1. 현재 브랜치명 확인: `git branch --show-current`
 2. 변경된 커밋 요약: `git log develop..HEAD --oneline`
 3. 변경된 파일 목록: `git diff develop --name-only`
-4. Jira 티켓 번호가 있으면 `mcp__claude_ai_Atlassian_Rovo__getJiraIssue`로 티켓 정보를 조회한다.
+4. Jira 티켓 번호가 있으면 Atlassian MCP의 이슈 조회 도구(getJiraIssue 류 — 도구명 접두사는 환경마다 다름)로 티켓 정보를 조회한다.
    - cloudId: `d4081ac1-010a-45f5-8241-d9d67209e21b`
    - 조회 후 `summary` (티켓 이름)와 `webUrl` (Jira 링크)를 추출한다.
 5. 아래 형식으로 PR을 생성한다.
