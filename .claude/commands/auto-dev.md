@@ -77,7 +77,8 @@ ErrorCode → entity/repository → service → controller 순서로 구현한�
 - 응답은 ApiResult 래퍼, 예외는 CustomException(ErrorCode)
 - 운영 DB는 Flyway + ddl-auto:validate — 엔티티와 마이그레이션이 반드시 일치해야 함
 - 서버는 Caddy 리버스 프록시 뒤 — 클라이언트 IP는 X-Forwarded-For에서 읽는다
-- 상세 규칙은 백엔드 레포 `.claude/skills/backend/SKILL.md`를 따른다.
+- 상세 규칙은 백엔드 레포 `.claude/skills/backend/SKILL.md`를 따른다. (백엔드 레포는 REPO_DIR — 그 안의 파일을 직접 읽는다)
+- 테스트를 작성/보강하는 이슈면 이 레포의 `.claude/skills/tdd/SKILL.md` 규칙을 따른다.
 
 ---
 

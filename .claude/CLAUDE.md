@@ -140,6 +140,8 @@ components/         → 훅만 호출, API 함수 직접 import 금지
 - 테스트는 무조건 작성하지 않는다.
 - 핵심 비즈니스 로직, 변경 위험이 높은 유틸 함수 위주로만 작성한다.
 - 실행 검증이 필요하면 Playwright e2e(`e2e/`) 또는 `.claude/skills/webapp-testing/` 스킬(dev 서버 기동 + 브라우저 자동화)을 사용한다.
+- 테스트를 새로 쓰거나 커버리지를 올릴 때는 `.claude/skills/tdd/` 스킬을 따른다 (FE/BE 공용 — 커버리지 채우기용 테스트 금지).
+- React/Next.js 성능 패턴은 `.claude/skills/react-best-practices/` 스킬(Vercel 공식, 72개 규칙)을 참조한다.
 
 ## 8.5 에이전트 구성
 
