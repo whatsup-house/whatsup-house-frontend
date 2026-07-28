@@ -21,7 +21,8 @@ import { formatLocalizedShortDate } from '@/lib/utils/date'
 
 const FILTERS: GatheringTypeFilter[] = ['all', 'open', 'completed']
 const SORTS: GatheringTypeSort[] = ['popular', 'latest', 'oldest']
-const TAG_FILTERS = ['푸드', '파티', '자기계발', '외국어', '취미', '게임', '액티비티', '나들이']
+// 대략 사용 빈도 순. 게더링 tags는 자유 입력이라, 여기 없는 태그는 필터로 잡히지 않는다.
+const TAG_FILTERS = ['푸드', '파티', '소셜', '대화', '자기계발', '외국어', '취미', '게임', '액티비티', '나들이']
 
 interface DropdownOption<T extends string> {
   value: T
