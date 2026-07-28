@@ -277,17 +277,18 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
               />
             </div>
 
-            {/* 썸네일 — 게더링 이미지는 4:3으로 크롭한다. */}
+            {/* 썸네일 — 상세 상단(aspect-[390/260] = 3:2)에 맞춘다.
+                카드(16:9)와 정사각 목록에서는 object-cover로 중앙만 잘려 보인다. */}
             <div className="max-w-[280px]">
               <ImageUploadField
                 label="썸네일"
                 previewUrl={thumbnailPreviewUrl}
-                cropRatio="4:3"
+                cropRatio="3:2"
                 cropContext="gathering"
                 onConfirm={handleThumbnailConfirm}
                 onClear={thumbnailTempPath ? handleThumbnailRevert : undefined}
                 isUploading={isUploading}
-                aspectClassName="aspect-[4/3]"
+                aspectClassName="aspect-[3/2]"
               />
             </div>
 

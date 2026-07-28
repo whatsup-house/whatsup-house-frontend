@@ -16,12 +16,14 @@ type Rotation = 0 | 90 | 180 | 270
 
 const OUTPUT: Record<CropRatio, { w: number; h: number }> = {
   '4:3': { w: 1080, h: 810 },
+  '3:2': { w: 1080, h: 720 },
   '9:16': { w: 1080, h: 1920 },
   '1:1': { w: 1080, h: 1080 },
 }
 
 const RATIO_NUM: Record<CropRatio, number> = {
   '4:3': 4 / 3,
+  '3:2': 3 / 2,
   '9:16': 9 / 16,
   '1:1': 1,
 }
@@ -544,9 +546,7 @@ interface PreviewStageProps {
 
 function PreviewStage({ previewUrl, cropRatio, context, onBack, onConfirm }: PreviewStageProps) {
   const t = useTranslations('ui.imageCrop')
-  const aspectStyle = {
-    aspectRatio: cropRatio === '4:3' ? '4 / 3' : cropRatio === '9:16' ? '9 / 16' : '1 / 1',
-  }
+  const aspectStyle = { aspectRatio: cropRatio.replace(':', ' / ') }
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-background">
