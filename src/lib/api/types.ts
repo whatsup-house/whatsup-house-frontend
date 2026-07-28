@@ -439,7 +439,7 @@ export interface AdminHeroCarouselSlideRequest {
 }
 
 // 이미지 업로드
-export type CropRatio = '4:3' | '9:16' | '1:1'
+export type CropRatio = '4:3' | '3:2' | '9:16' | '1:1'
 export type CropContext = 'review' | 'carousel' | 'avatar' | 'gathering'
 
 // 백엔드 SupabaseStorageService.ALLOWED_FOLDERS와 일치해야 한다.
