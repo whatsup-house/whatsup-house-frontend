@@ -439,8 +439,11 @@ export interface AdminHeroCarouselSlideRequest {
 }
 
 // 이미지 업로드
-export type CropRatio = '4:3' | '9:16' | '1:1'
-export type CropContext = 'review' | 'carousel' | 'avatar'
+export type CropRatio = '4:3' | '16:9' | '9:16' | '1:1'
+export type CropContext = 'review' | 'carousel' | 'avatar' | 'gathering'
+
+// 백엔드 SupabaseStorageService.ALLOWED_FOLDERS와 일치해야 한다.
+export type UploadFolder = 'carousel' | 'gathering' | 'review' | 'avatar'
 
 export interface ImageUploadResponse {
   tempPath: string

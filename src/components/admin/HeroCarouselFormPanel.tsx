@@ -94,7 +94,7 @@ export function HeroCarouselFormPanel({ slide, onClose, onSuccess }: HeroCarouse
     setValue('imageUrl', '')
 
     try {
-      const result = await uploadWithTempPath(blob, 'carousel.jpg')
+      const result = await uploadWithTempPath(blob, 'carousel.jpg', 'carousel')
       setImagePreviewUrl(result.previewUrl)
       setValue('imageUrl', result.previewUrl)
       setTempPath(result.tempPath)
