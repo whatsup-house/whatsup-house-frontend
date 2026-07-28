@@ -7,8 +7,10 @@ import { z } from 'zod'
 import dayjs from 'dayjs'
 import type { AdminGatheringListItem, GatheringCreateRequest, GatheringType } from '@/lib/api/adminGathering'
 import { useAdminLocations, useAdminGatheringDetail, useCreateGathering, useUpdateGathering } from '@/lib/hooks/useAdminGathering'
+import { useUploadImage } from '@/lib/hooks/useUploadImage'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
+import ImageUploadField from '@/components/ui/ImageUploadField'
 
 // 날짜는 오늘 포함 이후만 허용한다. 시간 순서 검증은 새벽 종료 케이스를 위해 적용하지 않는다. (KAN-221)
 const schema = z.object({
@@ -21,7 +23,6 @@ const schema = z.object({
   endTime: z.string().min(1, '종료 시간을 입력해주세요'),
   price: z.number({ error: '참가비를 입력해주세요' }).min(0, '참가비는 0원 이상이어야 합니다'),
   capacity: z.number({ error: '정원을 입력해주세요' }).int().min(1).max(30, '정원은 최대 30명입니다'),
-  thumbnailUrl: z.string().optional(),
   moodTagsText: z.string().optional(),
   mileageReward: z.number().optional(),
 }).superRefine((val, ctx) => {
@@ -48,10 +49,17 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
   const { data: detail } = useAdminGatheringDetail(gathering?.id)
   const { mutate: createGathering, isPending: isCreating } = useCreateGathering(onSuccess)
   const { mutate: updateGathering, isPending: isUpdating } = useUpdateGathering(onSuccess)
+  const { uploadWithTempPath, isUploading } = useUploadImage('이미지 업로드에 실패했습니다')
   const isPending = isCreating || isUpdating
 
   // 게더링 유형 (생성 시에만 설정 가능, 수정은 백엔드에서 무시)
   const [gatheringType, setGatheringType] = useState<GatheringType>('REGULAR')
+
+  // 이번 편집에서 새로 올린 이미지만 상태로 들고, 표시할 썸네일은 파생시킨다.
+  // tempPath가 없으면 수정 요청에서 thumbnailUrl을 생략해 백엔드가 기존 이미지를 유지한다.
+  const [newThumbnailUrl, setNewThumbnailUrl] = useState<string | null>(null)
+  const [thumbnailTempPath, setThumbnailTempPath] = useState<string | null>(null)
+  const thumbnailPreviewUrl = newThumbnailUrl ?? detail?.thumbnailUrl ?? null
 
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -59,7 +67,6 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
       price: 0,
       capacity: 1,
       mileageReward: 500,
-      thumbnailUrl: '',
       howToRunText: '',
       moodTagsText: '',
     },
@@ -70,14 +77,13 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
       reset()
       return
     }
-    // 목록 데이터로 우선 채우고
+    // 목록 데이터로 우선 채우고 (목록 응답에는 썸네일이 없다)
     setValue('title', gathering.title)
     setValue('date', gathering.date)
     setValue('startTime', gathering.startTime.slice(0, 5))
     setValue('endTime', gathering.endTime?.slice(0, 5) ?? '')
     setValue('price', gathering.price)
     setValue('capacity', gathering.capacity)
-    setValue('thumbnailUrl', gathering.thumbnailUrl ?? '')
   }, [gathering, setValue, reset])
 
   // 상세가 도착하면 소개/장소/시간/썸네일을 상세 기준으로 채운다. (KAN-220)
@@ -88,9 +94,35 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
     setValue('locationId', detail.location?.id ?? '')
     if (detail.startTime) setValue('startTime', detail.startTime.slice(0, 5))
     if (detail.endTime) setValue('endTime', detail.endTime.slice(0, 5))
-    setValue('thumbnailUrl', detail.thumbnailUrl ?? '')
     setValue('moodTagsText', detail.tags?.join(',') ?? '')
   }, [detail, setValue])
+
+  // 로컬 미리보기용 blob URL은 교체 시점과 언마운트 시점에 정리한다.
+  useEffect(() => {
+    if (!newThumbnailUrl?.startsWith('blob:')) return
+    return () => URL.revokeObjectURL(newThumbnailUrl)
+  }, [newThumbnailUrl])
+
+  // 크롭 완료 → 임시 업로드. 실패 시 기존 이미지로 되돌린다.
+  const handleThumbnailConfirm = async (blob: Blob) => {
+    // 업로드가 끝나기 전에도 크롭 결과를 즉시 보여준다.
+    setNewThumbnailUrl(URL.createObjectURL(blob))
+
+    try {
+      const result = await uploadWithTempPath(blob, 'gathering.jpg', 'gathering')
+      setNewThumbnailUrl(result.previewUrl)
+      setThumbnailTempPath(result.tempPath)
+    } catch {
+      setNewThumbnailUrl(null)
+      setThumbnailTempPath(null)
+    }
+  }
+
+  // 새로 올린 이미지만 취소한다. 백엔드가 썸네일 삭제를 지원하지 않아 기존 이미지는 지울 수 없다.
+  const handleThumbnailRevert = () => {
+    setNewThumbnailUrl(null)
+    setThumbnailTempPath(null)
+  }
 
   const onSubmit = (values: FormValues) => {
     const data: GatheringCreateRequest = {
@@ -102,7 +134,8 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
       endTime: values.endTime,
       price: values.price,
       capacity: values.capacity,
-      thumbnailUrl: values.thumbnailUrl || undefined,
+      // 새 이미지를 올렸을 때만 tempPath를 보낸다. 생략하면 백엔드가 기존 썸네일을 유지한다.
+      thumbnailUrl: thumbnailTempPath ?? undefined,
       mileageReward: values.mileageReward ?? 500,
       howToRun: values.howToRunText ? values.howToRunText.split('\n').filter(Boolean) : [],
       tags: values.moodTagsText ? values.moodTagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
@@ -244,12 +277,19 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
               />
             </div>
 
-            <Input
-              label="썸네일 URL"
-              placeholder="https://example.com/image.jpg"
-              error={errors.thumbnailUrl?.message}
-              {...register('thumbnailUrl')}
-            />
+            {/* 썸네일 — 게더링 카드가 16:9(aspect-video)로 노출하므로 같은 비율로 크롭한다. */}
+            <div className="max-w-[280px]">
+              <ImageUploadField
+                label="썸네일"
+                previewUrl={thumbnailPreviewUrl}
+                cropRatio="16:9"
+                cropContext="gathering"
+                onConfirm={handleThumbnailConfirm}
+                onClear={thumbnailTempPath ? handleThumbnailRevert : undefined}
+                isUploading={isUploading}
+                aspectClassName="aspect-video"
+              />
+            </div>
 
             <Input
               label="분위기 태그 (쉼표 구분)"
@@ -272,10 +312,11 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
             variant="primary"
             type="button"
             isLoading={isPending}
+            disabled={isUploading}
             onClick={handleSubmit(onSubmit)}
             className="flex-1"
           >
-            저장하기
+            {isUploading ? '업로드 중...' : '저장하기'}
           </Button>
         </div>
       </div>

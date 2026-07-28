@@ -76,7 +76,7 @@ export default function ReviewWriteForm({ applicationId, mileageReward }: Review
     setUploadedImageTempPath(null)
 
     try {
-      const result = await uploadWithTempPath(blob, 'review.jpg')
+      const result = await uploadWithTempPath(blob, 'review.jpg', 'review')
       setUploadedImageTempPath(result.tempPath)
       setPreviewUrl(result.previewUrl)
     } catch {

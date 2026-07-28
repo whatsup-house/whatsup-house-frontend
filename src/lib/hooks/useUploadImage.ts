@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { uploadImage } from '@/lib/api/upload'
-import type { ImageUploadResponse } from '@/lib/api/types'
+import type { ImageUploadResponse, UploadFolder } from '@/lib/api/types'
 
 interface UseUploadImageResult {
-  upload: (blob: Blob, filename?: string) => Promise<string>
-  uploadWithTempPath: (blob: Blob, filename?: string) => Promise<ImageUploadResponse>
+  upload: (blob: Blob, filename?: string, folder?: UploadFolder) => Promise<string>
+  uploadWithTempPath: (blob: Blob, filename?: string, folder?: UploadFolder) => Promise<ImageUploadResponse>
   isUploading: boolean
   error: string | null
   reset: () => void
@@ -14,11 +14,15 @@ export function useUploadImage(fallbackMessage = 'Image upload failed'): UseUplo
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const uploadWithTempPath = async (blob: Blob, filename?: string): Promise<ImageUploadResponse> => {
+  const uploadWithTempPath = async (
+    blob: Blob,
+    filename?: string,
+    folder?: UploadFolder,
+  ): Promise<ImageUploadResponse> => {
     setIsUploading(true)
     setError(null)
     try {
-      return await uploadImage(blob, filename)
+      return await uploadImage(blob, filename, folder)
     } catch (err) {
       const msg = err instanceof Error ? err.message : fallbackMessage
       setError(msg)
@@ -28,8 +32,8 @@ export function useUploadImage(fallbackMessage = 'Image upload failed'): UseUplo
     }
   }
 
-  const upload = async (blob: Blob, filename?: string): Promise<string> => {
-    const result = await uploadWithTempPath(blob, filename)
+  const upload = async (blob: Blob, filename?: string, folder?: UploadFolder): Promise<string> => {
+    const result = await uploadWithTempPath(blob, filename, folder)
     return result.previewUrl
   }
 
