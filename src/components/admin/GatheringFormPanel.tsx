@@ -277,17 +277,17 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
               />
             </div>
 
-            {/* 썸네일 — 게더링 카드가 16:9(aspect-video)로 노출하므로 같은 비율로 크롭한다. */}
+            {/* 썸네일 — 게더링 이미지는 4:3으로 크롭한다. */}
             <div className="max-w-[280px]">
               <ImageUploadField
                 label="썸네일"
                 previewUrl={thumbnailPreviewUrl}
-                cropRatio="16:9"
+                cropRatio="4:3"
                 cropContext="gathering"
                 onConfirm={handleThumbnailConfirm}
                 onClear={thumbnailTempPath ? handleThumbnailRevert : undefined}
                 isUploading={isUploading}
-                aspectClassName="aspect-video"
+                aspectClassName="aspect-[4/3]"
               />
             </div>
 
