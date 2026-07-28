@@ -915,6 +915,7 @@
       "contextTitle": {
         "review": "Editar foto de reseña",
         "carousel": "Editar imagen del carrusel",
+        "gathering": "Editar miniatura del encuentro",
         "avatar": "Editar imagen de perfil"
       },
       "processing": "Procesando...",
@@ -931,6 +932,7 @@
       "previewContext": {
         "avatar": "Así se verá en tu perfil.",
         "carousel": "Así quedará en el carrusel de casa",
+        "gathering": "Así se verá en la tarjeta del encuentro",
         "review": "Así se verá a continuación."
       },
       "avatarAlt": "Vista previa de avatar",

@@ -915,6 +915,7 @@
       "contextTitle": {
         "review": "후기 사진 편집",
         "carousel": "캐러셀 이미지 편집",
+        "gathering": "게더링 썸네일 편집",
         "avatar": "프로필 이미지 편집"
       },
       "processing": "처리 중...",
@@ -931,6 +932,7 @@
       "previewContext": {
         "avatar": "프로필에서 이렇게 보여요",
         "carousel": "홈 캐러셀에서 이렇게 보여요",
+        "gathering": "게더링 카드에서 이렇게 보여요",
         "review": "아래 화면들에서 이렇게 보여져요"
       },
       "avatarAlt": "아바타 미리보기",

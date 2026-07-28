@@ -262,6 +262,8 @@ export default function AdminGatheringsPage() {
       {/* 사이드 패널 */}
       {isPanelOpen && (
         <GatheringFormPanel
+          // 대상이 바뀌면 새로 마운트해 업로드 중이던 썸네일 상태가 남지 않게 한다.
+          key={editingGathering?.id ?? 'new'}
           gathering={editingGathering}
           onClose={() => setIsPanelOpen(false)}
           onSuccess={() => {

@@ -915,6 +915,7 @@
       "contextTitle": {
         "review": "编辑评论照片",
         "carousel": "编辑轮播图像",
+        "gathering": "编辑聚会缩略图",
         "avatar": "编辑个人资料图片"
       },
       "processing": "处理中...",
@@ -931,6 +932,7 @@
       "previewContext": {
         "avatar": "这就是它在您的个人资料中的外观",
         "carousel": "这就是它在家庭轮播中的样子",
+        "gathering": "这就是它在聚会卡片中的样子",
         "review": "这就是下面的样子"
       },
       "avatarAlt": "头像预览",

@@ -915,6 +915,7 @@
       "contextTitle": {
         "review": "Edit review photo",
         "carousel": "Edit carousel image",
+        "gathering": "Edit gathering thumbnail",
         "avatar": "Edit profile image"
       },
       "processing": "Processing...",
@@ -931,6 +932,7 @@
       "previewContext": {
         "avatar": "This is how it will look on your profile",
         "carousel": "This is how it will look in the home carousel",
+        "gathering": "This is how it will look on the gathering card",
         "review": "This is how it will look below"
       },
       "avatarAlt": "Avatar preview",
