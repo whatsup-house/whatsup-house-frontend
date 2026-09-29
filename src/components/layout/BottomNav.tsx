@@ -3,10 +3,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, User, Compass } from 'lucide-react'
+import { Home, User, Compass, MessageCircle, Circle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyProfile } from '@/lib/hooks/useAuth'
+import { useChatRooms } from '@/lib/hooks/useChat'
 import { getAnimalEmoji } from '@/lib/utils/animalProfile'
 
 // 게더링 상세(/gatherings/[id])에서만 숨긴다. 하단에 신청하기 스티키 바가 있기 때문.
@@ -44,21 +45,37 @@ export default function BottomNav() {
   const router = useRouter()
   const { isLoggedIn, isInitialized, requireAuth } = useRequireAuth()
   const { data: profile } = useMyProfile()
+  const { data: rooms, isError } = useChatRooms()
 
   if (HIDDEN_PATTERNS.some((pattern) => pattern.test(pathname))) {
     return null
   }
 
+  // 조회 실패·비로그인이면 0 → 배지 숨김
+  const unreadTotal = isLoggedIn && !isError ? (rooms ?? []).reduce((sum, room) => sum + room.unreadCount, 0) : 0
+
+  // null = 가운데 빈칸
   const navItems = [
-    { href: '/', icon: Home, label: t('tabs.home'), requireLogin: false },
     { href: '/gatherings', icon: Compass, label: t('tabs.gatherings'), requireLogin: false },
+    null,
+    { href: '/', icon: Home, label: t('tabs.home'), requireLogin: false },
+    { href: '/chat', icon: MessageCircle, label: t('tabs.chat'), requireLogin: true },
     { href: '/mypage', icon: User, label: t('tabs.my'), requireLogin: true },
   ]
 
   return (
     <nav className="sticky bottom-0 bg-card border-t border-tag-bg">
-      <div className="flex justify-around items-center h-16">
-        {navItems.map((item) => {
+      <div className="grid grid-cols-5 items-center h-16">
+        {navItems.map((item, index) => {
+          if (!item) {
+            return (
+              <div key={`blank-${index}`} aria-hidden="true" className="flex flex-col items-center gap-1 text-xs text-tag-text/40">
+                <Circle size={20} />
+                <span className="h-4" />
+              </div>
+            )
+          }
+
           const isActive =
             item.href === '/'
               ? pathname === '/'
@@ -77,10 +94,17 @@ export default function BottomNav() {
                   isActive ? 'text-primary' : 'text-tag-text'
                 } disabled:opacity-60`}
               >
-                {isLoggedIn ? (
+                {item.href === '/mypage' && isLoggedIn ? (
                   <MyTabIcon avatarUrl={profile?.avatarUrl} animalType={profile?.animalType} />
                 ) : (
-                  <Icon size={20} />
+                  <span className="relative">
+                    <Icon size={20} />
+                    {item.href === '/chat' && unreadTotal > 0 && (
+                      <span className="absolute -top-1.5 -right-2.5 min-w-[18px] rounded-full bg-primary px-1 text-center text-[10px] font-bold leading-[18px] text-white">
+                        {unreadTotal > 99 ? '99+' : unreadTotal}
+                      </span>
+                    )}
+                  </span>
                 )}
                 <span>{item.label}</span>
               </button>
