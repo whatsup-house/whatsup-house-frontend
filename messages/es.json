@@ -383,7 +383,8 @@
       "onboarding": "Incorporación",
       "applyComplete": "Solicitud completa",
       "apply": "Solicitar",
-      "story": "Acerca de"
+      "story": "Acerca de",
+      "chat": "Chat"
     }
   },
   "desktopBrand": {
@@ -1135,6 +1136,73 @@
       "JOB_SEEKER": "En búsqueda de empleo",
       "UNEMPLOYED": "Desempleado",
       "ETC": "Otros"
+    }
+  },
+  "chat": {
+    "withdrawn": "(Cuenta eliminada)",
+    "photo": "Foto",
+    "list": {
+      "inquiryCta": "Contactar con Whatsup House",
+      "inquiryCtaDescription": "Pregúntanos lo que quieras",
+      "empty": "Aún no tienes chats",
+      "loadError": "No se pudieron cargar los chats",
+      "dateFormat": "D MMM",
+      "hide": "Ocultar de la lista",
+      "leave": "Salir sin avisar",
+      "leaveConfirmTitle": "¿Salir de este chat?",
+      "leaveConfirmDescription": "Los demás miembros no verán que saliste.",
+      "hidden": "Ocultado de tu lista",
+      "left": "Saliste del chat"
+    },
+    "room": {
+      "members": "Miembros",
+      "openMembers": "Ver miembros",
+      "notice": "Aviso",
+      "noticeToggle": "Mostrar/ocultar aviso",
+      "noticeClear": "Quitar",
+      "loadError": "No se pudieron cargar los mensajes",
+      "empty": "Envía el primer mensaje",
+      "muted": "Tienes restringido el envío de mensajes",
+      "notMember": "No eres miembro de este chat",
+      "me": "Yo"
+    },
+    "message": {
+      "deleted": "Mensaje eliminado",
+      "edited": "(editado)",
+      "imageAlt": "Imagen del chat",
+      "retry": "Reenviar",
+      "discard": "Cancelar",
+      "failed": "Error al enviar",
+      "unread": "{count} sin leer"
+    },
+    "system": {
+      "JOINED": "{nickname} se unió",
+      "KICKED": "{nickname} fue expulsado",
+      "NOTICE_SET": "Se publicó un aviso"
+    },
+    "composer": {
+      "placeholder": "Escribe un mensaje",
+      "send": "Enviar",
+      "attachImage": "Enviar una foto",
+      "imageTooLarge": "La foto es demasiado grande. Máximo 5MB.",
+      "imageFailed": "No se pudo procesar la foto"
+    },
+    "actions": {
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "setNotice": "Fijar como aviso",
+      "report": "Denunciar",
+      "editTitle": "Editar mensaje",
+      "save": "Guardar",
+      "deleteConfirmTitle": "¿Eliminar este mensaje?",
+      "deleteConfirmDescription": "Todos verán \"Mensaje eliminado\".",
+      "reportTitle": "Denunciar mensaje",
+      "reportPlaceholder": "Cuéntanos el motivo de la denuncia",
+      "reported": "Denuncia enviada",
+      "noticeSet": "Fijado como aviso",
+      "noticeCleared": "Aviso eliminado"
     }
   }
 }

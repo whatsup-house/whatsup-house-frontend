@@ -383,7 +383,8 @@
       "onboarding": "온보딩",
       "applyComplete": "신청 완료",
       "apply": "신청하기",
-      "story": "소개"
+      "story": "소개",
+      "chat": "채팅"
     }
   },
   "desktopBrand": {
@@ -1135,6 +1136,73 @@
       "JOB_SEEKER": "취업준비생",
       "UNEMPLOYED": "무직·휴식중",
       "ETC": "기타"
+    }
+  },
+  "chat": {
+    "withdrawn": "(탈퇴한 회원)",
+    "photo": "사진",
+    "list": {
+      "inquiryCta": "와썹하우스에 문의하기",
+      "inquiryCtaDescription": "궁금한 점을 편하게 물어보세요",
+      "empty": "아직 참여 중인 채팅방이 없어요",
+      "loadError": "채팅 목록을 불러오지 못했어요",
+      "dateFormat": "M월 D일",
+      "hide": "목록에서 숨기기",
+      "leave": "조용히 나가기",
+      "leaveConfirmTitle": "채팅방을 나갈까요?",
+      "leaveConfirmDescription": "다른 멤버에게 나간 기록이 남지 않아요.",
+      "hidden": "목록에서 숨겼어요",
+      "left": "채팅방을 나왔어요"
+    },
+    "room": {
+      "members": "대화 상대",
+      "openMembers": "멤버 보기",
+      "notice": "공지",
+      "noticeToggle": "공지 펼치기/접기",
+      "noticeClear": "해제",
+      "loadError": "메시지를 불러오지 못했어요",
+      "empty": "첫 메시지를 보내보세요",
+      "muted": "채팅이 제한되어 메시지를 보낼 수 없어요",
+      "notMember": "참여하지 않은 채팅방이에요",
+      "me": "나"
+    },
+    "message": {
+      "deleted": "삭제된 메시지입니다",
+      "edited": "(수정됨)",
+      "imageAlt": "채팅 이미지",
+      "retry": "재전송",
+      "discard": "전송 취소",
+      "failed": "전송 실패",
+      "unread": "안 읽은 사람 {count}명"
+    },
+    "system": {
+      "JOINED": "{nickname}님이 들어왔습니다",
+      "KICKED": "{nickname}님이 내보내졌습니다",
+      "NOTICE_SET": "공지가 등록되었습니다"
+    },
+    "composer": {
+      "placeholder": "메시지 입력",
+      "send": "전송",
+      "attachImage": "사진 보내기",
+      "imageTooLarge": "사진이 너무 커요. 5MB 이하만 보낼 수 있어요.",
+      "imageFailed": "사진을 처리하지 못했어요"
+    },
+    "actions": {
+      "copy": "복사",
+      "copied": "복사했어요",
+      "edit": "수정",
+      "delete": "삭제",
+      "setNotice": "공지로 등록",
+      "report": "신고",
+      "editTitle": "메시지 수정",
+      "save": "저장",
+      "deleteConfirmTitle": "메시지를 삭제할까요?",
+      "deleteConfirmDescription": "모든 멤버에게 \"삭제된 메시지입니다\"로 보여요.",
+      "reportTitle": "메시지 신고",
+      "reportPlaceholder": "신고 사유를 입력해주세요",
+      "reported": "신고가 접수되었어요",
+      "noticeSet": "공지로 등록했어요",
+      "noticeCleared": "공지를 해제했어요"
     }
   }
 }

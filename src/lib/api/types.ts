@@ -748,3 +748,101 @@ export interface NotificationItem {
 export interface UnreadCountResponse {
   unreadCount: number
 }
+
+// ===== 채팅 (KAN-332) =====
+// 백엔드(KAN-328) 계약: docs chat-design 5절. 모든 시각은 ISO 문자열.
+export type ChatRoomType = 'INQUIRY' | 'GROUP'
+export type ChatMessageType = 'TEXT' | 'IMAGE' | 'SYSTEM'
+export type ChatSystemKind = 'JOINED' | 'KICKED' | 'NOTICE_SET'
+
+// 탈퇴·정지 회원은 nickname 이 null. 문의방에서 관리자는 nickname "와썹하우스"로 내려온다.
+export interface ChatSender {
+  userId: string
+  nickname: string | null
+  avatarUrl: string | null
+}
+
+export interface ChatLinkPreview {
+  url: string
+  title: string | null
+  description: string | null
+  image: string | null
+}
+
+export interface ChatReaction {
+  emoji: string
+  count: number
+  reactedByMe: boolean
+}
+
+export interface ChatMessage {
+  id: string
+  roomId: string
+  // SYSTEM 메시지·탈퇴 회원은 null
+  sender: ChatSender | null
+  type: ChatMessageType
+  // TEXT: 본문, IMAGE: 서명 URL, SYSTEM·삭제됨: null
+  content: string | null
+  systemKind: ChatSystemKind | null
+  systemParams: Record<string, string> | null
+  linkPreview: ChatLinkPreview | null
+  reactions: ChatReaction[]
+  // 이 메시지를 아직 안 읽은 멤버 수 (카톡식)
+  unreadCount: number
+  editedAt: string | null
+  deletedAt: string | null
+  createdAt: string
+}
+
+// GET /api/chat/rooms — 서버가 최근 메시지 순으로 정렬, hidden 제외
+export interface ChatRoomSummary {
+  id: string
+  type: ChatRoomType
+  name: string
+  memberCount: number
+  lastMessage: ChatMessage | null
+  unreadCount: number
+}
+
+export interface ChatMember {
+  userId: string
+  nickname: string | null
+  avatarUrl: string | null
+  admin: boolean
+}
+
+// GET /api/chat/rooms/{id}
+export interface ChatRoomDetail {
+  id: string
+  type: ChatRoomType
+  name: string
+  members: ChatMember[]
+  noticeMessage: ChatMessage | null
+  // 내 권한: 뮤트·퇴장 상태면 false
+  canSend: boolean
+}
+
+export interface ChatSendMessageRequest {
+  type: 'TEXT' | 'IMAGE'
+  // TEXT: 본문, IMAGE: 업로드 응답의 path
+  content: string
+}
+
+export interface ChatInquiryRoomResponse {
+  roomId: string
+}
+
+export interface ChatImageUploadResponse {
+  path: string
+}
+
+// 클라이언트 전용: 낙관적 전송 대기열 항목 (서버 응답 전까지 반투명 표시)
+export interface ChatOutgoingMessage {
+  tempId: string
+  type: 'TEXT' | 'IMAGE'
+  // TEXT: 본문, IMAGE: 로컬 미리보기 object URL
+  content: string
+  image: Blob | null
+  createdAt: string
+  failed: boolean
+}
