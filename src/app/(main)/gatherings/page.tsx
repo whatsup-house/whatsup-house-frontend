@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import dayjs from 'dayjs'
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query'
 import { getTranslations } from 'next-intl/server'
 import { makeQueryClient } from '@/lib/utils/queryClient'
@@ -23,13 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic'
 
 export default async function GatheringsPage() {
-  const today = dayjs()
-  const todayStr = today.format('YYYY-MM-DD')
-  const year = today.year()
-  const month = today.month() + 1
-
   const queryClient = makeQueryClient()
-  await prefetchGatheringsQueries(queryClient, todayStr, year, month)
+  await prefetchGatheringsQueries(queryClient)
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
