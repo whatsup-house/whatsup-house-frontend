@@ -11,7 +11,8 @@ import { getAnimalEmoji } from '@/lib/utils/animalProfile'
 
 // 게더링 상세(/gatherings/[id])에서만 숨긴다. 하단에 신청하기 스티키 바가 있기 때문.
 // /apply, /apply/complete 등 하위 경로에는 바텀 네비를 노출한다.
-const HIDDEN_PATTERNS = [/^\/gatherings\/[^/]+$/]
+// 채팅방(/chat/[id])은 하단 고정 입력창이 있어 숨긴다.
+const HIDDEN_PATTERNS = [/^\/gatherings\/[^/]+$/, /^\/chat\/[^/]+$/]
 
 function isValidImageSrc(url: string): boolean {
   return url.startsWith('/') || url.startsWith('http://') || url.startsWith('https://')

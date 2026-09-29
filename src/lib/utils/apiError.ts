@@ -18,6 +18,15 @@ export function getApiErrorCode(error: unknown): string | null {
   return typeof code === 'string' && code.length > 0 ? code : null
 }
 
+export function getApiErrorStatus(error: unknown): number | null {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return null
+  }
+
+  const status = (error as { response?: { status?: unknown } }).response?.status
+  return typeof status === 'number' ? status : null
+}
+
 export function resolveApiErrorMessage(
   error: unknown,
   t: (key: string) => string

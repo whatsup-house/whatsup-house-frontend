@@ -1,5 +1,12 @@
 import type { Page } from '@playwright/test'
-import type { AdminHeroCarouselSlide, AdminHomeReview, GatheringForm } from '@/lib/api/types'
+import type {
+  AdminHeroCarouselSlide,
+  AdminHomeReview,
+  ChatMessage,
+  ChatRoomDetail,
+  ChatRoomSummary,
+  GatheringForm,
+} from '@/lib/api/types'
 
 // ─── Admin Mock 데이터 (E2E 인터셉트용) ────────────────────────────────────────
 
@@ -556,5 +563,88 @@ export async function mockAdminHomeApis(page: Page) {
       return route.fulfill({ json: apiRes({ content: rawReviews }) })
     }
     return route.fulfill({ json: apiRes(rawReviews[0]) })
+  })
+}
+
+// ─── 채팅 (KAN-332) — 백엔드 채팅 API 미배포라 전부 모킹 ─────────────────────────
+
+export const MOCK_INQUIRY_ROOM_ID = 'd1000000-0000-0000-0000-000000000001'
+export const MOCK_GROUP_ROOM_ID = 'd1000000-0000-0000-0000-000000000002'
+
+// 문의방에서 관리자는 "와썹하우스"로 내려온다
+const mockHouseSender = { userId: mockAdminProfile.id, nickname: '와썹하우스', avatarUrl: null }
+
+export const mockInquiryWelcomeMessage: ChatMessage = {
+  id: 'e1000000-0000-0000-0000-000000000001',
+  roomId: MOCK_INQUIRY_ROOM_ID,
+  sender: mockHouseSender,
+  type: 'TEXT',
+  content: '안녕하세요, 와썹하우스입니다. 무엇을 도와드릴까요?',
+  systemKind: null,
+  systemParams: null,
+  linkPreview: null,
+  reactions: [],
+  unreadCount: 0,
+  editedAt: null,
+  deletedAt: null,
+  createdAt: '2026-09-29T10:00:00',
+}
+
+export const mockChatRooms: ChatRoomSummary[] = [
+  {
+    id: MOCK_GROUP_ROOM_ID,
+    type: 'GROUP',
+    name: '퇴근 게더링 3조',
+    memberCount: 5,
+    lastMessage: {
+      ...mockInquiryWelcomeMessage,
+      id: 'e1000000-0000-0000-0000-000000000002',
+      roomId: MOCK_GROUP_ROOM_ID,
+      sender: { userId: 'b1000000-0000-0000-0000-000000000003', nickname: '준서', avatarUrl: null },
+      content: '다들 잘 들어가셨나요?',
+    },
+    unreadCount: 3,
+  },
+]
+
+export const mockInquiryRoomDetail: ChatRoomDetail = {
+  id: MOCK_INQUIRY_ROOM_ID,
+  type: 'INQUIRY',
+  name: '와썹하우스',
+  members: [
+    { userId: mockUserProfile.id, nickname: mockUserProfile.nickname, avatarUrl: null, admin: false },
+    { ...mockHouseSender, admin: true },
+  ],
+  noticeMessage: null,
+  canSend: true,
+}
+
+// 방 목록·문의방 열기·방 상세·메시지 조회/전송. 전송한 메시지는 이후 조회에도 포함된다.
+export async function mockChatApis(page: Page) {
+  const messages: ChatMessage[] = [mockInquiryWelcomeMessage]
+
+  await page.route('**/api/chat/rooms', (route) => route.fulfill({ json: apiRes(mockChatRooms) }))
+  await page.route('**/api/chat/rooms/inquiry', (route) =>
+    route.fulfill({ json: apiRes({ roomId: MOCK_INQUIRY_ROOM_ID }) })
+  )
+  await page.route(`**/api/chat/rooms/${MOCK_INQUIRY_ROOM_ID}`, (route) =>
+    route.fulfill({ json: apiRes(mockInquiryRoomDetail) })
+  )
+  await page.route(`**/api/chat/rooms/${MOCK_INQUIRY_ROOM_ID}/messages**`, (route) => {
+    const request = route.request()
+    if (request.method() !== 'POST') return route.fulfill({ json: apiRes(messages) })
+
+    const body = request.postDataJSON() as { type: 'TEXT' | 'IMAGE'; content: string }
+    const message: ChatMessage = {
+      ...mockInquiryWelcomeMessage,
+      id: `e2000000-0000-0000-0000-${String(messages.length).padStart(12, '0')}`,
+      sender: { userId: mockUserProfile.id, nickname: mockUserProfile.nickname, avatarUrl: null },
+      type: body.type,
+      content: body.content,
+      unreadCount: 1,
+      createdAt: new Date().toISOString(),
+    }
+    messages.push(message)
+    return route.fulfill({ json: apiRes(message) })
   })
 }

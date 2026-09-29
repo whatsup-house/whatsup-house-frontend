@@ -383,7 +383,8 @@
       "onboarding": "オンボーディング",
       "applyComplete": "申請完了",
       "apply": "申請する",
-      "story": "紹介"
+      "story": "紹介",
+      "chat": "チャット"
     }
   },
   "desktopBrand": {
@@ -1135,6 +1136,73 @@
       "JOB_SEEKER": "就職活動中",
       "UNEMPLOYED": "無職・休養中",
       "ETC": "その他"
+    }
+  },
+  "chat": {
+    "withdrawn": "(退会したメンバー)",
+    "photo": "写真",
+    "list": {
+      "inquiryCta": "Whatsup Houseに問い合わせる",
+      "inquiryCtaDescription": "気軽に質問してください",
+      "empty": "参加中のチャットはまだありません",
+      "loadError": "チャット一覧を読み込めませんでした",
+      "dateFormat": "M月D日",
+      "hide": "一覧から非表示",
+      "leave": "こっそり退出",
+      "leaveConfirmTitle": "チャットを退出しますか?",
+      "leaveConfirmDescription": "他のメンバーに退出の記録は残りません。",
+      "hidden": "一覧から非表示にしました",
+      "left": "チャットを退出しました"
+    },
+    "room": {
+      "members": "メンバー",
+      "openMembers": "メンバーを見る",
+      "notice": "お知らせ",
+      "noticeToggle": "お知らせを開く/閉じる",
+      "noticeClear": "解除",
+      "loadError": "メッセージを読み込めませんでした",
+      "empty": "最初のメッセージを送ってみましょう",
+      "muted": "チャットが制限されているため送信できません",
+      "notMember": "参加していないチャットです",
+      "me": "自分"
+    },
+    "message": {
+      "deleted": "削除されたメッセージです",
+      "edited": "(編集済み)",
+      "imageAlt": "チャット画像",
+      "retry": "再送信",
+      "discard": "送信取消",
+      "failed": "送信失敗",
+      "unread": "未読 {count}人"
+    },
+    "system": {
+      "JOINED": "{nickname}さんが参加しました",
+      "KICKED": "{nickname}さんが退出させられました",
+      "NOTICE_SET": "お知らせが登録されました"
+    },
+    "composer": {
+      "placeholder": "メッセージを入力",
+      "send": "送信",
+      "attachImage": "写真を送る",
+      "imageTooLarge": "写真が大きすぎます。5MB以下のみ送信できます。",
+      "imageFailed": "写真を処理できませんでした"
+    },
+    "actions": {
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "edit": "編集",
+      "delete": "削除",
+      "setNotice": "お知らせに登録",
+      "report": "通報",
+      "editTitle": "メッセージを編集",
+      "save": "保存",
+      "deleteConfirmTitle": "メッセージを削除しますか?",
+      "deleteConfirmDescription": "全員に「削除されたメッセージです」と表示されます。",
+      "reportTitle": "メッセージを通報",
+      "reportPlaceholder": "通報の理由を入力してください",
+      "reported": "通報を受け付けました",
+      "noticeSet": "お知らせに登録しました",
+      "noticeCleared": "お知らせを解除しました"
     }
   }
 }

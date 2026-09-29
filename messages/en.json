@@ -383,7 +383,8 @@
       "onboarding": "Onboarding",
       "applyComplete": "Application complete",
       "apply": "Apply",
-      "story": "About"
+      "story": "About",
+      "chat": "Chat"
     }
   },
   "desktopBrand": {
@@ -1135,6 +1136,73 @@
       "JOB_SEEKER": "Job Seeker",
       "UNEMPLOYED": "Unemployed / Resting",
       "ETC": "Other"
+    }
+  },
+  "chat": {
+    "withdrawn": "(Deleted account)",
+    "photo": "Photo",
+    "list": {
+      "inquiryCta": "Contact Whatsup House",
+      "inquiryCtaDescription": "Feel free to ask us anything",
+      "empty": "No chats yet",
+      "loadError": "Couldn't load your chats",
+      "dateFormat": "MMM D",
+      "hide": "Hide from list",
+      "leave": "Leave quietly",
+      "leaveConfirmTitle": "Leave this chat?",
+      "leaveConfirmDescription": "Other members won't see that you left.",
+      "hidden": "Hidden from your list",
+      "left": "You left the chat"
+    },
+    "room": {
+      "members": "Members",
+      "openMembers": "View members",
+      "notice": "Notice",
+      "noticeToggle": "Expand/collapse notice",
+      "noticeClear": "Remove",
+      "loadError": "Couldn't load messages",
+      "empty": "Send the first message",
+      "muted": "You've been restricted from sending messages",
+      "notMember": "You're not a member of this chat",
+      "me": "Me"
+    },
+    "message": {
+      "deleted": "This message was deleted",
+      "edited": "(edited)",
+      "imageAlt": "Chat image",
+      "retry": "Resend",
+      "discard": "Cancel",
+      "failed": "Failed to send",
+      "unread": "{count} unread"
+    },
+    "system": {
+      "JOINED": "{nickname} joined",
+      "KICKED": "{nickname} was removed",
+      "NOTICE_SET": "A notice was posted"
+    },
+    "composer": {
+      "placeholder": "Type a message",
+      "send": "Send",
+      "attachImage": "Send a photo",
+      "imageTooLarge": "Photo is too large. Max 5MB.",
+      "imageFailed": "Couldn't process the photo"
+    },
+    "actions": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "edit": "Edit",
+      "delete": "Delete",
+      "setNotice": "Set as notice",
+      "report": "Report",
+      "editTitle": "Edit message",
+      "save": "Save",
+      "deleteConfirmTitle": "Delete this message?",
+      "deleteConfirmDescription": "Everyone will see \"This message was deleted\".",
+      "reportTitle": "Report message",
+      "reportPlaceholder": "Tell us why you are reporting this",
+      "reported": "Report submitted",
+      "noticeSet": "Set as notice",
+      "noticeCleared": "Notice removed"
     }
   }
 }
