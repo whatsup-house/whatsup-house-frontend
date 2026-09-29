@@ -1,5 +1,5 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query'
-import { fetchGatherings, fetchGatheringsAll, fetchCalendarDots, fetchGatheringDetail } from '@/lib/api/gathering'
+import { fetchGatheringsAll, fetchGatheringDetail, filterGatheringsByDate, deriveCalendarDots } from '@/lib/api/gathering'
 
 export function useGatheringsAll() {
   return useQuery({
@@ -19,19 +19,22 @@ export function useGatheringsByTitle(title: string) {
   })
 }
 
+// 날짜별 목록·달력 dot은 전체 목록 캐시에서 파생 — 날짜 선택·월 이동 시 네트워크 요청 없음 (KAN-327)
 export function useGatherings(date: string) {
   return useQuery({
-    queryKey: ['gatherings', 'date', date],
-    queryFn: () => fetchGatherings(date),
-    staleTime: 1000 * 60,
+    queryKey: ['gatherings', 'all'],
+    queryFn: fetchGatheringsAll,
+    staleTime: 1000 * 60 * 5,
+    select: (data) => filterGatheringsByDate(data, date),
   })
 }
 
 export function useCalendarDots(year: number, month: number) {
   return useQuery({
-    queryKey: ['gatherings', 'calendar', year, month],
-    queryFn: () => fetchCalendarDots(year, month),
+    queryKey: ['gatherings', 'all'],
+    queryFn: fetchGatheringsAll,
     staleTime: 1000 * 60 * 5,
+    select: (data) => deriveCalendarDots(data, year, month),
   })
 }
 
@@ -43,15 +46,10 @@ export function useGatheringDetail(id: string) {
   })
 }
 
-export async function prefetchGatheringsQueries(queryClient: QueryClient, date: string, year: number, month: number) {
-  await Promise.allSettled([
-    queryClient.prefetchQuery({
-      queryKey: ['gatherings', 'date', date],
-      queryFn: () => fetchGatherings(date),
-    }),
-    queryClient.prefetchQuery({
-      queryKey: ['gatherings', 'calendar', year, month],
-      queryFn: () => fetchCalendarDots(year, month),
-    }),
-  ])
+// 전체 목록 1회만 프리페치 — 날짜별 목록·달력 dot은 클라이언트에서 파생한다. prefetchQuery는 실패해도 throw하지 않는다.
+export async function prefetchGatheringsQueries(queryClient: QueryClient) {
+  await queryClient.prefetchQuery({
+    queryKey: ['gatherings', 'all'],
+    queryFn: fetchGatheringsAll,
+  })
 }

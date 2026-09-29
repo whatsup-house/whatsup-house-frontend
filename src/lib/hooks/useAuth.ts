@@ -17,6 +17,7 @@ import {
   withdrawMyAccount,
 } from '@/lib/api/auth'
 import { useAuthStore } from '@/lib/store/authStore'
+import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
 import { useRouter } from 'next/navigation'
 import type {
   FindEmailRequest,
@@ -34,6 +35,10 @@ export function useInitAuth() {
     queryKey: ['auth-me'],
     queryFn: fetchMyProfile,
     staleTime: Infinity,
+    // 게스트(401)는 data가 undefined라 staleTime과 무관하게 stale로 판정돼
+    // 포커스·재연결마다 /me → /refresh를 재호출한다. 갱신은 로그인·로그아웃 경로에서만. (KAN-326)
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     retry: false,
     throwOnError: false,
   })
@@ -61,6 +66,8 @@ export function useLogin(returnUrl: string = '/') {
       // 이전 세션의 서버 캐시를 폐기해 다른 계정 로그인 시 stale 데이터 노출을 막는다. (KAN-249)
       queryClient.clear()
       storeLogin(data.user.id, data.user.nickname, data.user.admin)
+      // proxy.ts는 인증 쿠키를 볼 수 없어 이 쿠키로 로그인 사용자의 /welcome 리다이렉트를 막는다. (KAN-323)
+      markWelcomeSeen()
       router.push(returnUrl)
     },
   })
@@ -86,6 +93,7 @@ export function useRegisterAndLogin() {
       // 이전 세션의 서버 캐시를 폐기해 새 계정 데이터로 갱신되게 한다. (KAN-249)
       queryClient.clear()
       storeLogin(loginData.user.id, loginData.user.nickname, loginData.user.admin)
+      markWelcomeSeen() // KAN-323: proxy.ts 오리다이렉트 방지
       router.push('/mypage')
     },
   })
