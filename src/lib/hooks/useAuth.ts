@@ -35,6 +35,10 @@ export function useInitAuth() {
     queryKey: ['auth-me'],
     queryFn: fetchMyProfile,
     staleTime: Infinity,
+    // 게스트(401)는 data가 undefined라 staleTime과 무관하게 stale로 판정돼
+    // 포커스·재연결마다 /me → /refresh를 재호출한다. 갱신은 로그인·로그아웃 경로에서만. (KAN-326)
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     retry: false,
     throwOnError: false,
   })
