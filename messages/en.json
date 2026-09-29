@@ -158,6 +158,8 @@
       "passwordPlaceholder": "At least 8 characters with letters and numbers",
       "passwordConfirmLabel": "Confirm password",
       "passwordConfirmPlaceholder": "Enter your password again",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "phoneLabel": "Contact number",
       "phonePlaceholder": "01012345678 (11 digits)",
       "checking": "Checking...",

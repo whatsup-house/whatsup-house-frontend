@@ -158,6 +158,8 @@
       "passwordPlaceholder": "英字＋数字を含む8文字以上",
       "passwordConfirmLabel": "パスワード確認",
       "passwordConfirmPlaceholder": "パスワードを再入力してください",
+      "showPassword": "パスワードを表示",
+      "hidePassword": "パスワードを隠す",
       "phoneLabel": "連絡先",
       "phonePlaceholder": "01012345678（11桁）",
       "checking": "確認中...",

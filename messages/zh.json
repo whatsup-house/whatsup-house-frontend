@@ -158,6 +158,8 @@
       "passwordPlaceholder": "至少 8 个字符，包含字母和数字",
       "passwordConfirmLabel": "确认密码",
       "passwordConfirmPlaceholder": "再次输入您的密码",
+      "showPassword": "显示密码",
+      "hidePassword": "隐藏密码",
       "phoneLabel": "联系电话",
       "phonePlaceholder": "01012345678（11位）",
       "checking": "正在检查...",

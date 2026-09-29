@@ -158,6 +158,8 @@
       "passwordPlaceholder": "영문+숫자 포함 8자 이상",
       "passwordConfirmLabel": "비밀번호 확인",
       "passwordConfirmPlaceholder": "비밀번호를 다시 입력해주세요",
+      "showPassword": "비밀번호 보기",
+      "hidePassword": "비밀번호 숨기기",
       "phoneLabel": "연락처",
       "phonePlaceholder": "01012345678 (11자리)",
       "checking": "확인 중...",

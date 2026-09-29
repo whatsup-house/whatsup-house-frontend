@@ -80,7 +80,8 @@ export default function LoginPageClient() {
                 type="email"
                 placeholder={t('emailPlaceholder')}
                 autoComplete="username"
-                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
+                aria-invalid={errors.email || hasLoginError ? true : undefined}
+                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary/30 ${
                   errors.email || hasLoginError ? 'border-primary' : 'border-tag-bg'
                 }`}
                 {...register('email')}
@@ -93,7 +94,8 @@ export default function LoginPageClient() {
                 type="password"
                 placeholder={t('passwordPlaceholder')}
                 autoComplete="current-password"
-                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
+                aria-invalid={errors.password || hasLoginError ? true : undefined}
+                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary/30 ${
                   errors.password || hasLoginError ? 'border-primary' : 'border-tag-bg'
                 }`}
                 {...register('password')}
@@ -102,13 +104,13 @@ export default function LoginPageClient() {
           </div>
 
           {(errors.email || errors.password) && !hasLoginError && (
-            <p className="mt-2 text-xs text-primary">
+            <p role="alert" className="mt-2 text-xs text-primary">
               {errors.email?.message ?? errors.password?.message}
             </p>
           )}
 
           {hasLoginError && (
-            <div className="mt-2 flex flex-col gap-1.5">
+            <div role="alert" className="mt-2 flex flex-col gap-1.5">
               <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-primary">
                 <AlertCircle size={13} />
                 <span>{t('credentialError')}</span>
