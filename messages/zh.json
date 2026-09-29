@@ -425,7 +425,9 @@
       "calendarCta": "点击查看全部聚会 →",
       "openBadge": "招募中",
       "previous": "上一页",
-      "next": "下一步"
+      "next": "下一步",
+      "pause": "暂停",
+      "play": "播放"
     },
     "curated": {
       "title": "精选聚会",

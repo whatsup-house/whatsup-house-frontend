@@ -425,7 +425,9 @@
       "calendarCta": "タップしてすべてのギャザリングを見る →",
       "openBadge": "募集中",
       "previous": "前へ",
-      "next": "次へ"
+      "next": "次へ",
+      "pause": "一時停止",
+      "play": "再生"
     },
     "curated": {
       "title": "今週よく見られたギャザリング",

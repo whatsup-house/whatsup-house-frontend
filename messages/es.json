@@ -425,7 +425,9 @@
       "calendarCta": "Toca para ver todos los encuentros →",
       "openBadge": "Abierto",
       "previous": "Anterior",
-      "next": "Siguiente"
+      "next": "Siguiente",
+      "pause": "Pausar",
+      "play": "Reproducir"
     },
     "curated": {
       "title": "Encuentros seleccionados",

@@ -425,7 +425,9 @@
       "calendarCta": "Tap to view all gatherings →",
       "openBadge": "Open",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "pause": "Pause",
+      "play": "Play"
     },
     "curated": {
       "title": "Most viewed gatherings this week",
