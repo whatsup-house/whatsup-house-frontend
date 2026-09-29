@@ -68,6 +68,8 @@ export function useChatRooms() {
     queryFn: fetchChatRooms,
     enabled: isLoggedIn,
     retry: false,
+    // 바텀 내비 안읽은 배지용 폴링. 소켓 연동 일감이 같은 캐시를 즉시 갱신한다.
+    refetchInterval: 30_000,
   })
 }
 

@@ -368,7 +368,8 @@
     "tabs": {
       "home": "Inicio",
       "gatherings": "Encuentros",
-      "my": "Mi página"
+      "my": "Mi página",
+      "chat": "Chat"
     },
     "titles": {
       "home": "Inicio",
