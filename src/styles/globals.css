@@ -26,6 +26,13 @@ body {
   background-color: var(--color-background);
   font-family: var(--font-pretendard);
   color: var(--color-foreground);
+  /* 한글은 어절 단위로 줄바꿈하고, 긴 URL 등은 넘칠 때만 끊는다 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
 }
 
 .font-brand-kr {
@@ -86,6 +93,19 @@ body {
 
 .animate-field-reveal {
   animation: field-reveal 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 모션 최소화 설정: 이동 애니메이션을 끄고 페이드만 남긴다 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up,
+  .animate-field-reveal {
+    animation: fade-in 0.2s ease;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* 스크롤바 숨김 */
