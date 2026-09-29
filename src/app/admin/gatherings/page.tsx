@@ -1,274 +1,134 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminGatheringApi, AdminGatheringListItem } from '@/lib/api/adminGathering'
-import type { AdminGatheringStatus } from '@/lib/api/admin'
-import { useUpdateGatheringStatus, useSetCuration } from '@/lib/hooks/useAdminGathering'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import dayjs from 'dayjs'
+import { Star } from 'lucide-react'
+import { useAdminGatheringTypes, useDeleteGathering, useSetCuration } from '@/lib/hooks/useAdminGathering'
 import { useCuratedGatherings } from '@/lib/hooks/useHome'
 import { GatheringFormPanel } from '@/components/admin/GatheringFormPanel'
 import { LoadingSpinner, Pagination } from '@/components/ui'
-import { Star } from 'lucide-react'
-import dayjs from 'dayjs'
 
 const PAGE_SIZE = 10
 
-// 백엔드 GatheringStatus enum(OPEN/CLOSED/COMPLETED/CANCELLED)과 값을 맞춘다. (KAN-209)
-const STATUS_OPTIONS = ['전체', 'OPEN', 'CLOSED', 'COMPLETED', 'CANCELLED']
-const STATUS_LABEL: Record<string, string> = {
-  전체: '전체',
-  OPEN: '모집중',
-  CLOSED: '마감',
-  COMPLETED: '진행완료',
-  CANCELLED: '취소',
-}
-const STATUS_STYLE: Record<string, string> = {
-  OPEN: 'bg-[#FDECEA] text-[#C8392B]',
-  CLOSED: 'bg-[#F5F5F5] text-[#767676]',
-  COMPLETED: 'bg-[#E8F5E9] text-[#4CAF50]',
-  CANCELLED: 'bg-[#FEF3F3] text-red-500',
-}
-
-const NEXT_STATUSES: Record<string, { value: AdminGatheringStatus; label: string }[]> = {
-  OPEN: [
-    { value: 'CLOSED', label: '모집 마감' },
-    { value: 'CANCELLED', label: '취소' },
-  ],
-  CLOSED: [
-    { value: 'COMPLETED', label: '진행 완료' },
-    { value: 'CANCELLED', label: '취소' },
-  ],
-  COMPLETED: [],
-  CANCELLED: [],
-}
-
+// 관리자 모임 목록 = 종류 목록. 회차는 종류 상세(/admin/gatherings/[id])에서 관리한다. (KAN-340)
 export default function AdminGatheringsPage() {
-  const queryClient = useQueryClient()
-  const [statusFilter, setStatusFilter] = useState('전체')
+  const router = useRouter()
   const [page, setPage] = useState(0)
-  const [isPanelOpen, setIsPanelOpen] = useState(false)
-  const [editingGathering, setEditingGathering] = useState<AdminGatheringListItem | null>(null)
+  // null: 패널 닫힘, 'new': 새 종류, 그 외: 수정할 종류 ID
+  const [panelTarget, setPanelTarget] = useState<string | null>(null)
 
-  const { data: allGatherings = [], isLoading } = useQuery({
-    queryKey: ['admin', 'gatherings', statusFilter],
-    queryFn: () =>
-      adminGatheringApi.getAll(statusFilter === '전체' ? undefined : statusFilter),
-  })
+  const { data: rows = [], isLoading } = useAdminGatheringTypes()
 
-  // 큐레이션 현재 상태는 공개 큐레이션 목록에서 파생한다. (KAN-190, 목록 응답에 isCurated가 없음)
+  // 큐레이션 현재 상태는 공개 큐레이션 목록(id = 대표 회차 ID)에서 파생한다. (KAN-190, 목록 응답에 isCurated가 없음)
   const { data: curated = [] } = useCuratedGatherings()
   const curatedIds = new Set(curated.map((c) => c.id))
   const { mutate: setCuration } = useSetCuration()
+  const { mutate: deleteGathering } = useDeleteGathering()
 
-  const totalPages = Math.ceil(allGatherings.length / PAGE_SIZE)
-  const gatherings = allGatherings.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
-
-  const { mutate: deleteGathering } = useMutation({
-    mutationFn: adminGatheringApi.delete,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'gatherings'] }),
-  })
-
-  const { mutate: changeStatus } = useUpdateGatheringStatus()
-
-  const handleStatusChange = (g: AdminGatheringListItem, nextStatus: AdminGatheringStatus) => {
-    const label = NEXT_STATUSES[g.status]?.find((s) => s.value === nextStatus)?.label ?? nextStatus
-    if (confirm(`"${g.title}"의 상태를 '${label}'으로 변경할까요?`)) {
-      changeStatus({ id: g.id, status: nextStatus })
-    }
-  }
-
-  const handleOpenEdit = (g: AdminGatheringListItem) => {
-    setEditingGathering(g)
-    setIsPanelOpen(true)
-  }
-
-  const handleOpenCreate = () => {
-    setEditingGathering(null)
-    setIsPanelOpen(true)
-  }
+  const totalPages = Math.ceil(rows.length / PAGE_SIZE)
+  const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   const handleDelete = (id: string, title: string) => {
-    if (confirm(`"${title}" 게더링을 취소할까요?`)) {
-      deleteGathering(id)
-    }
+    if (confirm(`"${title}" 모임과 모든 회차를 삭제할까요?`)) deleteGathering(id)
   }
 
   return (
-    <div className="flex gap-6">
-      <div className="flex-1 min-w-0">
-        {/* 헤더 */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
-          <h1 className="font-bold text-[22px] text-foreground">게더링 관리</h1>
-          <button
-            id="btn-gathering-add"
-            onClick={handleOpenCreate}
-            className="self-start sm:self-auto px-5 h-11 bg-primary text-white rounded-[12px] font-medium text-sm hover:opacity-90 transition-opacity"
-          >
-            + 게더링 추가
-          </button>
-        </div>
-
-        {/* 상태 필터 */}
-        <div className="bg-white rounded-[12px] p-4 mb-4 flex gap-2 overflow-x-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
-          {STATUS_OPTIONS.map((s) => (
-            <button
-              key={s}
-              id={`filter-status-${s}`}
-              onClick={() => { setStatusFilter(s); setPage(0) }}
-              className={`
-                shrink-0 px-4 h-9 rounded-full text-sm font-medium transition-all
-                ${statusFilter === s
-                  ? 'bg-primary text-white'
-                  : 'border border-[#E0E0E0] text-[#767676] hover:border-primary'
-                }
-              `}
-            >
-              {STATUS_LABEL[s]}
-            </button>
-          ))}
-        </div>
-
-        {/* 테이블 */}
-        <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-x-auto">
-          <table className="w-full min-w-[920px]">
-            <thead>
-              <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
-                {['게더링명', '날짜/시간', '장소', '참가비', '신청현황', '상태', '큐레이션', '액션'].map((col) => (
-                  <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading && (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center">
-                    <LoadingSpinner />
-                  </td>
-                </tr>
-              )}
-              {!isLoading && gatherings.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-sm text-[#767676]">
-                    게더링이 없습니다.
-                  </td>
-                </tr>
-              )}
-              {gatherings.map((g) => {
-                const fillRate = g.capacity > 0 ? g.currentApplicants / g.capacity : 0
-                const isReadOnly = g.status === 'COMPLETED' || g.status === 'CANCELLED'
-                const isCurated = curatedIds.has(g.id)
-                return (
-                  <tr key={g.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
-                    <td className="px-4 py-3 max-w-[220px]">
-                      <button
-                        onClick={() => !isReadOnly && handleOpenEdit(g)}
-                        disabled={isReadOnly}
-                        className="font-medium text-[14px] text-[#1A1A1A] hover:text-primary text-left truncate block w-full disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {g.title}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-[#767676] whitespace-nowrap">
-                      {dayjs(g.date).format('M/D')} {g.startTime?.slice(0, 5) ?? ''}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-[#767676] max-w-[120px] truncate">
-                      {g.locationName ?? '-'}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] whitespace-nowrap">
-                      {g.price?.toLocaleString()}원
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[13px] whitespace-nowrap">
-                          {g.currentApplicants}/{g.capacity}명
-                        </span>
-                        <div className="w-14 h-1.5 bg-[#F0EBE8] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all"
-                            style={{ width: `${Math.min(fillRate * 100, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_STYLE[g.status] ?? ''}`}>
-                        {STATUS_LABEL[g.status] ?? g.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => setCuration({ id: g.id, isCurated: !isCurated })}
-                        title={isCurated ? '홈 큐레이션 노출 해제' : '홈 큐레이션 노출'}
-                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[12px] border transition-colors ${
-                          isCurated
-                            ? 'border-primary text-primary bg-primary/5'
-                            : 'border-[#E0E0E0] text-[#767676] hover:border-primary'
-                        }`}
-                      >
-                        <Star size={12} className={isCurated ? 'fill-primary' : ''} />
-                        {isCurated ? '노출중' : '노출'}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3 text-[13px]">
-                        <button
-                          onClick={() => handleOpenEdit(g)}
-                          disabled={isReadOnly}
-                          className="text-primary hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
-                          title={isReadOnly ? '완료/취소된 게더링은 수정할 수 없습니다' : undefined}
-                        >
-                          수정
-                        </button>
-                        {(NEXT_STATUSES[g.status]?.length ?? 0) > 0 ? (
-                          <select
-                            defaultValue=""
-                            onChange={(e) => {
-                              if (e.target.value) {
-                                handleStatusChange(g, e.target.value as AdminGatheringStatus)
-                                e.target.value = ''
-                              }
-                            }}
-                            className="text-[#767676] text-[12px] border border-[#E0E0E0] rounded-[6px] px-2 py-1 cursor-pointer hover:border-primary focus:outline-none"
-                          >
-                            <option value="" disabled>상태 변경</option>
-                            {NEXT_STATUSES[g.status]?.map((opt) => (
-                              <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <button
-                            onClick={() => handleDelete(g.id, g.title)}
-                            className="text-red-500 hover:underline"
-                          >
-                            삭제
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
+    <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
+        <h1 className="font-bold text-[22px] text-foreground">게더링 관리</h1>
+        <button
+          id="btn-gathering-add"
+          onClick={() => setPanelTarget('new')}
+          className="self-start sm:self-auto px-5 h-11 bg-primary text-white rounded-input font-medium text-sm hover:opacity-90 transition-opacity"
+        >
+          + 게더링 추가
+        </button>
       </div>
 
-      {/* 사이드 패널 */}
-      {isPanelOpen && (
+      <div className="bg-card rounded-card shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[720px]">
+          <thead>
+            <tr className="bg-tag-bg text-xs text-tag-text">
+              {['게더링명', '회차', '다음 일정', '큐레이션', '액션'].map((col) => (
+                <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading && (
+              <tr>
+                <td colSpan={5} className="py-12 text-center"><LoadingSpinner /></td>
+              </tr>
+            )}
+            {!isLoading && pageRows.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-12 text-center text-sm text-tag-text">게더링이 없습니다.</td>
+              </tr>
+            )}
+            {pageRows.map((row) => {
+              const isCurated = row.sessionIds.some((id) => curatedIds.has(id))
+              return (
+                <tr key={row.id} className="border-t border-tag-bg hover:bg-background transition-colors">
+                  <td className="px-4 py-3 max-w-[280px]">
+                    <Link
+                      href={`/admin/gatherings/${row.id}`}
+                      className="font-medium text-sm text-foreground hover:text-primary truncate block"
+                    >
+                      {row.title}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-tag-text whitespace-nowrap">
+                    예정 {row.upcomingCount} / 전체 {row.sessionCount}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-tag-text whitespace-nowrap">
+                    {row.nextEventDate ? dayjs(row.nextEventDate).format('YYYY.M.D') : '-'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => setCuration({ id: row.id, isCurated: !isCurated })}
+                      title={isCurated ? '홈 큐레이션 노출 해제' : '홈 큐레이션 노출'}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border transition-colors ${
+                        isCurated
+                          ? 'border-primary text-primary bg-primary-light'
+                          : 'border-tag-bg text-tag-text hover:border-primary'
+                      }`}
+                    >
+                      <Star size={12} className={isCurated ? 'fill-primary' : ''} />
+                      {isCurated ? '노출중' : '노출'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3 text-sm">
+                      <Link href={`/admin/gatherings/${row.id}`} className="text-primary hover:underline">회차 관리</Link>
+                      <button onClick={() => setPanelTarget(row.id)} className="text-tag-text hover:text-foreground hover:underline">
+                        수정
+                      </button>
+                      <button onClick={() => handleDelete(row.id, row.title)} className="text-tag-text hover:text-primary hover:underline">
+                        삭제
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+
+      {panelTarget && (
         <GatheringFormPanel
           // 대상이 바뀌면 새로 마운트해 업로드 중이던 썸네일 상태가 남지 않게 한다.
-          key={editingGathering?.id ?? 'new'}
-          gathering={editingGathering}
-          onClose={() => setIsPanelOpen(false)}
-          onSuccess={() => {
-            setIsPanelOpen(false)
-            queryClient.invalidateQueries({ queryKey: ['admin', 'gatherings'] })
+          key={panelTarget}
+          gatheringId={panelTarget === 'new' ? null : panelTarget}
+          onClose={() => setPanelTarget(null)}
+          onSuccess={(id) => {
+            // 새 종류는 회차가 없어 목록에 안 보이므로 바로 상세로 보내 회차를 추가하게 한다.
+            if (panelTarget === 'new') router.push(`/admin/gatherings/${id}`)
+            setPanelTarget(null)
           }}
         />
       )}

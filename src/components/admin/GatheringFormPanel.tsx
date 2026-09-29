@@ -1,55 +1,55 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import dayjs from 'dayjs'
-import type { AdminGatheringListItem, GatheringCreateRequest, GatheringType } from '@/lib/api/adminGathering'
-import { useAdminLocations, useAdminGatheringDetail, useCreateGathering, useUpdateGathering } from '@/lib/hooks/useAdminGathering'
+import type { AdminGatheringTypeRequest, GatheringDetail, GatheringType } from '@/lib/api/types'
+import { useAdminGatheringDetail, useCreateGathering, useUpdateGathering, useSetCuration } from '@/lib/hooks/useAdminGathering'
+import { useCuratedGatherings } from '@/lib/hooks/useHome'
 import { useUploadImage } from '@/lib/hooks/useUploadImage'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import ImageUploadField from '@/components/ui/ImageUploadField'
 
-// 날짜는 오늘 포함 이후만 허용한다. 시간 순서 검증은 새벽 종료 케이스를 위해 적용하지 않는다. (KAN-221)
+// 모임 종류 필드만 다룬다. 날짜·시간·장소·정원은 회차(GatheringSessionModal)에서 입력한다. (KAN-340)
 const schema = z.object({
   title: z.string().min(1, '게더링명을 입력해주세요'),
   description: z.string().min(1, '게더링 소개를 입력해주세요'),
   howToRunText: z.string().optional(),
-  locationId: z.string().min(1, '장소를 선택해주세요'),
-  date: z.string().min(1, '날짜를 선택해주세요'),
-  startTime: z.string().min(1, '시작 시간을 입력해주세요'),
-  endTime: z.string().min(1, '종료 시간을 입력해주세요'),
-  price: z.number({ error: '참가비를 입력해주세요' }).min(0, '참가비는 0원 이상이어야 합니다'),
-  capacity: z.number({ error: '정원을 입력해주세요' }).int().min(1).max(30, '정원은 최대 30명입니다'),
-  moodTagsText: z.string().optional(),
-  mileageReward: z.number().optional(),
-}).superRefine((val, ctx) => {
-  const today = dayjs().format('YYYY-MM-DD')
-  if (val.date && val.date < today) {
-    ctx.addIssue({ code: 'custom', path: ['date'], message: '게더링 날짜는 오늘 이후로 선택해주세요.' })
-  }
+  basePrice: z.number({ error: '기본 참가비를 입력해주세요' }).min(0, '참가비는 0원 이상이어야 합니다'),
+  tagsText: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
 
 interface GatheringFormPanelProps {
-  gathering: AdminGatheringListItem | null
+  gatheringId: string | null   // null이면 새 종류 생성
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (gatheringId: string) => void
 }
 
-export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringFormPanelProps) {
-  const isEdit = !!gathering
+export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: GatheringFormPanelProps) {
+  const isEdit = !!gatheringId
 
-  const today = useMemo(() => dayjs().format('YYYY-MM-DD'), [])
-  const { data: locations } = useAdminLocations()
-  // 수정 시 상세를 조회해 소개/장소 등 목록에 없는 필드까지 prefill 한다. (KAN-220)
-  const { data: detail } = useAdminGatheringDetail(gathering?.id)
-  const { mutate: createGathering, isPending: isCreating } = useCreateGathering(onSuccess)
-  const { mutate: updateGathering, isPending: isUpdating } = useUpdateGathering(onSuccess)
+  const { data: detail } = useAdminGatheringDetail(gatheringId ?? undefined)
   const { uploadWithTempPath, isUploading } = useUploadImage('이미지 업로드에 실패했습니다')
+
+  // 큐레이션 현재 값은 공개 큐레이션 목록(id = 대표 회차 ID)에서 파생한다. 바꿨을 때만 저장 후 반영한다. (KAN-190)
+  const { data: curated = [] } = useCuratedGatherings()
+  const initialCurated = !!detail && curated.some((c) => detail.sessions.some((s) => s.id === c.id))
+  const [curatedChoice, setCuratedChoice] = useState<boolean | null>(null)
+  const isCurated = curatedChoice ?? initialCurated
+  const { mutate: setCuration } = useSetCuration()
+
+  const handleSaved = (saved: GatheringDetail) => {
+    if (curatedChoice !== null && curatedChoice !== initialCurated) {
+      setCuration({ id: saved.id, isCurated: curatedChoice })
+    }
+    onSuccess(saved.id)
+  }
+  const { mutate: createGathering, isPending: isCreating } = useCreateGathering(handleSaved)
+  const { mutate: updateGathering, isPending: isUpdating } = useUpdateGathering(handleSaved)
   const isPending = isCreating || isUpdating
 
   // 게더링 유형 (생성 시에만 설정 가능, 수정은 백엔드에서 무시)
@@ -61,41 +61,26 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
   const [thumbnailTempPath, setThumbnailTempPath] = useState<string | null>(null)
   const thumbnailPreviewUrl = newThumbnailUrl ?? detail?.thumbnailUrl ?? null
 
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      price: 0,
-      capacity: 1,
-      mileageReward: 500,
+      basePrice: 0,
       howToRunText: '',
-      moodTagsText: '',
+      tagsText: '',
     },
   })
 
-  useEffect(() => {
-    if (!gathering) {
-      reset()
-      return
-    }
-    // 목록 데이터로 우선 채우고 (목록 응답에는 썸네일이 없다)
-    setValue('title', gathering.title)
-    setValue('date', gathering.date)
-    setValue('startTime', gathering.startTime.slice(0, 5))
-    setValue('endTime', gathering.endTime?.slice(0, 5) ?? '')
-    setValue('price', gathering.price)
-    setValue('capacity', gathering.capacity)
-  }, [gathering, setValue, reset])
-
-  // 상세가 도착하면 소개/장소/시간/썸네일을 상세 기준으로 채운다. (KAN-220)
+  // 수정 시 상세가 도착하면 종류 필드를 채운다. (KAN-220)
   useEffect(() => {
     if (!detail) return
-    setValue('description', detail.description ?? '')
-    setValue('howToRunText', detail.howToRun?.join('\n') ?? '')
-    setValue('locationId', detail.location?.id ?? '')
-    if (detail.startTime) setValue('startTime', detail.startTime.slice(0, 5))
-    if (detail.endTime) setValue('endTime', detail.endTime.slice(0, 5))
-    setValue('moodTagsText', detail.tags?.join(',') ?? '')
-  }, [detail, setValue])
+    reset({
+      title: detail.title,
+      description: detail.description ?? '',
+      howToRunText: detail.howToRun?.join('\n') ?? '',
+      basePrice: detail.basePrice ?? 0,
+      tagsText: detail.tags?.join(',') ?? '',
+    })
+  }, [detail, reset])
 
   // 로컬 미리보기용 blob URL은 교체 시점과 언마운트 시점에 정리한다.
   useEffect(() => {
@@ -125,24 +110,18 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
   }
 
   const onSubmit = (values: FormValues) => {
-    const data: GatheringCreateRequest = {
+    const data: AdminGatheringTypeRequest = {
       title: values.title,
       description: values.description,
-      locationId: values.locationId,
-      date: values.date,
-      startTime: values.startTime,
-      endTime: values.endTime,
-      price: values.price,
-      capacity: values.capacity,
+      basePrice: values.basePrice,
       // 새 이미지를 올렸을 때만 tempPath를 보낸다. 생략하면 백엔드가 기존 썸네일을 유지한다.
       thumbnailUrl: thumbnailTempPath ?? undefined,
-      mileageReward: values.mileageReward ?? 500,
       howToRun: values.howToRunText ? values.howToRunText.split('\n').filter(Boolean) : [],
-      tags: values.moodTagsText ? values.moodTagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      tags: values.tagsText ? values.tagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
     }
 
-    if (isEdit) {
-      updateGathering({ id: gathering.id, data })
+    if (gatheringId) {
+      updateGathering({ id: gatheringId, data })
     } else {
       createGathering({ ...data, gatheringType })
     }
@@ -221,60 +200,14 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">장소 *</label>
-              <select
-                className="w-full h-[52px] px-4 border border-tag-bg rounded-input text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                {...register('locationId')}
-              >
-                <option value="">장소를 선택해주세요</option>
-                {locations?.map((loc) => (
-                  <option key={loc.id} value={loc.id}>{loc.name}</option>
-                ))}
-              </select>
-              {errors.locationId && (
-                <p className="text-xs text-red-500 mt-1">{errors.locationId.message}</p>
-              )}
-            </div>
-
-            <Input
-              label="날짜 *"
-              type="date"
-              min={today}
-              error={errors.date?.message}
-              {...register('date')}
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
-                label="시작 시간 *"
-                type="time"
-                error={errors.startTime?.message}
-                {...register('startTime')}
-              />
-              <Input
-                label="종료 시간 *"
-                type="time"
-                error={errors.endTime?.message}
-                {...register('endTime')}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Input
-                label="참가비 (원) *"
+                label="기본 참가비 (원) *"
                 type="number"
                 min={0}
-                error={errors.price?.message}
-                {...register('price', { valueAsNumber: true })}
+                error={errors.basePrice?.message}
+                {...register('basePrice', { valueAsNumber: true })}
               />
-              <Input
-                label="모집 정원 (최대 30) *"
-                type="number"
-                min={1}
-                max={30}
-                error={errors.capacity?.message}
-                {...register('capacity', { valueAsNumber: true })}
-              />
+              <p className="text-xs text-tag-text mt-1">회차에 가격을 따로 정하면 그 회차는 회차 가격을 써요.</p>
             </div>
 
             {/* 썸네일 — 상세 상단(aspect-[390/260] = 3:2)에 맞춘다.
@@ -293,17 +226,20 @@ export function GatheringFormPanel({ gathering, onClose, onSuccess }: GatheringF
             </div>
 
             <Input
-              label="분위기 태그 (쉼표 구분)"
+              label="태그 (쉼표 구분)"
               placeholder="조용한,감성적인"
-              {...register('moodTagsText')}
+              {...register('tagsText')}
             />
 
-            <Input
-              label="마일리지 적립"
-              type="number"
-              placeholder="500"
-              {...register('mileageReward', { valueAsNumber: true })}
-            />
+            <label className="flex items-center gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={isCurated}
+                onChange={(e) => setCuratedChoice(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              홈 큐레이션에 노출
+            </label>
           </div>
         </div>
 
