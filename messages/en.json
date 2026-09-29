@@ -528,7 +528,12 @@
       "otherDate": "Other dates",
       "apply": "Apply",
       "viewOtherDate": "View other dates",
-      "closed": "Closed"
+      "closed": "Closed",
+      "scheduleTitle": "Choose a date",
+      "noSchedule": "No upcoming dates",
+      "selectSession": "Choose a date",
+      "remainingSeats": "{count} spots left",
+      "applyDeadline": "Apply by {date}"
     },
     "apply": {
       "modal": {

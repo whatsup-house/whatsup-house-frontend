@@ -528,7 +528,12 @@
       "otherDate": "다른 날짜",
       "apply": "신청하기",
       "viewOtherDate": "다른 날짜 보기",
-      "closed": "운영 종료"
+      "closed": "운영 종료",
+      "scheduleTitle": "일정 선택",
+      "noSchedule": "예정된 일정 없음",
+      "selectSession": "일정을 선택해주세요",
+      "remainingSeats": "잔여 {count}석",
+      "applyDeadline": "{date}까지 신청"
     },
     "apply": {
       "modal": {

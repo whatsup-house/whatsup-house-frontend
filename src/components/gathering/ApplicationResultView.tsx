@@ -14,12 +14,14 @@ import {
 import { Button, Card } from '@/components/ui'
 import { formatLocalizedFullDate, formatTime } from '@/lib/utils/date'
 import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
-import type { ApplicationStatus, GatheringDetail } from '@/lib/api/types'
+import type { ApplicationStatus, GatheringDetail, GatheringSession } from '@/lib/api/types'
 
 type Mode = 'completed' | 'confirmed'
 
 interface ApplicationResultViewProps {
   gathering: GatheringDetail
+  // 신청 회차. 우연한 식탁 매칭 전처럼 배정 회차가 없으면 undefined
+  session?: GatheringSession
   mode: Mode
   bookingNumber?: string | null
   applicationId?: string | null
@@ -30,6 +32,7 @@ interface ApplicationResultViewProps {
 
 export default function ApplicationResultView({
   gathering,
+  session,
   mode,
   bookingNumber,
   applicationId,
@@ -41,10 +44,9 @@ export default function ApplicationResultView({
   const locale = useLocale()
   const router = useRouter()
 
-  const formattedDate = formatLocalizedFullDate(gathering.eventDate, locale)
-  const formattedTime = formatTime(gathering.startTime)
+  const price = session?.price ?? gathering.basePrice ?? 0
   const isRandomTable = gathering.gatheringType === 'RANDOM_TABLE'
-  const isFreeGathering = (gathering.price ?? 0) === 0
+  const isFreeGathering = price === 0
   const normalizedApplicationStatus = applicationStatus as ApplicationStatus | null
   const isRandomTablePaymentPending = normalizedApplicationStatus === 'PAYMENT_PENDING'
   const randomTableConfirmedText = ticketRemainingCount != null
@@ -79,23 +81,27 @@ export default function ApplicationResultView({
           <h2 className="text-base font-bold text-foreground mb-4">{gathering.title}</h2>
 
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <Calendar size={16} className="text-tag-text shrink-0" />
-              <div>
-                <p className="text-xs text-tag-text">{t('dateTime')}</p>
-                <p className="text-sm font-medium text-foreground">
-                  {formattedDate} {formattedTime}
-                </p>
-              </div>
-            </div>
+            {session && (
+              <>
+                <div className="flex items-center gap-3">
+                  <Calendar size={16} className="text-tag-text shrink-0" />
+                  <div>
+                    <p className="text-xs text-tag-text">{t('dateTime')}</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {formatLocalizedFullDate(session.eventDate, locale)} {formatTime(session.startTime)}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-3">
-              <MapPin size={16} className="text-tag-text shrink-0" />
-              <div>
-                <p className="text-xs text-tag-text">{t('location')}</p>
-                <p className="text-sm font-medium text-foreground">{gathering.location?.name}</p>
-              </div>
-            </div>
+                <div className="flex items-center gap-3">
+                  <MapPin size={16} className="text-tag-text shrink-0" />
+                  <div>
+                    <p className="text-xs text-tag-text">{t('location')}</p>
+                    <p className="text-sm font-medium text-foreground">{session.location?.name}</p>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="flex items-center gap-3">
               <CreditCard size={16} className="text-tag-text shrink-0" />
@@ -110,7 +116,7 @@ export default function ApplicationResultView({
                         : isRandomTablePaymentPending ? '이용권 구매 후 참가 확정' : '심사 완료 후 이용권 구매'
                     : isFreeGathering
                       ? '무료'
-                      : t('priceValue', { price: (gathering.price ?? 0).toLocaleString(locale) })}
+                      : t('priceValue', { price: price.toLocaleString(locale) })}
                 </p>
               </div>
             </div>
@@ -137,7 +143,7 @@ export default function ApplicationResultView({
           ) : paymentConfirmed ? (
             <PaymentConfirmedCard />
           ) : (
-            <PaymentAccountCard price={gathering.price ?? 0} />
+            <PaymentAccountCard price={price} />
           )
         )}
 

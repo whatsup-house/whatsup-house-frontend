@@ -3,31 +3,31 @@ import { MapPin, Clock, CalendarDays } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import Badge from '@/components/ui/Badge'
 import AppImage from '@/components/ui/AppImage'
-import type { GatheringListItem } from '@/lib/api/types'
-import { formatLocalizedShortDate } from '@/lib/utils/date'
-import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
+import type { GatheringListItem, GatheringSession } from '@/lib/api/types'
+import { formatLocalizedShortDate, formatTime } from '@/lib/utils/date'
+import { toBadgeStatus } from '@/lib/utils/gatheringStatus'
 
+// 날짜별 목록의 한 줄: 종류 정보 + 그 날의 회차 (KAN-339)
 interface GatheringCardProps {
   gathering: GatheringListItem
+  session: GatheringSession
 }
 
-export default function GatheringCard({ gathering }: GatheringCardProps) {
+export default function GatheringCard({ gathering, session }: GatheringCardProps) {
   const t = useTranslations('gathering.card')
   const locale = useLocale()
-  const {
-    id, title, eventDate, startTime, price,
-    maxAttendees, thumbnailUrl,
-    status, location, tags,
-  } = gathering
+  const { id, title, thumbnailUrl, tags, basePrice } = gathering
+  const { eventDate, startTime, maxAttendees, location } = session
+  const price = session.price ?? basePrice ?? 0
 
-  // 과거 모집중 게더링은 진행 완료로 보정해 표시 (KAN-164)
-  const effectiveStatus = getEffectiveStatus(status, eventDate)
+  // 회차 상태는 BE가 보정(지난 모집중 → DONE)해서 내려준다
+  const effectiveStatus = toBadgeStatus(session.status)
 
   const hasChips = (tags?.length ?? 0) > 0
   const thumbnailPosition = title === '우연한 식탁' ? 'center 32%' : undefined
 
   return (
-    <Link href={`/gatherings/${id}`}>
+    <Link href={`/gatherings/${id}?session=${session.id}`}>
       <div className="rounded-card bg-card shadow-sm overflow-hidden">
         {/* 썸네일 */}
         <div className="relative w-full aspect-video bg-tag-bg">
@@ -73,7 +73,7 @@ export default function GatheringCard({ gathering }: GatheringCardProps) {
             </div>
             <div className="flex items-center gap-1.5">
               <Clock size={13} />
-              <span>{startTime.slice(0, 5)}</span>
+              <span>{formatTime(startTime)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin size={13} />

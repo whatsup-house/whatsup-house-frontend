@@ -27,6 +27,8 @@ type FieldValue = string | number | string[]
 
 interface DynamicApplicationFormProps {
   gathering: GatheringDetail
+  // 신청할 회차 (일반 모임은 1개) (KAN-339)
+  sessionId: string
   forceGuest?: boolean
 }
 
@@ -70,7 +72,7 @@ function getAnswerByQuestionKey(
   return typeof value === 'string' ? value : ''
 }
 
-export default function DynamicApplicationForm({ gathering, forceGuest = false }: DynamicApplicationFormProps) {
+export default function DynamicApplicationForm({ gathering, sessionId, forceGuest = false }: DynamicApplicationFormProps) {
   const t = useTranslations('gathering.apply.form')
   const tCommon = useTranslations('common')
   const router = useRouter()
@@ -153,9 +155,13 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
       payload.push({ questionId: q.questionId, value: q.type === 'NUMBER' ? Number(v) : v })
     }
 
+    // 결과 페이지가 신청한 회차의 날짜·장소를 보여주도록 회차 ID를 넘긴다.
+    const resultBase = `/gatherings/${gathering.id}/apply`
+    const sessionQuery = `session=${encodeURIComponent(sessionId)}`
+
     try {
       if (isGuestMode) {
-        const result = await guestMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
+        const result = await guestMutation.mutateAsync({ sessionId, data: { answers: payload } })
         const guestPhone = normalizeGuestPhone(getAnswerByQuestionKey(questions, answers, 'phone'))
         const guestEmail = normalizeGuestEmail(getAnswerByQuestionKey(questions, answers, 'email'))
         if (guestPhone && guestEmail) {
@@ -166,21 +172,25 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
           return
         }
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'CONFIRMED') {
-          router.push(`/gatherings/${gathering.id}/apply/confirmed?bookingNumber=${encodeURIComponent(result.bookingNumber)}`)
+          router.push(`${resultBase}/confirmed?${sessionQuery}&bookingNumber=${encodeURIComponent(result.bookingNumber)}`)
           return
         }
-        router.push(`/gatherings/${gathering.id}/apply/complete?bookingNumber=${result.bookingNumber}&status=${result.status}`)
+        router.push(`${resultBase}/complete?${sessionQuery}&bookingNumber=${result.bookingNumber}&status=${result.status}`)
       } else {
-        const result = await memberMutation.mutateAsync({ gatheringId: gathering.id, data: { answers: payload } })
+        const result = await memberMutation.mutateAsync({
+          gatheringId: gathering.id,
+          candidateSessionIds: [sessionId],
+          answers: payload,
+        })
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'PAYMENT_PENDING') {
-          router.push(`/gatherings/${gathering.id}/apply/complete?applicationId=${encodeURIComponent(result.id)}&status=${result.status}`)
+          router.push(`${resultBase}/complete?${sessionQuery}&applicationId=${encodeURIComponent(result.id)}&status=${result.status}`)
           return
         }
         if (gathering.gatheringType === 'RANDOM_TABLE' && result.status === 'CONFIRMED') {
-          router.push(`/gatherings/${gathering.id}/apply/confirmed?applicationId=${encodeURIComponent(result.id)}`)
+          router.push(`${resultBase}/confirmed?${sessionQuery}&applicationId=${encodeURIComponent(result.id)}`)
           return
         }
-        router.push(`/gatherings/${gathering.id}/apply/complete?applicationId=${encodeURIComponent(result.id)}&status=${result.status}`)
+        router.push(`${resultBase}/complete?${sessionQuery}&applicationId=${encodeURIComponent(result.id)}&status=${result.status}`)
       }
     } catch (err) {
       setSubmitError(resolveApiErrorMessage(err, tCommon))
@@ -252,7 +262,7 @@ export default function DynamicApplicationForm({ gathering, forceGuest = false }
         <div className="flex items-center gap-2 px-4 py-3 bg-primary-light rounded-input">
           <CheckCircle size={18} className="text-primary shrink-0" />
           <p className="text-sm text-primary font-medium">
-            {t('memberMileageNotice', { mileage: gathering.mileageReward || 500 })}
+            {t('memberMileageNotice', { mileage: 500 })}
           </p>
         </div>
       )}

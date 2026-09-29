@@ -1,25 +1,21 @@
 import apiClient from './client'
-import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationSubmitResponse, ApplicationDetail } from './types'
+import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail } from './types'
 
-// 회원 동적 신청 (EAV 답변 배열) — JWT 필요
+// 회원 동적 신청 — 종류 ID + 희망 회차 ID (KAN-338). JWT 필요
 export const submitDynamicApplication = async (
-  gatheringId: string,
-  data: DynamicApplicationRequest,
+  data: ApplicationCreateRequest,
 ): Promise<ApplicationSubmitResponse> => {
-  const response = await apiClient.post<ApiResponse<ApplicationSubmitResponse>>(
-    `/api/gatherings/${gatheringId}/applications`,
-    data,
-  )
+  const response = await apiClient.post<ApiResponse<ApplicationSubmitResponse>>('/api/applications', data)
   return response.data.data
 }
 
-// 비회원 동적 신청 (EAV 답변 배열)
+// 비회원 동적 신청 (EAV 답변 배열) — 경로 ID는 회차 ID (BE 비회원 신청은 일반 모임 회차만)
 export const submitDynamicGuestApplication = async (
-  gatheringId: string,
+  sessionId: string,
   data: DynamicApplicationRequest,
 ): Promise<ApplicationSubmitResponse> => {
   const response = await apiClient.post<ApiResponse<ApplicationSubmitResponse>>(
-    `/api/gatherings/${gatheringId}/applications/guest`,
+    `/api/gatherings/${sessionId}/applications/guest`,
     data,
   )
   return response.data.data
