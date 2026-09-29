@@ -28,7 +28,10 @@ export default function ApplicationResultRoute({
   const initialStatus = searchParams.get('status')
   const token = searchParams.get('token')
   const guestSession = readGuestLookupSession()
+  // 경로 ID는 종류 ID 또는 옛 회차 ID. 종류 상세의 회차 중 신청 회차를 고른다. (KAN-339)
   const { data: gathering, isLoading: isGatheringLoading } = useGatheringDetail(gatheringId)
+  const sessionId = searchParams.get('session') ?? gatheringId
+  const session = gathering?.sessions.find((item) => item.id === sessionId)
 
   const memberApplication = useQuery({
     queryKey: ['application', applicationId],
@@ -70,6 +73,7 @@ export default function ApplicationResultRoute({
   return (
     <ApplicationResultView
       gathering={gathering}
+      session={session}
       mode={mode}
       bookingNumber={bookingNumber}
       applicationId={applicationId}

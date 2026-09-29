@@ -1,9 +1,9 @@
 'use client'
 
-import { use } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { use, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { useGatheringDetail } from '@/lib/hooks/useGatherings'
+import { useGatheringSession } from '@/lib/hooks/useGatherings'
 import { LoadingSpinner, ApiErrorMessage } from '@/components/ui'
 import DynamicApplicationForm from '@/components/gathering/DynamicApplicationForm'
 import AppImage from '@/components/ui/AppImage'
@@ -17,12 +17,20 @@ export default function ApplyPage({
   const t = useTranslations('gathering.apply.form')
   const locale = useLocale()
   const { id } = use(params)
+  const router = useRouter()
   const searchParams = useSearchParams()
   const forceGuest = searchParams.get('type') === 'guest'
+  // 신청할 회차 (KAN-339). 회차 없이 들어오면 종류 페이지에서 고르게 한다.
+  const sessionId = searchParams.get('session') ?? ''
 
-  const { data: gathering, isLoading, isError, refetch } = useGatheringDetail(id)
+  const { data: gathering, isLoading, isError, refetch } = useGatheringSession(sessionId)
+  const session = gathering?.sessions[0]
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!sessionId) router.replace(`/gatherings/${id}`)
+  }, [sessionId, id, router])
+
+  if (!sessionId || isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-background">
         <LoadingSpinner size="lg" />
@@ -30,7 +38,7 @@ export default function ApplyPage({
     )
   }
 
-  if (isError || !gathering) {
+  if (isError || !gathering || !session) {
     return (
       <div className="min-h-screen bg-background px-4 pt-20">
         <ApiErrorMessage
@@ -41,8 +49,8 @@ export default function ApplyPage({
     )
   }
 
-  const formattedDate = formatLocalizedNumericDate(gathering.eventDate, locale)
-  const formattedTime = formatTime(gathering.startTime)
+  const formattedDate = formatLocalizedNumericDate(session.eventDate, locale)
+  const formattedTime = formatTime(session.startTime)
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,7 +76,7 @@ export default function ApplyPage({
           </div>
         </div>
 
-        <DynamicApplicationForm gathering={gathering} forceGuest={forceGuest} />
+        <DynamicApplicationForm gathering={gathering} sessionId={session.id} forceGuest={forceGuest} />
       </div>
     </div>
   )

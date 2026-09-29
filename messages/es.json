@@ -528,7 +528,12 @@
       "otherDate": "Otra fecha",
       "apply": "Aplicar",
       "viewOtherDate": "Ver otras fechas",
-      "closed": "Finalizado"
+      "closed": "Finalizado",
+      "scheduleTitle": "Elige una fecha",
+      "noSchedule": "No hay fechas programadas",
+      "selectSession": "Elige una fecha",
+      "remainingSeats": "Quedan {count} plazas",
+      "applyDeadline": "Inscríbete antes del {date}"
     },
     "apply": {
       "modal": {

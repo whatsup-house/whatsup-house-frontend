@@ -528,7 +528,12 @@
       "otherDate": "其他日期",
       "apply": "申请",
       "viewOtherDate": "查看其他日期",
-      "closed": "运营结束"
+      "closed": "运营结束",
+      "scheduleTitle": "选择日程",
+      "noSchedule": "暂无预定日程",
+      "selectSession": "请选择日程",
+      "remainingSeats": "剩余 {count} 个名额",
+      "applyDeadline": "{date} 前可申请"
     },
     "apply": {
       "modal": {

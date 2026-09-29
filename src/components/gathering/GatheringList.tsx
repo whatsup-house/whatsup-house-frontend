@@ -5,11 +5,11 @@ import GatheringCard from './GatheringCard'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ApiErrorMessage from '@/components/ui/ApiErrorMessage'
 import EmptyState from '@/components/ui/EmptyState'
-import type { GatheringListItem } from '@/lib/api/types'
+import type { GatheringSessionEntry } from '@/lib/api/types'
 
 interface GatheringListProps {
   date: string
-  gatherings: GatheringListItem[] | undefined
+  gatherings: GatheringSessionEntry[] | undefined
   isLoading: boolean
   isError: boolean
   onRetry: () => void
@@ -46,8 +46,8 @@ export default function GatheringList({ date, gatherings, isLoading, isError, on
 
       {!isLoading && !isError && gatherings && gatherings.length > 0 && (
         <div className="flex flex-col gap-4">
-          {gatherings.map((gathering) => (
-            <GatheringCard key={gathering.id} gathering={gathering} />
+          {gatherings.map(({ gathering, session }) => (
+            <GatheringCard key={session.id} gathering={gathering} session={session} />
           ))}
         </div>
       )}

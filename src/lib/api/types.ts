@@ -11,38 +11,74 @@ export type GatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 // 게더링 종류 (REGULAR=일반, RANDOM_TABLE=우연한 식탁)
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
 
-// 게더링 타입
-export interface GatheringListItem {
+// 회차 상태 (KAN-338). 날짜가 지난 모집중 회차는 백엔드가 DONE으로 내려준다.
+export type GatheringSessionStatus = 'OPEN' | 'CLOSED' | 'DONE' | 'CANCELLED'
+
+// 모임 회차 — BE GatheringSessionResponse (KAN-338)
+export interface GatheringSession {
   id: string
-  title: string
-  description: string
-  eventDate: string      // YYYY-MM-DD
-  startTime: string      // HH:mm:ss
-  endTime: string
-  price: number
-  maxAttendees: number
-  status: GatheringStatus
-  thumbnailUrl: string | null
-  createdAt?: string     // 등록일 (ISO datetime) — 목록 정렬용 (KAN-295)
+  eventDate: string              // YYYY-MM-DD
+  startTime: string | null       // HH:mm:ss
+  endTime: string | null
   location: {
     id: string
     name: string
-    address?: string | null
-    naverMapUrl?: string | null
-    kakaoMapUrl?: string | null
+    address: string | null
+    naverMapUrl: string | null
+    kakaoMapUrl: string | null
   } | null
-  // 태그 — BE(KAN-304)에서 제공. 미제공 시 칩 미표시 (KAN-305)
-  tags?: string[] | null
+  maxAttendees: number
+  price: number | null           // 회차 오버라이드 없으면 종류 기본 가격
+  applyDeadlineAt: string | null // ISO datetime, 없으면 마감 없음
+  status: GatheringSessionStatus
+  confirmedCount: number         // 정원을 차지한 인원(승인 + 출석)
 }
 
-export interface GatheringDetail extends GatheringListItem {
-  gatheringType?: GatheringType
-  howToRun?: string[] | null
-  locationAddress?: string
-  photoUrls?: string[] | null
-  mileageReward?: number
-  averageRating?: number | null
-  reviewCount?: number
+// 모임 목록 항목 = 종류 + 조건에 맞는 회차 — BE GatheringResponse (KAN-338)
+export interface GatheringListItem {
+  id: string
+  title: string
+  description: string | null
+  tags: string[] | null
+  thumbnailUrl: string | null
+  gatheringType: GatheringType | null
+  basePrice: number | null
+  createdAt: string              // 종류 등록일 (ISO datetime) — 목록 정렬용 (KAN-295)
+  sessions: GatheringSession[]   // 날짜·시작 시간 순
+}
+
+// 모임 종류 상세 + 회차 목록 — BE GatheringDetailResponse (KAN-338)
+export interface GatheringDetail {
+  id: string
+  title: string
+  description: string | null
+  howToRun: string[] | null
+  tags: string[] | null
+  thumbnailUrl: string | null
+  gatheringType: GatheringType | null
+  basePrice: number | null
+  sessions: GatheringSession[]   // 날짜·시작 시간 순
+}
+
+// 목록 파생: 날짜별 목록의 한 줄 = 종류 + 그 날의 회차
+export interface GatheringSessionEntry {
+  gathering: GatheringListItem
+  session: GatheringSession
+}
+
+// 목록 파생: 모아보기 카드 (종류 1개 = 카드 1개)
+export type GatheringTypeFilter = 'all' | 'open' | 'completed'
+export type GatheringTypeSort = 'popular' | 'latest' | 'oldest'
+
+export interface GatheringTypeCard {
+  id: string
+  title: string
+  thumbnailUrl: string | null
+  tags: string[] | null
+  totalCount: number
+  representativeStatus: GatheringStatus
+  // 카드에 표시할 날짜. 진행완료 대표는 null. (KAN-295)
+  displayDate: string | null
 }
 
 // 우연한 식탁 이용권 (KAN-260)
@@ -104,10 +140,10 @@ export interface GuestTicketPurchaseRequest extends TicketPurchaseRequest {
   bookingNumber: string
 }
 
-// 달력 dot 표시용 (날짜별 대표 게더링 상태)
+// 달력 dot 표시용 (날짜별 대표 회차 상태)
 export interface CalendarDot {
   date: string           // YYYY-MM-DD
-  status: GatheringStatus
+  status: GatheringSessionStatus
 }
 
 // 인증 타입
@@ -224,7 +260,7 @@ export interface ApplicationListItem {
   gathering: {
     id: string
     title: string
-    eventDate: string
+    eventDate: string | null   // 회차 배정 전(우연한 식탁 매칭 전)이면 null (KAN-338)
     thumbnailUrl: string | null
     gatheringType?: GatheringType
   }
@@ -240,7 +276,7 @@ export interface GuestApplicationCheckResponse {
   gathering: {
     id: string
     title: string
-    eventDate: string
+    eventDate: string | null
     thumbnailUrl: string | null
   }
   createdAt: string
@@ -257,8 +293,8 @@ export interface ApplicationTokenCheckResponse {
   gathering: {
     id: string
     title: string
-    eventDate: string
-    startTime?: string
+    eventDate: string | null
+    startTime?: string | null
     locationName?: string | null
     thumbnailUrl: string | null
   }
@@ -603,6 +639,12 @@ export interface DynamicApplicationRequest {
   answers: AnswerItem[]
 }
 
+// 회원 신청 POST /api/applications — 종류 + 희망 회차(일반 모임은 1개) (KAN-338)
+export interface ApplicationCreateRequest extends DynamicApplicationRequest {
+  gatheringId: string
+  candidateSessionIds: string[]
+}
+
 // 신청 생성 응답
 export interface ApplicationSubmitResponse {
   id: string
@@ -631,7 +673,7 @@ export interface ApplicationDetail {
   gathering: {
     id: string
     title: string
-    eventDate: string
+    eventDate: string | null   // 회차 배정 전이면 null (KAN-338)
     startTime: string | null
   }
   createdAt: string

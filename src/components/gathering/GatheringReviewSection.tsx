@@ -17,6 +17,8 @@ type ReviewSort = 'LATEST' | 'LIKES'
 
 interface GatheringReviewSectionProps {
   gatheringId: string
+  // 이 종류의 회차 ID들 — 참석 신청(gathering.id=회차 ID)을 찾는 데 쓴다. (KAN-339)
+  sessionIds: string[]
   mileageReward?: number
 }
 
@@ -69,7 +71,7 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
   )
 }
 
-export default function GatheringReviewSection({ gatheringId, mileageReward }: GatheringReviewSectionProps) {
+export default function GatheringReviewSection({ gatheringId, sessionIds, mileageReward }: GatheringReviewSectionProps) {
   const t = useTranslations('review')
   const { isLoggedIn, userId } = useAuthStore()
   const [sort, setSort] = useState<ReviewSort>('LIKES')
@@ -78,7 +80,7 @@ export default function GatheringReviewSection({ gatheringId, mileageReward }: G
   const reviewScrollRef = useRef<HTMLDivElement>(null)
 
   const { data: attendedApps } = useMyApplicationsMe('ATTENDED', isLoggedIn)
-  const attendedApplication = attendedApps?.find((app) => app.gathering.id === gatheringId)
+  const attendedApplication = attendedApps?.find((app) => app.gathering.id === gatheringId || sessionIds.includes(app.gathering.id))
   const hasAttended = !!attendedApplication
 
   const { data, isLoading } = useGatheringReviews(gatheringId, sort, page)

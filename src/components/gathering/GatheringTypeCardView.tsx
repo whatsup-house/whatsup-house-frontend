@@ -3,20 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, ChevronDown, Coffee, SlidersHorizontal } from 'lucide-react'
-import dayjs from 'dayjs'
 import { useLocale, useTranslations } from 'next-intl'
 import Badge from '@/components/ui/Badge'
 import AppImage from '@/components/ui/AppImage'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import ApiErrorMessage from '@/components/ui/ApiErrorMessage'
 import EmptyState from '@/components/ui/EmptyState'
-import { useGatheringsAll } from '@/lib/hooks/useGatherings'
+import { useGatheringTypeCards } from '@/lib/hooks/useGatherings'
 import { useCuratedGatherings } from '@/lib/hooks/useHome'
-import {
-  buildGatheringTypeCards,
-  type GatheringTypeFilter,
-  type GatheringTypeSort,
-} from '@/lib/utils/gatheringGroup'
+import type { GatheringTypeFilter, GatheringTypeSort } from '@/lib/api/types'
 import { formatLocalizedShortDate } from '@/lib/utils/date'
 
 const FILTERS: GatheringTypeFilter[] = ['all', 'open', 'completed']
@@ -213,15 +208,10 @@ export default function GatheringTypeCardView() {
   const filterOptions = FILTERS.map((value) => ({ value, label: t(`filter.${value}`) }))
   const sortOptions = SORTS.map((value) => ({ value, label: t(`sort.${value}`) }))
 
-  const { data, isLoading, isError, refetch } = useGatheringsAll()
   const { data: curated } = useCuratedGatherings()
+  const curatedIds = useMemo(() => curated?.map((c) => c.id) ?? [], [curated])
+  const { data: cardsByStatus = [], isLoading, isError, refetch } = useGatheringTypeCards(filter, sort, curatedIds)
 
-  const today = dayjs().format('YYYY-MM-DD')
-  const curatedTitles = useMemo(() => curated?.map((c) => c.title) ?? [], [curated])
-  const cardsByStatus = useMemo(
-    () => (data ? buildGatheringTypeCards(data, { today, filter, sort, curatedTitles }) : []),
-    [data, today, filter, sort, curatedTitles],
-  )
   const cards = useMemo(() => {
     if (selectedTags.length === 0) return cardsByStatus
     return cardsByStatus.filter((card) => card.tags?.some((tag) => selectedTags.includes(tag)))
@@ -282,9 +272,9 @@ export default function GatheringTypeCardView() {
         <div className="grid grid-cols-2 gap-3">
           {cards.map((card) => (
             <button
-              key={card.title}
+              key={card.id}
               type="button"
-              onClick={() => router.push(`/gatherings/${card.representativeId}`)}
+              onClick={() => router.push(`/gatherings/${card.id}`)}
               className="flex flex-col rounded-card bg-card shadow-sm overflow-hidden text-left"
             >
               <div className="relative w-full aspect-square bg-tag-bg">

@@ -1,33 +1,32 @@
 'use client'
 
 import { useState } from 'react'
-import { Share2, Calendar, Clock, MapPin, Users, CreditCard, AlertTriangle, Gift, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Share2, CreditCard, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Card, Badge } from '@/components/ui'
+import { Card } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
 import GatheringReviewSection from './GatheringReviewSection'
-import MapLinkButton from './MapLinkButton'
+import GatheringSessionList from './GatheringSessionList'
 import TicketPassSection from './TicketPassSection'
-import type { GatheringDetail as GatheringDetailType } from '@/lib/api/types'
-import { formatLocalizedFullDate, formatTimeRange, getDurationParts } from '@/lib/utils/date'
-import { getEffectiveStatus } from '@/lib/utils/gatheringStatus'
-import { getNaverMapUrl, getKakaoMapUrl } from '@/lib/utils/mapUrl'
+import type { GatheringDetail as GatheringDetailType, GatheringSession } from '@/lib/api/types'
 
 interface GatheringDetailProps {
   gathering: GatheringDetailType
+  // 예정된 회차 (신청 대상)
+  upcomingSessions: GatheringSession[]
+  selectedSessionId: string | null
+  price: number
+  onSelectSession: (sessionId: string) => void
 }
 
-export default function GatheringDetail({ gathering }: GatheringDetailProps) {
+export default function GatheringDetail({
+  gathering, upcomingSessions, selectedSessionId, price, onSelectSession,
+}: GatheringDetailProps) {
   const t = useTranslations('gathering.detail')
   const locale = useLocale()
-  const {
-    title, status, eventDate, startTime, endTime, location, locationAddress,
-    price, maxAttendees, thumbnailUrl,
-    description, howToRun, photoUrls, mileageReward,
-    reviewCount, gatheringType,
-  } = gathering
+  const { title, thumbnailUrl, description, howToRun, gatheringType } = gathering
 
-  const photos = photoUrls && photoUrls.length > 0 ? photoUrls : (thumbnailUrl ? [thumbnailUrl] : [])
+  const photos = thumbnailUrl ? [thumbnailUrl] : []
   const [photoIndex, setPhotoIndex] = useState(0)
   const [shareToast, setShareToast] = useState(false)
 
@@ -49,16 +48,8 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
   const handlePrevPhoto = () => setPhotoIndex((i) => (i - 1 + photos.length) % photos.length)
   const handleNextPhoto = () => setPhotoIndex((i) => (i + 1) % photos.length)
 
-  const formattedDate = formatLocalizedFullDate(eventDate, locale)
-  const timeRange = formatTimeRange(startTime, endTime)
   const isRandomTable = gatheringType === 'RANDOM_TABLE'
   const isFreeGathering = price === 0
-  const duration = getDurationParts(startTime, endTime)
-  const durationStr = duration
-    ? duration.minutes > 0
-      ? t('durationWithMinutes', { hours: duration.hours, minutes: duration.minutes })
-      : t('durationHours', { hours: duration.hours })
-    : ''
 
   return (
     <>
@@ -128,73 +119,20 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
       {/* 본문 영역 */}
       <div className="px-4 pt-5 pb-4">
         {/* 제목 */}
-        <div className="mb-3">
-          <div className="mb-2">
-            <Badge variant={getEffectiveStatus(status, eventDate)} />
-          </div>
+        <div className="mb-5">
           <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
         </div>
+
+        {/* 회차 목록 — 날짜·시간·지역·잔여 정원·마감, 신청할 회차 선택 (KAN-339) */}
+        <GatheringSessionList
+          sessions={upcomingSessions}
+          selectedSessionId={selectedSessionId}
+          onSelect={onSelectSession}
+        />
 
         {/* 정보 카드 */}
         <Card className="p-4 mb-6 border border-tag-bg/50">
           <div className="flex flex-col gap-3.5">
-            {/* 날짜 */}
-            <div className="flex items-start gap-3">
-              <Calendar size={18} className="text-tag-text mt-0.5 shrink-0" />
-              <div>
-                <p className="text-xs text-tag-text mb-0.5">{t('date')}</p>
-                <p className="text-sm font-semibold text-foreground">{formattedDate}</p>
-              </div>
-            </div>
-
-            {/* 시간 */}
-            <div className="flex items-start gap-3">
-              <Clock size={18} className="text-tag-text mt-0.5 shrink-0" />
-              <div>
-                <p className="text-xs text-tag-text mb-0.5">{t('time')}</p>
-                <p className="text-sm font-semibold text-foreground">
-                  {timeRange}{durationStr ? ` (${durationStr})` : ''}
-                </p>
-              </div>
-            </div>
-
-            {/* 장소 */}
-            <div className="flex items-start gap-3">
-              <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
-              <div className="flex-1">
-                <p className="text-xs text-tag-text mb-0.5">{t('location')}</p>
-                <p className="text-sm font-semibold text-foreground">{location?.name}</p>
-                {(location?.address ?? locationAddress) && (
-                  <p className="text-xs text-tag-text mt-0.5 break-keep">
-                    {location?.address ?? locationAddress}
-                  </p>
-                )}
-                {location && (
-                  <div className="flex flex-wrap items-center gap-2 mt-2.5">
-                    <MapLinkButton
-                      provider="naver"
-                      href={getNaverMapUrl(location, location.address ?? locationAddress)}
-                    />
-                    <MapLinkButton
-                      provider="kakao"
-                      href={getKakaoMapUrl(location, location.address ?? locationAddress)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 모집인원 */}
-            <div className="flex items-start gap-3">
-              <Users size={18} className="text-tag-text mt-0.5 shrink-0" />
-              <div className="flex-1">
-                <p className="text-xs text-tag-text mb-0.5">{t('capacityLabel')}</p>
-                <p className="text-sm font-semibold text-foreground">
-                  {t('capacity', { count: maxAttendees })}
-                </p>
-              </div>
-            </div>
-
             {/* 참가비 / 우연한 식탁 이용권 */}
             <div className="flex items-start gap-3">
               <CreditCard size={18} className="text-tag-text mt-0.5 shrink-0" />
@@ -215,17 +153,6 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
                 </p>
               </div>
             </div>
-
-            {/* 마일리지 적립 */}
-            {mileageReward != null && mileageReward > 0 && (
-              <div className="flex items-start gap-3">
-                <Gift size={18} className="text-tag-text mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-tag-text mb-0.5">{t('mileageReward')}</p>
-                  <p className="text-sm font-semibold text-primary">+{mileageReward.toLocaleString()}M</p>
-                </div>
-              </div>
-            )}
           </div>
         </Card>
 
@@ -285,11 +212,8 @@ export default function GatheringDetail({ gathering }: GatheringDetailProps) {
               <div className="w-1 h-5 bg-primary rounded-full" />
               <h2 className="text-base font-bold text-foreground">{t('reviewsTitle')}</h2>
             </div>
-            {(reviewCount ?? 0) > 0 && (
-              <span className="text-sm text-tag-text">{t('reviewCount', { count: reviewCount ?? 0 })}</span>
-            )}
           </div>
-          <GatheringReviewSection gatheringId={gathering.id} mileageReward={gathering.mileageReward} />
+          <GatheringReviewSection gatheringId={gathering.id} sessionIds={gathering.sessions.map((session) => session.id)} />
         </div>
       </div>
     </div>

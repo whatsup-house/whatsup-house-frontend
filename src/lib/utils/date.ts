@@ -14,7 +14,9 @@ function intlLocale(locale: string): string {
   return LOCALE_MAP[locale as AppLocale] ?? LOCALE_MAP.ko
 }
 
-export function formatLocalizedShortDate(date: string, locale: string): string {
+// 날짜가 없으면(회차 배정 전 신청 등) 빈 문자열
+export function formatLocalizedShortDate(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
   const d = dayjs(date)
   return new Intl.DateTimeFormat(intlLocale(locale), {
     month: 'short',
@@ -23,7 +25,8 @@ export function formatLocalizedShortDate(date: string, locale: string): string {
   }).format(d.toDate())
 }
 
-export function formatLocalizedFullDate(date: string, locale: string): string {
+export function formatLocalizedFullDate(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
   const d = dayjs(date)
   return new Intl.DateTimeFormat(intlLocale(locale), {
     year: 'numeric',
@@ -33,7 +36,8 @@ export function formatLocalizedFullDate(date: string, locale: string): string {
   }).format(d.toDate())
 }
 
-export function formatLocalizedNumericDate(date: string, locale: string): string {
+export function formatLocalizedNumericDate(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
   const d = dayjs(date)
   return new Intl.DateTimeFormat(intlLocale(locale), {
     year: 'numeric',
