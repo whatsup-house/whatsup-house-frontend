@@ -45,16 +45,11 @@ interface Preset {
   data: Partial<EditorState>
 }
 const PRESETS: Preset[] = [
-  { name: '나이', hint: '나이 ±8 + 비슷한 나이 우대', data: { label: '나이', questionKey: 'age', type: 'NUMBER', isMatchingField: true, matchingStrategy: 'SAME' } },
   { name: '성별', hint: '성별 균형 맞추기 (신청 화면엔 남성/여성으로 노출)', data: { label: '성별', questionKey: 'gender', type: 'SINGLE_CHOICE', choicesText: 'MALE\nFEMALE', isMatchingField: true, matchingStrategy: 'DIVERSE' } },
   { name: '직업', hint: '같은 직군 쏠림 방지', data: { label: '직업', questionKey: 'job_category', type: 'SINGLE_CHOICE', choicesText: '학생\n직장인\n프리랜서\n자영업', isMatchingField: true, matchingStrategy: 'DIVERSE' } },
   { name: 'MBTI', hint: '성향 다양성', data: { label: 'MBTI', questionKey: 'mbti', type: 'MBTI_INPUT', isMatchingField: true, matchingStrategy: 'DIVERSE' } },
   { name: '관심사', hint: '관심사 겹치는 사람끼리', data: { label: '관심사', questionKey: 'interests', type: 'MULTI_CHOICE', choicesText: '영화\n음악\n여행\n운동\n독서', isMatchingField: true, matchingStrategy: 'OVERLAP' } },
-  { name: '식사 예산', hint: '예산대 겹쳐야 같은 그룹 (하드 조건)', data: { label: '식사 예산', questionKey: 'budget', type: 'MULTI_CHOICE', choicesText: '1만원대\n2만원대\n3만원대', isMatchingField: false } },
-  { name: '가능 날짜', hint: '날짜 겹쳐야 같은 그룹 (하드 조건)', data: { label: '가능 날짜', questionKey: 'available_dates', type: 'MULTI_CHOICE', choicesText: '2026-08-01\n2026-08-08', isMatchingField: false } },
 ]
-
-const HARD_KEYS = ['budget', 'available_dates', 'age']
 
 // 자유 질문용 안정 식별자. (KAN-191) question key는 화면에 노출하지 않으므로 자동 생성한다.
 function autoQuestionKey(): string {
@@ -62,9 +57,8 @@ function autoQuestionKey(): string {
 }
 
 function getDefaultMatchingStrategy(questionKey: string, type: QuestionType): MatchingStrategy {
-  if (questionKey === 'age') return 'SAME'
   if (['gender', 'job_category', 'mbti'].includes(questionKey)) return 'DIVERSE'
-  if (['interests', 'available_dates', 'budget'].includes(questionKey)) return 'OVERLAP'
+  if (questionKey === 'interests') return 'OVERLAP'
   if (type === 'NUMBER') return 'SAME'
   if (type === 'MULTI_CHOICE') return 'OVERLAP'
   return 'DIVERSE'
@@ -100,6 +94,7 @@ interface FormQuestionBuilderProps {
 }
 
 // 질문 항목을 수정 API 요청 본문으로 변환한다 (순서 변경 시 displayOrder만 교체).
+// 가중치는 폼 빌더에서 다루지 않으므로 서버 값을 그대로 돌려보낸다. (KAN-343)
 function toUpsertPayload(q: FormQuestionAdminItem, displayOrder: number): FormQuestionUpsertRequest {
   return {
     questionKey: q.questionKey,
@@ -112,7 +107,7 @@ function toUpsertPayload(q: FormQuestionAdminItem, displayOrder: number): FormQu
     validation: q.validation ?? undefined,
     isMatchingField: q.isMatchingField,
     matchingStrategy: q.matchingStrategy ?? undefined,
-    matchingWeight: q.isMatchingField ? 1 : undefined,
+    matchingWeight: q.matchingWeight ?? undefined,
   }
 }
 
@@ -201,6 +196,11 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
                         <Lock size={10} /> 기본
                       </span>
                     )}
+                    {q.reservedKey && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-tag-text text-card rounded text-[11px]">
+                        <Lock size={10} /> 우연한 식탁 표준 항목
+                      </span>
+                    )}
                   </div>
                 </div>
                 <button onClick={() => setEditing(q)} className="text-[#767676] hover:text-[#1A1A1A] p-1.5" title="수정">
@@ -211,8 +211,9 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
                     if (q.systemReserved) { showToast('기본 질문(이름/연락처)은 삭제할 수 없어요.', 'error'); return }
                     if (confirm(`'${q.label}' 질문을 삭제할까요?`)) deleteQuestion.mutate(q.questionId)
                   }}
-                  className={`p-1.5 ${q.systemReserved ? 'text-[#DDD] cursor-not-allowed' : 'text-[#C8392B] hover:bg-[#FDECEA] rounded'}`}
-                  title={q.systemReserved ? '삭제 불가' : '삭제'}
+                  disabled={!!q.reservedKey}
+                  className={`p-1.5 ${q.systemReserved || q.reservedKey ? 'text-[#DDD] cursor-not-allowed' : 'text-[#C8392B] hover:bg-[#FDECEA] rounded'}`}
+                  title={q.reservedKey ? '우연한 식탁 표준 항목은 삭제할 수 없어요' : q.systemReserved ? '삭제 불가' : '삭제'}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -244,7 +245,6 @@ interface EditorState {
   choicesText: string
   isMatchingField: boolean
   matchingStrategy: MatchingStrategy | ''
-  matchingWeight: number
 }
 
 interface QuestionEditorModalProps {
@@ -258,18 +258,20 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   const addQuestion = useAddFormQuestion(gatheringId)
   const updateQuestion = useUpdateFormQuestion(gatheringId)
   const isEdit = !!initial
+  // 우연한 식탁 표준 항목은 라벨·선택지만 수정할 수 있다. (KAN-343)
+  const locked = !!initial?.reservedKey
 
   const [state, setState] = useState<EditorState>(() => ({
     label: initial?.label ?? '',
     questionKey: initial?.questionKey ?? '',
     // 단답형·장문형을 '텍스트 답변'으로 합쳤으므로 레거시 LONG_TEXT는 SHORT_TEXT로 정규화한다.
-    type: initial?.type === 'LONG_TEXT' ? 'SHORT_TEXT' : (initial?.type ?? 'SHORT_TEXT'),
+    // 표준 항목은 타입 변경이 막혀 있으므로 원래 타입을 유지한다.
+    type: initial?.type === 'LONG_TEXT' && !locked ? 'SHORT_TEXT' : (initial?.type ?? 'SHORT_TEXT'),
     placeholder: initial?.placeholder ?? '',
     required: initial?.required ?? true,
     choicesText: (initial?.options?.choices ?? []).join('\n'),
     isMatchingField: initial?.isMatchingField ?? false,
     matchingStrategy: initial?.matchingStrategy ?? '',
-    matchingWeight: initial?.matchingWeight ?? 1,
   }))
   const [error, setError] = useState<string | null>(null)
 
@@ -303,12 +305,11 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   }
 
   const applyPreset = (preset: Preset) => {
-    setState((p) => ({ ...p, placeholder: '', required: true, matchingWeight: 1, matchingStrategy: '', choicesText: '', ...preset.data }))
+    setState((p) => ({ ...p, placeholder: '', required: true, matchingStrategy: '', choicesText: '', ...preset.data }))
     setError(null)
   }
 
   const isChoice = CHOICE_TYPES.includes(state.type)
-  const isHardKey = HARD_KEYS.includes(state.questionKey)
   // 텍스트 답변은 매칭에 사용할 수 없다. (KAN-226)
   const isTextType = state.type === 'SHORT_TEXT' || state.type === 'LONG_TEXT'
   const allowedMatchingStrategies = getAllowedMatchingStrategies(state.type)
@@ -337,7 +338,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
       options: isChoice ? { choices } : undefined,
       isMatchingField: state.isMatchingField,
       matchingStrategy: state.isMatchingField ? (state.matchingStrategy as MatchingStrategy) : undefined,
-      matchingWeight: state.isMatchingField ? 1 : undefined,
+      matchingWeight: initial?.matchingWeight ?? undefined,
     }
 
     const onDone = { onSuccess: onClose }
@@ -359,6 +360,12 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
         </div>
 
         <div className="overflow-y-auto px-5 py-4 flex flex-col gap-4">
+          {locked && (
+            <p className="flex items-start gap-1.5 rounded-input bg-tag-bg px-3 py-2 text-[12px] text-tag-text">
+              <Lock size={12} className="mt-0.5 shrink-0" />
+              우연한 식탁 표준 항목이에요. 라벨과 선택지만 수정할 수 있어요.
+            </p>
+          )}
           {/* 프리셋 (새 질문일 때만) */}
           {!isEdit && (
             <div>
@@ -386,8 +393,8 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
 
           {/* 유형 (question key는 화면에 노출하지 않고 프리셋/자동으로 지정됨 — KAN-191) */}
           <Field label="유형 *">
-            <select value={state.type} onChange={(e) => handleTypeChange(e.target.value as QuestionType)} className={inputCls}>
-              {TYPE_OPTIONS.map((t) => (
+            <select value={state.type} disabled={locked} onChange={(e) => handleTypeChange(e.target.value as QuestionType)} className={inputCls}>
+              {(locked ? [state.type] : TYPE_OPTIONS).map((t) => (
                 <option key={t} value={t}>{TYPE_LABEL[t]}</option>
               ))}
             </select>
@@ -403,16 +410,16 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
           {/* 안내문구 */}
           {!isChoice && state.type !== 'MBTI_INPUT' && (
             <Field label="입력 안내문구 (선택)">
-              <input value={state.placeholder} onChange={(e) => set('placeholder', e.target.value)} placeholder="예: 숫자만 입력" className={inputCls} />
+              <input value={state.placeholder} disabled={locked} onChange={(e) => set('placeholder', e.target.value)} placeholder="예: 숫자만 입력" className={inputCls} />
             </Field>
           )}
 
           {/* 필수 — 기본 질문(이름/연락처/이메일)은 신청자 식별에 필요해 항상 필수다. (KAN-210) */}
-          <label className={`flex items-center gap-2 ${initial?.systemReserved ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+          <label className={`flex items-center gap-2 ${initial?.systemReserved || locked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
             <input
               type="checkbox"
               checked={initial?.systemReserved ? true : state.required}
-              disabled={!!initial?.systemReserved}
+              disabled={!!initial?.systemReserved || locked}
               onChange={(e) => set('required', e.target.checked)}
               className="w-4 h-4 accent-[#C8392B]"
             />
@@ -421,40 +428,35 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
             </span>
           </label>
 
-          {/* 매칭 — 텍스트 답변은 매칭 계산이 불가능해 비활성화한다. (KAN-226) */}
-          <div className="rounded-[12px] border border-[#F0EBE8] p-3 bg-[#FAF8F6] flex flex-col gap-3">
-            <label className={`flex items-center gap-2 ${isTextType ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
-              <input
-                type="checkbox"
-                checked={state.isMatchingField}
-                disabled={isTextType}
-                onChange={(e) => handleMatchingFieldChange(e.target.checked)}
-                className="w-4 h-4 accent-[#C8392B]"
-              />
-              <span className="text-[14px] font-medium text-[#1A1A1A]">
-                매칭에 사용{isTextType ? ' (텍스트 답변은 불가)' : ''}
-              </span>
-            </label>
-            {isHardKey && (
-              <p className="text-[12px] text-[#767676]">
-                {state.questionKey === 'age'
-                  ? '나이는 ±8살 이내만 같은 그룹이 돼요(하드 조건). 비슷한 나이 우대까지 하려면 매칭 사용을 켜고 ‘비슷하게’를 고르세요.'
-                  : '이 항목은 겹치는 사람끼리만 같은 그룹이 돼요(하드 조건). 매칭 사용을 꺼도 자동 적용됩니다.'}
-              </p>
-            )}
-            {state.isMatchingField && (
-              <div>
-                <Field label="매칭 방식">
-                  <select value={state.matchingStrategy} onChange={(e) => set('matchingStrategy', e.target.value as MatchingStrategy)} className={inputCls}>
-                    <option value="">선택</option>
-                    {allowedMatchingStrategies.map((strategy) => (
-                      <option key={strategy} value={strategy}>{STRATEGY_LABEL[strategy]}</option>
-                    ))}
-                  </select>
-                </Field>
-              </div>
-            )}
-          </div>
+          {/* 매칭 — 텍스트 답변은 매칭 계산이 불가능해 비활성화한다. (KAN-226) 표준 항목은 매칭 설정을 바꾸지 않는다. (KAN-343) */}
+          {!locked && (
+            <div className="rounded-[12px] border border-[#F0EBE8] p-3 bg-[#FAF8F6] flex flex-col gap-3">
+              <label className={`flex items-center gap-2 ${isTextType ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                <input
+                  type="checkbox"
+                  checked={state.isMatchingField}
+                  disabled={isTextType}
+                  onChange={(e) => handleMatchingFieldChange(e.target.checked)}
+                  className="w-4 h-4 accent-[#C8392B]"
+                />
+                <span className="text-[14px] font-medium text-[#1A1A1A]">
+                  매칭에 사용{isTextType ? ' (텍스트 답변은 불가)' : ''}
+                </span>
+              </label>
+              {state.isMatchingField && (
+                <div>
+                  <Field label="매칭 방식">
+                    <select value={state.matchingStrategy} onChange={(e) => set('matchingStrategy', e.target.value as MatchingStrategy)} className={inputCls}>
+                      <option value="">선택</option>
+                      {allowedMatchingStrategies.map((strategy) => (
+                        <option key={strategy} value={strategy}>{STRATEGY_LABEL[strategy]}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+              )}
+            </div>
+          )}
 
           {error && <p className="text-[13px] text-[#C8392B]">{error}</p>}
         </div>
@@ -470,7 +472,7 @@ function QuestionEditorModal({ gatheringId, initial, nextOrder, onClose }: Quest
   )
 }
 
-const inputCls = 'w-full px-3 py-2 rounded-input border border-[#F0EBE8] bg-white text-[14px] focus:outline-none focus:ring-1 focus:ring-primary'
+const inputCls = 'w-full px-3 py-2 rounded-input border border-[#F0EBE8] bg-white text-[14px] focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed'
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (

@@ -368,7 +368,8 @@
     "tabs": {
       "home": "Home",
       "gatherings": "Gatherings",
-      "my": "My"
+      "my": "My",
+      "chat": "Chat"
     },
     "titles": {
       "home": "Home",
@@ -383,7 +384,8 @@
       "onboarding": "Onboarding",
       "applyComplete": "Application complete",
       "apply": "Apply",
-      "story": "About"
+      "story": "About",
+      "chat": "Chat"
     }
   },
   "desktopBrand": {
@@ -527,7 +529,12 @@
       "otherDate": "Other dates",
       "apply": "Apply",
       "viewOtherDate": "View other dates",
-      "closed": "Closed"
+      "closed": "Closed",
+      "scheduleTitle": "Choose a date",
+      "noSchedule": "No upcoming dates",
+      "selectSession": "Choose a date",
+      "remainingSeats": "{count} spots left",
+      "applyDeadline": "Apply by {date}"
     },
     "apply": {
       "modal": {
@@ -592,6 +599,57 @@
       "depositAccount": "Deposit account (pay after request)",
       "accountHolder": "Account holder {holder}",
       "loginRequired": "Log in to purchase a pass."
+    },
+    "diningApply": {
+      "steps": {
+        "sessions": "Pick your dates",
+        "form": "Fill in the form",
+        "ticket": "Check your pass"
+      },
+      "stepProgress": "{step}/3",
+      "sessionsGuide": "Pick every date that works for you. We'll prioritize the dates you picked first.",
+      "prev": "Back",
+      "next": "Next",
+      "submit": "Apply",
+      "requiredMissing": "Please fill in all required fields.",
+      "selectedSessionsTitle": "Your dates (in priority order)",
+      "noTicketNotice": "You don't have a pass yet. If you apply now, your application will await payment and be confirmed once you have a pass.",
+      "submitted": "Your application has been received.",
+      "submitFailed": "Couldn't submit your application. Please try again shortly.",
+      "paymentPendingTitle": "Awaiting payment",
+      "paymentPendingDescription": "Your application was received, but you don't have enough passes. Buy a pass to confirm it and wait for matching.",
+      "buyTicket": "Buy a pass",
+      "viewMyApplications": "View my applications"
+    },
+    "diningTable": {
+      "label": "Random Table",
+      "loadFailed": "Couldn't load the table details.",
+      "notMemberTitle": "You're not a member of this table",
+      "notMemberDescription": "Only members of a confirmed table can view it.\nCheck your application status on My Page.",
+      "attendance": {
+        "SCHEDULED": "Attending",
+        "ATTENDED": "Attended",
+        "CANCELED_EARLY": "Cancelled early",
+        "CANCELED_LATE": "Late cancellation",
+        "NO_SHOW": "No-show"
+      },
+      "venueTitle": "Restaurant",
+      "venuePending": "Assigning a restaurant",
+      "priceRange": "Price range {price}",
+      "membersTitle": "{count} members at your table",
+      "topicsTitle": "Conversation topics",
+      "topicsGuide": "Conversation topics and icebreakers are posted in the group chat.",
+      "enterChat": "Open group chat",
+      "chatPreparing": "Group chat coming soon",
+      "cancelPolicyTitle": "Cancellation policy",
+      "checkInTitle": "Check-in",
+      "checkIn": "Check in",
+      "checkedIn": "Checked in",
+      "checkInWindow": "You can check in between {from} and {to}.",
+      "checkInUnavailable": "Check-in isn't available right now.",
+      "checkInWindowClosed": "It's not check-in time.",
+      "checkInSuccess": "You're checked in. Enjoy your meal!",
+      "checkInFailed": "Couldn't check in. Please try again shortly."
     }
   },
   "review": {
@@ -686,6 +744,72 @@
         "PENDING": "Deposit pending",
         "CONFIRMED": "Deposit complete",
         "FREE": "Free"
+      },
+      "dining": {
+        "phase": {
+          "payment": "Payment",
+          "waiting": "Waiting",
+          "matching": "Matching",
+          "reallocating": "Reassigning",
+          "confirmed": "Confirmed",
+          "attended": "Attended",
+          "alternative": "New date offered",
+          "noMatch": "No match",
+          "exception": "Under review"
+        },
+        "moreSessions": "+{count} more dates",
+        "detail": {
+          "payment": "Buy a pass to confirm your application and join the matching queue.",
+          "waiting": "Waiting for matching.",
+          "waitingAt": "Matching starts {at}.",
+          "matching": "We're finding a table for you.",
+          "matchingUntil": "Your table will be confirmed {at}.",
+          "reallocating": "The table changed, so we are reassigning you.",
+          "confirmed": "Your table is confirmed. Check who you are dining with and where.",
+          "attended": "Thanks for joining us.",
+          "alternative": "We couldn't form a table for this date. Choose an option below.",
+          "noMatch": "Sorry, you weren't matched this time.",
+          "exception": "Our team is reviewing your application. Please hold on."
+        },
+        "buyTicket": "Buy a pass",
+        "viewTable": "View table",
+        "goResolve": "Choose an option",
+        "viewAll": "View all my applications",
+        "cancel": {
+          "policy": "You can cancel up to 2 days before the session starts, and your used pass will be returned. After that, cancellation is not possible.",
+          "button": "Cancel application",
+          "closed": "It is less than 2 days before the session, so you can no longer cancel.",
+          "confirmTitle": "Cancel this application?",
+          "confirmDescription": "This cannot be undone. Your used pass will be returned.",
+          "confirm": "Cancel application",
+          "done": "Your application was cancelled."
+        },
+        "resolution": {
+          "title": "What would you like to do?",
+          "respondBy": "Please choose by {at}. After that, your pass will be kept for later.",
+          "offeredSessions": "Dates you can move to",
+          "noOfferedSessions": "There are no dates to move to right now.",
+          "unavailable": "We're preparing your options. Please check again shortly.",
+          "loadFailed": "Couldn't load your options. Please try again shortly.",
+          "resolved": "You already made a choice.",
+          "expired": "The deadline passed, so your pass was kept for later.",
+          "chosen": "Your choice has been applied.",
+          "choices": {
+            "TRANSFER": "Move to this date",
+            "KEEP_TICKET": "Keep my pass",
+            "REFUND": "Get a refund"
+          },
+          "confirm": {
+            "TRANSFER": "Move your application to the selected date?",
+            "KEEP_TICKET": "Cancel this application and keep your pass? You can use it for your next application.",
+            "REFUND": "Cancel this application and get a refund for your pass?"
+          }
+        },
+        "errors": {
+          "alreadyProcessed": "This application was already processed. We reloaded the latest status.",
+          "cancelWindowClosed": "You can only cancel up to 2 days before the session starts.",
+          "failed": "Couldn't complete the request. Please try again shortly."
+        }
       },
       "emptyFiltered": "No applications with this status.",
       "empty": "You have not applied for any gatherings yet.",
@@ -1135,6 +1259,80 @@
       "JOB_SEEKER": "Job Seeker",
       "UNEMPLOYED": "Unemployed / Resting",
       "ETC": "Other"
+    }
+  },
+  "chat": {
+    "withdrawn": "(Deleted account)",
+    "photo": "Photo",
+    "list": {
+      "inquiryCta": "Contact Whatsup House",
+      "inquiryCtaDescription": "Feel free to ask us anything",
+      "empty": "No chats yet",
+      "loadError": "Couldn't load your chats",
+      "dateFormat": "MMM D",
+      "hide": "Hide from list",
+      "leave": "Leave quietly",
+      "leaveConfirmTitle": "Leave this chat?",
+      "leaveConfirmDescription": "Other members won't see that you left.",
+      "hidden": "Hidden from your list",
+      "left": "You left the chat"
+    },
+    "room": {
+      "members": "Members",
+      "openMembers": "View members",
+      "notice": "Notice",
+      "noticeToggle": "Expand/collapse notice",
+      "noticeClear": "Remove",
+      "loadError": "Couldn't load messages",
+      "empty": "Send the first message",
+      "muted": "You've been restricted from sending messages",
+      "notMember": "You're not a member of this chat",
+      "me": "Me"
+    },
+    "message": {
+      "deleted": "This message was deleted",
+      "edited": "(edited)",
+      "imageAlt": "Chat image",
+      "retry": "Resend",
+      "discard": "Cancel",
+      "failed": "Failed to send",
+      "unread": "{count} unread"
+    },
+    "system": {
+      "JOINED": "{nickname} joined",
+      "KICKED": "{nickname} was removed",
+      "NOTICE_SET": "A notice was posted"
+    },
+    "composer": {
+      "placeholder": "Type a message",
+      "send": "Send",
+      "attachImage": "Send a photo",
+      "imageTooLarge": "Photo is too large. Max 5MB.",
+      "imageFailed": "Couldn't process the photo"
+    },
+    "actions": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "edit": "Edit",
+      "delete": "Delete",
+      "setNotice": "Set as notice",
+      "clearNotice": "Remove notice",
+      "report": "Report",
+      "editTitle": "Edit message",
+      "save": "Save",
+      "deleteConfirmTitle": "Delete this message?",
+      "deleteConfirmDescription": "Everyone will see \"This message was deleted\".",
+      "reportTitle": "Report message",
+      "reportPlaceholder": "Tell us why you are reporting this",
+      "reported": "Report submitted",
+      "noticeSet": "Set as notice",
+      "noticeCleared": "Notice removed"
+    },
+    "push": {
+      "prompt": "Get notified of new messages",
+      "allow": "Allow",
+      "later": "Later",
+      "iosGuide": "Add this site to your Home Screen to get notifications"
     }
   }
 }

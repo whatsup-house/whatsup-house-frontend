@@ -14,7 +14,9 @@ function intlLocale(locale: string): string {
   return LOCALE_MAP[locale as AppLocale] ?? LOCALE_MAP.ko
 }
 
-export function formatLocalizedShortDate(date: string, locale: string): string {
+// 날짜가 없으면(회차 배정 전 신청 등) 빈 문자열
+export function formatLocalizedShortDate(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
   const d = dayjs(date)
   return new Intl.DateTimeFormat(intlLocale(locale), {
     month: 'short',
@@ -23,7 +25,8 @@ export function formatLocalizedShortDate(date: string, locale: string): string {
   }).format(d.toDate())
 }
 
-export function formatLocalizedFullDate(date: string, locale: string): string {
+export function formatLocalizedFullDate(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
   const d = dayjs(date)
   return new Intl.DateTimeFormat(intlLocale(locale), {
     year: 'numeric',
@@ -33,7 +36,8 @@ export function formatLocalizedFullDate(date: string, locale: string): string {
   }).format(d.toDate())
 }
 
-export function formatLocalizedNumericDate(date: string, locale: string): string {
+export function formatLocalizedNumericDate(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
   const d = dayjs(date)
   return new Intl.DateTimeFormat(intlLocale(locale), {
     year: 'numeric',
@@ -41,6 +45,18 @@ export function formatLocalizedNumericDate(date: string, locale: string): string
     day: '2-digit',
     weekday: 'short',
   }).format(d.toDate())
+}
+
+// 매칭 실행·확정 예정·응답 기한처럼 시각까지 보여줘야 하는 값 (예: 10월 8일 (수) 오후 9:00)
+export function formatLocalizedShortDateTime(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(dayjs(date).toDate())
 }
 
 export function formatKoreanShortDate(date: string): string {

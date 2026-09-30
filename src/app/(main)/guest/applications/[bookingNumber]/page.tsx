@@ -113,13 +113,15 @@ function GuestApplicationDetailContent({ bookingNumber }: { bookingNumber: strin
           <h2 className="mt-2 text-lg font-bold text-foreground">{detail.gathering.title}</h2>
 
           <div className="mt-5 space-y-3 text-sm">
-            <div className="flex gap-3">
-              <Calendar size={17} className="mt-0.5 shrink-0 text-tag-text" />
-              <div>
-                <p className="text-xs text-tag-text">날짜</p>
-                <p className="font-medium text-foreground">{eventDate}</p>
+            {eventDate && (
+              <div className="flex gap-3">
+                <Calendar size={17} className="mt-0.5 shrink-0 text-tag-text" />
+                <div>
+                  <p className="text-xs text-tag-text">날짜</p>
+                  <p className="font-medium text-foreground">{eventDate}</p>
+                </div>
               </div>
-            </div>
+            )}
             {startTime && (
               <div className="flex gap-3">
                 <Clock size={17} className="mt-0.5 shrink-0 text-tag-text" />

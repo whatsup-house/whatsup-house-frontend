@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
-import { useMyApplicationsMe, useCancelApplication } from '@/lib/hooks/useApplications'
+import DiningStatusCard from './DiningStatusCard'
+import { useMyApplicationsMe, useCancelApplication, useMyDiningApplications } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { formatLocalizedNumericDate } from '@/lib/utils/date'
 import { getApplicationDisplayStatus } from '@/lib/utils/applicationDisplay'
@@ -38,6 +39,11 @@ export default function MyApplicationList() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>(null)
   const { data: applications, isLoading } = useMyApplicationsMe(filterStatus, isLoggedIn)
   const cancelMutation = useCancelApplication()
+  // 우연한 식탁 신청의 매칭 상태는 /api/dining/me/applications 에만 있다. 해당 신청이 있을 때만 조회한다. (KAN-344)
+  const hasRandomTable = applications?.some((item) => item.gathering.gatheringType === 'RANDOM_TABLE') ?? false
+  const { data: diningApplications } = useMyDiningApplications(isLoggedIn && hasRandomTable)
+  // 취소된 신청은 dining 목록에서 빠지므로 기존 카드로 보인다. (KAN-354)
+  const diningById = new Map(diningApplications?.map((item) => [item.id, item]) ?? [])
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const tabScrollRef = useRef<HTMLDivElement>(null)
 
@@ -97,6 +103,22 @@ export default function MyApplicationList() {
       ) : (
         <div className="flex flex-col gap-3">
           {applications.map((item) => {
+            const dining = item.gathering.gatheringType === 'RANDOM_TABLE' ? diningById.get(item.id) : undefined
+            if (dining) {
+              return (
+                <DiningStatusCard
+                  key={item.id}
+                  applicationId={dining.id}
+                  title={dining.gathering.title}
+                  status={dining.status}
+                  matchStatus={dining.matchStatus}
+                  table={dining.table}
+                  assignedSession={dining.assignedSession}
+                  candidateSessions={dining.candidateSessions}
+                  resolutionId={dining.resolutionId}
+                />
+              )
+            }
             const isConfirmed = item.status === 'CONFIRMED'
             const isRandomTablePaymentPending = item.status === 'PAYMENT_PENDING' && item.gathering.gatheringType === 'RANDOM_TABLE'
             const showsApplicationDetail = item.status === 'PENDING' || item.status === 'REJECTED' || item.status === 'CANCELLED'

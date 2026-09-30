@@ -368,7 +368,8 @@
     "tabs": {
       "home": "首页",
       "gatherings": "聚会",
-      "my": "我的"
+      "my": "我的",
+      "chat": "聊天"
     },
     "titles": {
       "home": "首页",
@@ -383,7 +384,8 @@
       "onboarding": "引导设置",
       "applyComplete": "申请完成",
       "apply": "申请",
-      "story": "关于"
+      "story": "关于",
+      "chat": "聊天"
     }
   },
   "desktopBrand": {
@@ -527,7 +529,12 @@
       "otherDate": "其他日期",
       "apply": "申请",
       "viewOtherDate": "查看其他日期",
-      "closed": "运营结束"
+      "closed": "运营结束",
+      "scheduleTitle": "选择日程",
+      "noSchedule": "暂无预定日程",
+      "selectSession": "请选择日程",
+      "remainingSeats": "剩余 {count} 个名额",
+      "applyDeadline": "{date} 前可申请"
     },
     "apply": {
       "modal": {
@@ -592,6 +599,57 @@
       "depositAccount": "存款账号（请求后付款）",
       "accountHolder": "账户持有人 {holder}",
       "loginRequired": "登录购买通行证。"
+    },
+    "diningApply": {
+      "steps": {
+        "sessions": "选择意向日期",
+        "form": "填写申请表",
+        "ticket": "确认通行证"
+      },
+      "stepProgress": "{step}/3",
+      "sessionsGuide": "请选出所有可以参加的日期。我们会优先安排你先选的日期。",
+      "prev": "上一步",
+      "next": "下一步",
+      "submit": "提交申请",
+      "requiredMissing": "请填写所有必填项。",
+      "selectedSessionsTitle": "意向日期（按优先顺序）",
+      "noTicketNotice": "你还没有通行证。现在申请将以待付款状态受理，通行证到位后即可确认。",
+      "submitted": "申请已受理。",
+      "submitFailed": "申请失败，请稍后再试。",
+      "paymentPendingTitle": "待付款",
+      "paymentPendingDescription": "申请已受理，但通行证不足。购买通行证后申请即可确认并进入匹配等待。",
+      "buyTicket": "购买通行证",
+      "viewMyApplications": "查看我的申请"
+    },
+    "diningTable": {
+      "label": "偶遇餐桌",
+      "loadFailed": "无法加载餐桌信息。",
+      "notMemberTitle": "你不是这张餐桌的成员",
+      "notMemberDescription": "只有已确定餐桌的成员才能查看。\n请在“我的”页面查看申请状态。",
+      "attendance": {
+        "SCHEDULED": "待参加",
+        "ATTENDED": "已参加",
+        "CANCELED_EARLY": "提前取消",
+        "CANCELED_LATE": "临时取消",
+        "NO_SHOW": "未到场"
+      },
+      "venueTitle": "餐厅",
+      "venuePending": "正在安排餐厅",
+      "priceRange": "价格区间 {price}",
+      "membersTitle": "同桌成员 {count}人",
+      "topicsTitle": "聊天话题",
+      "topicsGuide": "聊天话题和破冰内容会发布在群聊中。",
+      "enterChat": "进入群聊",
+      "chatPreparing": "群聊准备中",
+      "cancelPolicyTitle": "取消政策",
+      "checkInTitle": "签到",
+      "checkIn": "签到",
+      "checkedIn": "已签到",
+      "checkInWindow": "可在 {from} ~ {to} 之间签到。",
+      "checkInUnavailable": "现在无法签到。",
+      "checkInWindowClosed": "现在不是签到时间。",
+      "checkInSuccess": "签到成功，祝你用餐愉快！",
+      "checkInFailed": "签到失败，请稍后重试。"
     }
   },
   "review": {
@@ -686,6 +744,72 @@
         "PENDING": "存款待处理",
         "CONFIRMED": "存款完成",
         "FREE": "免费"
+      },
+      "dining": {
+        "phase": {
+          "payment": "付款",
+          "waiting": "等待匹配",
+          "matching": "匹配中",
+          "reallocating": "重新分配中",
+          "confirmed": "已确定",
+          "attended": "已参加",
+          "alternative": "推荐其他日期",
+          "noMatch": "匹配失败",
+          "exception": "确认中"
+        },
+        "moreSessions": "另有{count}个日期",
+        "detail": {
+          "payment": "购买使用券后，报名即可确定并进入匹配等待。",
+          "waiting": "正在等待匹配。",
+          "waitingAt": "将于{at}开始匹配。",
+          "matching": "正在为你寻找同桌伙伴。",
+          "matchingUntil": "餐桌预计于{at}确定。",
+          "reallocating": "餐桌人数有变动，正在重新分配。",
+          "confirmed": "餐桌已确定，快来看看同桌伙伴和餐厅吧。",
+          "attended": "感谢你的参加。",
+          "alternative": "这个日期未能组成餐桌，请在下方选择处理方式。",
+          "noMatch": "很遗憾，这次没有匹配成功。",
+          "exception": "运营团队正在确认你的报名，请稍候。"
+        },
+        "buyTicket": "购买使用券",
+        "viewTable": "查看餐桌",
+        "goResolve": "选择处理方式",
+        "viewAll": "查看我的全部报名",
+        "cancel": {
+          "policy": "活动开始前2天可取消，已使用的使用券将退回。之后无法取消。",
+          "button": "取消报名",
+          "closed": "距离活动开始已不足2天，无法取消。",
+          "confirmTitle": "要取消报名吗？",
+          "confirmDescription": "取消后无法恢复，已使用的使用券将退回。",
+          "confirm": "取消报名",
+          "done": "已取消报名。"
+        },
+        "resolution": {
+          "title": "你想怎么处理？",
+          "respondBy": "请在{at}前选择。逾期将按保留使用券处理。",
+          "offeredSessions": "可更换的日期",
+          "noOfferedSessions": "目前没有可更换的日期。",
+          "unavailable": "正在准备选项，请稍后再查看。",
+          "loadFailed": "无法加载选项，请稍后重试。",
+          "resolved": "你已完成选择。",
+          "expired": "已过回复期限，已按保留使用券处理。",
+          "chosen": "你的选择已生效。",
+          "choices": {
+            "TRANSFER": "改到这个日期",
+            "KEEP_TICKET": "保留使用券",
+            "REFUND": "申请退款"
+          },
+          "confirm": {
+            "TRANSFER": "要把报名改到所选日期吗？",
+            "KEEP_TICKET": "要取消报名并保留使用券吗？下次报名时可以继续使用。",
+            "REFUND": "要取消报名并退还使用券费用吗？"
+          }
+        },
+        "errors": {
+          "alreadyProcessed": "该报名已处理，已为你重新加载最新状态。",
+          "cancelWindowClosed": "仅可在活动开始前2天取消。",
+          "failed": "处理失败，请稍后重试。"
+        }
       },
       "emptyFiltered": "没有具有此状态的应用程序。",
       "empty": "您还没有申请参加任何聚会。",
@@ -1135,6 +1259,80 @@
       "JOB_SEEKER": "求职者",
       "UNEMPLOYED": "待业·休息中",
       "ETC": "其他"
+    }
+  },
+  "chat": {
+    "withdrawn": "(已注销用户)",
+    "photo": "图片",
+    "list": {
+      "inquiryCta": "咨询 Whatsup House",
+      "inquiryCtaDescription": "有任何问题都可以问我们",
+      "empty": "还没有参与的聊天",
+      "loadError": "无法加载聊天列表",
+      "dateFormat": "M月D日",
+      "hide": "从列表中隐藏",
+      "leave": "悄悄退出",
+      "leaveConfirmTitle": "要退出聊天吗?",
+      "leaveConfirmDescription": "其他成员不会看到你退出的记录。",
+      "hidden": "已从列表中隐藏",
+      "left": "已退出聊天"
+    },
+    "room": {
+      "members": "聊天成员",
+      "openMembers": "查看成员",
+      "notice": "公告",
+      "noticeToggle": "展开/收起公告",
+      "noticeClear": "取消",
+      "loadError": "无法加载消息",
+      "empty": "发送第一条消息吧",
+      "muted": "你已被禁言,无法发送消息",
+      "notMember": "你不是该聊天的成员",
+      "me": "我"
+    },
+    "message": {
+      "deleted": "消息已删除",
+      "edited": "(已编辑)",
+      "imageAlt": "聊天图片",
+      "retry": "重新发送",
+      "discard": "取消发送",
+      "failed": "发送失败",
+      "unread": "{count}人未读"
+    },
+    "system": {
+      "JOINED": "{nickname}加入了聊天",
+      "KICKED": "{nickname}已被移出聊天",
+      "NOTICE_SET": "已发布公告"
+    },
+    "composer": {
+      "placeholder": "输入消息",
+      "send": "发送",
+      "attachImage": "发送图片",
+      "imageTooLarge": "图片太大,最大 5MB。",
+      "imageFailed": "无法处理图片"
+    },
+    "actions": {
+      "copy": "复制",
+      "copied": "已复制",
+      "edit": "编辑",
+      "delete": "删除",
+      "setNotice": "设为公告",
+      "clearNotice": "取消公告",
+      "report": "举报",
+      "editTitle": "编辑消息",
+      "save": "保存",
+      "deleteConfirmTitle": "要删除这条消息吗?",
+      "deleteConfirmDescription": "所有成员都会看到\"消息已删除\"。",
+      "reportTitle": "举报消息",
+      "reportPlaceholder": "请输入举报理由",
+      "reported": "举报已提交",
+      "noticeSet": "已设为公告",
+      "noticeCleared": "已取消公告"
+    },
+    "push": {
+      "prompt": "接收新消息通知",
+      "allow": "允许",
+      "later": "稍后",
+      "iosGuide": "添加到主屏幕即可接收通知"
     }
   }
 }

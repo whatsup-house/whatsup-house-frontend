@@ -16,6 +16,7 @@ import {
   updateMyProfile,
   withdrawMyAccount,
 } from '@/lib/api/auth'
+import { unsubscribeChatPush } from '@/lib/hooks/useChatPush'
 import { useAuthStore } from '@/lib/store/authStore'
 import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
 import { useRouter } from 'next/navigation'
@@ -161,7 +162,11 @@ export function useLogout() {
   const router = useRouter()
 
   return useMutation({
-    mutationFn: logoutApi,
+    // 인증 쿠키가 살아 있을 때 푸시 구독부터 지운다. (KAN-336)
+    mutationFn: async () => {
+      await unsubscribeChatPush()
+      await logoutApi()
+    },
     onSettled: () => {
       storeLogout()
       // 로그아웃 후 이전 사용자 서버 캐시가 남지 않도록 폐기한다. (KAN-249)

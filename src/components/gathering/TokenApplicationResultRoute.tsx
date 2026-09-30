@@ -26,8 +26,10 @@ export default function TokenApplicationResultRoute() {
     retry: false,
   })
 
+  // gathering.id는 회차 ID(배정 전이면 종류 ID). 종류 상세의 회차 중 신청 회차를 고른다. (KAN-339)
   const gatheringId = tokenApplication.data?.gathering.id ?? ''
   const { data: gathering, isLoading: isGatheringLoading } = useGatheringDetail(gatheringId)
+  const session = gathering?.sessions.find((item) => item.id === gatheringId)
 
   if (!token) {
     return (
@@ -76,6 +78,7 @@ export default function TokenApplicationResultRoute() {
   return (
     <ApplicationResultView
       gathering={gathering}
+      session={session}
       mode={mode}
       bookingNumber={application.bookingNumber}
       applicationStatus={application.status as ApplicationStatus}

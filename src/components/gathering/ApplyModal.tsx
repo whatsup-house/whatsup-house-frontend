@@ -5,11 +5,12 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
-import type { GatheringDetail } from '@/lib/api/types'
+import type { GatheringDetail, GatheringSession } from '@/lib/api/types'
 import { formatLocalizedShortDate, formatTime } from '@/lib/utils/date'
 
 interface ApplyModalProps {
   gathering: GatheringDetail
+  session: GatheringSession
   isOpen: boolean
   onClose: () => void
   onLoginApply: () => void
@@ -18,6 +19,7 @@ interface ApplyModalProps {
 
 export default function ApplyModal({
   gathering,
+  session,
   isOpen,
   onClose,
   onLoginApply,
@@ -40,8 +42,8 @@ export default function ApplyModal({
 
   if (!isOpen) return null
 
-  const formattedDate = formatLocalizedShortDate(gathering.eventDate, locale)
-  const formattedTime = formatTime(gathering.startTime)
+  const formattedDate = formatLocalizedShortDate(session.eventDate, locale)
+  const formattedTime = formatTime(session.startTime)
 
   return (
     <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center">

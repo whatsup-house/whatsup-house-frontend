@@ -8,13 +8,15 @@ import { useNavigationStore } from '@/lib/store/navigationStore'
 import LanguageSwitcher from './LanguageSwitcher'
 import NotificationBell from './NotificationBell'
 
-const HIDDEN_PATTERNS: RegExp[] = []
+// 채팅방(/chat/[id])은 자체 헤더(뒤로·방 이름·멤버)를 쓴다.
+const HIDDEN_PATTERNS: RegExp[] = [/^\/chat\/[^/]+$/]
 
 const PAGE_TITLE_KEYS: Record<string, string> = {
   '/': 'home',
   '/gatherings': 'gatherings',
   '/reviews': 'reviews',
   '/social': 'social',
+  '/chat': 'chat',
   '/mypage': 'mypage',
   '/mypage/mileage': 'mileage',
   '/applications/check': 'applicationCheck',

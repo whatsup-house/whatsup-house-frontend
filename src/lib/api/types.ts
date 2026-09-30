@@ -11,38 +11,128 @@ export type GatheringStatus = 'OPEN' | 'CLOSED' | 'COMPLETED' | 'CANCELLED'
 // 게더링 종류 (REGULAR=일반, RANDOM_TABLE=우연한 식탁)
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
 
-// 게더링 타입
-export interface GatheringListItem {
+// 회차 상태 (KAN-338). 날짜가 지난 모집중 회차는 백엔드가 DONE으로 내려준다.
+export type GatheringSessionStatus = 'OPEN' | 'CLOSED' | 'DONE' | 'CANCELLED'
+
+// 모임 회차 — BE GatheringSessionResponse (KAN-338)
+export interface GatheringSession {
   id: string
-  title: string
-  description: string
-  eventDate: string      // YYYY-MM-DD
-  startTime: string      // HH:mm:ss
-  endTime: string
-  price: number
-  maxAttendees: number
-  status: GatheringStatus
-  thumbnailUrl: string | null
-  createdAt?: string     // 등록일 (ISO datetime) — 목록 정렬용 (KAN-295)
+  eventDate: string              // YYYY-MM-DD
+  startTime: string | null       // HH:mm:ss
+  endTime: string | null
   location: {
     id: string
     name: string
-    address?: string | null
-    naverMapUrl?: string | null
-    kakaoMapUrl?: string | null
+    address: string | null
+    naverMapUrl: string | null
+    kakaoMapUrl: string | null
   } | null
-  // 태그 — BE(KAN-304)에서 제공. 미제공 시 칩 미표시 (KAN-305)
-  tags?: string[] | null
+  maxAttendees: number
+  price: number | null           // 회차 오버라이드 없으면 종류 기본 가격
+  applyDeadlineAt: string | null // ISO datetime, 없으면 마감 없음
+  status: GatheringSessionStatus
+  confirmedCount: number         // 정원을 차지한 인원(승인 + 출석)
+  // RANDOM_TABLE 회차 전용 (KAN-345). 응답에 아직 없을 수 있어 optional
+  matchRunAt?: string | null
+  autoConfirmGraceMinutes?: number | null
+  tableSizeMin?: number | null
+  tableSizeMax?: number | null
+  minGroupScore?: number | null
+  maxAgeGap?: number | null
 }
 
-export interface GatheringDetail extends GatheringListItem {
-  gatheringType?: GatheringType
-  howToRun?: string[] | null
-  locationAddress?: string
-  photoUrls?: string[] | null
-  mileageReward?: number
-  averageRating?: number | null
-  reviewCount?: number
+// 모임 목록 항목 = 종류 + 조건에 맞는 회차 — BE GatheringResponse (KAN-338)
+export interface GatheringListItem {
+  id: string
+  title: string
+  description: string | null
+  tags: string[] | null
+  thumbnailUrl: string | null
+  gatheringType: GatheringType | null
+  basePrice: number | null
+  createdAt: string              // 종류 등록일 (ISO datetime) — 목록 정렬용 (KAN-295)
+  sessions: GatheringSession[]   // 날짜·시작 시간 순
+}
+
+// 모임 종류 상세 + 회차 목록 — BE GatheringDetailResponse (KAN-338)
+export interface GatheringDetail {
+  id: string
+  title: string
+  description: string | null
+  howToRun: string[] | null
+  tags: string[] | null
+  thumbnailUrl: string | null
+  gatheringType: GatheringType | null
+  basePrice: number | null
+  sessions: GatheringSession[]   // 날짜·시작 시간 순
+}
+
+// 목록 파생: 날짜별 목록의 한 줄 = 종류 + 그 날의 회차
+export interface GatheringSessionEntry {
+  gathering: GatheringListItem
+  session: GatheringSession
+}
+
+// 목록 파생: 모아보기 카드 (종류 1개 = 카드 1개)
+export type GatheringTypeFilter = 'all' | 'open' | 'completed'
+export type GatheringTypeSort = 'popular' | 'latest' | 'oldest'
+
+export interface GatheringTypeCard {
+  id: string
+  title: string
+  thumbnailUrl: string | null
+  tags: string[] | null
+  totalCount: number
+  representativeStatus: GatheringStatus
+  // 카드에 표시할 날짜. 진행완료 대표는 null. (KAN-295)
+  displayDate: string | null
+}
+
+// 관리자 모임 종류 생성/수정 — BE GatheringCreateRequest / GatheringUpdateRequest (KAN-338)
+export interface AdminGatheringTypeRequest {
+  title: string
+  description: string
+  howToRun: string[]
+  tags: string[]
+  basePrice: number
+  thumbnailUrl?: string          // 새로 올린 이미지의 tempPath만. 생략하면 기존 썸네일 유지
+  gatheringType?: GatheringType  // 생성 시에만 반영 (수정 불가)
+}
+
+// 우연한 식탁 회차 전용 필드 — RANDOM_TABLE 회차에서만 보낸다. null이면 매칭 규칙 기본값 (KAN-345)
+export interface DiningSessionFields {
+  matchRunAt: string                     // YYYY-MM-DDTHH:mm, 이 시각에 마감하고 매칭 실행
+  autoConfirmGraceMinutes: number | null // 제안 → 자동 확정까지 유예(분). 0이면 즉시
+  tableSizeMin: number
+  tableSizeMax: number
+  minGroupScore: number | null           // 0~1
+  maxAgeGap: number | null
+}
+
+// 관리자 회차 필드 — BE GatheringSessionRequest (회차 수정 본문이자 반복 생성의 base) (KAN-338)
+export interface AdminSessionRequest extends Partial<DiningSessionFields> {
+  eventDate: string              // YYYY-MM-DD
+  startTime: string | null       // HH:mm
+  endTime: string | null
+  locationId: string
+  maxAttendees: number
+  priceOverride: number | null   // null이면 종류 기본 가격
+  applyDeadlineAt: string | null // YYYY-MM-DDTHH:mm, null이면 마감 없음
+}
+
+// 회차 생성 — 단건은 회차 필드를 최상위에, 주간 반복은 { base, repeatWeekly: { until } } (KAN-338)
+export type AdminSessionCreateRequest =
+  | AdminSessionRequest
+  | { base: AdminSessionRequest; repeatWeekly: { until: string } }
+
+// 관리자 모임 목록의 한 줄 = 종류 1개. 회차 단위 관리자 목록을 종류 ID로 묶어 파생한다.
+export interface AdminGatheringTypeRow {
+  id: string
+  title: string
+  sessionIds: string[]
+  sessionCount: number
+  upcomingCount: number          // 오늘 이후 · 취소 제외
+  nextEventDate: string | null   // 다가오는 가장 이른 회차 날짜
 }
 
 // 우연한 식탁 이용권 (KAN-260)
@@ -104,10 +194,10 @@ export interface GuestTicketPurchaseRequest extends TicketPurchaseRequest {
   bookingNumber: string
 }
 
-// 달력 dot 표시용 (날짜별 대표 게더링 상태)
+// 달력 dot 표시용 (날짜별 대표 회차 상태)
 export interface CalendarDot {
   date: string           // YYYY-MM-DD
-  status: GatheringStatus
+  status: GatheringSessionStatus
 }
 
 // 인증 타입
@@ -224,7 +314,7 @@ export interface ApplicationListItem {
   gathering: {
     id: string
     title: string
-    eventDate: string
+    eventDate: string | null   // 회차 배정 전(우연한 식탁 매칭 전)이면 null (KAN-338)
     thumbnailUrl: string | null
     gatheringType?: GatheringType
   }
@@ -240,7 +330,7 @@ export interface GuestApplicationCheckResponse {
   gathering: {
     id: string
     title: string
-    eventDate: string
+    eventDate: string | null
     thumbnailUrl: string | null
   }
   createdAt: string
@@ -257,8 +347,8 @@ export interface ApplicationTokenCheckResponse {
   gathering: {
     id: string
     title: string
-    eventDate: string
-    startTime?: string
+    eventDate: string | null
+    startTime?: string | null
     locationName?: string | null
     thumbnailUrl: string | null
   }
@@ -603,6 +693,12 @@ export interface DynamicApplicationRequest {
   answers: AnswerItem[]
 }
 
+// 회원 신청 POST /api/applications — 종류 + 희망 회차(일반 모임은 1개) (KAN-338)
+export interface ApplicationCreateRequest extends DynamicApplicationRequest {
+  gatheringId: string
+  candidateSessionIds: string[]
+}
+
 // 신청 생성 응답
 export interface ApplicationSubmitResponse {
   id: string
@@ -610,6 +706,111 @@ export interface ApplicationSubmitResponse {
   gatheringId: string
   status: ApplicationStatus
   createdAt: string
+}
+
+// ===== 우연한 식탁 참가자 (/api/dining, KAN-342) =====
+
+// 신청 매칭 상태 — BE MatchStatus. 이용권 차감(확정) 전이면 null
+export type MatchStatus =
+  | 'WAITING'
+  | 'MATCHING'
+  | 'CONFIRM_PENDING'
+  | 'CONFIRMED'
+  | 'REALLOCATING'
+  | 'ALTERNATIVE_OFFERED'
+  | 'TRANSFERRED'
+  | 'NO_MATCH'
+  | 'EXCEPTION'
+
+// 이용권 차감 상태 — BE TicketDeductionStatus
+export type TicketDeductionStatus =
+  | 'DEDUCTED'
+  | 'RESTORED'
+  | 'REFUND_REQUESTED'
+  | 'REFUND_PROCESSING'
+  | 'REFUNDED'
+  | 'REFUND_FAILED'
+
+export interface DiningSessionInfo {
+  id: string
+  eventDate: string          // YYYY-MM-DD
+  startTime: string | null   // HH:mm:ss
+  region: string | null      // 회차 장소명
+  matchRunAt?: string | null // 매칭 실행 예정 시각(ISO). BE 가 아직 안 내려주면 표시 생략
+}
+
+// 테이블 상태 — BE DiningTableStatus. PROPOSED: 확정 유예 중
+export type DiningTableStatus = 'PROPOSED' | 'CONFIRMED' | 'DONE' | 'DISSOLVED'
+
+// 내 우연한 식탁 신청 1건 — GET /api/dining/me/applications 의 applications[]
+export interface DiningApplicationItem {
+  id: string
+  gathering: { id: string; title: string }
+  candidateSessions: DiningSessionInfo[]   // 우선순위 순
+  assignedSession: DiningSessionInfo | null
+  status: ApplicationStatus
+  matchStatus: MatchStatus | null
+  ticketStatus: TicketDeductionStatus | null
+  table: { id: string; status: DiningTableStatus; confirmAt: string | null } | null
+  resolutionId?: string | null             // 매칭 실패 해결 선택 ID (KAN-347). 없으면 해결 버튼 비활성
+}
+
+export interface DiningApplicationListResponse {
+  applications: DiningApplicationItem[]
+}
+
+// 매칭 실패 해결 선택 — GET /api/dining/resolutions/{id} (KAN-347, 병렬 개발이라 필드는 optional)
+export type DiningResolutionChoice = 'TRANSFER' | 'KEEP_TICKET' | 'REFUND'
+export type DiningResolutionStatus = 'OFFERED' | 'RESOLVED' | 'EXPIRED'
+
+export interface DiningResolution {
+  id: string
+  applicationId?: string
+  offeredSessions?: (DiningSessionInfo & { endTime?: string | null })[]
+  choice?: DiningResolutionChoice | null
+  respondBy?: string | null   // ISO datetime. 지나면 KEEP_TICKET 으로 자동 처리
+  status?: DiningResolutionStatus
+}
+
+// POST /api/dining/resolutions/{id}/choose. TRANSFER 면 sessionId 필수
+export interface DiningResolutionChooseRequest {
+  choice: DiningResolutionChoice
+  sessionId?: string
+}
+
+// 신청 폼 프리필 — GET /api/dining/prefill?gatheringId= . 답한 적 없는 표준 질문은 빠진다
+export interface DiningPrefillResponse {
+  answers: {
+    reservedKey: ReservedQuestionKey
+    questionKey: string                  // 이 모임 폼에서의 질문 키
+    value: string | number | string[]
+  }[]
+}
+
+// 확정 테이블의 내 참석 — BE AttendanceStatus. 체크인(POST /api/dining/tables/{id}/check-in, KAN-349) 응답도 같은 모양
+export type DiningAttendanceStatus = 'SCHEDULED' | 'ATTENDED' | 'CANCELED_EARLY' | 'CANCELED_LATE' | 'NO_SHOW'
+
+export interface DiningAttendance {
+  status: DiningAttendanceStatus
+  checkedInAt: string | null
+}
+
+// 테이블 상세 — GET /api/dining/tables/{id} (KAN-346). 멤버가 아니면 403, 없으면 404
+export interface DiningTableDetail {
+  id: string
+  status: 'CONFIRMED' | 'DONE'
+  session: {
+    eventDate: string          // YYYY-MM-DD
+    startTime: string | null   // HH:mm:ss
+    endTime: string | null
+    region: string | null
+  }
+  venue: { name: string; address: string | null; mapUrl: string | null; priceRange: string | null } | null  // 배정 전이면 null
+  chatRoomId: string | null
+  // 구성원 제한 소개(INF-06): 닉네임·MBTI·관심사만 내려온다
+  members: { nickname: string; mbti: string | null; interests: string[] | null }[] | null
+  cancelPolicy: string | null
+  myAttendance: DiningAttendance | null
 }
 
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
@@ -631,7 +832,7 @@ export interface ApplicationDetail {
   gathering: {
     id: string
     title: string
-    eventDate: string
+    eventDate: string | null   // 회차 배정 전이면 null (KAN-338)
     startTime: string | null
   }
   createdAt: string
@@ -641,6 +842,16 @@ export interface ApplicationDetail {
 // ===== 신청폼 관리 (관리자) =====
 
 export type MatchingStrategy = 'SAME' | 'DIVERSE' | 'OVERLAP'
+
+// 우연한 식탁 표준 항목 키 (백엔드 ReservedQuestionKey와 1:1, KAN-341)
+export type ReservedQuestionKey =
+  | 'BIRTH_YEAR'
+  | 'GENDER'
+  | 'MBTI'
+  | 'INTERESTS'
+  | 'MY_STYLE'
+  | 'WANTED_STYLE'
+  | 'DIET'
 
 // 질문 추가/수정 요청 (POST/PUT /api/admin/.../form/questions)
 export interface FormQuestionUpsertRequest {
@@ -672,21 +883,13 @@ export interface FormQuestionAdminItem {
   systemReserved: boolean
   matchingStrategy: MatchingStrategy | null
   matchingWeight: number | null
+  // 표준 항목이면 삭제·타입 변경 불가, 라벨·선택지만 수정 (KAN-343). 구버전 응답엔 필드가 없다.
+  reservedKey?: ReservedQuestionKey | null
 }
 
 // ===== 자동매칭 (관리자) =====
 
 export type MatchingGroupStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
-
-// 자동매칭 실행 결과 (POST /api/admin/gatherings/{id}/matching)
-export interface MatchingRunResult {
-  gatheringId: string
-  algorithmVersion: string
-  confirmedCount: number
-  groupCount: number
-  matchedCount: number
-  unmatchedCount: number
-}
 
 // 매칭 멤버 1명
 export interface MatchingMemberView {
@@ -717,6 +920,60 @@ export interface MatchingResult {
   unmatched: MatchingMemberView[]
 }
 
+// ===== 우연한 식탁 운영 (관리자, KAN-348) =====
+
+// 운영 대시보드 회차 카드 — BE DiningDashboardResponse.SessionCard
+export interface DiningDashboardSession {
+  sessionId: string
+  gatheringId: string
+  title: string
+  eventDate: string              // YYYY-MM-DD
+  startTime: string | null       // HH:mm:ss
+  locationName: string | null    // 지역
+  status: GatheringSessionStatus
+  paidCount: number
+  maxAttendees: number
+  matchRunAt: string | null      // ISO datetime
+  isMatchRunDone: boolean        // 테이블이 하나라도 만들어졌으면 true
+  tableCount: number             // 제안 중 + 확정
+  openExceptionCount: number
+}
+
+// GET /api/admin/dining/dashboard
+export interface DiningDashboard {
+  upcomingSessionCount: number
+  waitingApplicantCount: number
+  paidApplicantCount: number
+  proposedTableCount: number
+  confirmedTableCount: number
+  openExceptionCount: number     // 회차 무관 전체
+  sessions: DiningDashboardSession[] // 날짜·시작 시간 순
+}
+
+// GET /api/admin/dining/venues — BE VenueResponse
+export interface DiningVenue {
+  id: string
+  name: string
+  address: string
+  mapUrl: string | null
+  priceRange: string | null
+  region: string
+  isActive: boolean
+}
+
+// PUT /api/admin/dining/sessions/{id}/venues 본문 항목 (목록으로 통째로 교체)
+export interface SessionVenueRequest {
+  venueId: string
+  capacityTables: number         // 1~100
+}
+
+// BE SessionVenueResponse
+export interface SessionVenue {
+  venue: DiningVenue
+  capacityTables: number
+  usedTables: number
+}
+
 // 관리자 신청 상세 (답변 포함) — GET /api/admin/applications/{id}
 export interface AdminApplicationDetail {
   id: string
@@ -733,7 +990,7 @@ export interface AdminApplicationDetail {
 // 인앱 알림 (KAN-262)
 export type NotificationType = 'PARTICIPATION_CONFIRMED' | 'MILEAGE_EARNED' | 'REVIEW_LIKE_MILESTONE'
 // 알림 클릭 시 이동 대상 (FE가 라우트로 매핑)
-export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS'
+export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION'
 
 export interface NotificationItem {
   id: string
@@ -747,4 +1004,278 @@ export interface NotificationItem {
 
 export interface UnreadCountResponse {
   unreadCount: number
+}
+
+// ===== 우연한 식탁 운영: 예외함·설정 (KAN-353) =====
+// 백엔드 AdminDiningController(KAN-348) 계약. 시각은 LocalDateTime ISO 문자열.
+export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND'
+export type DiningExceptionStatus = 'OPEN' | 'RESOLVED'
+// WARN=기록만, RESTRICT/BAN=우연한 식탁 참여 자격 RESTRICTED
+export type DiningSafetyAction = 'WARN' | 'RESTRICT' | 'BAN'
+
+// GET /api/admin/dining/exceptions — 전체 회차 횡단, 최신순
+export interface DiningExceptionCase {
+  id: string
+  type: DiningExceptionType
+  status: DiningExceptionStatus
+  sessionId: string | null
+  // 현재는 매칭 그룹 ID
+  tableId: string | null
+  applicationId: string | null
+  reason: string
+  action: DiningSafetyAction | null
+  resolvedBy: string | null
+  resolutionNote: string | null
+  createdAt: string
+  resolvedAt: string | null
+}
+
+// PATCH /api/admin/dining/exceptions/{id} — RESOLVED면 note 필수, action은 SAFETY만
+export interface DiningExceptionStatusRequest {
+  status: DiningExceptionStatus
+  note?: string
+  action?: DiningSafetyAction
+}
+
+export interface DiningMatchingWeights {
+  gender: number
+  mbti: number
+  interests: number
+  wantedStyle: number
+  custom: number
+}
+
+// GET/PUT /api/admin/dining/settings/matching-rules — 요청·응답 같은 모양(PUT은 전체 교체)
+export interface DiningMatchingRules {
+  maxAgeGap: number
+  tableSizeMin: number
+  tableSizeMax: number
+  minGroupScore: number
+  autoConfirmGraceMinutes: number
+  weights: DiningMatchingWeights
+}
+
+// GET /api/admin/dining/venues — 삭제되지 않은 식당, 지역·이름 순
+export interface DiningVenue {
+  id: string
+  name: string
+  address: string
+  mapUrl: string | null
+  priceRange: string | null
+  region: string
+  isActive: boolean
+}
+
+// POST /venues, PUT /venues/{id} (전체 교체)
+export type DiningVenueRequest = Omit<DiningVenue, 'id'>
+
+// PUT /api/admin/dining/tables/{id}/venue
+export interface DiningTableVenueResponse {
+  tableId: string
+  venue: DiningVenue
+}
+
+// ===== 채팅 (KAN-332) =====
+// 백엔드(KAN-328) 계약: docs chat-design 5절. 모든 시각은 ISO 문자열.
+export type ChatRoomType = 'INQUIRY' | 'GROUP'
+export type ChatMessageType = 'TEXT' | 'IMAGE' | 'SYSTEM'
+export type ChatSystemKind = 'JOINED' | 'KICKED' | 'NOTICE_SET'
+
+// 탈퇴·정지 회원은 nickname 이 null. 문의방에서 관리자는 nickname "와썹하우스"로 내려온다.
+export interface ChatSender {
+  userId: string
+  nickname: string | null
+  avatarUrl: string | null
+}
+
+export interface ChatLinkPreview {
+  url: string
+  title: string | null
+  description: string | null
+  image: string | null
+}
+
+export interface ChatReaction {
+  emoji: string
+  count: number
+  reactedByMe: boolean
+}
+
+export interface ChatMessage {
+  id: string
+  roomId: string
+  // SYSTEM 메시지·탈퇴 회원은 null
+  sender: ChatSender | null
+  type: ChatMessageType
+  // TEXT: 본문, IMAGE: 서명 URL, SYSTEM·삭제됨: null
+  content: string | null
+  systemKind: ChatSystemKind | null
+  systemParams: Record<string, string> | null
+  linkPreview: ChatLinkPreview | null
+  reactions: ChatReaction[]
+  // 이 메시지를 아직 안 읽은 멤버 수 (카톡식)
+  unreadCount: number
+  editedAt: string | null
+  deletedAt: string | null
+  createdAt: string
+}
+
+// GET /api/chat/rooms — 서버가 최근 메시지 순으로 정렬, hidden 제외
+export interface ChatRoomSummary {
+  id: string
+  type: ChatRoomType
+  name: string
+  memberCount: number
+  lastMessage: ChatMessage | null
+  unreadCount: number
+}
+
+export interface ChatMember {
+  userId: string
+  nickname: string | null
+  avatarUrl: string | null
+  admin: boolean
+}
+
+// GET /api/chat/rooms/{id}
+export interface ChatRoomDetail {
+  id: string
+  type: ChatRoomType
+  name: string
+  members: ChatMember[]
+  noticeMessage: ChatMessage | null
+  // 내 권한: 뮤트·퇴장 상태면 false
+  canSend: boolean
+}
+
+export interface ChatSendMessageRequest {
+  type: 'TEXT' | 'IMAGE'
+  // TEXT: 본문, IMAGE: 업로드 응답의 path
+  content: string
+}
+
+export interface ChatInquiryRoomResponse {
+  roomId: string
+}
+
+export interface ChatImageUploadResponse {
+  path: string
+}
+
+// 클라이언트 전용: 낙관적 전송 대기열 항목 (서버 응답 전까지 반투명 표시)
+export interface ChatOutgoingMessage {
+  tempId: string
+  type: 'TEXT' | 'IMAGE'
+  // TEXT: 본문, IMAGE: 로컬 미리보기 object URL
+  content: string
+  image: Blob | null
+  createdAt: string
+  failed: boolean
+}
+
+// ===== 채팅 소켓 (KAN-333) =====
+// GET /api/chat/socket-token — STOMP CONNECT 의 Authorization: Bearer 헤더용 단기 토큰
+export interface ChatSocketTokenResponse {
+  token: string
+  // 수명(초). 기본 120
+  expiresIn: number
+}
+
+// /topic/rooms/{roomId} 이벤트 봉투 (BE ChatSocketEventResponse). 메시지 페이로드는 방 전체에 한 번 보내는 뷰어 중립 값이다.
+export type ChatSocketEvent =
+  | { kind: 'MESSAGE_CREATED' | 'MESSAGE_UPDATED' | 'MESSAGE_DELETED' | 'REACTION_CHANGED'; roomId: string; payload: ChatMessage }
+  | { kind: 'READ'; roomId: string; payload: { userId: string; messageId: string } }
+  // 해제면 null
+  | { kind: 'NOTICE_CHANGED'; roomId: string; payload: ChatMessage | null }
+  | { kind: 'MEMBER_CHANGED'; roomId: string; payload: { userIds: string[] } }
+
+// /user/queue/rooms — 새 메시지가 생긴 방의 목록 미리보기 (봉투 없음, BE ChatRoomPreviewResponse)
+export interface ChatRoomPreviewEvent {
+  roomId: string
+  lastMessage: NonNullable<ChatRoomSummary['lastMessage']>
+  unreadCount: number
+}
+
+// ===== 채팅 웹 푸시 (KAN-336) =====
+export interface ChatPushPublicKeyResponse {
+  // VAPID 공개키(base64url). PushManager.subscribe 의 applicationServerKey 로 쓴다.
+  publicKey: string
+}
+
+// PushSubscription.toJSON() 형태
+export interface ChatPushSubscriptionRequest {
+  endpoint: string
+  keys: {
+    p256dh: string
+    auth: string
+  }
+}
+
+// ===== 관리자 채팅 (KAN-334) =====
+// 백엔드 AdminChatController 실제 계약. Lombok boolean isX 필드는 JSON 에서 x 로 직렬화된다(isUnanswered → unanswered).
+export type ChatSourceType = 'GATHERING' | 'DINING_TABLE'
+export type ChatReportStatus = 'OPEN' | 'RESOLVED'
+
+// 방 목록 미리보기용 마지막 메시지 (ChatLastMessageResponse)
+export interface AdminChatLastMessage {
+  id: string
+  type: ChatMessageType
+  senderId: string | null
+  // TEXT 본문. IMAGE·SYSTEM·삭제면 null
+  content: string | null
+  systemKind: ChatSystemKind | null
+  systemParams: Record<string, unknown> | null
+  deleted: boolean
+  createdAt: string
+}
+
+// GET /api/admin/chat/rooms — 전체 방
+export interface AdminChatRoomSummary {
+  id: string
+  type: ChatRoomType
+  // GROUP: 방 이름, INQUIRY: 문의자 닉네임(탈퇴 시 null)
+  name: string | null
+  sourceType: ChatSourceType | null
+  sourceId: string | null
+  memberCount: number
+  lastMessage: AdminChatLastMessage | null
+  unreadCount: number
+  // 문의방 미답변(마지막 메시지를 문의자가 보냄)
+  unanswered: boolean
+  // 내가 참여 중인지. 미참여 단체방은 멤버 API 로 먼저 들어가야 방을 볼 수 있다.
+  member: boolean
+}
+
+// POST /api/admin/chat/rooms — 생성한 관리자는 서버가 자동 포함
+export interface AdminChatRoomCreateRequest {
+  name: string
+  memberIds: string[]
+  sourceType?: ChatSourceType
+  sourceId?: string
+}
+
+export type ChatRoomIdResponse = ChatInquiryRoomResponse
+
+// GET /api/admin/chat/rooms/source-members — 게더링 참가 확정자 / 매칭 조원
+export interface ChatSourceMember {
+  userId: string
+  nickname: string
+}
+
+// GET /api/admin/chat/reports
+export interface AdminChatReport {
+  id: string
+  roomId: string
+  messageId: string
+  reporterId: string
+  reporterNickname: string | null
+  reason: string
+  status: ChatReportStatus
+  createdAt: string
+  messageType: ChatMessageType
+  messageSenderId: string | null
+  messageSenderNickname: string | null
+  // 검토용 TEXT 원문(삭제된 메시지 포함). IMAGE·SYSTEM 은 null
+  messageContent: string | null
+  messageDeleted: boolean
 }
