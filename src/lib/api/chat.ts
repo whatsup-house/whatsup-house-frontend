@@ -4,6 +4,8 @@ import type {
   ChatImageUploadResponse,
   ChatInquiryRoomResponse,
   ChatMessage,
+  ChatPushPublicKeyResponse,
+  ChatPushSubscriptionRequest,
   ChatRoomDetail,
   ChatRoomSummary,
   ChatSendMessageRequest,
@@ -79,4 +81,20 @@ export const uploadChatImage = async (blob: Blob): Promise<ChatImageUploadRespon
 // 공지 등록/해제 (관리자 API). messageId null = 해제
 export const updateChatNotice = async (roomId: string, messageId: string | null): Promise<void> => {
   await apiClient.put<ApiResponse<void>>(`/api/admin/chat/rooms/${roomId}/notice`, { messageId })
+}
+
+// 웹 푸시 VAPID 공개키. VAPID 미설정이면 503.
+export const fetchPushPublicKey = async (): Promise<string> => {
+  const response = await apiClient.get<ApiResponse<ChatPushPublicKeyResponse>>('/api/chat/push-subscriptions/public-key')
+  return response.data.data.publicKey
+}
+
+// 같은 endpoint 재등록은 서버에서 갱신된다. (201)
+export const registerPushSubscription = async (data: ChatPushSubscriptionRequest): Promise<void> => {
+  await apiClient.post<ApiResponse<void>>('/api/chat/push-subscriptions', data)
+}
+
+// 본인 구독만 지운다. 없어도 204.
+export const deletePushSubscription = async (endpoint: string): Promise<void> => {
+  await apiClient.delete('/api/chat/push-subscriptions', { data: { endpoint } })
 }

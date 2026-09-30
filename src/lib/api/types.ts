@@ -889,6 +889,21 @@ export interface ChatOutgoingMessage {
   failed: boolean
 }
 
+// ===== 채팅 웹 푸시 (KAN-336) =====
+export interface ChatPushPublicKeyResponse {
+  // VAPID 공개키(base64url). PushManager.subscribe 의 applicationServerKey 로 쓴다.
+  publicKey: string
+}
+
+// PushSubscription.toJSON() 형태
+export interface ChatPushSubscriptionRequest {
+  endpoint: string
+  keys: {
+    p256dh: string
+    auth: string
+  }
+}
+
 // ===== 관리자 채팅 (KAN-334) =====
 // 백엔드 AdminChatController 실제 계약. Lombok boolean isX 필드는 JSON 에서 x 로 직렬화된다(isUnanswered → unanswered).
 export type ChatSourceType = 'GATHERING' | 'DINING_TABLE'

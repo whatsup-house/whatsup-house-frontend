@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
       { protocol: 'http', hostname: 'localhost' },
     ],
   },
+  // 서비스 워커는 항상 최신본을 받도록 캐시하지 않는다. (KAN-336)
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+    ];
+  },
 };
 
 // Sentry 설정 (KAN-255). 소스맵 업로드는 SENTRY_AUTH_TOKEN이 있을 때만 수행되며,
