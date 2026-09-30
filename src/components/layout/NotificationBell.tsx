@@ -12,6 +12,7 @@ import {
   useDeleteNotification,
 } from '@/lib/hooks/useNotifications'
 import { formatLocalizedShortDate } from '@/lib/utils/date'
+import { DINING_RESOLUTION_ANCHOR } from '@/lib/utils/diningStatus'
 import type { NotificationItem, NotificationLink, NotificationType } from '@/lib/api/types'
 
 // 유형별 이동 대상 라우트. (KAN-262)
@@ -19,6 +20,10 @@ const LINK_ROUTES: Record<NotificationLink, string> = {
   APPLICATIONS: '/mypage?tab=applications',
   MILEAGE: '/mypage/mileage',
   REVIEWS: '/mypage?tab=reviews',
+  // 우연한 식탁 (KAN-354). 알림 응답에 대상 ID가 없어 테이블·해결 선택은 신청 상태 카드(테이블 링크·해결 영역)로 보낸다.
+  TICKET_PURCHASE: '/payments/random-table',
+  DINING_TABLE: '/mypage?tab=applications',
+  DINING_RESOLUTION: `/mypage?tab=applications#${DINING_RESOLUTION_ANCHOR}`,
 }
 
 const TYPE_ICON: Record<NotificationType, LucideIcon> = {

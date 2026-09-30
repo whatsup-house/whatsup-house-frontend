@@ -1,6 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, fetchDiningTableDetail, submitDiningCheckIn } from '@/lib/api/application'
-import type { ApplicationCreateRequest, ApplicationStatus, DynamicApplicationRequest } from '@/lib/api/types'
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn } from '@/lib/api/application'
+import type { ApplicationCreateRequest, ApplicationStatus, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
+import { useToastStore } from '@/lib/store/toastStore'
+import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
 
 // 회원 동적 신청
 export function useSubmitDynamicApplication() {
@@ -47,6 +50,62 @@ export function useMyApplications(enabled: boolean) {
     queryFn: fetchMyApplications,
     enabled,
     staleTime: 1000 * 60,
+  })
+}
+
+// 우연한 식탁 신청 상태가 바뀌는 동작(취소·해결 선택) 뒤 다시 불러올 목록
+function invalidateDiningApplications(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ['dining'] })
+  queryClient.invalidateQueries({ queryKey: ['applications', 'me'] })
+  queryClient.invalidateQueries({ queryKey: ['my-applications'] })
+  queryClient.invalidateQueries({ queryKey: ['my-tickets'] })
+}
+
+// 409(이미 처리됨)는 최신 상태로 다시 불러오고, 취소 기한 마감은 안내, 그 외는 서버 메시지를 토스트로 띄운다. (KAN-354)
+function useDiningActionErrorToast() {
+  const t = useTranslations('mypage.applications.dining.errors')
+  const showToast = useToastStore((s) => s.show)
+  const queryClient = useQueryClient()
+  return (err: unknown) => {
+    if (getApiErrorStatus(err) === 409) {
+      showToast(t('alreadyProcessed'), 'error')
+      invalidateDiningApplications(queryClient)
+    } else if (getApiErrorCode(err) === 'CANCEL_WINDOW_CLOSED') {
+      showToast(t('cancelWindowClosed'), 'error')
+    } else {
+      showToast(getApiErrorMessage(err, t('failed')), 'error')
+    }
+  }
+}
+
+// 우연한 식탁 사전 취소 (KAN-342)
+export function useCancelDiningApplication() {
+  const queryClient = useQueryClient()
+  const onError = useDiningActionErrorToast()
+  return useMutation({
+    mutationFn: (id: string) => cancelDiningApplication(id),
+    onSuccess: () => invalidateDiningApplications(queryClient),
+    onError,
+  })
+}
+
+// 매칭 실패 해결 선택지 (KAN-347). 미배포 BE에선 실패로 두고 카드가 안내를 띄운다.
+export function useDiningResolution(id: string | null | undefined) {
+  return useQuery({
+    queryKey: ['dining', 'resolution', id],
+    queryFn: () => fetchDiningResolution(id!),
+    enabled: !!id,
+    retry: false,
+  })
+}
+
+export function useChooseDiningResolution() {
+  const queryClient = useQueryClient()
+  const onError = useDiningActionErrorToast()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: DiningResolutionChooseRequest }) => chooseDiningResolution(id, data),
+    onSuccess: () => invalidateDiningApplications(queryClient),
+    onError,
   })
 }
 

@@ -745,16 +745,71 @@
         "CONFIRMED": "Depósito completo",
         "FREE": "Gratis"
       },
-      "matchStatus": {
-        "WAITING": "Esperando emparejamiento",
-        "MATCHING": "Emparejando",
-        "CONFIRM_PENDING": "Pendiente de confirmación",
-        "CONFIRMED": "Emparejado",
-        "REALLOCATING": "Reasignando",
-        "ALTERNATIVE_OFFERED": "Fecha alternativa ofrecida",
-        "TRANSFERRED": "Fecha cambiada",
-        "NO_MATCH": "Sin emparejamiento",
-        "EXCEPTION": "En revisión"
+      "dining": {
+        "phase": {
+          "payment": "Pago",
+          "waiting": "En espera",
+          "matching": "Emparejando",
+          "reallocating": "Reasignando",
+          "confirmed": "Confirmado",
+          "attended": "Asistido",
+          "alternative": "Otra fecha propuesta",
+          "noMatch": "Sin emparejamiento",
+          "exception": "En revisión"
+        },
+        "moreSessions": "+{count} fechas más",
+        "detail": {
+          "payment": "Compra un pase para confirmar tu solicitud y entrar en la cola de emparejamiento.",
+          "waiting": "Esperando el emparejamiento.",
+          "waitingAt": "El emparejamiento empieza el {at}.",
+          "matching": "Estamos buscando una mesa para ti.",
+          "matchingUntil": "Tu mesa se confirmará el {at}.",
+          "reallocating": "La mesa cambió, así que te estamos reasignando.",
+          "confirmed": "Tu mesa está confirmada. Mira con quién cenarás y dónde.",
+          "attended": "Gracias por acompañarnos.",
+          "alternative": "No pudimos formar una mesa para esta fecha. Elige una opción abajo.",
+          "noMatch": "Lo sentimos, esta vez no hubo emparejamiento.",
+          "exception": "Nuestro equipo está revisando tu solicitud. Espera un momento."
+        },
+        "buyTicket": "Comprar pase",
+        "viewTable": "Ver mesa",
+        "goResolve": "Elegir una opción",
+        "viewAll": "Ver todas mis solicitudes",
+        "cancel": {
+          "policy": "Puedes cancelar hasta 2 días antes de que empiece la sesión y te devolveremos el pase usado. Después ya no es posible cancelar.",
+          "button": "Cancelar solicitud",
+          "closed": "Faltan menos de 2 días para la sesión, así que ya no puedes cancelar.",
+          "confirmTitle": "¿Cancelar esta solicitud?",
+          "confirmDescription": "No se puede deshacer. Te devolveremos el pase usado.",
+          "confirm": "Cancelar solicitud",
+          "done": "Tu solicitud fue cancelada."
+        },
+        "resolution": {
+          "title": "¿Qué quieres hacer?",
+          "respondBy": "Elige antes del {at}. Después, guardaremos tu pase para más adelante.",
+          "offeredSessions": "Fechas a las que puedes cambiar",
+          "noOfferedSessions": "Ahora no hay fechas disponibles para cambiar.",
+          "unavailable": "Estamos preparando tus opciones. Vuelve a revisar en un momento.",
+          "loadFailed": "No se pudieron cargar tus opciones. Inténtalo de nuevo en un momento.",
+          "resolved": "Ya elegiste una opción.",
+          "expired": "Pasó el plazo, así que guardamos tu pase para más adelante.",
+          "chosen": "Tu elección se aplicó.",
+          "choices": {
+            "TRANSFER": "Cambiar a esta fecha",
+            "KEEP_TICKET": "Guardar mi pase",
+            "REFUND": "Pedir reembolso"
+          },
+          "confirm": {
+            "TRANSFER": "¿Cambiar tu solicitud a la fecha seleccionada?",
+            "KEEP_TICKET": "¿Cancelar esta solicitud y guardar tu pase? Podrás usarlo en tu próxima solicitud.",
+            "REFUND": "¿Cancelar esta solicitud y pedir el reembolso del pase?"
+          }
+        },
+        "errors": {
+          "alreadyProcessed": "Esta solicitud ya fue procesada. Cargamos el estado más reciente.",
+          "cancelWindowClosed": "Solo puedes cancelar hasta 2 días antes de que empiece la sesión.",
+          "failed": "No se pudo completar la solicitud. Inténtalo de nuevo en un momento."
+        }
       },
       "emptyFiltered": "No hay solicitudes con este estado.",
       "empty": "Aún no has solicitado ningún encuentro.",

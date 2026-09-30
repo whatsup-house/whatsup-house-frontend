@@ -47,6 +47,18 @@ export function formatLocalizedNumericDate(date: string | null | undefined, loca
   }).format(d.toDate())
 }
 
+// 매칭 실행·확정 예정·응답 기한처럼 시각까지 보여줘야 하는 값 (예: 10월 8일 (수) 오후 9:00)
+export function formatLocalizedShortDateTime(date: string | null | undefined, locale: string): string {
+  if (!date) return ''
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(dayjs(date).toDate())
+}
+
 export function formatKoreanShortDate(date: string): string {
   return formatLocalizedShortDate(date, 'ko')
 }

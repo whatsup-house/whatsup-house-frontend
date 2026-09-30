@@ -736,7 +736,11 @@ export interface DiningSessionInfo {
   eventDate: string          // YYYY-MM-DD
   startTime: string | null   // HH:mm:ss
   region: string | null      // 회차 장소명
+  matchRunAt?: string | null // 매칭 실행 예정 시각(ISO). BE 가 아직 안 내려주면 표시 생략
 }
+
+// 테이블 상태 — BE DiningTableStatus. PROPOSED: 확정 유예 중
+export type DiningTableStatus = 'PROPOSED' | 'CONFIRMED' | 'DONE' | 'DISSOLVED'
 
 // 내 우연한 식탁 신청 1건 — GET /api/dining/me/applications 의 applications[]
 export interface DiningApplicationItem {
@@ -747,11 +751,31 @@ export interface DiningApplicationItem {
   status: ApplicationStatus
   matchStatus: MatchStatus | null
   ticketStatus: TicketDeductionStatus | null
-  table: { id: string; status: MatchingGroupStatus; confirmAt: string | null } | null
+  table: { id: string; status: DiningTableStatus; confirmAt: string | null } | null
+  resolutionId?: string | null             // 매칭 실패 해결 선택 ID (KAN-347). 없으면 해결 버튼 비활성
 }
 
 export interface DiningApplicationListResponse {
   applications: DiningApplicationItem[]
+}
+
+// 매칭 실패 해결 선택 — GET /api/dining/resolutions/{id} (KAN-347, 병렬 개발이라 필드는 optional)
+export type DiningResolutionChoice = 'TRANSFER' | 'KEEP_TICKET' | 'REFUND'
+export type DiningResolutionStatus = 'OFFERED' | 'RESOLVED' | 'EXPIRED'
+
+export interface DiningResolution {
+  id: string
+  applicationId?: string
+  offeredSessions?: (DiningSessionInfo & { endTime?: string | null })[]
+  choice?: DiningResolutionChoice | null
+  respondBy?: string | null   // ISO datetime. 지나면 KEEP_TICKET 으로 자동 처리
+  status?: DiningResolutionStatus
+}
+
+// POST /api/dining/resolutions/{id}/choose. TRANSFER 면 sessionId 필수
+export interface DiningResolutionChooseRequest {
+  choice: DiningResolutionChoice
+  sessionId?: string
 }
 
 // 신청 폼 프리필 — GET /api/dining/prefill?gatheringId= . 답한 적 없는 표준 질문은 빠진다
@@ -966,7 +990,7 @@ export interface AdminApplicationDetail {
 // 인앱 알림 (KAN-262)
 export type NotificationType = 'PARTICIPATION_CONFIRMED' | 'MILEAGE_EARNED' | 'REVIEW_LIKE_MILESTONE'
 // 알림 클릭 시 이동 대상 (FE가 라우트로 매핑)
-export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS'
+export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION'
 
 export interface NotificationItem {
   id: string
