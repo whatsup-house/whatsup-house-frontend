@@ -2,7 +2,24 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell, X, CheckCircle, Gift, Heart, type LucideIcon } from 'lucide-react'
+import {
+  AlarmClock,
+  ArrowRightLeft,
+  BadgeCheck,
+  Bell,
+  CalendarClock,
+  CheckCircle,
+  CreditCard,
+  Gift,
+  Heart,
+  Hourglass,
+  MessageSquare,
+  Shuffle,
+  Sparkles,
+  Undo2,
+  X,
+  type LucideIcon,
+} from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useAuthStore } from '@/lib/store/authStore'
 import {
@@ -15,23 +32,36 @@ import { formatLocalizedShortDate } from '@/lib/utils/date'
 import { DINING_RESOLUTION_ANCHOR } from '@/lib/utils/diningStatus'
 import type { NotificationItem, NotificationLink, NotificationType } from '@/lib/api/types'
 
-// 유형별 이동 대상 라우트. (KAN-262)
-const LINK_ROUTES: Record<NotificationLink, string> = {
-  APPLICATIONS: '/mypage?tab=applications',
-  MILEAGE: '/mypage/mileage',
-  REVIEWS: '/mypage?tab=reviews',
-  // 우연한 식탁 (KAN-354). 알림 응답에 대상 ID가 없어 테이블·해결 선택은 신청 상태 카드(테이블 링크·해결 영역)로 보낸다.
-  TICKET_PURCHASE: '/payments/random-table',
-  DINING_TABLE: '/mypage?tab=applications',
-  DINING_RESOLUTION: `/mypage?tab=applications#${DINING_RESOLUTION_ANCHOR}`,
-  // 피드백 요청(KAN-356)도 테이블 ID가 없어 참가 이력으로 보낸다. 미제출 테이블마다 피드백 폼 링크가 있다.
-  DINING_FEEDBACK_REQUEST: '/dining/history',
+// 유형별 이동 대상 라우트. (KAN-262) 값이 함수라 BE link 추가 시 여기 누락되면 컴파일 에러. (KAN-359)
+// linkId(KAN-346·349)가 있으면 대상 화면으로 바로 보내고, 없으면 목록형 폴백 경로로 보낸다.
+const LINK_ROUTES: Record<NotificationLink, (linkId: string | null | undefined) => string> = {
+  APPLICATIONS: () => '/mypage?tab=applications',
+  MILEAGE: () => '/mypage/mileage',
+  REVIEWS: () => '/mypage?tab=reviews',
+  TICKET_PURCHASE: (linkId) => (linkId ? `/payments/random-table?applicationId=${linkId}` : '/payments/random-table'),
+  DINING_TABLE: (linkId) => (linkId ? `/dining/tables/${linkId}` : '/mypage?tab=applications'),
+  // 해결 선택은 linkId가 없다(BE: 내 신청의 resolutionId로 찾음) → 신청 상태 카드의 해결 영역으로 보낸다.
+  DINING_RESOLUTION: () => `/mypage?tab=applications#${DINING_RESOLUTION_ANCHOR}`,
+  DINING_FEEDBACK_REQUEST: (linkId) => (linkId ? `/dining/tables/${linkId}/feedback` : '/dining/history'),
+  // 다음 모집 알림. linkId = 새 회차가 열린 모임 종류 ID
+  DINING_HISTORY: (linkId) => (linkId ? `/gatherings/${linkId}` : '/dining/history'),
 }
 
 const TYPE_ICON: Record<NotificationType, LucideIcon> = {
   PARTICIPATION_CONFIRMED: CheckCircle,
   MILEAGE_EARNED: Gift,
   REVIEW_LIKE_MILESTONE: Heart,
+  DINING_PAYMENT_PENDING: CreditCard,
+  DINING_CONFIRMED: CheckCircle,
+  DINING_ALTERNATIVE_OFFERED: CalendarClock,
+  DINING_TRANSFERRED: ArrowRightLeft,
+  DINING_REFUND_REQUESTED: Undo2,
+  DINING_REFUND_COMPLETED: BadgeCheck,
+  DINING_WAITING: Hourglass,
+  DINING_REALLOCATING: Shuffle,
+  DINING_REMINDER: AlarmClock,
+  DINING_FEEDBACK_REQUEST: MessageSquare,
+  DINING_NEXT_SESSIONS: Sparkles,
 }
 
 export default function NotificationBell() {
@@ -65,7 +95,9 @@ export default function NotificationBell() {
   const handleSelect = (item: NotificationItem) => {
     if (!item.isRead) markRead.mutate(item.id)
     setOpen(false)
-    if (item.link) router.push(LINK_ROUTES[item.link])
+    // FE가 모르는 link 값(BE 선배포)이면 이동하지 않는다.
+    const route = item.link ? LINK_ROUTES[item.link]?.(item.linkId) : undefined
+    if (route) router.push(route)
   }
 
   return (

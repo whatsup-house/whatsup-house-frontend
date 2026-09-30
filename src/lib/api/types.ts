@@ -1139,9 +1139,24 @@ export interface AdminApplicationDetail {
 }
 
 // 인앱 알림 (KAN-262)
-export type NotificationType = 'PARTICIPATION_CONFIRMED' | 'MILEAGE_EARNED' | 'REVIEW_LIKE_MILESTONE'
+export type NotificationType =
+  | 'PARTICIPATION_CONFIRMED'
+  | 'MILEAGE_EARNED'
+  | 'REVIEW_LIKE_MILESTONE'
+  // 우연한 식탁 (BE NotificationType KAN-342·346·347·349)
+  | 'DINING_PAYMENT_PENDING'
+  | 'DINING_CONFIRMED'
+  | 'DINING_ALTERNATIVE_OFFERED'
+  | 'DINING_TRANSFERRED'
+  | 'DINING_REFUND_REQUESTED'
+  | 'DINING_REFUND_COMPLETED'
+  | 'DINING_WAITING'
+  | 'DINING_REALLOCATING'
+  | 'DINING_REMINDER'
+  | 'DINING_FEEDBACK_REQUEST'
+  | 'DINING_NEXT_SESSIONS'
 // 알림 클릭 시 이동 대상 (FE가 라우트로 매핑)
-export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION' | 'DINING_FEEDBACK_REQUEST'
+export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION' | 'DINING_FEEDBACK_REQUEST' | 'DINING_HISTORY'
 
 export interface NotificationItem {
   id: string
@@ -1149,6 +1164,9 @@ export interface NotificationItem {
   title: string
   content: string | null
   link: NotificationLink | null
+  // 이동 대상 ID (KAN-346·349). DINING_TABLE·DINING_FEEDBACK_REQUEST=테이블 ID, DINING_HISTORY=모임 종류 ID,
+  // TICKET_PURCHASE·APPLICATIONS(우연한 식탁)=신청 ID. 없으면 null
+  linkId?: string | null
   isRead: boolean
   createdAt: string
 }
