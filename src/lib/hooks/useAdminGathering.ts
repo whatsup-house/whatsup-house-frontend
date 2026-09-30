@@ -19,12 +19,12 @@ function invalidateGatheringQueries(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: ['gathering'] })
 }
 
-// 삭제 409(신청이 있는 회차)는 취소로 유도하는 안내 토스트를 띄운다. (KAN-340)
+// 삭제 409(신청이 있는 회차 — 종류 삭제·회차 삭제 공통)는 취소로 유도하는 안내 토스트를 띄운다. (KAN-340)
 function useDeleteErrorToast() {
   const showToast = useToastStore((s) => s.show)
   return (err: unknown) => {
     if (getApiErrorStatus(err) === 409) {
-      showToast('신청이 있는 회차는 삭제할 수 없어요. 회차를 취소해 주세요.', 'error')
+      showToast('신청이 있는 회차가 있어 삭제할 수 없어요. 삭제 대신 회차를 취소해 주세요.', 'error')
     } else {
       showToast(getApiErrorMessage(err, '삭제 중 오류가 발생했어요.'), 'error')
     }
