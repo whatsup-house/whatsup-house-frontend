@@ -127,3 +127,16 @@ export function useDeleteDiningVenue() {
     onError: onError('식당을 삭제하지 못했어요.'),
   })
 }
+
+// 회차 콘솔 테이블별 식당 배정 (KAN-352). 풀에 없는 식당 400, 수용 테이블이 가득 차면 409
+export function useAssignDiningTableVenue() {
+  const queryClient = useQueryClient()
+  const showToast = useToastStore((s) => s.show)
+  const onError = useErrorToast()
+  return useMutation({
+    mutationFn: ({ tableId, venueId }: { tableId: string; venueId: string }) => assignDiningTableVenue(tableId, venueId),
+    onSuccess: (res) => showToast(`${res.venue.name}을(를) 배정했어요.`),
+    onError: onError('식당을 배정하지 못했어요.'),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: diningKey }),
+  })
+}
