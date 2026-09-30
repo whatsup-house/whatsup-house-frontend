@@ -708,6 +708,61 @@ export interface ApplicationSubmitResponse {
   createdAt: string
 }
 
+// ===== 우연한 식탁 참가자 (/api/dining, KAN-342) =====
+
+// 신청 매칭 상태 — BE MatchStatus. 이용권 차감(확정) 전이면 null
+export type MatchStatus =
+  | 'WAITING'
+  | 'MATCHING'
+  | 'CONFIRM_PENDING'
+  | 'CONFIRMED'
+  | 'REALLOCATING'
+  | 'ALTERNATIVE_OFFERED'
+  | 'TRANSFERRED'
+  | 'NO_MATCH'
+  | 'EXCEPTION'
+
+// 이용권 차감 상태 — BE TicketDeductionStatus
+export type TicketDeductionStatus =
+  | 'DEDUCTED'
+  | 'RESTORED'
+  | 'REFUND_REQUESTED'
+  | 'REFUND_PROCESSING'
+  | 'REFUNDED'
+  | 'REFUND_FAILED'
+
+export interface DiningSessionInfo {
+  id: string
+  eventDate: string          // YYYY-MM-DD
+  startTime: string | null   // HH:mm:ss
+  region: string | null      // 회차 장소명
+}
+
+// 내 우연한 식탁 신청 1건 — GET /api/dining/me/applications 의 applications[]
+export interface DiningApplicationItem {
+  id: string
+  gathering: { id: string; title: string }
+  candidateSessions: DiningSessionInfo[]   // 우선순위 순
+  assignedSession: DiningSessionInfo | null
+  status: ApplicationStatus
+  matchStatus: MatchStatus | null
+  ticketStatus: TicketDeductionStatus | null
+  table: { id: string; status: MatchingGroupStatus; confirmAt: string | null } | null
+}
+
+export interface DiningApplicationListResponse {
+  applications: DiningApplicationItem[]
+}
+
+// 신청 폼 프리필 — GET /api/dining/prefill?gatheringId= . 답한 적 없는 표준 질문은 빠진다
+export interface DiningPrefillResponse {
+  answers: {
+    reservedKey: ReservedQuestionKey
+    questionKey: string                  // 이 모임 폼에서의 질문 키
+    value: string | number | string[]
+  }[]
+}
+
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
 export interface AnswerView {
   questionKey: string

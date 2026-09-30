@@ -7,8 +7,13 @@ import { Card, Button } from '@/components/ui'
 import { useMyTickets } from '@/lib/hooks/useTickets'
 import { useAuthStore } from '@/lib/store/authStore'
 
+interface TicketPassSectionProps {
+  // 구매 화면에서 돌아올 경로 (신청 흐름에서 입력을 유지한 채 복귀, KAN-344)
+  returnUrl?: string
+}
+
 // 우연한 식탁(RANDOM_TABLE) 게더링 상세에 노출되는 이용권 선결제 섹션. (KAN-260)
-export default function TicketPassSection() {
+export default function TicketPassSection({ returnUrl }: TicketPassSectionProps) {
   const t = useTranslations('gathering.ticketPass')
   const { isLoggedIn } = useAuthStore()
   const { data } = useMyTickets()
@@ -46,7 +51,7 @@ export default function TicketPassSection() {
 
           {data?.purchasable ? (
             <Button variant="primary" size="lg" className="w-full"
-              onClick={() => router.push('/payments/random-table')}>
+              onClick={() => router.push(`/payments/random-table${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`)}>
               1회권·4회권 선택하기
             </Button>
           ) : (

@@ -62,8 +62,15 @@ export default function GatheringDetailPage({
   const price = selectedSession?.price ?? gathering.basePrice ?? 0
   const selectedPath = selectedSession ? `/gatherings/${gathering.id}?session=${selectedSession.id}` : `/gatherings/${gathering.id}`
   const applyPath = selectedSession ? `/gatherings/${gathering.id}/apply?session=${selectedSession.id}` : ''
+  // 우연한 식탁은 회원 전용 단계형 신청(회차 복수 선택)으로 간다. 고른 회차가 있으면 1지망으로 넘긴다. (KAN-344)
+  const isRandomTable = gathering.gatheringType === 'RANDOM_TABLE'
+  const diningApplyPath = `/gatherings/${gathering.id}/apply/dining${selectedSession ? `?session=${selectedSession.id}` : ''}`
 
   const handleApplyClick = () => {
+    if (isRandomTable) {
+      if (requireAuth(diningApplyPath)) router.push(diningApplyPath)
+      return
+    }
     if (!selectedSession) return
     if (isLoggedIn) {
       router.push(applyPath)
@@ -111,10 +118,10 @@ export default function GatheringDetailPage({
               variant="primary"
               size="default"
               className="px-6"
-              disabled={!selectedSession}
+              disabled={!selectedSession && !isRandomTable}
               onClick={handleApplyClick}
             >
-              {selectedSession ? t('apply') : t('selectSession')}
+              {selectedSession || isRandomTable ? t('apply') : t('selectSession')}
             </Button>
           ) : (
             <Button

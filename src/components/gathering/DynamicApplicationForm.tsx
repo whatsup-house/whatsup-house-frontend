@@ -23,7 +23,7 @@ import type {
   UserProfile,
 } from '@/lib/api/types'
 
-type FieldValue = string | number | string[]
+export type FieldValue = string | number | string[]
 
 interface DynamicApplicationFormProps {
   gathering: GatheringDetail
@@ -33,7 +33,7 @@ interface DynamicApplicationFormProps {
 }
 
 // 질문 값이 비었는지 판정 (필수 검증용)
-function isEmpty(question: FormQuestionDetail, value: FieldValue | undefined): boolean {
+export function isEmpty(question: FormQuestionDetail, value: FieldValue | undefined): boolean {
   if (value === undefined) return true
   if (question.type === 'MULTI_CHOICE') return !Array.isArray(value) || value.length === 0
   if (question.type === 'MBTI_INPUT') return typeof value !== 'string' || value.length !== 4 || value.includes('·')
@@ -42,7 +42,7 @@ function isEmpty(question: FormQuestionDetail, value: FieldValue | undefined): b
 }
 
 // 회원 프로필에서 questionKey에 대응하는 초기값을 뽑는다.
-function prefillFromProfile(question: FormQuestionDetail, profile: UserProfile): FieldValue | undefined {
+export function prefillFromProfile(question: FormQuestionDetail, profile: UserProfile): FieldValue | undefined {
   switch (question.questionKey) {
     case 'gender':
       return profile.gender ?? undefined

@@ -599,6 +599,27 @@
       "depositAccount": "Cuenta de depósito (pago después de la solicitud)",
       "accountHolder": "Titular de la cuenta {holder}",
       "loginRequired": "Inicia sesión para comprar un pase."
+    },
+    "diningApply": {
+      "steps": {
+        "sessions": "Elige tus fechas",
+        "form": "Completa el formulario",
+        "ticket": "Revisa tu pase"
+      },
+      "stepProgress": "{step}/3",
+      "sessionsGuide": "Elige todas las fechas que te vengan bien. Daremos prioridad a las que elijas primero.",
+      "prev": "Atrás",
+      "next": "Siguiente",
+      "submit": "Enviar solicitud",
+      "requiredMissing": "Completa todos los campos obligatorios.",
+      "selectedSessionsTitle": "Tus fechas (por prioridad)",
+      "noTicketNotice": "Aún no tienes un pase. Si solicitas ahora, quedará pendiente de pago y se confirmará cuando tengas un pase.",
+      "submitted": "Hemos recibido tu solicitud.",
+      "submitFailed": "No se pudo enviar la solicitud. Inténtalo de nuevo en un momento.",
+      "paymentPendingTitle": "Pago pendiente",
+      "paymentPendingDescription": "Recibimos tu solicitud, pero no tienes pases suficientes. Compra un pase para confirmarla y esperar el emparejamiento.",
+      "buyTicket": "Comprar un pase",
+      "viewMyApplications": "Ver mis solicitudes"
     }
   },
   "review": {
@@ -693,6 +714,17 @@
         "PENDING": "Depósito pendiente",
         "CONFIRMED": "Depósito completo",
         "FREE": "Gratis"
+      },
+      "matchStatus": {
+        "WAITING": "Esperando emparejamiento",
+        "MATCHING": "Emparejando",
+        "CONFIRM_PENDING": "Pendiente de confirmación",
+        "CONFIRMED": "Emparejado",
+        "REALLOCATING": "Reasignando",
+        "ALTERNATIVE_OFFERED": "Fecha alternativa ofrecida",
+        "TRANSFERRED": "Fecha cambiada",
+        "NO_MATCH": "Sin emparejamiento",
+        "EXCEPTION": "En revisión"
       },
       "emptyFiltered": "No hay solicitudes con este estado.",
       "empty": "Aún no has solicitado ningún encuentro.",

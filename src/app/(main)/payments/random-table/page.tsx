@@ -10,6 +10,7 @@ import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseT
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useToastStore } from '@/lib/store/toastStore'
 import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
+import { safeReturnUrl } from '@/lib/utils/url'
 import type { TicketPass } from '@/lib/api/types'
 
 function PaymentContent() {
@@ -17,6 +18,8 @@ function PaymentContent() {
   const searchParams = useSearchParams()
   const bookingNumber = searchParams.get('bookingNumber')
   const applicationId = searchParams.get('applicationId')
+  // 우연한 식탁 신청 흐름에서 들어오면 입력을 유지한 신청 화면으로 돌아갈 수 있게 한다. (KAN-344)
+  const returnUrl = searchParams.get('returnUrl')
   const { isLoggedIn, isInitialized } = useRequireAuth()
   const productsQuery = useTicketProducts()
   const memberTickets = useMyTickets(applicationId)
@@ -167,6 +170,11 @@ function PaymentContent() {
           )}
           <Button variant="primary" size="lg" className="w-full" disabled={!canPurchase || !product} isLoading={purchase.isPending} onClick={submit}>{product?.name ?? '이용권'} 구매 요청</Button>
         </>
+      )}
+      {returnUrl && (
+        <Button variant="outlined" size="lg" className="w-full mt-3" onClick={() => router.push(safeReturnUrl(returnUrl))}>
+          신청 화면으로 돌아가기
+        </Button>
       )}
     </div>
   )

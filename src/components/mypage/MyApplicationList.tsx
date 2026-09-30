@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
-import { useMyApplicationsMe, useCancelApplication } from '@/lib/hooks/useApplications'
+import { useMyApplicationsMe, useCancelApplication, useMyDiningApplications } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { formatLocalizedNumericDate } from '@/lib/utils/date'
 import { getApplicationDisplayStatus } from '@/lib/utils/applicationDisplay'
@@ -38,6 +38,10 @@ export default function MyApplicationList() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>(null)
   const { data: applications, isLoading } = useMyApplicationsMe(filterStatus, isLoggedIn)
   const cancelMutation = useCancelApplication()
+  // 우연한 식탁 신청의 매칭 상태는 /api/dining/me/applications 에만 있다. 해당 신청이 있을 때만 조회한다. (KAN-344)
+  const hasRandomTable = applications?.some((item) => item.gathering.gatheringType === 'RANDOM_TABLE') ?? false
+  const { data: diningApplications } = useMyDiningApplications(isLoggedIn && hasRandomTable)
+  const matchStatusById = new Map(diningApplications?.map((item) => [item.id, item.matchStatus]) ?? [])
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const tabScrollRef = useRef<HTMLDivElement>(null)
 
@@ -104,6 +108,7 @@ export default function MyApplicationList() {
             const canCancel = item.status === 'PENDING' || item.status === 'PAYMENT_PENDING'
             const cannotCancel = item.status === 'CONFIRMED' || item.status === 'ATTENDED'
             const displayStatus = getApplicationDisplayStatus(item.status, item.paymentStatus)
+            const matchStatus = item.gathering.gatheringType === 'RANDOM_TABLE' ? matchStatusById.get(item.id) : null
             const goDetail = () => {
               if (isRandomTablePaymentPending) {
                 router.push(`/payments/random-table?applicationId=${encodeURIComponent(item.id)}`)
@@ -157,6 +162,11 @@ export default function MyApplicationList() {
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[displayStatus]}`}>
                         {t(`status.${displayStatus}`)}
                       </span>
+                      {matchStatus && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-tag-bg text-tag-text">
+                          {t(`matchStatus.${matchStatus}`)}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <p className="text-xs text-tag-text mt-1">

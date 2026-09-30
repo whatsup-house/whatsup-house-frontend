@@ -12,10 +12,12 @@ interface GatheringSessionListProps {
   sessions: GatheringSession[]
   selectedSessionId: string | null
   onSelect: (sessionId: string) => void
+  // 우연한 식탁 복수 선택: 고른 순서 = 우선순위. 주면 체크박스처럼 동작하고 순위 번호를 보여준다. (KAN-344)
+  priorityIds?: string[]
 }
 
 // 종류 상세의 회차 목록: 날짜·시간·지역·잔여 정원·마감을 보여주고 신청할 회차 1개를 고른다. (KAN-339)
-export default function GatheringSessionList({ sessions, selectedSessionId, onSelect }: GatheringSessionListProps) {
+export default function GatheringSessionList({ sessions, selectedSessionId, onSelect, priorityIds }: GatheringSessionListProps) {
   const t = useTranslations('gathering.detail')
   const locale = useLocale()
   const selected = sessions.find((session) => session.id === selectedSessionId)
@@ -32,10 +34,11 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
           {t('noSchedule')}
         </p>
       ) : (
-        <div role="radiogroup" aria-label={t('scheduleTitle')} className="flex flex-col gap-2">
+        <div role={priorityIds ? 'group' : 'radiogroup'} aria-label={t('scheduleTitle')} className="flex flex-col gap-2">
           {sessions.map((session) => {
             const applicable = isSessionApplicable(session)
-            const isSelected = session.id === selectedSessionId
+            const priority = (priorityIds?.indexOf(session.id) ?? -1) + 1
+            const isSelected = priorityIds ? priority > 0 : session.id === selectedSessionId
             const deadline = applicable && session.applyDeadlineAt
               ? t('applyDeadline', {
                 date: `${formatLocalizedShortDate(session.applyDeadlineAt, locale)} ${dayjs(session.applyDeadlineAt).format('HH:mm')}`,
@@ -46,7 +49,7 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
               <button
                 key={session.id}
                 type="button"
-                role="radio"
+                role={priorityIds ? 'checkbox' : 'radio'}
                 aria-checked={isSelected}
                 disabled={!applicable}
                 onClick={() => onSelect(session.id)}
@@ -56,6 +59,11 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-foreground">
+                    {priority > 0 && (
+                      <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                        {priority}
+                      </span>
+                    )}
                     {formatLocalizedShortDate(session.eventDate, locale)} {formatTimeRange(session.startTime, session.endTime)}
                   </p>
                   {applicable ? (

@@ -599,6 +599,27 @@
       "depositAccount": "Deposit account (pay after request)",
       "accountHolder": "Account holder {holder}",
       "loginRequired": "Log in to purchase a pass."
+    },
+    "diningApply": {
+      "steps": {
+        "sessions": "Pick your dates",
+        "form": "Fill in the form",
+        "ticket": "Check your pass"
+      },
+      "stepProgress": "{step}/3",
+      "sessionsGuide": "Pick every date that works for you. We'll prioritize the dates you picked first.",
+      "prev": "Back",
+      "next": "Next",
+      "submit": "Apply",
+      "requiredMissing": "Please fill in all required fields.",
+      "selectedSessionsTitle": "Your dates (in priority order)",
+      "noTicketNotice": "You don't have a pass yet. If you apply now, your application will await payment and be confirmed once you have a pass.",
+      "submitted": "Your application has been received.",
+      "submitFailed": "Couldn't submit your application. Please try again shortly.",
+      "paymentPendingTitle": "Awaiting payment",
+      "paymentPendingDescription": "Your application was received, but you don't have enough passes. Buy a pass to confirm it and wait for matching.",
+      "buyTicket": "Buy a pass",
+      "viewMyApplications": "View my applications"
     }
   },
   "review": {
@@ -693,6 +714,17 @@
         "PENDING": "Deposit pending",
         "CONFIRMED": "Deposit complete",
         "FREE": "Free"
+      },
+      "matchStatus": {
+        "WAITING": "Waiting for match",
+        "MATCHING": "Matching",
+        "CONFIRM_PENDING": "Pending confirmation",
+        "CONFIRMED": "Matched",
+        "REALLOCATING": "Reassigning",
+        "ALTERNATIVE_OFFERED": "Alternative date offered",
+        "TRANSFERRED": "Date moved",
+        "NO_MATCH": "No match",
+        "EXCEPTION": "Under review"
       },
       "emptyFiltered": "No applications with this status.",
       "empty": "You have not applied for any gatherings yet.",
