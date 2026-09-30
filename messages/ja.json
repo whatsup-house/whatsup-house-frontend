@@ -599,6 +599,27 @@
       "depositAccount": "入金口座（申請後に入金）",
       "accountHolder": "口座名義 {holder}",
       "loginRequired": "ログイン後に利用券を購入できます。"
+    },
+    "diningApply": {
+      "steps": {
+        "sessions": "希望日の選択",
+        "form": "申請フォーム入力",
+        "ticket": "利用券の確認"
+      },
+      "stepProgress": "{step}/3",
+      "sessionsGuide": "参加できる日程をすべて選んでください。先に選んだ日程から優先して割り当てます。",
+      "prev": "戻る",
+      "next": "次へ",
+      "submit": "申請する",
+      "requiredMissing": "必須項目をすべて入力してください。",
+      "selectedSessionsTitle": "希望日（優先順）",
+      "noTicketNotice": "利用券をお持ちではありません。今申請すると支払い待ちとして受け付けられ、利用券の準備ができ次第確定します。",
+      "submitted": "申請を受け付けました。",
+      "submitFailed": "申請に失敗しました。しばらくしてからもう一度お試しください。",
+      "paymentPendingTitle": "支払い待ち",
+      "paymentPendingDescription": "申請は受け付けましたが、利用券が不足しています。利用券を購入すると申請が確定し、マッチング待ちになります。",
+      "buyTicket": "利用券を購入する",
+      "viewMyApplications": "申請履歴を見る"
     }
   },
   "review": {
@@ -693,6 +714,17 @@
         "PENDING": "入金確認中",
         "CONFIRMED": "入金完了",
         "FREE": "無料"
+      },
+      "matchStatus": {
+        "WAITING": "マッチング待ち",
+        "MATCHING": "マッチング中",
+        "CONFIRM_PENDING": "確定待ち",
+        "CONFIRMED": "マッチング確定",
+        "REALLOCATING": "再配置中",
+        "ALTERNATIVE_OFFERED": "代替日程のご提案",
+        "TRANSFERRED": "日程変更",
+        "NO_MATCH": "マッチング不成立",
+        "EXCEPTION": "確認中"
       },
       "emptyFiltered": "該当状態の申請履歴がありません。",
       "empty": "まだ申請したギャザリングがありません。",

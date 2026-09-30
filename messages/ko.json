@@ -599,6 +599,27 @@
       "depositAccount": "입금 계좌 (신청 후 입금)",
       "accountHolder": "예금주 {holder}",
       "loginRequired": "로그인 후 이용권을 구매할 수 있어요."
+    },
+    "diningApply": {
+      "steps": {
+        "sessions": "희망 날짜 선택",
+        "form": "신청서 작성",
+        "ticket": "이용권 확인"
+      },
+      "stepProgress": "{step}/3",
+      "sessionsGuide": "참여할 수 있는 날짜를 모두 골라주세요. 먼저 고른 날짜부터 우선 배정돼요.",
+      "prev": "이전",
+      "next": "다음",
+      "submit": "신청하기",
+      "requiredMissing": "필수 항목을 모두 입력해주세요.",
+      "selectedSessionsTitle": "희망 날짜 (우선순위 순)",
+      "noTicketNotice": "보유한 이용권이 없어요. 지금 신청하면 결제 대기로 접수되고, 이용권이 준비되면 확정돼요.",
+      "submitted": "신청이 접수됐어요.",
+      "submitFailed": "신청에 실패했어요. 잠시 후 다시 시도해주세요.",
+      "paymentPendingTitle": "결제 대기",
+      "paymentPendingDescription": "신청은 접수됐지만 이용권이 부족해요. 이용권을 구매하면 신청이 확정되고 매칭을 기다리게 돼요.",
+      "buyTicket": "이용권 구매하기",
+      "viewMyApplications": "내 신청 보기"
     }
   },
   "review": {
@@ -693,6 +714,17 @@
         "PENDING": "입금확인중",
         "CONFIRMED": "입금 완료",
         "FREE": "무료"
+      },
+      "matchStatus": {
+        "WAITING": "매칭 대기",
+        "MATCHING": "매칭 중",
+        "CONFIRM_PENDING": "확정 대기",
+        "CONFIRMED": "매칭 확정",
+        "REALLOCATING": "재배치 중",
+        "ALTERNATIVE_OFFERED": "대체 날짜 제안",
+        "TRANSFERRED": "날짜 이동",
+        "NO_MATCH": "매칭 실패",
+        "EXCEPTION": "확인 중"
       },
       "emptyFiltered": "해당 상태의 신청 내역이 없어요.",
       "empty": "아직 신청한 게더링이 없어요.",

@@ -599,6 +599,27 @@
       "depositAccount": "存款账号（请求后付款）",
       "accountHolder": "账户持有人 {holder}",
       "loginRequired": "登录购买通行证。"
+    },
+    "diningApply": {
+      "steps": {
+        "sessions": "选择意向日期",
+        "form": "填写申请表",
+        "ticket": "确认通行证"
+      },
+      "stepProgress": "{step}/3",
+      "sessionsGuide": "请选出所有可以参加的日期。我们会优先安排你先选的日期。",
+      "prev": "上一步",
+      "next": "下一步",
+      "submit": "提交申请",
+      "requiredMissing": "请填写所有必填项。",
+      "selectedSessionsTitle": "意向日期（按优先顺序）",
+      "noTicketNotice": "你还没有通行证。现在申请将以待付款状态受理，通行证到位后即可确认。",
+      "submitted": "申请已受理。",
+      "submitFailed": "申请失败，请稍后再试。",
+      "paymentPendingTitle": "待付款",
+      "paymentPendingDescription": "申请已受理，但通行证不足。购买通行证后申请即可确认并进入匹配等待。",
+      "buyTicket": "购买通行证",
+      "viewMyApplications": "查看我的申请"
     }
   },
   "review": {
@@ -693,6 +714,17 @@
         "PENDING": "存款待处理",
         "CONFIRMED": "存款完成",
         "FREE": "免费"
+      },
+      "matchStatus": {
+        "WAITING": "等待匹配",
+        "MATCHING": "匹配中",
+        "CONFIRM_PENDING": "待确认",
+        "CONFIRMED": "匹配成功",
+        "REALLOCATING": "重新分配中",
+        "ALTERNATIVE_OFFERED": "已提供替代日期",
+        "TRANSFERRED": "已改期",
+        "NO_MATCH": "匹配失败",
+        "EXCEPTION": "核查中"
       },
       "emptyFiltered": "没有具有此状态的应用程序。",
       "empty": "您还没有申请参加任何聚会。",
