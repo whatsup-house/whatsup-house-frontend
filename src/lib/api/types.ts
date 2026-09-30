@@ -81,6 +81,43 @@ export interface GatheringTypeCard {
   displayDate: string | null
 }
 
+// 관리자 모임 종류 생성/수정 — BE GatheringCreateRequest / GatheringUpdateRequest (KAN-338)
+export interface AdminGatheringTypeRequest {
+  title: string
+  description: string
+  howToRun: string[]
+  tags: string[]
+  basePrice: number
+  thumbnailUrl?: string          // 새로 올린 이미지의 tempPath만. 생략하면 기존 썸네일 유지
+  gatheringType?: GatheringType  // 생성 시에만 반영 (수정 불가)
+}
+
+// 관리자 회차 필드 — BE GatheringSessionRequest (회차 수정 본문이자 반복 생성의 base) (KAN-338)
+export interface AdminSessionRequest {
+  eventDate: string              // YYYY-MM-DD
+  startTime: string | null       // HH:mm
+  endTime: string | null
+  locationId: string
+  maxAttendees: number
+  priceOverride: number | null   // null이면 종류 기본 가격
+  applyDeadlineAt: string | null // YYYY-MM-DDTHH:mm, null이면 마감 없음
+}
+
+// 회차 생성 — 단건은 회차 필드를 최상위에, 주간 반복은 { base, repeatWeekly: { until } } (KAN-338)
+export type AdminSessionCreateRequest =
+  | AdminSessionRequest
+  | { base: AdminSessionRequest; repeatWeekly: { until: string } }
+
+// 관리자 모임 목록의 한 줄 = 종류 1개. 회차 단위 관리자 목록을 종류 ID로 묶어 파생한다.
+export interface AdminGatheringTypeRow {
+  id: string
+  title: string
+  sessionIds: string[]
+  sessionCount: number
+  upcomingCount: number          // 오늘 이후 · 취소 제외
+  nextEventDate: string | null   // 다가오는 가장 이른 회차 날짜
+}
+
 // 우연한 식탁 이용권 (KAN-260)
 export type TicketPassStatus = 'PENDING' | 'ACTIVE' | 'USED_UP' | 'CANCELLED'
 export type TicketProduct = 'RANDOM_TABLE_ONE' | 'RANDOM_TABLE_FOUR'

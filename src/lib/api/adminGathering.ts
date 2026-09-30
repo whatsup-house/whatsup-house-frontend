@@ -1,9 +1,21 @@
 import apiClient from './client'
-import type { ApiResponse, AdminApplicationDetail, PaymentStatus } from './types'
+import type {
+  ApiResponse,
+  AdminApplicationDetail,
+  AdminGatheringTypeRequest,
+  AdminGatheringTypeRow,
+  AdminSessionCreateRequest,
+  AdminSessionRequest,
+  GatheringDetail,
+  GatheringSession,
+  PaymentStatus,
+} from './types'
 
 // 화면 표시 모델. 백엔드 목록 응답을 getAll에서 이 형태로 매핑한다. (KAN-185)
+// 항목 하나 = 회차 하나. id는 회차 ID, gatheringId는 종류 ID. (KAN-338)
 export interface AdminGatheringListItem {
   id: string
+  gatheringId: string
   title: string
   date: string                 // 백엔드 eventDate 매핑
   startTime: string
@@ -20,6 +32,7 @@ export interface AdminGatheringListItem {
 // 백엔드 관리자 게더링 목록 응답 원본 (AdminGatheringResponse)
 interface RawAdminGathering {
   id: string
+  gatheringId: string
   title: string
   eventDate: string
   startTime: string | null
@@ -31,59 +44,30 @@ interface RawAdminGathering {
   applicantCount: number
 }
 
-// 관리자 게더링 상세 응답 (GET /api/admin/gatherings/{id}). 수정 패널 prefill용. (KAN-220)
-export interface AdminGatheringDetail {
-  id: string
-  title: string
-  description: string | null
-  howToRun?: string[] | null
-  eventDate: string
-  startTime: string | null
-  endTime: string | null
-  price: number | null
-  maxAttendees: number
-  status: string
-  thumbnailUrl: string | null
-  tags?: string[] | null
-  location: { id: string; name: string; address: string } | null
-}
-
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
 
-export interface GatheringCreateRequest {
-  title: string
-  description: string
-  howToRun?: string[]
-  locationId: string
-  date: string
-  startTime: string
-  endTime: string
-  price: number
-  capacity: number
-  thumbnailUrl?: string
-  tags?: string[]
-  moodTags?: string[]
-  activityTags?: string[]
-  mileageReward?: number
-  gatheringType?: GatheringType   // 생성 시에만 반영됨 (수정은 백엔드에서 무시)
-}
-
-// 화면 모델(date/capacity)을 백엔드 계약(eventDate/maxAttendees)으로 변환한다. (KAN-185)
-function toGatheringRequestBody(data: GatheringCreateRequest) {
-  return {
-    title: data.title,
-    description: data.description,
-    howToRun: data.howToRun,
-    locationId: data.locationId,
-    eventDate: data.date,
-    startTime: data.startTime,
-    endTime: data.endTime,
-    price: data.price,
-    maxAttendees: data.capacity,
-    thumbnailUrl: data.thumbnailUrl,
-    tags: data.tags ?? data.moodTags,
-    gatheringType: data.gatheringType,
+// 회차 단위 관리자 목록을 종류 단위로 묶는다. 목록 순서(BE 반환 순)대로 종류가 처음 나온 순서를 유지한다.
+// ponytail: 회차가 하나도 없는 종류는 BE 목록에 없어 빠진다. 종류 목록 API가 생기면 교체.
+export function groupAdminGatheringTypes(items: AdminGatheringListItem[], today: string): AdminGatheringTypeRow[] {
+  const rows = new Map<string, AdminGatheringTypeRow>()
+  for (const item of items) {
+    const row = rows.get(item.gatheringId) ?? {
+      id: item.gatheringId,
+      title: item.title,
+      sessionIds: [],
+      sessionCount: 0,
+      upcomingCount: 0,
+      nextEventDate: null,
+    }
+    row.sessionIds.push(item.id)
+    row.sessionCount += 1
+    if (item.date >= today && item.status !== 'CANCELLED') {
+      row.upcomingCount += 1
+      if (!row.nextEventDate || item.date < row.nextEventDate) row.nextEventDate = item.date
+    }
+    rows.set(item.gatheringId, row)
   }
+  return [...rows.values()]
 }
 
 export interface LocationItem {
@@ -158,6 +142,7 @@ export const adminGatheringApi = {
     // 백엔드 eventDate/maxAttendees/applicantCount를 화면 모델(date/capacity/currentApplicants)로 매핑. (KAN-185)
     return (res.data.data ?? []).map((g) => ({
       id: g.id,
+      gatheringId: g.gatheringId,
       title: g.title,
       date: g.eventDate,
       startTime: g.startTime ?? '',
@@ -171,22 +156,41 @@ export const adminGatheringApi = {
     }))
   },
 
-  create: async (data: GatheringCreateRequest) => {
-    const res = await apiClient.post<ApiResponse<unknown>>('/api/admin/gatherings', toGatheringRequestBody(data))
+  // 모임 종류 생성. 회차는 createSessions로 따로 추가한다. (KAN-338)
+  create: async (data: AdminGatheringTypeRequest): Promise<GatheringDetail> => {
+    const res = await apiClient.post<ApiResponse<GatheringDetail>>('/api/admin/gatherings', data)
     return res.data.data
   },
 
-  // 수정 패널 prefill용 상세 조회 (소개/장소 등 목록 응답에 없는 필드 포함). (KAN-220)
-  getById: async (id: string): Promise<AdminGatheringDetail> => {
-    const res = await apiClient.get<ApiResponse<AdminGatheringDetail>>(`/api/admin/gatherings/${id}`)
+  // 모임 종류 상세 + 전체 회차. 회차 ID로 요청해도 그 회차의 종류로 응답한다. (KAN-338)
+  getById: async (id: string): Promise<GatheringDetail> => {
+    const res = await apiClient.get<ApiResponse<GatheringDetail>>(`/api/admin/gatherings/${id}`)
     return res.data.data
   },
 
-  update: async (id: string, data: GatheringCreateRequest) => {
-    const res = await apiClient.put<ApiResponse<unknown>>(`/api/admin/gatherings/${id}`, toGatheringRequestBody(data))
+  // 종류 ID만 받는다. 타입은 바꿀 수 없다.
+  update: async (id: string, data: AdminGatheringTypeRequest): Promise<GatheringDetail> => {
+    const res = await apiClient.put<ApiResponse<GatheringDetail>>(`/api/admin/gatherings/${id}`, data)
     return res.data.data
   },
 
+  // 회차 추가 — 단건 또는 주간 반복. 만들어진 회차 목록을 돌려준다.
+  createSessions: async (gatheringId: string, data: AdminSessionCreateRequest): Promise<GatheringSession[]> => {
+    const res = await apiClient.post<ApiResponse<GatheringSession[]>>(`/api/admin/gatherings/${gatheringId}/sessions`, data)
+    return res.data.data
+  },
+
+  updateSession: async (sessionId: string, data: AdminSessionRequest): Promise<GatheringSession> => {
+    const res = await apiClient.put<ApiResponse<GatheringSession>>(`/api/admin/gatherings/sessions/${sessionId}`, data)
+    return res.data.data
+  },
+
+  // 신청이 있는 회차면 409
+  deleteSession: async (sessionId: string) => {
+    await apiClient.delete(`/api/admin/gatherings/sessions/${sessionId}`)
+  },
+
+  // 경로 id는 회차 ID (KAN-338)
   updateStatus: async (id: string, status: string) => {
     await apiClient.patch(`/api/admin/gatherings/${id}/status`, { status })
   },
@@ -201,6 +205,7 @@ export const adminGatheringApi = {
     await apiClient.put('/api/admin/gatherings/curated/order', { gatheringIds })
   },
 
+  // 종류 삭제(회차 포함). 신청이 있는 회차가 있으면 409
   delete: async (id: string) => {
     await apiClient.delete(`/api/admin/gatherings/${id}`)
   },
