@@ -1199,6 +1199,7 @@
       "edit": "Edit",
       "delete": "Delete",
       "setNotice": "Set as notice",
+      "clearNotice": "Remove notice",
       "report": "Report",
       "editTitle": "Edit message",
       "save": "Save",

@@ -888,3 +888,72 @@ export interface ChatOutgoingMessage {
   createdAt: string
   failed: boolean
 }
+
+// ===== 관리자 채팅 (KAN-334) =====
+// 백엔드 AdminChatController 실제 계약. Lombok boolean isX 필드는 JSON 에서 x 로 직렬화된다(isUnanswered → unanswered).
+export type ChatSourceType = 'GATHERING' | 'DINING_TABLE'
+export type ChatReportStatus = 'OPEN' | 'RESOLVED'
+
+// 방 목록 미리보기용 마지막 메시지 (ChatLastMessageResponse)
+export interface AdminChatLastMessage {
+  id: string
+  type: ChatMessageType
+  senderId: string | null
+  // TEXT 본문. IMAGE·SYSTEM·삭제면 null
+  content: string | null
+  systemKind: ChatSystemKind | null
+  systemParams: Record<string, unknown> | null
+  deleted: boolean
+  createdAt: string
+}
+
+// GET /api/admin/chat/rooms — 전체 방
+export interface AdminChatRoomSummary {
+  id: string
+  type: ChatRoomType
+  // GROUP: 방 이름, INQUIRY: 문의자 닉네임(탈퇴 시 null)
+  name: string | null
+  sourceType: ChatSourceType | null
+  sourceId: string | null
+  memberCount: number
+  lastMessage: AdminChatLastMessage | null
+  unreadCount: number
+  // 문의방 미답변(마지막 메시지를 문의자가 보냄)
+  unanswered: boolean
+  // 내가 참여 중인지. 미참여 단체방은 멤버 API 로 먼저 들어가야 방을 볼 수 있다.
+  member: boolean
+}
+
+// POST /api/admin/chat/rooms — 생성한 관리자는 서버가 자동 포함
+export interface AdminChatRoomCreateRequest {
+  name: string
+  memberIds: string[]
+  sourceType?: ChatSourceType
+  sourceId?: string
+}
+
+export type ChatRoomIdResponse = ChatInquiryRoomResponse
+
+// GET /api/admin/chat/rooms/source-members — 게더링 참가 확정자 / 매칭 조원
+export interface ChatSourceMember {
+  userId: string
+  nickname: string
+}
+
+// GET /api/admin/chat/reports
+export interface AdminChatReport {
+  id: string
+  roomId: string
+  messageId: string
+  reporterId: string
+  reporterNickname: string | null
+  reason: string
+  status: ChatReportStatus
+  createdAt: string
+  messageType: ChatMessageType
+  messageSenderId: string | null
+  messageSenderNickname: string | null
+  // 검토용 TEXT 원문(삭제된 메시지 포함). IMAGE·SYSTEM 은 null
+  messageContent: string | null
+  messageDeleted: boolean
+}

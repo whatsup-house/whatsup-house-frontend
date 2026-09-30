@@ -48,3 +48,11 @@ export function resolveApiErrorMessage(
 
   return t('errors.UNKNOWN')
 }
+
+// 관리자 화면용. 채팅 도메인 403(CHAT_NOT_MEMBER·CHAT_MUTED 등)이 아닌 403 은 관리자 권한이 없다는 뜻이다.
+export function getAdminApiErrorMessage(error: unknown, fallback: string): string {
+  if (getApiErrorStatus(error) === 403 && !getApiErrorCode(error)?.startsWith('CHAT_')) {
+    return '관리자만 할 수 있는 작업이에요. 관리자 계정으로 다시 로그인해주세요.'
+  }
+  return getApiErrorMessage(error, fallback)
+}
