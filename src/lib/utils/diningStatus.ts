@@ -63,3 +63,25 @@ export function getNextMatchRunAt(sessions: DiningSessionInfo[], now = dayjs()):
     .filter((runAt): runAt is string => !!runAt && dayjs(runAt).isAfter(now))
     .sort((a, b) => dayjs(a).valueOf() - dayjs(b).valueOf())[0] ?? null
 }
+
+// ===== 어드민 회차 콘솔 표시 (KAN-352) =====
+
+// 테이블 카드 라벨: id 앞 4자리
+export const tableLabel = (tableId: string) => `#${tableId.slice(0, 4)}`
+
+export const TABLE_STATUS_LABEL: Record<DiningTableStatus, string> = {
+  PROPOSED: '제안',
+  CONFIRMED: '확정',
+  DONE: '종료',
+  DISSOLVED: '해체',
+}
+
+export const TABLE_STATUS_CLASS: Record<DiningTableStatus, string> = {
+  PROPOSED: 'bg-yellow-100 text-yellow-700',
+  CONFIRMED: 'bg-green-100 text-green-700',
+  DONE: 'bg-blue-100 text-blue-700',
+  DISSOLVED: 'bg-gray-100 text-gray-500',
+}
+
+// 성별은 표준 질문 답 원문(MALE/FEMALE)
+export const genderShort = (gender: string | null) => (gender === 'MALE' ? '남' : gender === 'FEMALE' ? '여' : gender ?? '-')

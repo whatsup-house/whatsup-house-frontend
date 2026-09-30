@@ -950,17 +950,6 @@ export interface DiningDashboard {
   sessions: DiningDashboardSession[] // 날짜·시작 시간 순
 }
 
-// GET /api/admin/dining/venues — BE VenueResponse
-export interface DiningVenue {
-  id: string
-  name: string
-  address: string
-  mapUrl: string | null
-  priceRange: string | null
-  region: string
-  isActive: boolean
-}
-
 // PUT /api/admin/dining/sessions/{id}/venues 본문 항목 (목록으로 통째로 교체)
 export interface SessionVenueRequest {
   venueId: string
@@ -972,6 +961,136 @@ export interface SessionVenue {
   venue: DiningVenue
   capacityTables: number
   usedTables: number
+}
+
+// ===== 우연한 식탁 회차 콘솔 (관리자, KAN-352) =====
+// 시각은 LocalDateTime ISO 문자열.
+
+// GET /api/admin/dining/sessions/{id}/applicants — BE DiningApplicantResponse. 나이·성별·MBTI는 신청 답변 원문
+export interface DiningApplicant {
+  applicationId: string
+  userId: string | null            // 레거시 비회원 신청은 null
+  name: string
+  age: string | null
+  gender: string | null
+  mbti: string | null
+  status: ApplicationStatus
+  isPaid: boolean                  // 이용권 차감 완료 = 승인·출석
+  matchStatus: MatchStatus | null
+  candidateSessions: { sessionId: string; eventDate: string; priority: number }[] // 1순위부터
+  participationCount: number
+  hasExcludedRelation: boolean     // 같은 회차 신청자와 피하고 싶음·신고 관계
+}
+
+// BE ScoreDetail. penalties는 감점 항목명 → 감점 값
+export interface DiningScoreDetail {
+  pairAvg: number
+  pairMin: number
+  penalties: Record<string, number> | null
+}
+
+export type DiningAssignReason = 'INITIAL' | 'REALLOCATED' | 'MANUAL' | 'SPLIT' | 'MERGED'
+export type DiningUnassignedReason = 'AGE_GAP' | 'BLOCKED_PAIR' | 'NOT_ENOUGH_PEOPLE' | 'LOW_SCORE' | 'NEXT_SESSION_WAITING'
+
+// BE DiningTableListResponse.MemberView (좌석 순)
+export interface DiningTableMember {
+  memberId: string
+  applicationId: string
+  userId: string
+  nickname: string
+  birthYear: number | null
+  gender: string | null
+  mbti: string | null
+  assignReason: DiningAssignReason
+  isManual: boolean
+}
+
+// BE DiningTableListResponse.TableView (해체된 테이블 제외)
+export interface DiningAdminTable {
+  id: string
+  status: DiningTableStatus
+  groupScore: number | null        // 0~1
+  scoreDetail: DiningScoreDetail | null
+  confirmAt: string | null         // 자동 확정 예정 시각
+  locked: boolean                  // 수동 조정됨 — 재실행해도 유지
+  venueId: string | null
+  members: DiningTableMember[]
+  chatRoomId?: string | null       // BE 목록 응답에 아직 없다. 내려오면 채팅방 상태를 표시한다
+}
+
+// BE MatchRunResponse
+export interface DiningMatchRun {
+  id: string
+  startedAt: string
+  finishedAt: string | null
+  triggeredBy: string
+  candidateCount: number
+  tableCount: number
+  splitCount: number
+  mergeCount: number
+  reallocatedCount: number
+  unassignedCount: number
+  algorithmVersion: string
+}
+
+// GET /api/admin/dining/sessions/{id}/tables
+export interface DiningTableList {
+  tables: DiningAdminTable[]
+  unassigned: { applicationId: string; nickname: string; reason: DiningUnassignedReason }[]
+  lastRun: DiningMatchRun | null   // 실행 이력이 없으면 null
+}
+
+// POST /api/admin/dining/tables/{id}/confirm-now — 하드 조건 위반으로 보류되면 status가 PROPOSED 그대로
+export interface DiningTableConfirmResult {
+  id: string
+  status: DiningTableStatus
+  confirmedAt: string | null
+  venueId: string | null
+  chatRoomId: string | null
+}
+
+export interface DiningTableViolation {
+  tableId: string
+  rule: 'TABLE_SIZE' | 'AGE_GAP' | 'BLOCKED_PAIR'
+  message: string
+}
+
+// 테이블 조정(move·split·merge·dissolve) 응답 — 조정된 테이블만. 위반이면 400 TABLE_RULE_VIOLATION(params.violations)
+export interface DiningTableAdjustResponse {
+  tables: DiningAdminTable[]
+  validation: { valid: boolean; violations: DiningTableViolation[] }
+}
+
+// 테이블 조정 요청. 확정(CONFIRMED) 테이블이 끼면 reason 필수(BE 400)
+export type DiningTableAdjustRequest =
+  | { type: 'move'; tableId: string; memberId: string; targetTableId: string; reason?: string }
+  | { type: 'split'; tableId: string; memberIds: string[]; reason?: string }
+  | { type: 'merge'; tableIds: string[]; reason?: string } // 첫 테이블로 합친다
+  | { type: 'dissolve'; tableId: string; reason?: string }
+
+// GET /api/admin/dining/sessions/{id}/attendance (KAN-349 계약, 아직 404일 수 있다)
+export interface DiningAttendanceRow {
+  attendanceId: string
+  memberId: string
+  nickname: string
+  status: DiningAttendanceStatus
+  checkedInAt: string | null
+  noShowCandidate: boolean
+}
+
+// GET /api/admin/dining/sessions/{id}/feedback-summary (KAN-350). 평균은 응답이 없으면 null
+export interface DiningFeedbackSummary {
+  responseCount: number
+  memberCount: number
+  responseRate: number             // 0~1
+  avgTable: number | null
+  avgTalk: number | null
+  avgVenue: number | null
+  rejoinYes: number
+  rejoinMaybe: number
+  rejoinNo: number
+  reportCount: number
+  byTable: { tableId: string; responseCount: number; avgTable: number | null; avgTalk: number | null; avgVenue: number | null }[]
 }
 
 // 관리자 신청 상세 (답변 포함) — GET /api/admin/applications/{id}
