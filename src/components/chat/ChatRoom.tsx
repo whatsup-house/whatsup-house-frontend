@@ -143,7 +143,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
     router.replace(listHref)
   }, [isRedirecting, roomErrorCode, router, showToast, t, listHref])
 
-  // 읽음 처리 자리 (소켓 일감에서 구현)
+  // 읽음 전송: 방 진입·새 메시지 수신 시 (문서가 보일 때만, 같은 id 는 한 번만 — lib/chat/socket.ts)
   useEffect(() => {
     if (lastMessageId) markRead(roomId, lastMessageId)
   }, [markRead, roomId, lastMessageId])

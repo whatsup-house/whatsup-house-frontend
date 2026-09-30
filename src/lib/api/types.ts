@@ -901,6 +901,75 @@ export interface UnreadCountResponse {
   unreadCount: number
 }
 
+// ===== 우연한 식탁 운영: 예외함·설정 (KAN-353) =====
+// 백엔드 AdminDiningController(KAN-348) 계약. 시각은 LocalDateTime ISO 문자열.
+export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND'
+export type DiningExceptionStatus = 'OPEN' | 'RESOLVED'
+// WARN=기록만, RESTRICT/BAN=우연한 식탁 참여 자격 RESTRICTED
+export type DiningSafetyAction = 'WARN' | 'RESTRICT' | 'BAN'
+
+// GET /api/admin/dining/exceptions — 전체 회차 횡단, 최신순
+export interface DiningExceptionCase {
+  id: string
+  type: DiningExceptionType
+  status: DiningExceptionStatus
+  sessionId: string | null
+  // 현재는 매칭 그룹 ID
+  tableId: string | null
+  applicationId: string | null
+  reason: string
+  action: DiningSafetyAction | null
+  resolvedBy: string | null
+  resolutionNote: string | null
+  createdAt: string
+  resolvedAt: string | null
+}
+
+// PATCH /api/admin/dining/exceptions/{id} — RESOLVED면 note 필수, action은 SAFETY만
+export interface DiningExceptionStatusRequest {
+  status: DiningExceptionStatus
+  note?: string
+  action?: DiningSafetyAction
+}
+
+export interface DiningMatchingWeights {
+  gender: number
+  mbti: number
+  interests: number
+  wantedStyle: number
+  custom: number
+}
+
+// GET/PUT /api/admin/dining/settings/matching-rules — 요청·응답 같은 모양(PUT은 전체 교체)
+export interface DiningMatchingRules {
+  maxAgeGap: number
+  tableSizeMin: number
+  tableSizeMax: number
+  minGroupScore: number
+  autoConfirmGraceMinutes: number
+  weights: DiningMatchingWeights
+}
+
+// GET /api/admin/dining/venues — 삭제되지 않은 식당, 지역·이름 순
+export interface DiningVenue {
+  id: string
+  name: string
+  address: string
+  mapUrl: string | null
+  priceRange: string | null
+  region: string
+  isActive: boolean
+}
+
+// POST /venues, PUT /venues/{id} (전체 교체)
+export type DiningVenueRequest = Omit<DiningVenue, 'id'>
+
+// PUT /api/admin/dining/tables/{id}/venue
+export interface DiningTableVenueResponse {
+  tableId: string
+  venue: DiningVenue
+}
+
 // ===== 채팅 (KAN-332) =====
 // 백엔드(KAN-328) 계약: docs chat-design 5절. 모든 시각은 ISO 문자열.
 export type ChatRoomType = 'INQUIRY' | 'GROUP'
@@ -997,6 +1066,29 @@ export interface ChatOutgoingMessage {
   image: Blob | null
   createdAt: string
   failed: boolean
+}
+
+// ===== 채팅 소켓 (KAN-333) =====
+// GET /api/chat/socket-token — STOMP CONNECT 의 Authorization: Bearer 헤더용 단기 토큰
+export interface ChatSocketTokenResponse {
+  token: string
+  // 수명(초). 기본 120
+  expiresIn: number
+}
+
+// /topic/rooms/{roomId} 이벤트 봉투 (BE ChatSocketEventResponse). 메시지 페이로드는 방 전체에 한 번 보내는 뷰어 중립 값이다.
+export type ChatSocketEvent =
+  | { kind: 'MESSAGE_CREATED' | 'MESSAGE_UPDATED' | 'MESSAGE_DELETED' | 'REACTION_CHANGED'; roomId: string; payload: ChatMessage }
+  | { kind: 'READ'; roomId: string; payload: { userId: string; messageId: string } }
+  // 해제면 null
+  | { kind: 'NOTICE_CHANGED'; roomId: string; payload: ChatMessage | null }
+  | { kind: 'MEMBER_CHANGED'; roomId: string; payload: { userIds: string[] } }
+
+// /user/queue/rooms — 새 메시지가 생긴 방의 목록 미리보기 (봉투 없음, BE ChatRoomPreviewResponse)
+export interface ChatRoomPreviewEvent {
+  roomId: string
+  lastMessage: NonNullable<ChatRoomSummary['lastMessage']>
+  unreadCount: number
 }
 
 // ===== 채팅 웹 푸시 (KAN-336) =====
