@@ -684,6 +684,16 @@ export interface ApplicationDetail {
 
 export type MatchingStrategy = 'SAME' | 'DIVERSE' | 'OVERLAP'
 
+// 우연한 식탁 표준 항목 키 (백엔드 ReservedQuestionKey와 1:1, KAN-341)
+export type ReservedQuestionKey =
+  | 'BIRTH_YEAR'
+  | 'GENDER'
+  | 'MBTI'
+  | 'INTERESTS'
+  | 'MY_STYLE'
+  | 'WANTED_STYLE'
+  | 'DIET'
+
 // 질문 추가/수정 요청 (POST/PUT /api/admin/.../form/questions)
 export interface FormQuestionUpsertRequest {
   questionKey: string
@@ -714,6 +724,8 @@ export interface FormQuestionAdminItem {
   systemReserved: boolean
   matchingStrategy: MatchingStrategy | null
   matchingWeight: number | null
+  // 표준 항목이면 삭제·타입 변경 불가, 라벨·선택지만 수정 (KAN-343). 구버전 응답엔 필드가 없다.
+  reservedKey?: ReservedQuestionKey | null
 }
 
 // ===== 자동매칭 (관리자) =====
