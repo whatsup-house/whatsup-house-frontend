@@ -21,9 +21,9 @@ import type { ChatMessage, ChatOutgoingMessage, ChatReaction, ChatRoomSummary } 
 import { useAuthStore } from '@/lib/store/authStore'
 import { getApiErrorStatus } from '@/lib/utils/apiError'
 
-const roomsKey = ['chat', 'rooms'] as const
-const roomKey = (roomId: string) => ['chat', 'room', roomId] as const
-const messagesKey = (roomId: string) => ['chat', 'messages', roomId] as const
+export const roomsKey = ['chat', 'rooms'] as const
+export const roomKey = (roomId: string) => ['chat', 'room', roomId] as const
+export const messagesKey = (roomId: string) => ['chat', 'messages', roomId] as const
 
 // pages[0] = 최신 페이지, pages[n] = 더 오래된 페이지. 각 페이지 안은 오래된 → 최신 순.
 type MessagePages = InfiniteData<ChatMessage[], string | undefined>

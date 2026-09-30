@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ChatMember } from '@/lib/api/types'
@@ -6,10 +7,13 @@ import ChatAvatar from './ChatAvatar'
 interface ChatMemberDrawerProps {
   members: ChatMember[]
   myUserId: string | null
+  // 관리자 화면 전용: 멤버 행 오른쪽 액션, 목록 아래 영역
+  renderMemberActions?: (member: ChatMember) => ReactNode
+  footer?: ReactNode
   onClose: () => void
 }
 
-export default function ChatMemberDrawer({ members, myUserId, onClose }: ChatMemberDrawerProps) {
+export default function ChatMemberDrawer({ members, myUserId, renderMemberActions, footer, onClose }: ChatMemberDrawerProps) {
   const t = useTranslations('chat')
   const tCommon = useTranslations('common')
 
@@ -37,22 +41,26 @@ export default function ChatMemberDrawer({ members, myUserId, onClose }: ChatMem
               <X size={20} />
             </button>
           </div>
-          <ul className="flex-1 overflow-y-auto py-2">
-            {members.map((member) => {
-              const name = member.nickname ?? t('withdrawn')
-              return (
-                <li key={member.userId} className="flex items-center gap-3 px-4 py-2">
-                  <ChatAvatar name={name} avatarUrl={member.avatarUrl} size="sm" />
-                  <span className="min-w-0 truncate text-sm text-foreground">{name}</span>
-                  {member.userId === myUserId && (
-                    <span className="shrink-0 rounded-full bg-tag-bg px-1.5 py-0.5 text-[10px] text-tag-text">
-                      {t('room.me')}
-                    </span>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+          <div className="flex-1 overflow-y-auto">
+            <ul className="py-2">
+              {members.map((member) => {
+                const name = member.nickname ?? t('withdrawn')
+                return (
+                  <li key={member.userId} className="flex items-center gap-3 px-4 py-2">
+                    <ChatAvatar name={name} avatarUrl={member.avatarUrl} size="sm" />
+                    <span className="min-w-0 truncate text-sm text-foreground">{name}</span>
+                    {member.userId === myUserId && (
+                      <span className="shrink-0 rounded-full bg-tag-bg px-1.5 py-0.5 text-[10px] text-tag-text">
+                        {t('room.me')}
+                      </span>
+                    )}
+                    {renderMemberActions && <div className="ml-auto shrink-0">{renderMemberActions(member)}</div>}
+                  </li>
+                )
+              })}
+            </ul>
+            {footer}
+          </div>
         </aside>
       </div>
     </div>

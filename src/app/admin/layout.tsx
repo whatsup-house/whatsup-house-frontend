@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, CalendarDays, MapPin, Users, LogOut, ClipboardList, Home, Utensils, FileText, Mail, Menu, X,
-  Ticket,
+  Ticket, MessageCircle,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useLogout } from '@/lib/hooks/useAuth'
@@ -20,6 +20,7 @@ const sidebarItems = [
   { href: '/admin/tickets', icon: Ticket, label: '이용권 설정' },
   { href: '/admin/locations', icon: MapPin, label: '장소 관리' },
   { href: '/admin/users', icon: Users, label: '회원 관리' },
+  { href: '/admin/chat', icon: MessageCircle, label: '채팅' },
   { href: '/admin/email-templates', icon: Mail, label: '메일 템플릿 관리' },
 ]
 

@@ -25,7 +25,7 @@ import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorStatus, resolveApiErrorMessage } from '@/lib/utils/apiError'
 import { getMessagePreview, getSystemMessageText } from '@/lib/utils/chatMessage'
 import { formatLocalizedFullDate } from '@/lib/utils/date'
-import type { ChatMessage } from '@/lib/api/types'
+import type { ChatMember, ChatMessage } from '@/lib/api/types'
 import ChatActionSheet from './ChatActionSheet'
 import type { ChatSheetAction } from './ChatActionSheet'
 import ChatComposer from './ChatComposer'
@@ -43,6 +43,11 @@ const LOAD_MORE_THRESHOLD = 60
 
 interface ChatRoomProps {
   roomId: string
+  // 뒤로가기 기본 경로·방에 못 들어갈 때 돌아갈 목록 (관리자 화면은 /admin/chat)
+  listHref?: string
+  // 관리자 화면이 멤버 드로어에 붙이는 액션 (멤버 행 오른쪽, 목록 아래)
+  memberActions?: (member: ChatMember) => ReactNode
+  drawerFooter?: ReactNode
 }
 
 interface DialogState {
@@ -70,12 +75,12 @@ function CenterPill({ children }: { children: ReactNode }) {
   )
 }
 
-export default function ChatRoom({ roomId }: ChatRoomProps) {
+export default function ChatRoom({ roomId, listHref = '/chat', memberActions, drawerFooter }: ChatRoomProps) {
   const t = useTranslations('chat')
   const tCommon = useTranslations('common')
   const locale = useLocale()
   const router = useRouter()
-  const handleBack = useBackNavigation('/chat')
+  const handleBack = useBackNavigation(listHref)
   const { isLoggedIn, isInitialized, requireAuth } = useRequireAuth()
   const { userId, nickname, isAdmin } = useAuthStore()
   const showToast = useToastStore((s) => s.show)
@@ -135,8 +140,8 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
   useEffect(() => {
     if (!isRedirecting) return
     if (roomErrorCode === 'CHAT_NOT_MEMBER') showToast(t('room.notMember'), 'error')
-    router.replace('/chat')
-  }, [isRedirecting, roomErrorCode, router, showToast, t])
+    router.replace(listHref)
+  }, [isRedirecting, roomErrorCode, router, showToast, t, listHref])
 
   // 읽음 처리 자리 (소켓 일감에서 구현)
   useEffect(() => {
@@ -200,7 +205,14 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
     if (isMine && text !== null) {
       actions.push({ key: 'edit', label: t('actions.edit'), onSelect: () => setDialog({ kind: 'edit', message }) })
     }
-    if (isAdmin) actions.push({ key: 'notice', label: t('actions.setNotice'), onSelect: () => handleNotice(message.id) })
+    if (isAdmin) {
+      const isNotice = room?.noticeMessage?.id === message.id
+      actions.push({
+        key: 'notice',
+        label: t(isNotice ? 'actions.clearNotice' : 'actions.setNotice'),
+        onSelect: () => handleNotice(isNotice ? null : message.id),
+      })
+    }
     if (!isMine) {
       actions.push({ key: 'report', label: t('actions.report'), danger: true, onSelect: () => setDialog({ kind: 'report', message }) })
     }
@@ -419,7 +431,13 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
       )}
 
       {isMembersOpen && room && (
-        <ChatMemberDrawer members={room.members} myUserId={userId} onClose={() => setIsMembersOpen(false)} />
+        <ChatMemberDrawer
+          members={room.members}
+          myUserId={userId}
+          renderMemberActions={memberActions}
+          footer={drawerFooter}
+          onClose={() => setIsMembersOpen(false)}
+        />
       )}
 
       {viewerUrl && (
