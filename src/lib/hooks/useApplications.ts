@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningResolution, chooseDiningResolution } from '@/lib/api/application'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn } from '@/lib/api/application'
 import type { ApplicationCreateRequest, ApplicationStatus, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
@@ -148,6 +148,27 @@ export function useMyDiningApplications(enabled: boolean) {
     enabled,
     retry: false,
     staleTime: 1000 * 60,
+  })
+}
+
+// 우연한 식탁 테이블 상세 (KAN-355). 403(멤버 아님)·404 는 화면에서 분기한다.
+export function useDiningTableDetail(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['dining', 'table', id],
+    queryFn: () => fetchDiningTableDetail(id),
+    enabled: enabled && !!id,
+  })
+}
+
+// 체크인 (KAN-355). 응답 모양에 기대지 않고 상세를 다시 불러와 참석 상태를 맞춘다 — 끝날 때까지 pending 유지.
+export function useDiningCheckIn(tableId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => submitDiningCheckIn(tableId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dining', 'me', 'applications'] })
+      return queryClient.invalidateQueries({ queryKey: ['dining', 'table', tableId] })
+    },
   })
 }
 

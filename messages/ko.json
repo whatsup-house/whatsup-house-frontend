@@ -620,6 +620,36 @@
       "paymentPendingDescription": "신청은 접수됐지만 이용권이 부족해요. 이용권을 구매하면 신청이 확정되고 매칭을 기다리게 돼요.",
       "buyTicket": "이용권 구매하기",
       "viewMyApplications": "내 신청 보기"
+    },
+    "diningTable": {
+      "label": "우연한 식탁",
+      "loadFailed": "테이블 정보를 불러오지 못했어요.",
+      "notMemberTitle": "이 테이블의 멤버가 아닙니다",
+      "notMemberDescription": "확정된 테이블의 멤버만 볼 수 있어요.\n내 신청 상태는 마이페이지에서 확인해 주세요.",
+      "attendance": {
+        "SCHEDULED": "참석 예정",
+        "ATTENDED": "참석 완료",
+        "CANCELED_EARLY": "사전 취소",
+        "CANCELED_LATE": "늦은 취소",
+        "NO_SHOW": "노쇼"
+      },
+      "venueTitle": "식당",
+      "venuePending": "식당 배정 중",
+      "priceRange": "가격대 {price}",
+      "membersTitle": "함께하는 멤버 {count}명",
+      "topicsTitle": "대화 주제",
+      "topicsGuide": "대화 주제와 아이스브레이킹은 단체방에서 확인할 수 있어요.",
+      "enterChat": "단체방 입장",
+      "chatPreparing": "단체방 준비 중",
+      "cancelPolicyTitle": "취소 정책",
+      "checkInTitle": "체크인",
+      "checkIn": "체크인하기",
+      "checkedIn": "체크인 완료",
+      "checkInWindow": "체크인은 {from} ~ {to} 사이에 할 수 있어요.",
+      "checkInUnavailable": "지금은 체크인할 수 없어요.",
+      "checkInWindowClosed": "체크인 가능 시간이 아니에요.",
+      "checkInSuccess": "체크인했어요. 즐거운 식사 되세요!",
+      "checkInFailed": "체크인에 실패했어요. 잠시 후 다시 시도해주세요."
     }
   },
   "review": {

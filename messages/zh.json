@@ -620,6 +620,36 @@
       "paymentPendingDescription": "申请已受理，但通行证不足。购买通行证后申请即可确认并进入匹配等待。",
       "buyTicket": "购买通行证",
       "viewMyApplications": "查看我的申请"
+    },
+    "diningTable": {
+      "label": "偶遇餐桌",
+      "loadFailed": "无法加载餐桌信息。",
+      "notMemberTitle": "你不是这张餐桌的成员",
+      "notMemberDescription": "只有已确定餐桌的成员才能查看。\n请在“我的”页面查看申请状态。",
+      "attendance": {
+        "SCHEDULED": "待参加",
+        "ATTENDED": "已参加",
+        "CANCELED_EARLY": "提前取消",
+        "CANCELED_LATE": "临时取消",
+        "NO_SHOW": "未到场"
+      },
+      "venueTitle": "餐厅",
+      "venuePending": "正在安排餐厅",
+      "priceRange": "价格区间 {price}",
+      "membersTitle": "同桌成员 {count}人",
+      "topicsTitle": "聊天话题",
+      "topicsGuide": "聊天话题和破冰内容会发布在群聊中。",
+      "enterChat": "进入群聊",
+      "chatPreparing": "群聊准备中",
+      "cancelPolicyTitle": "取消政策",
+      "checkInTitle": "签到",
+      "checkIn": "签到",
+      "checkedIn": "已签到",
+      "checkInWindow": "可在 {from} ~ {to} 之间签到。",
+      "checkInUnavailable": "现在无法签到。",
+      "checkInWindowClosed": "现在不是签到时间。",
+      "checkInSuccess": "签到成功，祝你用餐愉快！",
+      "checkInFailed": "签到失败，请稍后重试。"
     }
   },
   "review": {

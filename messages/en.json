@@ -620,6 +620,36 @@
       "paymentPendingDescription": "Your application was received, but you don't have enough passes. Buy a pass to confirm it and wait for matching.",
       "buyTicket": "Buy a pass",
       "viewMyApplications": "View my applications"
+    },
+    "diningTable": {
+      "label": "Random Table",
+      "loadFailed": "Couldn't load the table details.",
+      "notMemberTitle": "You're not a member of this table",
+      "notMemberDescription": "Only members of a confirmed table can view it.\nCheck your application status on My Page.",
+      "attendance": {
+        "SCHEDULED": "Attending",
+        "ATTENDED": "Attended",
+        "CANCELED_EARLY": "Cancelled early",
+        "CANCELED_LATE": "Late cancellation",
+        "NO_SHOW": "No-show"
+      },
+      "venueTitle": "Restaurant",
+      "venuePending": "Assigning a restaurant",
+      "priceRange": "Price range {price}",
+      "membersTitle": "{count} members at your table",
+      "topicsTitle": "Conversation topics",
+      "topicsGuide": "Conversation topics and icebreakers are posted in the group chat.",
+      "enterChat": "Open group chat",
+      "chatPreparing": "Group chat coming soon",
+      "cancelPolicyTitle": "Cancellation policy",
+      "checkInTitle": "Check-in",
+      "checkIn": "Check in",
+      "checkedIn": "Checked in",
+      "checkInWindow": "You can check in between {from} and {to}.",
+      "checkInUnavailable": "Check-in isn't available right now.",
+      "checkInWindowClosed": "It's not check-in time.",
+      "checkInSuccess": "You're checked in. Enjoy your meal!",
+      "checkInFailed": "Couldn't check in. Please try again shortly."
     }
   },
   "review": {
