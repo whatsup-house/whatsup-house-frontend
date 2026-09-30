@@ -649,7 +649,70 @@
       "checkInUnavailable": "现在无法签到。",
       "checkInWindowClosed": "现在不是签到时间。",
       "checkInSuccess": "签到成功，祝你用餐愉快！",
-      "checkInFailed": "签到失败，请稍后重试。"
+      "checkInFailed": "签到失败，请稍后重试。",
+      "feedbackTitle": "活动后反馈",
+      "feedbackGuide": "今天的餐桌怎么样？你的意见会用于下一次匹配。",
+      "feedbackButton": "填写反馈"
+    },
+    "diningFeedback": {
+      "title": "活动后反馈",
+      "subtitle": "请如实告诉我们，这能帮助我们安排更好的餐桌。",
+      "scoresTitle": "满意度",
+      "scores": {
+        "tableScore": "整体餐桌",
+        "talkScore": "聊天",
+        "venueScore": "餐厅"
+      },
+      "rejoinTitle": "下次还想参加吗？",
+      "rejoin": {
+        "YES": "想",
+        "MAYBE": "考虑中",
+        "NO": "不想"
+      },
+      "peersTitle": "想再见面的成员（选填）",
+      "peersPrivacy": "你的选择不会公开，仅用于运营和匹配，绝不会告知对方。",
+      "peerKinds": {
+        "AGAIN": "想再见面",
+        "AVOID": "不想同桌"
+      },
+      "noPeers": "目前没有可选择的成员。",
+      "unselectableNotice": "部分成员暂时无法选择。",
+      "commentTitle": "其他意见（选填）",
+      "commentPlaceholder": "请随意写下满意或不足之处。",
+      "submit": "提交反馈",
+      "requiredNotice": "请完成3项满意度评分并选择是否愿意再次参加。",
+      "submitFailed": "反馈提交失败，请稍后再试。",
+      "backToTable": "返回餐桌详情",
+      "viewHistory": "查看参加记录",
+      "result": {
+        "done": {
+          "title": "反馈已提交",
+          "description": "感谢你的宝贵意见，我们会在之后的匹配中参考。"
+        },
+        "alreadySubmitted": {
+          "title": "你已提交过反馈",
+          "description": "每个餐桌只能提交一次反馈。"
+        },
+        "notOpen": {
+          "title": "暂时还不能提交反馈",
+          "description": "聚餐结束后才能提交反馈。"
+        }
+      }
+    },
+    "diningReport": {
+      "title": "举报成员",
+      "description": "如果遇到让你不适或危险的情况，请告诉我们。仅运营团队可见，之后你们不会再被分到同一桌。",
+      "selectLabel": "要举报的成员",
+      "selectPlaceholder": "选择成员",
+      "button": "举报",
+      "noTargets": "目前没有可举报的成员。",
+      "unselectableNotice": "部分成员暂时无法选择。",
+      "confirmTitle": "要举报 {nickname} 吗？",
+      "confirmDescription": "请填写举报理由，运营团队确认后会处理。",
+      "reasonPlaceholder": "请写下发生了什么。",
+      "confirm": "举报",
+      "done": "举报已受理。",
+      "failed": "举报失败，请稍后再试。"
     }
   },
   "review": {
@@ -721,7 +784,8 @@
       "logout": "退出",
       "changePassword": "更改密码",
       "withdraw": "删除账号",
-      "email": "邮箱"
+      "email": "邮箱",
+      "diningHistory": "偶遇餐桌参加记录"
     },
     "applications": {
       "loading": "正在加载...",
@@ -977,6 +1041,21 @@
       "validation": {
         "password": "请输入您的密码"
       }
+    },
+    "diningHistory": {
+      "title": "偶遇餐桌参加记录",
+      "loadFailed": "无法加载参加记录。",
+      "empty": "你还没有参加过餐桌。",
+      "tableStatus": {
+        "PROPOSED": "待确认",
+        "CONFIRMED": "已确认",
+        "DONE": "已结束",
+        "DISSOLVED": "已解散"
+      },
+      "venuePending": "尚未分配餐厅",
+      "feedbackSubmitted": "已提交反馈",
+      "writeFeedback": "填写反馈",
+      "viewTable": "查看餐桌"
     }
   },
   "social": {

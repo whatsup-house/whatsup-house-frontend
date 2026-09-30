@@ -649,7 +649,70 @@
       "checkInUnavailable": "現在チェックインできません。",
       "checkInWindowClosed": "チェックインできる時間ではありません。",
       "checkInSuccess": "チェックインしました。お食事をお楽しみください！",
-      "checkInFailed": "チェックインに失敗しました。しばらくしてからもう一度お試しください。"
+      "checkInFailed": "チェックインに失敗しました。しばらくしてからもう一度お試しください。",
+      "feedbackTitle": "イベント後のフィードバック",
+      "feedbackGuide": "今日の食卓はいかがでしたか？いただいたご意見は次のマッチングに反映されます。",
+      "feedbackButton": "フィードバックを書く"
+    },
+    "diningFeedback": {
+      "title": "イベント後のフィードバック",
+      "subtitle": "率直なご意見をお聞かせください。より良い食卓づくりに役立てます。",
+      "scoresTitle": "満足度",
+      "scores": {
+        "tableScore": "テーブル全体",
+        "talkScore": "会話",
+        "venueScore": "お店"
+      },
+      "rejoinTitle": "また参加したいですか？",
+      "rejoin": {
+        "YES": "はい",
+        "MAYBE": "検討中",
+        "NO": "いいえ"
+      },
+      "peersTitle": "また会いたいメンバー（任意）",
+      "peersPrivacy": "選択内容は非公開です。運営とマッチングにのみ使われ、相手に知らされることはありません。",
+      "peerKinds": {
+        "AGAIN": "また会いたい",
+        "AVOID": "避けたい"
+      },
+      "noPeers": "現在選択できるメンバーがいません。",
+      "unselectableNotice": "一部のメンバーはまだ選択できません。",
+      "commentTitle": "自由意見（任意）",
+      "commentPlaceholder": "良かった点、残念だった点を自由にお書きください。",
+      "submit": "フィードバックを送る",
+      "requiredNotice": "満足度3項目と再参加の意向を選択してください。",
+      "submitFailed": "フィードバックを送信できませんでした。しばらくしてからもう一度お試しください。",
+      "backToTable": "テーブル詳細に戻る",
+      "viewHistory": "参加履歴を見る",
+      "result": {
+        "done": {
+          "title": "フィードバックを送信しました",
+          "description": "貴重なご意見ありがとうございます。次のマッチングに反映します。"
+        },
+        "alreadySubmitted": {
+          "title": "フィードバックは送信済みです",
+          "description": "フィードバックはテーブルごとに1回のみ送信できます。"
+        },
+        "notOpen": {
+          "title": "まだフィードバックできません",
+          "description": "フィードバックは食事会の終了後に送信できます。"
+        }
+      }
+    },
+    "diningReport": {
+      "title": "メンバーを通報",
+      "description": "不快なことや危険なことがあればお知らせください。運営にのみ伝わり、今後同じテーブルになることはありません。",
+      "selectLabel": "通報するメンバー",
+      "selectPlaceholder": "メンバーを選択",
+      "button": "通報",
+      "noTargets": "現在通報できるメンバーがいません。",
+      "unselectableNotice": "一部のメンバーはまだ選択できません。",
+      "confirmTitle": "{nickname}さんを通報しますか？",
+      "confirmDescription": "通報の理由をご記入ください。運営が確認して対応します。",
+      "reasonPlaceholder": "何があったかご記入ください。",
+      "confirm": "通報する",
+      "done": "通報を受け付けました。",
+      "failed": "通報できませんでした。しばらくしてからもう一度お試しください。"
     }
   },
   "review": {
@@ -721,7 +784,8 @@
       "logout": "ログアウト",
       "changePassword": "パスワード変更",
       "withdraw": "退会",
-      "email": "メールアドレス"
+      "email": "メールアドレス",
+      "diningHistory": "偶然の食卓 参加履歴"
     },
     "applications": {
       "loading": "読み込み中...",
@@ -977,6 +1041,21 @@
       "validation": {
         "password": "パスワードを入力してください"
       }
+    },
+    "diningHistory": {
+      "title": "偶然の食卓 参加履歴",
+      "loadFailed": "参加履歴を読み込めませんでした。",
+      "empty": "まだ参加した食卓がありません。",
+      "tableStatus": {
+        "PROPOSED": "確定待ち",
+        "CONFIRMED": "確定",
+        "DONE": "終了",
+        "DISSOLVED": "解散"
+      },
+      "venuePending": "お店の割り当て前",
+      "feedbackSubmitted": "フィードバック送信済み",
+      "writeFeedback": "フィードバックを書く",
+      "viewTable": "テーブルを見る"
     }
   },
   "social": {

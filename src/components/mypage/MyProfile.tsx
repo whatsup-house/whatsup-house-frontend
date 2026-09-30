@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pencil, LayoutDashboard, Ticket } from 'lucide-react'
+import { Pencil, LayoutDashboard, Ticket, Utensils, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
@@ -158,6 +158,15 @@ export default function MyProfile() {
             <span className="text-sm font-bold text-primary">{t('ticketRemaining', { count: tickets.totalRemaining })}</span>
           </div>
         )}
+
+        {/* 우연한 식탁 참가 이력 (KAN-356) */}
+        <Link href="/dining/history" className="bg-card rounded-card px-5 py-4 flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <Utensils size={18} className="text-primary shrink-0" />
+            <span className="text-sm font-medium text-foreground">{t('diningHistory')}</span>
+          </span>
+          <ChevronRight size={16} className="text-tag-text" />
+        </Link>
 
         {/* 상세 정보 */}
         <div className="bg-card rounded-card px-5">

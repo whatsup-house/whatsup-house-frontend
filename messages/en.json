@@ -649,7 +649,70 @@
       "checkInUnavailable": "Check-in isn't available right now.",
       "checkInWindowClosed": "It's not check-in time.",
       "checkInSuccess": "You're checked in. Enjoy your meal!",
-      "checkInFailed": "Couldn't check in. Please try again shortly."
+      "checkInFailed": "Couldn't check in. Please try again shortly.",
+      "feedbackTitle": "Post-event feedback",
+      "feedbackGuide": "How was your table? Your feedback helps us with the next match.",
+      "feedbackButton": "Leave feedback"
+    },
+    "diningFeedback": {
+      "title": "Post-event feedback",
+      "subtitle": "Tell us honestly. It helps us set up better tables next time.",
+      "scoresTitle": "Satisfaction",
+      "scores": {
+        "tableScore": "Overall table",
+        "talkScore": "Conversation",
+        "venueScore": "Restaurant"
+      },
+      "rejoinTitle": "Would you join again?",
+      "rejoin": {
+        "YES": "Yes",
+        "MAYBE": "Maybe",
+        "NO": "No"
+      },
+      "peersTitle": "Members you want to meet again (optional)",
+      "peersPrivacy": "Your choices are private. They are only used by our team for matching and are never shared with the other person.",
+      "peerKinds": {
+        "AGAIN": "Meet again",
+        "AVOID": "Rather not"
+      },
+      "noPeers": "No members are available to choose right now.",
+      "unselectableNotice": "Some members can’t be selected yet.",
+      "commentTitle": "Comments (optional)",
+      "commentPlaceholder": "Share what you liked or what could be better.",
+      "submit": "Send feedback",
+      "requiredNotice": "Please rate all 3 items and choose whether you’d join again.",
+      "submitFailed": "Couldn’t send your feedback. Please try again later.",
+      "backToTable": "Back to table details",
+      "viewHistory": "View my history",
+      "result": {
+        "done": {
+          "title": "Feedback sent",
+          "description": "Thanks for sharing. We’ll reflect it in upcoming matches."
+        },
+        "alreadySubmitted": {
+          "title": "Feedback already submitted",
+          "description": "You can leave feedback only once per table."
+        },
+        "notOpen": {
+          "title": "Feedback isn’t open yet",
+          "description": "You can leave feedback after the dinner is over."
+        }
+      }
+    },
+    "diningReport": {
+      "title": "Report a member",
+      "description": "If something uncomfortable or unsafe happened, let us know. Only our team will see it, and you won’t be seated together again.",
+      "selectLabel": "Member to report",
+      "selectPlaceholder": "Select a member",
+      "button": "Report",
+      "noTargets": "No members are available to report right now.",
+      "unselectableNotice": "Some members can’t be selected yet.",
+      "confirmTitle": "Report {nickname}?",
+      "confirmDescription": "Please describe the reason. Our team will review it and take action.",
+      "reasonPlaceholder": "Tell us what happened.",
+      "confirm": "Report",
+      "done": "Your report has been received.",
+      "failed": "Couldn’t send your report. Please try again later."
     }
   },
   "review": {
@@ -721,7 +784,8 @@
       "logout": "Log out",
       "changePassword": "Change password",
       "withdraw": "Delete account",
-      "email": "Email"
+      "email": "Email",
+      "diningHistory": "Random Table history"
     },
     "applications": {
       "loading": "Loading...",
@@ -977,6 +1041,21 @@
       "validation": {
         "password": "Please enter your password"
       }
+    },
+    "diningHistory": {
+      "title": "Random Table history",
+      "loadFailed": "Couldn’t load your history.",
+      "empty": "You haven’t joined any tables yet.",
+      "tableStatus": {
+        "PROPOSED": "Pending",
+        "CONFIRMED": "Confirmed",
+        "DONE": "Finished",
+        "DISSOLVED": "Dissolved"
+      },
+      "venuePending": "Restaurant not assigned yet",
+      "feedbackSubmitted": "Feedback submitted",
+      "writeFeedback": "Leave feedback",
+      "viewTable": "View table"
     }
   },
   "social": {
