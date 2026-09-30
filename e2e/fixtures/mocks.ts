@@ -470,7 +470,7 @@ export const mockGatheringForm: GatheringForm = {
 
 // ─── API Route Interceptors ───────────────────────────────────────────────────
 
-function apiRes<T>(data: T) {
+export function apiRes<T>(data: T) {
   return { success: true, message: 'OK', data }
 }
 
