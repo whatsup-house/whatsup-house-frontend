@@ -620,6 +620,36 @@
       "paymentPendingDescription": "Recibimos tu solicitud, pero no tienes pases suficientes. Compra un pase para confirmarla y esperar el emparejamiento.",
       "buyTicket": "Comprar un pase",
       "viewMyApplications": "Ver mis solicitudes"
+    },
+    "diningTable": {
+      "label": "Mesa al azar",
+      "loadFailed": "No se pudo cargar la información de la mesa.",
+      "notMemberTitle": "No eres miembro de esta mesa",
+      "notMemberDescription": "Solo los miembros de una mesa confirmada pueden verla.\nConsulta el estado de tu solicitud en Mi página.",
+      "attendance": {
+        "SCHEDULED": "Asistirás",
+        "ATTENDED": "Asististe",
+        "CANCELED_EARLY": "Cancelación anticipada",
+        "CANCELED_LATE": "Cancelación tardía",
+        "NO_SHOW": "No asistió"
+      },
+      "venueTitle": "Restaurante",
+      "venuePending": "Asignando restaurante",
+      "priceRange": "Rango de precios {price}",
+      "membersTitle": "{count} miembros en tu mesa",
+      "topicsTitle": "Temas de conversación",
+      "topicsGuide": "Los temas de conversación y las dinámicas para romper el hielo se publican en el chat grupal.",
+      "enterChat": "Abrir chat grupal",
+      "chatPreparing": "Chat grupal en preparación",
+      "cancelPolicyTitle": "Política de cancelación",
+      "checkInTitle": "Check-in",
+      "checkIn": "Hacer check-in",
+      "checkedIn": "Check-in completado",
+      "checkInWindow": "Puedes hacer check-in entre las {from} y las {to}.",
+      "checkInUnavailable": "Ahora no puedes hacer check-in.",
+      "checkInWindowClosed": "No es hora de hacer check-in.",
+      "checkInSuccess": "¡Check-in hecho! Disfruta la comida.",
+      "checkInFailed": "No se pudo hacer check-in. Inténtalo de nuevo en un momento."
     }
   },
   "review": {
