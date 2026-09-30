@@ -715,16 +715,71 @@
         "CONFIRMED": "存款完成",
         "FREE": "免费"
       },
-      "matchStatus": {
-        "WAITING": "等待匹配",
-        "MATCHING": "匹配中",
-        "CONFIRM_PENDING": "待确认",
-        "CONFIRMED": "匹配成功",
-        "REALLOCATING": "重新分配中",
-        "ALTERNATIVE_OFFERED": "已提供替代日期",
-        "TRANSFERRED": "已改期",
-        "NO_MATCH": "匹配失败",
-        "EXCEPTION": "核查中"
+      "dining": {
+        "phase": {
+          "payment": "付款",
+          "waiting": "等待匹配",
+          "matching": "匹配中",
+          "reallocating": "重新分配中",
+          "confirmed": "已确定",
+          "attended": "已参加",
+          "alternative": "推荐其他日期",
+          "noMatch": "匹配失败",
+          "exception": "确认中"
+        },
+        "moreSessions": "另有{count}个日期",
+        "detail": {
+          "payment": "购买使用券后，报名即可确定并进入匹配等待。",
+          "waiting": "正在等待匹配。",
+          "waitingAt": "将于{at}开始匹配。",
+          "matching": "正在为你寻找同桌伙伴。",
+          "matchingUntil": "餐桌预计于{at}确定。",
+          "reallocating": "餐桌人数有变动，正在重新分配。",
+          "confirmed": "餐桌已确定，快来看看同桌伙伴和餐厅吧。",
+          "attended": "感谢你的参加。",
+          "alternative": "这个日期未能组成餐桌，请在下方选择处理方式。",
+          "noMatch": "很遗憾，这次没有匹配成功。",
+          "exception": "运营团队正在确认你的报名，请稍候。"
+        },
+        "buyTicket": "购买使用券",
+        "viewTable": "查看餐桌",
+        "goResolve": "选择处理方式",
+        "viewAll": "查看我的全部报名",
+        "cancel": {
+          "policy": "活动开始前2天可取消，已使用的使用券将退回。之后无法取消。",
+          "button": "取消报名",
+          "closed": "距离活动开始已不足2天，无法取消。",
+          "confirmTitle": "要取消报名吗？",
+          "confirmDescription": "取消后无法恢复，已使用的使用券将退回。",
+          "confirm": "取消报名",
+          "done": "已取消报名。"
+        },
+        "resolution": {
+          "title": "你想怎么处理？",
+          "respondBy": "请在{at}前选择。逾期将按保留使用券处理。",
+          "offeredSessions": "可更换的日期",
+          "noOfferedSessions": "目前没有可更换的日期。",
+          "unavailable": "正在准备选项，请稍后再查看。",
+          "loadFailed": "无法加载选项，请稍后重试。",
+          "resolved": "你已完成选择。",
+          "expired": "已过回复期限，已按保留使用券处理。",
+          "chosen": "你的选择已生效。",
+          "choices": {
+            "TRANSFER": "改到这个日期",
+            "KEEP_TICKET": "保留使用券",
+            "REFUND": "申请退款"
+          },
+          "confirm": {
+            "TRANSFER": "要把报名改到所选日期吗？",
+            "KEEP_TICKET": "要取消报名并保留使用券吗？下次报名时可以继续使用。",
+            "REFUND": "要取消报名并退还使用券费用吗？"
+          }
+        },
+        "errors": {
+          "alreadyProcessed": "该报名已处理，已为你重新加载最新状态。",
+          "cancelWindowClosed": "仅可在活动开始前2天取消。",
+          "failed": "处理失败，请稍后重试。"
+        }
       },
       "emptyFiltered": "没有具有此状态的应用程序。",
       "empty": "您还没有申请参加任何聚会。",

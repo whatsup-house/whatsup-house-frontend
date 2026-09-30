@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningPrefillResponse } from './types'
+import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningPrefillResponse, DiningResolution, DiningResolutionChooseRequest } from './types'
 
 // 회원 동적 신청 — 종류 ID + 희망 회차 ID (KAN-338). JWT 필요
 export const submitDynamicApplication = async (
@@ -62,6 +62,21 @@ export const fetchDiningPrefill = async (gatheringId: string): Promise<DiningPre
 export const fetchMyDiningApplications = async (): Promise<DiningApplicationItem[]> => {
   const response = await apiClient.get<ApiResponse<DiningApplicationListResponse>>('/api/dining/me/applications')
   return response.data.data?.applications ?? []
+}
+
+// 우연한 식탁 사전 취소 — 회차 시작 2일 전까지 (KAN-342)
+export const cancelDiningApplication = async (id: string): Promise<void> => {
+  await apiClient.post(`/api/dining/applications/${id}/cancel`)
+}
+
+// 매칭 실패 해결 선택지 (KAN-347)
+export const fetchDiningResolution = async (id: string): Promise<DiningResolution> => {
+  const response = await apiClient.get<ApiResponse<DiningResolution>>(`/api/dining/resolutions/${id}`)
+  return response.data.data
+}
+
+export const chooseDiningResolution = async (id: string, data: DiningResolutionChooseRequest): Promise<void> => {
+  await apiClient.post(`/api/dining/resolutions/${id}/choose`, data)
 }
 
 export const cancelApplication = async (id: string): Promise<void> => {

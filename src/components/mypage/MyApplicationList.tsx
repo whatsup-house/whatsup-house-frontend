@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
+import DiningStatusCard from './DiningStatusCard'
 import { useMyApplicationsMe, useCancelApplication, useMyDiningApplications } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { formatLocalizedNumericDate } from '@/lib/utils/date'
@@ -41,7 +42,8 @@ export default function MyApplicationList() {
   // 우연한 식탁 신청의 매칭 상태는 /api/dining/me/applications 에만 있다. 해당 신청이 있을 때만 조회한다. (KAN-344)
   const hasRandomTable = applications?.some((item) => item.gathering.gatheringType === 'RANDOM_TABLE') ?? false
   const { data: diningApplications } = useMyDiningApplications(isLoggedIn && hasRandomTable)
-  const matchStatusById = new Map(diningApplications?.map((item) => [item.id, item.matchStatus]) ?? [])
+  // 취소된 신청은 dining 목록에서 빠지므로 기존 카드로 보인다. (KAN-354)
+  const diningById = new Map(diningApplications?.map((item) => [item.id, item]) ?? [])
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const tabScrollRef = useRef<HTMLDivElement>(null)
 
@@ -101,6 +103,22 @@ export default function MyApplicationList() {
       ) : (
         <div className="flex flex-col gap-3">
           {applications.map((item) => {
+            const dining = item.gathering.gatheringType === 'RANDOM_TABLE' ? diningById.get(item.id) : undefined
+            if (dining) {
+              return (
+                <DiningStatusCard
+                  key={item.id}
+                  applicationId={dining.id}
+                  title={dining.gathering.title}
+                  status={dining.status}
+                  matchStatus={dining.matchStatus}
+                  table={dining.table}
+                  assignedSession={dining.assignedSession}
+                  candidateSessions={dining.candidateSessions}
+                  resolutionId={dining.resolutionId}
+                />
+              )
+            }
             const isConfirmed = item.status === 'CONFIRMED'
             const isRandomTablePaymentPending = item.status === 'PAYMENT_PENDING' && item.gathering.gatheringType === 'RANDOM_TABLE'
             const showsApplicationDetail = item.status === 'PENDING' || item.status === 'REJECTED' || item.status === 'CANCELLED'
@@ -108,7 +126,6 @@ export default function MyApplicationList() {
             const canCancel = item.status === 'PENDING' || item.status === 'PAYMENT_PENDING'
             const cannotCancel = item.status === 'CONFIRMED' || item.status === 'ATTENDED'
             const displayStatus = getApplicationDisplayStatus(item.status, item.paymentStatus)
-            const matchStatus = item.gathering.gatheringType === 'RANDOM_TABLE' ? matchStatusById.get(item.id) : null
             const goDetail = () => {
               if (isRandomTablePaymentPending) {
                 router.push(`/payments/random-table?applicationId=${encodeURIComponent(item.id)}`)
@@ -162,11 +179,6 @@ export default function MyApplicationList() {
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_STYLE[displayStatus]}`}>
                         {t(`status.${displayStatus}`)}
                       </span>
-                      {matchStatus && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-tag-bg text-tag-text">
-                          {t(`matchStatus.${matchStatus}`)}
-                        </span>
-                      )}
                     </div>
                   </div>
                   <p className="text-xs text-tag-text mt-1">

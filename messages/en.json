@@ -715,16 +715,71 @@
         "CONFIRMED": "Deposit complete",
         "FREE": "Free"
       },
-      "matchStatus": {
-        "WAITING": "Waiting for match",
-        "MATCHING": "Matching",
-        "CONFIRM_PENDING": "Pending confirmation",
-        "CONFIRMED": "Matched",
-        "REALLOCATING": "Reassigning",
-        "ALTERNATIVE_OFFERED": "Alternative date offered",
-        "TRANSFERRED": "Date moved",
-        "NO_MATCH": "No match",
-        "EXCEPTION": "Under review"
+      "dining": {
+        "phase": {
+          "payment": "Payment",
+          "waiting": "Waiting",
+          "matching": "Matching",
+          "reallocating": "Reassigning",
+          "confirmed": "Confirmed",
+          "attended": "Attended",
+          "alternative": "New date offered",
+          "noMatch": "No match",
+          "exception": "Under review"
+        },
+        "moreSessions": "+{count} more dates",
+        "detail": {
+          "payment": "Buy a pass to confirm your application and join the matching queue.",
+          "waiting": "Waiting for matching.",
+          "waitingAt": "Matching starts {at}.",
+          "matching": "We're finding a table for you.",
+          "matchingUntil": "Your table will be confirmed {at}.",
+          "reallocating": "The table changed, so we are reassigning you.",
+          "confirmed": "Your table is confirmed. Check who you are dining with and where.",
+          "attended": "Thanks for joining us.",
+          "alternative": "We couldn't form a table for this date. Choose an option below.",
+          "noMatch": "Sorry, you weren't matched this time.",
+          "exception": "Our team is reviewing your application. Please hold on."
+        },
+        "buyTicket": "Buy a pass",
+        "viewTable": "View table",
+        "goResolve": "Choose an option",
+        "viewAll": "View all my applications",
+        "cancel": {
+          "policy": "You can cancel up to 2 days before the session starts, and your used pass will be returned. After that, cancellation is not possible.",
+          "button": "Cancel application",
+          "closed": "It is less than 2 days before the session, so you can no longer cancel.",
+          "confirmTitle": "Cancel this application?",
+          "confirmDescription": "This cannot be undone. Your used pass will be returned.",
+          "confirm": "Cancel application",
+          "done": "Your application was cancelled."
+        },
+        "resolution": {
+          "title": "What would you like to do?",
+          "respondBy": "Please choose by {at}. After that, your pass will be kept for later.",
+          "offeredSessions": "Dates you can move to",
+          "noOfferedSessions": "There are no dates to move to right now.",
+          "unavailable": "We're preparing your options. Please check again shortly.",
+          "loadFailed": "Couldn't load your options. Please try again shortly.",
+          "resolved": "You already made a choice.",
+          "expired": "The deadline passed, so your pass was kept for later.",
+          "chosen": "Your choice has been applied.",
+          "choices": {
+            "TRANSFER": "Move to this date",
+            "KEEP_TICKET": "Keep my pass",
+            "REFUND": "Get a refund"
+          },
+          "confirm": {
+            "TRANSFER": "Move your application to the selected date?",
+            "KEEP_TICKET": "Cancel this application and keep your pass? You can use it for your next application.",
+            "REFUND": "Cancel this application and get a refund for your pass?"
+          }
+        },
+        "errors": {
+          "alreadyProcessed": "This application was already processed. We reloaded the latest status.",
+          "cancelWindowClosed": "You can only cancel up to 2 days before the session starts.",
+          "failed": "Couldn't complete the request. Please try again shortly."
+        }
       },
       "emptyFiltered": "No applications with this status.",
       "empty": "You have not applied for any gatherings yet.",

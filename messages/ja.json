@@ -715,16 +715,71 @@
         "CONFIRMED": "入金完了",
         "FREE": "無料"
       },
-      "matchStatus": {
-        "WAITING": "マッチング待ち",
-        "MATCHING": "マッチング中",
-        "CONFIRM_PENDING": "確定待ち",
-        "CONFIRMED": "マッチング確定",
-        "REALLOCATING": "再配置中",
-        "ALTERNATIVE_OFFERED": "代替日程のご提案",
-        "TRANSFERRED": "日程変更",
-        "NO_MATCH": "マッチング不成立",
-        "EXCEPTION": "確認中"
+      "dining": {
+        "phase": {
+          "payment": "お支払い",
+          "waiting": "マッチング待ち",
+          "matching": "マッチング中",
+          "reallocating": "再配置中",
+          "confirmed": "確定",
+          "attended": "参加済み",
+          "alternative": "別日程のご提案",
+          "noMatch": "マッチング不成立",
+          "exception": "確認中"
+        },
+        "moreSessions": "ほか{count}日程",
+        "detail": {
+          "payment": "利用券を購入すると申込みが確定し、マッチング待ちになります。",
+          "waiting": "マッチングを待っています。",
+          "waitingAt": "{at}にマッチングを開始します。",
+          "matching": "ご一緒するテーブルを探しています。",
+          "matchingUntil": "テーブルは{at}に確定する予定です。",
+          "reallocating": "テーブルの人数が変わったため、再配置しています。",
+          "confirmed": "テーブルが確定しました。メンバーとお店を確認してみましょう。",
+          "attended": "ご参加ありがとうございました。",
+          "alternative": "この日程ではテーブルが成立しませんでした。下からご希望の方法を選んでください。",
+          "noMatch": "残念ながら今回はマッチングが成立しませんでした。",
+          "exception": "運営チームが申込みを確認しています。少々お待ちください。"
+        },
+        "buyTicket": "利用券を購入する",
+        "viewTable": "テーブルを見る",
+        "goResolve": "対応方法を選ぶ",
+        "viewAll": "申込み一覧を見る",
+        "cancel": {
+          "policy": "開催の2日前までキャンセルでき、使用した利用券はお返しします。それ以降はキャンセルできません。",
+          "button": "申込みをキャンセル",
+          "closed": "開催の2日前を過ぎたため、キャンセルできません。",
+          "confirmTitle": "申込みをキャンセルしますか？",
+          "confirmDescription": "キャンセルした申込みは元に戻せません。使用した利用券はお返しします。",
+          "confirm": "キャンセルする",
+          "done": "申込みをキャンセルしました。"
+        },
+        "resolution": {
+          "title": "どうしますか？",
+          "respondBy": "{at}までにお選びください。期限を過ぎると利用券の保管として処理されます。",
+          "offeredSessions": "移動できる日程",
+          "noOfferedSessions": "現在移動できる日程はありません。",
+          "unavailable": "選択肢を準備しています。しばらくしてから再度ご確認ください。",
+          "loadFailed": "選択肢を読み込めませんでした。しばらくしてから再度お試しください。",
+          "resolved": "すでに選択済みです。",
+          "expired": "回答期限を過ぎたため、利用券の保管として処理されました。",
+          "chosen": "選択が反映されました。",
+          "choices": {
+            "TRANSFER": "この日程に移動",
+            "KEEP_TICKET": "利用券を保管",
+            "REFUND": "返金を受ける"
+          },
+          "confirm": {
+            "TRANSFER": "選択した日程に申込みを移動しますか？",
+            "KEEP_TICKET": "申込みをキャンセルして利用券を保管しますか？次回の申込みで使えます。",
+            "REFUND": "申込みをキャンセルして利用券の返金を受けますか？"
+          }
+        },
+        "errors": {
+          "alreadyProcessed": "すでに処理された申込みです。最新の状態を読み込み直しました。",
+          "cancelWindowClosed": "開催の2日前までしかキャンセルできません。",
+          "failed": "処理できませんでした。しばらくしてから再度お試しください。"
+        }
       },
       "emptyFiltered": "該当状態の申請履歴がありません。",
       "empty": "まだ申請したギャザリングがありません。",

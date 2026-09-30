@@ -6,6 +6,7 @@ import { prefetchHomeQueries } from '@/lib/hooks/useHome'
 import HeroCarousel from '@/components/home/HeroCarousel'
 import CuratedSection from '@/components/home/CuratedSection'
 import ReviewsSection from '@/components/home/ReviewsSection'
+import DiningStatusSummary from '@/components/home/DiningStatusSummary'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.home')
@@ -30,6 +31,7 @@ export default async function HomePage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="min-h-screen bg-background pb-6">
+        <DiningStatusSummary />
         <HeroCarousel />
         <CuratedSection />
         <ReviewsSection />
