@@ -24,6 +24,8 @@ const LINK_ROUTES: Record<NotificationLink, string> = {
   TICKET_PURCHASE: '/payments/random-table',
   DINING_TABLE: '/mypage?tab=applications',
   DINING_RESOLUTION: `/mypage?tab=applications#${DINING_RESOLUTION_ANCHOR}`,
+  // 피드백 요청(KAN-356)도 테이블 ID가 없어 참가 이력으로 보낸다. 미제출 테이블마다 피드백 폼 링크가 있다.
+  DINING_FEEDBACK_REQUEST: '/dining/history',
 }
 
 const TYPE_ICON: Record<NotificationType, LucideIcon> = {

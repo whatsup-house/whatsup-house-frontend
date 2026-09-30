@@ -1,18 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { notFound, useRouter } from 'next/navigation'
-import { Calendar, CheckCircle2, Clock, MapPin, MessageCircle, Users, Utensils } from 'lucide-react'
+import { Calendar, CheckCircle2, Clock, MapPin, MessageCircle, Star, Users, Utensils } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import dayjs from 'dayjs'
 import { ApiErrorMessage, Button, Card, LoadingSpinner } from '@/components/ui'
 import ErrorView from '@/components/layout/ErrorView'
+import DiningReportCard from './DiningReportCard'
 import MapLinkButton from './MapLinkButton'
 import { useDiningCheckIn, useDiningTableDetail } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
+import { useAuthStore } from '@/lib/store/authStore'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
 import { formatLocalizedFullDate, formatTimeRange } from '@/lib/utils/date'
+import { getSelectablePeers, isDiningFeedbackOpen } from '@/lib/utils/diningStatus'
 import { getKakaoMapUrl, getNaverMapUrl } from '@/lib/utils/mapUrl'
 import type { DiningAttendanceStatus } from '@/lib/api/types'
 
@@ -34,6 +38,7 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
   const locale = useLocale()
   const router = useRouter()
   const { isLoggedIn, isInitialized } = useRequireAuth()
+  const myUserId = useAuthStore((s) => s.userId)
   const tableQuery = useDiningTableDetail(tableId, isLoggedIn)
 
   // 회원 전용. 비로그인은 로그인 후 이 화면으로 돌아오게 한다.
@@ -68,6 +73,7 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
   const members = tableQuery.data.members ?? []
   const eventDate = formatLocalizedFullDate(session?.eventDate, locale)
   const timeRange = formatTimeRange(session?.startTime, session?.endTime)
+  const isFeedbackOpen = isDiningFeedbackOpen(tableQuery.data.status, session?.eventDate, session?.endTime)
 
   return (
     <div className="min-h-screen bg-background px-5 py-7 space-y-4">
@@ -101,6 +107,23 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
           )}
         </div>
       </Card>
+
+      {/* 행사 후 피드백 (KAN-356). 테이블 종료 또는 회차 종료 뒤 노출, 최종 판단은 BE */}
+      {isFeedbackOpen && (
+        <Card className="p-5">
+          <h2 className="mb-2 flex items-center gap-2 font-bold text-foreground">
+            <Star size={18} className="text-primary" />
+            {t('feedbackTitle')}
+          </h2>
+          <p className="text-sm leading-relaxed text-tag-text break-keep">{t('feedbackGuide')}</p>
+          <Link
+            href={`/dining/tables/${encodeURIComponent(tableId)}/feedback`}
+            className="mt-4 flex min-h-[44px] w-full items-center justify-center rounded-button bg-primary px-4 text-sm font-bold text-white"
+          >
+            {t('feedbackButton')}
+          </Link>
+        </Card>
+      )}
 
       <Card className="p-5">
         <h2 className="mb-3 flex items-center gap-2 font-bold text-foreground">
@@ -178,6 +201,8 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
         startTime={session?.startTime ?? null}
         attendanceStatus={myAttendance?.status ?? null}
       />
+
+      <DiningReportCard tableId={tableId} {...getSelectablePeers(members, myUserId)} />
     </div>
   )
 }

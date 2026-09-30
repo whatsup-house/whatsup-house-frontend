@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningPrefillResponse, DiningResolution, DiningResolutionChooseRequest, DiningAttendance, DiningTableDetail } from './types'
+import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningPrefillResponse, DiningResolution, DiningResolutionChooseRequest, DiningAttendance, DiningTableDetail, DiningFeedbackRequest, DiningReportRequest, DiningHistoryItem } from './types'
 
 // 회원 동적 신청 — 종류 ID + 희망 회차 ID (KAN-338). JWT 필요
 export const submitDynamicApplication = async (
@@ -88,6 +88,22 @@ export const fetchDiningTableDetail = async (id: string): Promise<DiningTableDet
 // 체크인 — 회차 시작 ±2시간만 허용, 밖이면 400 CHECKIN_WINDOW_CLOSED (KAN-349)
 export const submitDiningCheckIn = async (tableId: string): Promise<DiningAttendance> => {
   const response = await apiClient.post<ApiResponse<DiningAttendance>>(`/api/dining/tables/${tableId}/check-in`)
+  return response.data.data
+}
+
+// 행사 후 피드백 — 멤버당 1회. 403 NOT_TABLE_MEMBER / 400 FEEDBACK_NOT_OPEN·INVALID_TABLE_PEER / 409 FEEDBACK_ALREADY_SUBMITTED (KAN-350)
+export const submitDiningFeedback = async (tableId: string, data: DiningFeedbackRequest): Promise<void> => {
+  await apiClient.post(`/api/dining/tables/${tableId}/feedback`, data)
+}
+
+// 같은 테이블 멤버 신고 — 400 SELF_REPORT_NOT_ALLOWED·INVALID_TABLE_PEER (KAN-350)
+export const submitDiningReport = async (tableId: string, data: DiningReportRequest): Promise<void> => {
+  await apiClient.post(`/api/dining/tables/${tableId}/reports`, data)
+}
+
+// 내 우연한 식탁 참가 이력 (KAN-350)
+export const fetchMyDiningHistory = async (): Promise<DiningHistoryItem[]> => {
+  const response = await apiClient.get<ApiResponse<DiningHistoryItem[]>>('/api/dining/me/history')
   return response.data.data
 }
 
