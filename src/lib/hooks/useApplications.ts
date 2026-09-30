@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn } from '@/lib/api/application'
-import type { ApplicationCreateRequest, ApplicationStatus, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory } from '@/lib/api/application'
+import type { ApplicationCreateRequest, ApplicationStatus, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
 
@@ -169,6 +169,31 @@ export function useDiningCheckIn(tableId: string) {
       queryClient.invalidateQueries({ queryKey: ['dining', 'me', 'applications'] })
       return queryClient.invalidateQueries({ queryKey: ['dining', 'table', tableId] })
     },
+  })
+}
+
+// 행사 후 피드백 (KAN-350). 에러 분기(409·400·403)는 폼 화면에서 한다.
+export function useSubmitDiningFeedback(tableId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: DiningFeedbackRequest) => submitDiningFeedback(tableId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dining', 'me', 'history'] }),
+  })
+}
+
+// 같은 테이블 멤버 신고 (KAN-350)
+export function useReportDiningMember(tableId: string) {
+  return useMutation({
+    mutationFn: (data: DiningReportRequest) => submitDiningReport(tableId, data),
+  })
+}
+
+// 내 우연한 식탁 참가 이력 (KAN-350)
+export function useMyDiningHistory(enabled: boolean) {
+  return useQuery({
+    queryKey: ['dining', 'me', 'history'],
+    queryFn: fetchMyDiningHistory,
+    enabled,
   })
 }
 

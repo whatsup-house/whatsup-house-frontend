@@ -14,7 +14,7 @@ interface ReviewWriteFormProps {
   mileageReward?: number
 }
 
-function StarRating({ rating, onChange }: { rating: number; onChange: (v: number) => void }) {
+export function StarRating({ rating, onChange }: { rating: number; onChange: (v: number) => void }) {
   const t = useTranslations('review.form')
   return (
     <div className="flex gap-0.5 mb-3">

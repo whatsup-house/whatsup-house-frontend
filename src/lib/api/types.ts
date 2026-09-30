@@ -807,10 +807,42 @@ export interface DiningTableDetail {
   }
   venue: { name: string; address: string | null; mapUrl: string | null; priceRange: string | null } | null  // 배정 전이면 null
   chatRoomId: string | null
-  // 구성원 제한 소개(INF-06): 닉네임·MBTI·관심사만 내려온다
-  members: { nickname: string; mbti: string | null; interests: string[] | null }[] | null
+  // 구성원 제한 소개(INF-06): 닉네임·MBTI·관심사만 내려온다. userId 는 피드백·신고 대상 지정용(KAN-346 반영 전엔 없음)
+  members: { userId?: string; nickname: string; mbti: string | null; interests: string[] | null }[] | null
   cancelPolicy: string | null
   myAttendance: DiningAttendance | null
+}
+
+// 행사 후 피드백 — POST /api/dining/tables/{id}/feedback (KAN-350). 멤버당 1회
+export type DiningRejoinIntent = 'YES' | 'MAYBE' | 'NO'
+// AGAIN=다시 만나고 싶음, AVOID=같은 테이블 원치 않음. 운영자·매칭 전용이라 상대에게 공개되지 않는다
+export type DiningPeerPreferenceKind = 'AGAIN' | 'AVOID'
+
+export interface DiningFeedbackRequest {
+  tableScore: number   // 1~5
+  talkScore: number
+  venueScore: number
+  rejoinIntent: DiningRejoinIntent
+  comment?: string     // 최대 2000자
+  peers?: { userId: string; kind: DiningPeerPreferenceKind }[]
+}
+
+// 같은 테이블 멤버 신고 — POST /api/dining/tables/{id}/reports (KAN-350)
+export interface DiningReportRequest {
+  reportedUserId: string
+  reason: string       // 최대 2000자
+}
+
+// 내 참가 이력 한 건 — GET /api/dining/me/history (KAN-350). 최신 회차 순
+export interface DiningHistoryItem {
+  tableId: string
+  sessionId: string
+  eventDate: string              // YYYY-MM-DD
+  region: string | null
+  venueName: string | null       // 배정 전이면 null
+  tableStatus: DiningTableStatus // 확정·종료 테이블만 온다
+  feedbackSubmitted: boolean
+  attendanceStatus: DiningAttendanceStatus | null  // 아직 BE 가 항상 null → 표시 생략
 }
 
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
@@ -990,7 +1022,7 @@ export interface AdminApplicationDetail {
 // 인앱 알림 (KAN-262)
 export type NotificationType = 'PARTICIPATION_CONFIRMED' | 'MILEAGE_EARNED' | 'REVIEW_LIKE_MILESTONE'
 // 알림 클릭 시 이동 대상 (FE가 라우트로 매핑)
-export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION'
+export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION' | 'DINING_FEEDBACK_REQUEST'
 
 export interface NotificationItem {
   id: string
