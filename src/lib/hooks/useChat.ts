@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import {
   CHAT_PAGE_SIZE,
   deleteChatMessage,
   fetchChatMessages,
+  fetchChatMessagesAfter,
   fetchChatRoom,
   fetchChatRooms,
   hideChatRoom,
@@ -17,8 +20,18 @@ import {
   updateChatNotice,
   uploadChatImage,
 } from '@/lib/api/chat'
-import type { ChatMessage, ChatOutgoingMessage, ChatReaction, ChatRoomSummary } from '@/lib/api/types'
+import type {
+  ChatMessage,
+  ChatOutgoingMessage,
+  ChatReaction,
+  ChatRoomDetail,
+  ChatRoomPreviewEvent,
+  ChatRoomSummary,
+  ChatSocketEvent,
+} from '@/lib/api/types'
+import { connectChatSocket, disconnectChatSocket, flushChatRead, markChatRead, setChatSocketRoom } from '@/lib/chat/socket'
 import { useAuthStore } from '@/lib/store/authStore'
+import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorStatus } from '@/lib/utils/apiError'
 
 export const roomsKey = ['chat', 'rooms'] as const
@@ -241,8 +254,194 @@ export function useSetChatNotice(roomId: string) {
   })
 }
 
-// 읽음 처리 자리. 읽음은 STOMP SEND(/app/rooms/{id}/read)로만 하므로 REST 가 없다 — 소켓 연동 일감이 채운다.
-const markReadNoop = () => {}
+// 읽음은 STOMP SEND /app/rooms/{id}/read 로만 한다(REST 없음). 문서가 보일 때만, 같은 id 는 한 번만 보낸다.
 export function useMarkRead(): (roomId: string, messageId: string) => void {
-  return markReadNoop
+  return markChatRead
 }
+
+// ===== 소켓 이벤트 → 캐시 (KAN-333) =====
+
+// 방마다 "읽는 사람 → 마지막으로 읽은 메시지 id". 방 토픽을 구독할 때마다 그 방 것을 비운다(구독 전 이벤트는 못 봤으므로).
+type ReadPointers = Map<string, Map<string, string>>
+
+// 소켓 메시지는 방 전체에 한 번 보내는 뷰어 중립 값이다(reactedByMe 항상 false, 문의방 관리자 표시명 고정).
+// 이미 가진 메시지면 내 시점 값(sender·reactedByMe)은 캐시 쪽을 유지한다.
+function keepMyReactions(incoming: ChatReaction[], current: ChatReaction[]): ChatReaction[] {
+  return incoming.map((r) => ({ ...r, reactedByMe: current.some((c) => c.emoji === r.emoji && c.reactedByMe) }))
+}
+
+function mergeSocketMessage(current: ChatMessage, incoming: ChatMessage): ChatMessage {
+  return { ...incoming, sender: current.sender, reactions: keepMyReactions(incoming.reactions, current.reactions) }
+}
+
+function patchUnreadCounts(queryClient: QueryClient, roomId: string, counts: Map<string, number>) {
+  queryClient.setQueryData<MessagePages>(messagesKey(roomId), (data) =>
+    data && {
+      ...data,
+      pages: data.pages.map((page) =>
+        page.map((m) => {
+          const unreadCount = counts.get(m.id)
+          return unreadCount === undefined ? m : { ...m, unreadCount }
+        }),
+      ),
+    },
+  )
+}
+
+// "readerId 가 messageId 까지 읽음"을 안 읽은 수에 반영한다. READ 와 새 메시지(보내면 서버가 보낸 사람을 거기까지 읽음 처리) 둘 다 여기로 온다.
+// 규칙은 BE ChatResponseAssembler 와 같다: 보낸 사람은 세지 않고, 문의방은 관리자 전원을 한 명으로 센다.
+// 이전 읽은 지점 다음 ~ messageId 사이에서 그 사람이 보내지 않은 메시지마다 1을 뺀다.
+function applyRead(queryClient: QueryClient, roomId: string, readerId: string, messageId: string, pointers: ReadPointers) {
+  const room = queryClient.getQueryData<ChatRoomDetail>(roomKey(roomId))
+  const isInquiry = room?.type === 'INQUIRY'
+  const staffIds = isInquiry ? room.members.filter((m) => m.admin).map((m) => m.userId) : []
+  const isStaff = staffIds.includes(readerId)
+  const readerIds = isStaff ? staffIds : [readerId]
+  const roomPointers = pointers.get(roomId) ?? new Map<string, string>()
+  pointers.set(roomId, roomPointers)
+  const pointerKey = isStaff ? 'staff' : readerId
+  const previous = roomPointers.get(pointerKey)
+  roomPointers.set(pointerKey, messageId)
+
+  // 단체방에서 처음 보는 사람은 이전에 어디까지 읽었는지 몰라 최신 페이지 값을 서버에서 받아 맞춘다.
+  // 문의방은 읽는 쪽이 둘뿐이라 처음부터 빼도 정확하다.
+  // ponytail: 멤버별 읽은 지점이 API 에 없어 구독마다 사람당 1회 조회한다. 방 상세가 lastReadMessageId 를 주면 이 분기를 없앤다.
+  if (!previous && !isInquiry) {
+    fetchChatMessages(roomId).then(
+      (latest) => patchUnreadCounts(queryClient, roomId, new Map(latest.map((m) => [m.id, m.unreadCount]))),
+      () => {},
+    )
+    return
+  }
+  const ordered = [...(queryClient.getQueryData<MessagePages>(messagesKey(roomId))?.pages ?? [])].reverse().flat()
+  const end = ordered.findIndex((m) => m.id === messageId)
+  const start = previous ? ordered.findIndex((m) => m.id === previous) + 1 : 0
+  const counts = new Map(
+    ordered
+      .slice(start, end + 1)
+      .filter((m) => m.unreadCount > 0 && !readerIds.includes(m.sender?.userId ?? ''))
+      .map((m): [string, number] => [m.id, m.unreadCount - 1]),
+  )
+  if (counts.size > 0) patchUnreadCounts(queryClient, roomId, counts)
+}
+
+function applyRoomEvent(queryClient: QueryClient, event: ChatSocketEvent, pointers: ReadPointers) {
+  const { roomId } = event
+  switch (event.kind) {
+    case 'MESSAGE_CREATED':
+    case 'MESSAGE_UPDATED':
+    case 'MESSAGE_DELETED': {
+      const message = event.payload
+      // 이미 있으면(내 전송 응답이 먼저 붙인 경우 포함) 교체, 새 메시지면 최신 페이지 끝에 붙인다
+      patchMessage(queryClient, roomId, message.id, (m) => mergeSocketMessage(m, message))
+      if (event.kind === 'MESSAGE_CREATED') {
+        appendMessage(queryClient, roomId, message)
+        if (message.sender) applyRead(queryClient, roomId, message.sender.userId, message.id, pointers)
+      }
+      return
+    }
+    case 'REACTION_CHANGED': {
+      const { id, reactions } = event.payload
+      patchMessage(queryClient, roomId, id, (m) => ({ ...m, reactions: keepMyReactions(reactions, m.reactions) }))
+      return
+    }
+    case 'READ': {
+      const { userId, messageId } = event.payload
+      applyRead(queryClient, roomId, userId, messageId, pointers)
+      // 내가 방의 마지막 메시지까지 읽었으면 방 목록(바텀 내비 배지)도 바로 0
+      if (userId === useAuthStore.getState().userId) {
+        queryClient.setQueryData<ChatRoomSummary[]>(roomsKey, (rooms) =>
+          rooms?.map((r) => (r.id === roomId && r.lastMessage?.id === messageId ? { ...r, unreadCount: 0 } : r)),
+        )
+      }
+      return
+    }
+    case 'NOTICE_CHANGED': {
+      const noticeMessage = event.payload
+      queryClient.setQueryData<ChatRoomDetail>(roomKey(roomId), (room) => room && { ...room, noticeMessage })
+      return
+    }
+    case 'MEMBER_CHANGED':
+      // 멤버 목록·내 권한은 방 상세로 다시 받는다. 내가 내보내졌으면 403 → ChatRoom 이 목록으로 보낸다.
+      queryClient.invalidateQueries({ queryKey: roomKey(roomId) })
+  }
+}
+
+// /user/queue/rooms: 새 메시지가 생긴 방의 미리보기. 목록에 없는 방(새로 초대됨·숨김 해제)이면 목록을 다시 받는다.
+function applyRoomPreview(queryClient: QueryClient, { roomId, lastMessage, unreadCount }: ChatRoomPreviewEvent) {
+  const rooms = queryClient.getQueryData<ChatRoomSummary[]>(roomsKey)
+  const room = rooms?.find((r) => r.id === roomId)
+  if (!rooms || !room) {
+    queryClient.invalidateQueries({ queryKey: roomsKey })
+    return
+  }
+  // 서버 정렬(최근 메시지 순)에 맞춰 맨 위로
+  queryClient.setQueryData<ChatRoomSummary[]>(roomsKey, [
+    { ...room, lastMessage, unreadCount },
+    ...rooms.filter((r) => r.id !== roomId),
+  ])
+}
+
+// 방 토픽 구독 직후: 캐시의 마지막 메시지 이후를 받아 끊긴 동안의 공백을 채운다.
+// 구독 뒤 실시간 이벤트가 먼저 붙었을 수 있어 최신 페이지를 시간순으로 다시 정렬한다.
+async function fillMessageGap(queryClient: QueryClient, roomId: string) {
+  const data = queryClient.getQueryData<MessagePages>(messagesKey(roomId))
+  if (!data) return // 첫 조회 전: REST 가 최신을 받는다
+  const newest = data.pages[0] ?? []
+  const lastId = newest[newest.length - 1]?.id
+  const missed = lastId ? await fetchChatMessagesAfter(roomId, lastId) : []
+  // 빈 방이었거나 공백이 한 페이지 이상이면 처음부터 다시 받는다
+  if (!lastId || missed.length >= CHAT_PAGE_SIZE) {
+    await queryClient.invalidateQueries({ queryKey: messagesKey(roomId) })
+    return
+  }
+  queryClient.setQueryData<MessagePages>(messagesKey(roomId), (current) => {
+    if (!current) return current
+    const known = new Set(current.pages.flat().map((m) => m.id))
+    const fresh = missed.filter((m) => !known.has(m.id))
+    if (fresh.length === 0) return current
+    const [head = [], ...older] = current.pages
+    // createdAt 은 같은 형식의 ISO 문자열이라 문자열 비교가 시간순이다
+    const merged = [...head, ...fresh].sort((a, b) => (a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0))
+    return { ...current, pages: [merged, ...older] }
+  })
+}
+
+// /chat 하위 라우트 레이아웃에서만 쓴다: 로그인 상태면 소켓을 열고, /chat 을 벗어나거나(언마운트) 로그아웃하면 닫는다.
+// 끊긴 동안은 useChatRooms 의 30초 폴링이 그대로 돈다.
+export function useChatSocket() {
+  const queryClient = useQueryClient()
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
+  const roomId = usePathname().match(/^\/chat\/([^/]+)$/)?.[1] ?? null
+  const router = useRouter()
+  const t = useTranslations('chat')
+  const showToast = useToastStore((s) => s.show)
+
+  useEffect(() => {
+    if (!isLoggedIn) return
+    const pointers: ReadPointers = new Map()
+    connectChatSocket({
+      onRoomSubscribed: (id) => {
+        pointers.delete(id)
+        fillMessageGap(queryClient, id).catch(() => {})
+      },
+      onRoomEvent: (event) => applyRoomEvent(queryClient, event, pointers),
+      onRoomsEvent: (preview) => applyRoomPreview(queryClient, preview),
+      onRoomRejected: () => {
+        showToast(t('room.notMember'), 'error')
+        router.replace('/chat')
+      },
+    })
+    document.addEventListener('visibilitychange', flushChatRead)
+    return () => {
+      document.removeEventListener('visibilitychange', flushChatRead)
+      disconnectChatSocket()
+    }
+  }, [isLoggedIn, queryClient, router, showToast, t])
+
+  useEffect(() => {
+    setChatSocketRoom(roomId)
+    return () => setChatSocketRoom(null)
+  }, [roomId])
+}
+
