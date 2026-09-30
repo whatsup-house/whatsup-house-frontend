@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import { adminGatheringApi, groupAdminGatheringTypes, ApplicationStatus } from '@/lib/api/adminGathering'
 import type { AdminGatheringStatus } from '@/lib/api/admin'
@@ -7,13 +7,16 @@ import type {
   AdminSessionCreateRequest,
   AdminSessionRequest,
   GatheringDetail,
+  GatheringSession,
 } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
 
 // 종류·회차 변경은 관리자 목록·상세와 공개 목록·상세 캐시를 모두 낡게 만든다. (KAN-340)
+// 우연한 식탁 운영 대시보드도 회차 기준이라 함께 낡는다. (KAN-351)
 function invalidateGatheringQueries(queryClient: QueryClient) {
   queryClient.invalidateQueries({ queryKey: ['admin', 'gatherings'] })
+  queryClient.invalidateQueries({ queryKey: ['admin', 'dining'] })
   queryClient.invalidateQueries({ queryKey: ['admin', 'gathering'] })
   queryClient.invalidateQueries({ queryKey: ['gatherings'] })
   queryClient.invalidateQueries({ queryKey: ['gathering'] })
@@ -71,12 +74,33 @@ export function useAdminLocations() {
 }
 
 // 관리자 모임 목록 — 회차 단위 목록을 종류 단위로 묶는다. (KAN-340)
-export function useAdminGatheringTypes() {
+export function useAdminGatheringTypes(enabled = true) {
   return useQuery({
     queryKey: ['admin', 'gatherings', 'types'],
     queryFn: () => adminGatheringApi.getAll(),
     select: (items) => groupAdminGatheringTypes(items, dayjs().format('YYYY-MM-DD')),
+    enabled,
   })
+}
+
+// 우연한 식탁(RANDOM_TABLE) 종류 — 운영 대시보드 회차 만들기의 종류 선택용 (KAN-351)
+// ponytail: 목록 응답에 타입이 없어 종류마다 상세를 한 번씩 부른다(캐시는 종류 상세와 공유). 종류 목록 API에 타입이 생기면 교체.
+export function useRandomTableGatheringTypes(enabled: boolean) {
+  const rows = useAdminGatheringTypes(enabled)
+  const details = useQueries({
+    queries: (rows.data ?? []).map((row) => ({
+      queryKey: ['admin', 'gathering', row.id],
+      queryFn: () => adminGatheringApi.getById(row.id),
+      staleTime: 1000 * 30,
+      enabled,
+    })),
+  })
+  return {
+    types: details.flatMap((q) =>
+      q.data?.gatheringType === 'RANDOM_TABLE' ? [{ id: q.data.id, title: q.data.title }] : []),
+    isLoading: rows.isLoading || details.some((q) => q.isLoading),
+    isError: rows.isError || details.some((q) => q.isError),
+  }
 }
 
 // 모임 종류 상세 + 전체 회차 (수정 패널 prefill, 종류 상세 화면) (KAN-220, KAN-340)
@@ -134,8 +158,8 @@ export function useDeleteGathering(onSuccess?: () => void) {
   })
 }
 
-// 회차 추가 — 단건 또는 주간 반복 (KAN-340)
-export function useCreateSessions(gatheringId: string, onSuccess?: () => void) {
+// 회차 추가 — 단건 또는 주간 반복 (KAN-340). onSuccess는 만들어진 회차들을 받는다 (식당 풀 설정용, KAN-351)
+export function useCreateSessions(gatheringId: string, onSuccess?: (created: GatheringSession[]) => void) {
   const queryClient = useQueryClient()
   const showToast = useToastStore((s) => s.show)
   return useMutation({
@@ -143,7 +167,7 @@ export function useCreateSessions(gatheringId: string, onSuccess?: () => void) {
     onSuccess: (created) => {
       invalidateGatheringQueries(queryClient)
       showToast(`회차 ${created.length}개를 추가했어요.`)
-      onSuccess?.()
+      onSuccess?.(created)
     },
     onError: (err: unknown) => showToast(getApiErrorMessage(err, '회차 추가 중 오류가 발생했어요.'), 'error'),
   })

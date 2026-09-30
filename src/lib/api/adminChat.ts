@@ -8,6 +8,7 @@ import type {
   ChatRoomIdResponse,
   ChatSourceMember,
   ChatSourceType,
+  MatchingResult,
 } from './types'
 
 // 전체 방 목록. 조회한 관리자는 미가입 문의방에 자동 등록된다.
@@ -26,6 +27,12 @@ export const fetchChatSourceMembers = async (type: ChatSourceType, id: string): 
   const response = await apiClient.get<ApiResponse<ChatSourceMember[]>>('/api/admin/chat/rooms/source-members', {
     params: { type, id },
   })
+  return response.data.data
+}
+
+// 우연한 식탁 조 목록 — 단체방 조원 불러오기에서 조를 고르는 용도 (KAN-334, 옛 matching.ts에서 이동 KAN-351)
+export const fetchDiningTableGroups = async (gatheringId: string): Promise<MatchingResult> => {
+  const response = await apiClient.get<ApiResponse<MatchingResult>>(`/api/admin/gatherings/${gatheringId}/matching`)
   return response.data.data
 }
 

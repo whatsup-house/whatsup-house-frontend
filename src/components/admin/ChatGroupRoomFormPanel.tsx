@@ -9,8 +9,7 @@ import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import AdminUserSearch from './AdminUserSearch'
-import { useChatSourceGatherings, useCreateChatRoom, useLoadSourceMembers } from '@/lib/hooks/useAdminChat'
-import { useMatchingResult } from '@/lib/hooks/useMatching'
+import { useChatSourceGatherings, useCreateChatRoom, useDiningTableGroups, useLoadSourceMembers } from '@/lib/hooks/useAdminChat'
 import type { ChatSourceMember, ChatSourceType } from '@/lib/api/types'
 
 const schema = z.object({
@@ -39,7 +38,7 @@ export default function ChatGroupRoomFormPanel({ onClose }: ChatGroupRoomFormPan
   const [gatheringId, setGatheringId] = useState('')
   const [groupId, setGroupId] = useState('')
   // 우연한 식탁은 게더링 → 조 순서로 고른다
-  const { data: matching } = useMatchingResult(sourceType === 'DINING_TABLE' ? gatheringId : '')
+  const { data: matching } = useDiningTableGroups(sourceType === 'DINING_TABLE' ? gatheringId : '')
 
   const { register, control, getValues, handleSubmit, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
