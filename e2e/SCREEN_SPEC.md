@@ -12,6 +12,7 @@
 2. [회원 플로우](#2-회원-플로우)
 3. [관리자 플로우](#3-관리자-플로우)
 4. [엣지 케이스](#4-엣지-케이스)
+5. [우연한 식탁](#5-우연한-식탁)
 
 ---
 
@@ -566,6 +567,116 @@
 
 ---
 
+## 5. 우연한 식탁
+
+> PRD 18장 데모 시나리오를 목 응답(`e2e/fixtures/dining-mocks.ts`)으로 재현한다. 시드 참가자 12명(출생연도·MBTI 모두 다름, 성별 6:6), 종류 1개 + 회차 2개(7일 뒤 성수 19:00, 14일 뒤 을지로 12:30), 매칭 결과 테이블 2개(6명·5명) + 미배정 1명(나이 차 초과 → 대체 회차 제안). 스케줄러 대신 관리자 "지금 매칭 실행"·"전체 즉시 확정"으로 진행한다.
+> 스펙: `user/dining-apply.spec.ts`, `user/dining-status.spec.ts`, `user/dining-table.spec.ts`, `admin/dining-console.spec.ts`, `admin/dining-exceptions.spec.ts`
+
+### 5-1. 우연한 식탁 신청 (3단계)
+
+| 항목 | 내용 |
+|------|------|
+| 스크린샷 | `user/dining-apply-01-detail.png` ~ `dining-apply-05-mypage-waiting.png` |
+| URL | `/gatherings/{종류 id}` → `/gatherings/{종류 id}/apply/dining` → `/mypage?tab=applications` |
+| 접근 | 회원 전용 (비로그인은 로그인 후 복귀) |
+
+| # | 요소 | 기능 |
+|---|------|------|
+| 1 | 종류 페이지 "신청하기" | 회차를 고르지 않아도 단계형 신청으로 이동. 고른 회차가 있으면 1지망으로 넘긴다 |
+| 2 | 1단계 희망 날짜 | 회차 복수 선택(체크박스). 고른 순서가 우선순위 번호로 표시된다. 하나도 안 고르면 "다음" 비활성 |
+| 3 | 2단계 신청서 | 표준 질문(출생연도·성별·MBTI·관심사·나/원하는 스타일·식이 제한)을 지난 답변(`GET /api/dining/prefill`)으로 채운다 |
+| 4 | 3단계 이용권 확인 | 희망 날짜 우선순위 요약 + 남은 이용권. 이용권이 없으면 결제 대기로 접수된다고 안내 |
+| 5 | 신청하기 | `POST /api/applications` `{gatheringId, candidateSessionIds(우선순위 순), answers}` → 마이페이지 신청 내역 |
+
+---
+
+### 5-2. 신청 상태 카드 (마이페이지 신청 내역)
+
+| 항목 | 내용 |
+|------|------|
+| 스크린샷 | `user/dining-status-01-waiting.png` ~ `dining-status-07-cancel-window.png` |
+| URL | `/mypage?tab=applications` |
+
+| # | 요소 | 기능 |
+|---|------|------|
+| 1 | 단계 배지·진행 막대 | 결제 → 매칭 대기(실행 예정 시각) → 매칭 중(확정 예정 시각) → 재배치 중 → 확정 → 참석 완료 |
+| 2 | 테이블 보기 | 확정·참석 완료 단계에서 `/dining/tables/{id}`로 이동 |
+| 3 | 대체 날짜 제안 | 매칭 실패 시 카드 안에서 대체 회차로 옮기기(날짜 선택 필수) / 이용권 보관 / 환불. 확인 모달 후 `POST /api/dining/resolutions/{id}/choose` |
+| 4 | 신청 취소 | 회차 시작 2일 전까지만 활성. 지나면 비활성 + 안내 문구. 확인 모달 후 `POST /api/dining/applications/{id}/cancel` |
+
+---
+
+### 5-3. 테이블 상세 · 체크인 · 신고
+
+| 항목 | 내용 |
+|------|------|
+| 스크린샷 | `user/dining-table-01-detail.png` ~ `dining-table-04-report-modal.png` |
+| URL | `/dining/tables/{id}` |
+| 접근 | 확정된 테이블 멤버만 (아니면 403 안내) |
+
+| # | 요소 | 기능 |
+|---|------|------|
+| 1 | 일정 카드 | 날짜·시간·지역 + 내 참석 상태 배지 |
+| 2 | 식당 | 이름·주소·가격대·지도 링크. 배정 전이면 "식당 배정 중" |
+| 3 | 함께하는 멤버 | 구성원 제한 소개: 닉네임·MBTI·관심사만 (나이·성별 비공개) |
+| 4 | 단체방 입장 | 채팅방이 만들어지면 활성, 아니면 "단체방 준비 중" |
+| 5 | 체크인 | 회차 시작 ±2시간만 활성. 창 밖이면 가능 시간 안내. `POST .../check-in` 후 "체크인 완료" |
+| 6 | 멤버 신고 | 나를 뺀 멤버 선택 → 사유 입력 모달 → `POST .../reports` |
+
+---
+
+### 5-4. 행사 후 피드백 · 참가 이력
+
+| 항목 | 내용 |
+|------|------|
+| 스크린샷 | `user/dining-feedback-01-form.png` ~ `dining-feedback-03-already-submitted.png`, `user/dining-history-01-list.png` |
+| URL | `/dining/tables/{id}/feedback`, `/dining/history` |
+
+| # | 요소 | 기능 |
+|---|------|------|
+| 1 | 만족도 | 테이블 전체·대화·식당 별점(1~5). 3항목 + 재참여 의향을 골라야 제출 활성 |
+| 2 | 다시 만나고 싶은 멤버 | 멤버별 "다시 만나고 싶어요 / 피하고 싶어요"(비공개, 매칭에만 사용) |
+| 3 | 피드백 보내기 | `POST .../feedback` → 완료 화면. 409 FEEDBACK_ALREADY_SUBMITTED 면 "이미 피드백을 제출했어요" |
+| 4 | 참가 이력 | 회차·지역·식당·테이블 상태·참석 상태·피드백 제출 여부. 미제출이면 "피드백 남기기" |
+
+---
+
+### 5-5. 관리자 — 운영 대시보드 · 회차 콘솔
+
+| 항목 | 내용 |
+|------|------|
+| 스크린샷 | `admin/dining-01-dashboard.png` ~ `dining-08-move-violation.png` |
+| URL | `/admin/dining`, `/admin/dining/sessions/{회차 id}` |
+
+| # | 요소 | 기능 |
+|---|------|------|
+| 1 | 타일 | 다가오는 회차·대기 신청자·결제 완료·제안 중/확정 테이블·열린 예외(클릭 시 예외함) |
+| 2 | 회차 카드 | 날짜·지역·결제 완료/정원·매칭 실행 예정/완료·테이블 수·예외 수. 클릭 → 회차 콘솔 |
+| 3 | 지금 매칭 실행 / 다시 실행 | confirm 후 `POST .../match-runs`. 결과 토스트(후보 → 테이블, 미배정) |
+| 4 | 테이블 탭 | 카드(상태·"N분 후 확정"·점수 툴팁·잠금·멤버 칩), 칩 "이동" 셀렉트/드래그로 이동, 분리·병합·즉시 확정·해체, 미배정 목록 + 사유 |
+| 5 | 규칙 위반 | 400 TABLE_RULE_VIOLATION 이면 토스트 + 해당 카드 경고, 멤버는 원래 테이블로 원복 |
+| 6 | 전체 즉시 확정 (N) | 제안 테이블마다 `POST .../confirm-now` |
+| 7 | 식당·단체방 탭 | 회차 식당 풀 저장, 테이블별 식당 배정(`PUT .../venue`), 채팅방 상태·재시도, 알림 재발송 |
+| 8 | 참석·피드백 탭 | 체크인 현황·노쇼 확정, 응답률·만족도 평균·재참여 의향·신고 건수(예외함 링크) |
+
+---
+
+### 5-6. 관리자 — 예외함 · 설정
+
+| 항목 | 내용 |
+|------|------|
+| 스크린샷 | `admin/dining-exceptions-01-open.png` ~ `dining-exceptions-03-resolved.png`, `admin/dining-settings-01-rules.png` |
+| URL | `/admin/dining/exceptions`, `/admin/dining/settings` |
+
+| # | 요소 | 기능 |
+|---|------|------|
+| 1 | 열림/해결 탭 · 유형 칩 | 전체 회차 횡단 목록 필터 |
+| 2 | 식당(VENUE) 건 | 배정할 식당 선택 → "식당 배정 후 처리". 처리 메모 없으면 비활성. 배정 `PUT` 후 `PATCH .../exceptions/{id}` `{status: RESOLVED, note}` |
+| 3 | 매칭 규칙 기본값 | 최대 나이 차·테이블 인원·최소 점수·확정 유예·가중치. `PUT .../settings/matching-rules` 전체 교체 |
+| 4 | 식당 풀 | 식당 추가·수정·삭제 |
+
+---
+
 ## 스크린샷 인덱스
 
 | 경로 | 화면 |
@@ -604,3 +715,9 @@
 | `admin/locations-*.png` | 장소 관리 |
 | `admin/users-*.png` | 회원 관리 |
 | `edge/*.png` | 엣지 케이스 |
+| `user/dining-apply-*.png` | 우연한 식탁 신청 3단계 → 마이페이지 매칭 대기 |
+| `user/dining-status-*.png` | 우연한 식탁 상태 카드 (단계 전환·대체 회차·사전 취소) |
+| `user/dining-table-*.png` | 우연한 식탁 테이블 상세·체크인·신고 |
+| `user/dining-feedback-*.png`, `user/dining-history-01-list.png` | 행사 후 피드백·참가 이력 |
+| `admin/dining-0*.png` | 우연한 식탁 대시보드·회차 콘솔 |
+| `admin/dining-exceptions-*.png`, `admin/dining-settings-01-rules.png` | 우연한 식탁 예외함·설정 |
