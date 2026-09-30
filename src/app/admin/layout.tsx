@@ -16,7 +16,7 @@ const sidebarItems = [
   { href: '/admin/home', icon: Home, label: '홈화면 관리' },
   { href: '/admin/applications', icon: ClipboardList, label: '참가자 관리' },
   { href: '/admin/forms', icon: FileText, label: '신청폼 관리' },
-  { href: '/admin/matching', icon: Utensils, label: '우연한 식탁 매칭' },
+  { href: '/admin/dining', icon: Utensils, label: '우연한 식탁' },
   { href: '/admin/tickets', icon: Ticket, label: '이용권 설정' },
   { href: '/admin/locations', icon: MapPin, label: '장소 관리' },
   { href: '/admin/users', icon: Users, label: '회원 관리' },

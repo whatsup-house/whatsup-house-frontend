@@ -73,6 +73,13 @@ export default function AdminGatheringTypeDetail({ gatheringId }: AdminGathering
       maxAttendees: s.maxAttendees,
       priceOverride: s.price !== null && s.price !== detail.basePrice ? s.price : null,
       applyDeadlineAt: s.applyDeadlineAt?.slice(0, 16) ?? null,
+      // 우연한 식탁 전용 필드 — 모달이 RANDOM_TABLE일 때만 쓴다 (KAN-351)
+      matchRunAt: s.matchRunAt?.slice(0, 16),
+      autoConfirmGraceMinutes: s.autoConfirmGraceMinutes,
+      tableSizeMin: s.tableSizeMin ?? undefined,
+      tableSizeMax: s.tableSizeMax ?? undefined,
+      minGroupScore: s.minGroupScore,
+      maxAgeGap: s.maxAgeGap,
     },
   })
 
@@ -232,6 +239,7 @@ export default function AdminGatheringTypeDetail({ gatheringId }: AdminGathering
           // 대상이 바뀌면 새로 마운트해 이전 입력이 남지 않게 한다.
           key={sessionModal === 'new' ? 'new' : sessionModal.sessionId}
           gatheringId={detail.id}
+          gatheringType={detail.gatheringType}
           editing={sessionModal === 'new' ? null : sessionModal}
           onClose={() => setSessionModal(null)}
         />

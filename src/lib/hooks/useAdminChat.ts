@@ -7,6 +7,7 @@ import {
   fetchAdminChatRooms,
   fetchChatReports,
   fetchChatSourceMembers,
+  fetchDiningTableGroups,
   kickChatMember,
   muteChatUser,
   unmuteChatUser,
@@ -59,6 +60,15 @@ export function useChatSourceGatherings() {
     queryKey: ['admin', 'chat', 'gatherings'],
     queryFn: () => adminGatheringApi.getAll(),
     staleTime: 1000 * 60 * 5,
+  })
+}
+
+// 우연한 식탁 조 목록 (게더링을 고른 뒤 조 선택)
+export function useDiningTableGroups(gatheringId: string) {
+  return useQuery({
+    queryKey: ['admin', 'chat', 'dining-groups', gatheringId],
+    queryFn: () => fetchDiningTableGroups(gatheringId),
+    enabled: !!gatheringId,
   })
 }
 

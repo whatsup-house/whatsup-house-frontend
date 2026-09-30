@@ -32,6 +32,13 @@ export interface GatheringSession {
   applyDeadlineAt: string | null // ISO datetime, 없으면 마감 없음
   status: GatheringSessionStatus
   confirmedCount: number         // 정원을 차지한 인원(승인 + 출석)
+  // RANDOM_TABLE 회차 전용 (KAN-345). 응답에 아직 없을 수 있어 optional
+  matchRunAt?: string | null
+  autoConfirmGraceMinutes?: number | null
+  tableSizeMin?: number | null
+  tableSizeMax?: number | null
+  minGroupScore?: number | null
+  maxAgeGap?: number | null
 }
 
 // 모임 목록 항목 = 종류 + 조건에 맞는 회차 — BE GatheringResponse (KAN-338)
@@ -92,8 +99,18 @@ export interface AdminGatheringTypeRequest {
   gatheringType?: GatheringType  // 생성 시에만 반영 (수정 불가)
 }
 
+// 우연한 식탁 회차 전용 필드 — RANDOM_TABLE 회차에서만 보낸다. null이면 매칭 규칙 기본값 (KAN-345)
+export interface DiningSessionFields {
+  matchRunAt: string                     // YYYY-MM-DDTHH:mm, 이 시각에 마감하고 매칭 실행
+  autoConfirmGraceMinutes: number | null // 제안 → 자동 확정까지 유예(분). 0이면 즉시
+  tableSizeMin: number
+  tableSizeMax: number
+  minGroupScore: number | null           // 0~1
+  maxAgeGap: number | null
+}
+
 // 관리자 회차 필드 — BE GatheringSessionRequest (회차 수정 본문이자 반복 생성의 base) (KAN-338)
-export interface AdminSessionRequest {
+export interface AdminSessionRequest extends Partial<DiningSessionFields> {
   eventDate: string              // YYYY-MM-DD
   startTime: string | null       // HH:mm
   endTime: string | null
@@ -769,16 +786,6 @@ export interface FormQuestionAdminItem {
 
 export type MatchingGroupStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 
-// 자동매칭 실행 결과 (POST /api/admin/gatherings/{id}/matching)
-export interface MatchingRunResult {
-  gatheringId: string
-  algorithmVersion: string
-  confirmedCount: number
-  groupCount: number
-  matchedCount: number
-  unmatchedCount: number
-}
-
 // 매칭 멤버 1명
 export interface MatchingMemberView {
   memberId: string | null     // 미배정자는 null
@@ -806,6 +813,60 @@ export interface MatchingResult {
   gatheringId: string
   groups: MatchingGroupView[]
   unmatched: MatchingMemberView[]
+}
+
+// ===== 우연한 식탁 운영 (관리자, KAN-348) =====
+
+// 운영 대시보드 회차 카드 — BE DiningDashboardResponse.SessionCard
+export interface DiningDashboardSession {
+  sessionId: string
+  gatheringId: string
+  title: string
+  eventDate: string              // YYYY-MM-DD
+  startTime: string | null       // HH:mm:ss
+  locationName: string | null    // 지역
+  status: GatheringSessionStatus
+  paidCount: number
+  maxAttendees: number
+  matchRunAt: string | null      // ISO datetime
+  isMatchRunDone: boolean        // 테이블이 하나라도 만들어졌으면 true
+  tableCount: number             // 제안 중 + 확정
+  openExceptionCount: number
+}
+
+// GET /api/admin/dining/dashboard
+export interface DiningDashboard {
+  upcomingSessionCount: number
+  waitingApplicantCount: number
+  paidApplicantCount: number
+  proposedTableCount: number
+  confirmedTableCount: number
+  openExceptionCount: number     // 회차 무관 전체
+  sessions: DiningDashboardSession[] // 날짜·시작 시간 순
+}
+
+// GET /api/admin/dining/venues — BE VenueResponse
+export interface DiningVenue {
+  id: string
+  name: string
+  address: string
+  mapUrl: string | null
+  priceRange: string | null
+  region: string
+  isActive: boolean
+}
+
+// PUT /api/admin/dining/sessions/{id}/venues 본문 항목 (목록으로 통째로 교체)
+export interface SessionVenueRequest {
+  venueId: string
+  capacityTables: number         // 1~100
+}
+
+// BE SessionVenueResponse
+export interface SessionVenue {
+  venue: DiningVenue
+  capacityTables: number
+  usedTables: number
 }
 
 // 관리자 신청 상세 (답변 포함) — GET /api/admin/applications/{id}
