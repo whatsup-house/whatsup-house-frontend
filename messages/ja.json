@@ -620,6 +620,36 @@
       "paymentPendingDescription": "申請は受け付けましたが、利用券が不足しています。利用券を購入すると申請が確定し、マッチング待ちになります。",
       "buyTicket": "利用券を購入する",
       "viewMyApplications": "申請履歴を見る"
+    },
+    "diningTable": {
+      "label": "偶然の食卓",
+      "loadFailed": "テーブル情報を読み込めませんでした。",
+      "notMemberTitle": "このテーブルのメンバーではありません",
+      "notMemberDescription": "確定したテーブルのメンバーのみ閲覧できます。\n申請状況はマイページでご確認ください。",
+      "attendance": {
+        "SCHEDULED": "参加予定",
+        "ATTENDED": "参加済み",
+        "CANCELED_EARLY": "事前キャンセル",
+        "CANCELED_LATE": "直前キャンセル",
+        "NO_SHOW": "無断欠席"
+      },
+      "venueTitle": "レストラン",
+      "venuePending": "レストラン調整中",
+      "priceRange": "価格帯 {price}",
+      "membersTitle": "一緒のメンバー {count}人",
+      "topicsTitle": "会話のテーマ",
+      "topicsGuide": "会話のテーマとアイスブレイクはグループチャットで確認できます。",
+      "enterChat": "グループチャットへ",
+      "chatPreparing": "グループチャット準備中",
+      "cancelPolicyTitle": "キャンセルポリシー",
+      "checkInTitle": "チェックイン",
+      "checkIn": "チェックインする",
+      "checkedIn": "チェックイン完了",
+      "checkInWindow": "チェックインは {from}〜{to} の間にできます。",
+      "checkInUnavailable": "現在チェックインできません。",
+      "checkInWindowClosed": "チェックインできる時間ではありません。",
+      "checkInSuccess": "チェックインしました。お食事をお楽しみください！",
+      "checkInFailed": "チェックインに失敗しました。しばらくしてからもう一度お試しください。"
     }
   },
   "review": {

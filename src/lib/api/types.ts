@@ -763,6 +763,32 @@ export interface DiningPrefillResponse {
   }[]
 }
 
+// 확정 테이블의 내 참석 — BE AttendanceStatus. 체크인(POST /api/dining/tables/{id}/check-in, KAN-349) 응답도 같은 모양
+export type DiningAttendanceStatus = 'SCHEDULED' | 'ATTENDED' | 'CANCELED_EARLY' | 'CANCELED_LATE' | 'NO_SHOW'
+
+export interface DiningAttendance {
+  status: DiningAttendanceStatus
+  checkedInAt: string | null
+}
+
+// 테이블 상세 — GET /api/dining/tables/{id} (KAN-346). 멤버가 아니면 403, 없으면 404
+export interface DiningTableDetail {
+  id: string
+  status: 'CONFIRMED' | 'DONE'
+  session: {
+    eventDate: string          // YYYY-MM-DD
+    startTime: string | null   // HH:mm:ss
+    endTime: string | null
+    region: string | null
+  }
+  venue: { name: string; address: string | null; mapUrl: string | null; priceRange: string | null } | null  // 배정 전이면 null
+  chatRoomId: string | null
+  // 구성원 제한 소개(INF-06): 닉네임·MBTI·관심사만 내려온다
+  members: { nickname: string; mbti: string | null; interests: string[] | null }[] | null
+  cancelPolicy: string | null
+  myAttendance: DiningAttendance | null
+}
+
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
 export interface AnswerView {
   questionKey: string
