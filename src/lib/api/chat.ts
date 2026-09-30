@@ -9,6 +9,7 @@ import type {
   ChatRoomDetail,
   ChatRoomSummary,
   ChatSendMessageRequest,
+  ChatSocketTokenResponse,
 } from './types'
 
 export const CHAT_PAGE_SIZE = 50
@@ -35,6 +36,23 @@ export const fetchChatMessages = async (roomId: string, before?: string): Promis
   const response = await apiClient.get<ApiResponse<ChatMessage[]>>(`/api/chat/rooms/${roomId}/messages`, {
     params: { before, size: CHAT_PAGE_SIZE },
   })
+  return response.data.data
+}
+
+// 재접속 보충: after 커서(메시지 id) 이후 size건. 오래된 → 최신 순.
+export const fetchChatMessagesAfter = async (roomId: string, after: string): Promise<ChatMessage[]> => {
+  const response = await apiClient.get<ApiResponse<ChatMessage[]>>(`/api/chat/rooms/${roomId}/messages`, {
+    params: { after, size: CHAT_PAGE_SIZE },
+  })
+  return response.data.data
+}
+
+// STOMP 엔드포인트: API base 의 http(s) → ws(s). SockJS 없이 브라우저 WebSocket 으로 붙는다.
+export const CHAT_SOCKET_URL = `${(apiClient.defaults.baseURL ?? '').replace(/\/$/, '')}/ws-chat`.replace(/^http/, 'ws')
+
+// STOMP CONNECT 용 단기 토큰(2분). 쿠키 인증이라 401 이면 apiClient 인터셉터가 refresh 후 한 번 다시 부른다.
+export const fetchChatSocketToken = async (): Promise<ChatSocketTokenResponse> => {
+  const response = await apiClient.get<ApiResponse<ChatSocketTokenResponse>>('/api/chat/socket-token')
   return response.data.data
 }
 

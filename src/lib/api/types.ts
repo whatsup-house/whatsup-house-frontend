@@ -889,6 +889,29 @@ export interface ChatOutgoingMessage {
   failed: boolean
 }
 
+// ===== 채팅 소켓 (KAN-333) =====
+// GET /api/chat/socket-token — STOMP CONNECT 의 Authorization: Bearer 헤더용 단기 토큰
+export interface ChatSocketTokenResponse {
+  token: string
+  // 수명(초). 기본 120
+  expiresIn: number
+}
+
+// /topic/rooms/{roomId} 이벤트 봉투 (BE ChatSocketEventResponse). 메시지 페이로드는 방 전체에 한 번 보내는 뷰어 중립 값이다.
+export type ChatSocketEvent =
+  | { kind: 'MESSAGE_CREATED' | 'MESSAGE_UPDATED' | 'MESSAGE_DELETED' | 'REACTION_CHANGED'; roomId: string; payload: ChatMessage }
+  | { kind: 'READ'; roomId: string; payload: { userId: string; messageId: string } }
+  // 해제면 null
+  | { kind: 'NOTICE_CHANGED'; roomId: string; payload: ChatMessage | null }
+  | { kind: 'MEMBER_CHANGED'; roomId: string; payload: { userIds: string[] } }
+
+// /user/queue/rooms — 새 메시지가 생긴 방의 목록 미리보기 (봉투 없음, BE ChatRoomPreviewResponse)
+export interface ChatRoomPreviewEvent {
+  roomId: string
+  lastMessage: NonNullable<ChatRoomSummary['lastMessage']>
+  unreadCount: number
+}
+
 // ===== 채팅 웹 푸시 (KAN-336) =====
 export interface ChatPushPublicKeyResponse {
   // VAPID 공개키(base64url). PushManager.subscribe 의 applicationServerKey 로 쓴다.
