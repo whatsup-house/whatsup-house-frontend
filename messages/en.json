@@ -1210,6 +1210,12 @@
       "reported": "Report submitted",
       "noticeSet": "Set as notice",
       "noticeCleared": "Notice removed"
+    },
+    "push": {
+      "prompt": "Get notified of new messages",
+      "allow": "Allow",
+      "later": "Later",
+      "iosGuide": "Add this site to your Home Screen to get notifications"
     }
   }
 }

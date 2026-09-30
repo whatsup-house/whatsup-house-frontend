@@ -1210,6 +1210,12 @@
       "reported": "Denuncia enviada",
       "noticeSet": "Fijado como aviso",
       "noticeCleared": "Aviso eliminado"
+    },
+    "push": {
+      "prompt": "Recibir avisos de mensajes nuevos",
+      "allow": "Permitir",
+      "later": "Más tarde",
+      "iosGuide": "Añádela a tu pantalla de inicio para recibir notificaciones"
     }
   }
 }

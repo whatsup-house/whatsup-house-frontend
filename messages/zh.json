@@ -1210,6 +1210,12 @@
       "reported": "举报已提交",
       "noticeSet": "已设为公告",
       "noticeCleared": "已取消公告"
+    },
+    "push": {
+      "prompt": "接收新消息通知",
+      "allow": "允许",
+      "later": "稍后",
+      "iosGuide": "添加到主屏幕即可接收通知"
     }
   }
 }

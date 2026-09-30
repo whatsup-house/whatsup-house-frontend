@@ -16,6 +16,7 @@ import type { ChatRoomSummary } from '@/lib/api/types'
 import ChatActionSheet from './ChatActionSheet'
 import ChatAvatar from './ChatAvatar'
 import ChatDialog from './ChatDialog'
+import ChatPushBanner from './ChatPushBanner'
 
 interface ChatRoomRowProps {
   name: string
@@ -142,6 +143,7 @@ export default function ChatRoomList() {
 
   return (
     <div className="min-h-full bg-card pb-4">
+      <ChatPushBanner />
       <button
         type="button"
         onClick={handleOpenInquiry}
