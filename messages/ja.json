@@ -382,6 +382,7 @@
       "social": "ソーシャル",
       "mypage": "マイページ",
       "mileage": "マイレージ",
+      "profileEdit": "プロフィール編集",
       "applicationCheck": "申請履歴照会",
       "login": "ログイン",
       "register": "会員登録",
@@ -914,9 +915,8 @@
       "reviews": "自分のレビュー"
     },
     "mileage": {
-      "balanceAsOf": "{time}時点の保有マイレージ",
+      "balanceLabel": "保有マイレージ",
       "unit": "マイレージ",
-      "howToEarnEyebrow": "貯め方",
       "howToEarnTitle": "どうやって貯まりますか？",
       "earnMethods": [
         {
@@ -962,7 +962,6 @@
         }
       },
       "browseGatherings": "ギャザリングを見る",
-      "logEyebrow": "マイレージ履歴",
       "logTitle": "マイレージ履歴",
       "itemCount": "{count}件",
       "sortLatest": "新しい順",

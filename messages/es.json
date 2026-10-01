@@ -382,6 +382,7 @@
       "social": "Social",
       "mypage": "Mi página",
       "mileage": "Puntos",
+      "profileEdit": "Editar perfil",
       "applicationCheck": "Consultar solicitudes",
       "login": "Iniciar sesión",
       "register": "Crear cuenta",
@@ -914,9 +915,8 @@
       "reviews": "Mis reseñas"
     },
     "mileage": {
-      "balanceAsOf": "Saldo de puntos a partir del {time}",
+      "balanceLabel": "Millaje disponible",
       "unit": "Puntos",
-      "howToEarnEyebrow": "CÓMO GANAR",
       "howToEarnTitle": "¿Cómo lo gano?",
       "earnMethods": [
         {
@@ -962,7 +962,6 @@
         }
       },
       "browseGatherings": "Explorar encuentros",
-      "logEyebrow": "REGISTRO DE KILOMETRAJE",
       "logTitle": "Historial de puntos",
       "itemCount": "{count} artículos",
       "sortLatest": "Lo más nuevo",

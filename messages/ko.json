@@ -382,6 +382,7 @@
       "social": "소셜",
       "mypage": "마이페이지",
       "mileage": "마일리지",
+      "profileEdit": "프로필 수정",
       "applicationCheck": "신청 내역 조회",
       "login": "로그인",
       "register": "회원가입",
@@ -914,9 +915,8 @@
       "reviews": "내가 쓴 후기"
     },
     "mileage": {
-      "balanceAsOf": "{time} 기준 보유 마일리지",
+      "balanceLabel": "보유 마일리지",
       "unit": "마일리지",
-      "howToEarnEyebrow": "적립 방법",
       "howToEarnTitle": "어떻게 쌓나요?",
       "earnMethods": [
         {
@@ -962,7 +962,6 @@
         }
       },
       "browseGatherings": "게더링 둘러보기",
-      "logEyebrow": "마일리지 기록",
       "logTitle": "마일리지 내역",
       "itemCount": "{count}건",
       "sortLatest": "최신순",

@@ -382,6 +382,7 @@
       "social": "Social",
       "mypage": "My Page",
       "mileage": "Mileage",
+      "profileEdit": "Edit profile",
       "applicationCheck": "Check applications",
       "login": "Log in",
       "register": "Sign up",
@@ -914,9 +915,8 @@
       "reviews": "My Reviews"
     },
     "mileage": {
-      "balanceAsOf": "Mileage balance as of {time}",
+      "balanceLabel": "Available mileage",
       "unit": "Mileage",
-      "howToEarnEyebrow": "HOW TO EARN",
       "howToEarnTitle": "How do I earn it?",
       "earnMethods": [
         {
@@ -962,7 +962,6 @@
         }
       },
       "browseGatherings": "Browse gatherings",
-      "logEyebrow": "MILEAGE LOG",
       "logTitle": "Mileage history",
       "itemCount": "{count} items",
       "sortLatest": "Newest",

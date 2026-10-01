@@ -382,6 +382,7 @@
       "social": "社交",
       "mypage": "我的页面",
       "mileage": "积分",
+      "profileEdit": "编辑资料",
       "applicationCheck": "申请记录查询",
       "login": "登录",
       "register": "注册",
@@ -914,9 +915,8 @@
       "reviews": "我的评价"
     },
     "mileage": {
-      "balanceAsOf": "截至 {time} 的积分余额",
+      "balanceLabel": "当前里程",
       "unit": "积分",
-      "howToEarnEyebrow": "如何赚取",
       "howToEarnTitle": "我如何赚取它？",
       "earnMethods": [
         {
@@ -962,7 +962,6 @@
         }
       },
       "browseGatherings": "浏览聚会",
-      "logEyebrow": "积分记录",
       "logTitle": "积分记录",
       "itemCount": "{count} 项目",
       "sortLatest": "最新",
