@@ -34,6 +34,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',
+  themeColor: '#F5F0EB',
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,7 +43,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('description'),
-    icons: { icon: '/assets/whatsup-favicon.png' },
+    icons: { icon: '/assets/whatsup-favicon.png', apple: '/icons/apple-touch-icon.png' },
+    // iOS 홈 화면 추가 시 standalone 실행 (KAN-366)
+    appleWebApp: { capable: true, title: t('title'), statusBarStyle: 'default' },
   }
 }
 
