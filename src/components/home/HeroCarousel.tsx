@@ -172,7 +172,7 @@ export default function HeroCarousel() {
             aria-label={slide.title}
             tabIndex={i === activeIdx ? 0 : -1}
             aria-hidden={i !== activeIdx}
-            className="flex-none w-full h-full relative overflow-hidden cursor-pointer bg-tag-bg text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-primary"
+            className="flex-none w-full h-full relative overflow-hidden cursor-pointer bg-tag-bg text-left focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-primary"
             onClick={() => handleSlideClick(slide)}
           >
             <AppImage
