@@ -63,8 +63,9 @@ export default function BottomNav() {
     { href: '/mypage', icon: User, label: t('tabs.my'), requireLogin: true },
   ]
 
+  // z-40: 페이지 콘텐츠·TopNav(z-30) 위, 모달·바텀시트(z-50)·토스트(z-[100]) 아래. (KAN-368)
   return (
-    <nav className="sticky bottom-0 bg-card border-t border-tag-bg pb-[env(safe-area-inset-bottom)]">
+    <nav className="sticky bottom-0 z-40 bg-card border-t border-tag-bg pb-[env(safe-area-inset-bottom)]">
       <div className="grid grid-cols-5 items-center h-16">
         {navItems.map((item, index) => {
           if (!item) {
