@@ -649,7 +649,70 @@
       "checkInUnavailable": "지금은 체크인할 수 없어요.",
       "checkInWindowClosed": "체크인 가능 시간이 아니에요.",
       "checkInSuccess": "체크인했어요. 즐거운 식사 되세요!",
-      "checkInFailed": "체크인에 실패했어요. 잠시 후 다시 시도해주세요."
+      "checkInFailed": "체크인에 실패했어요. 잠시 후 다시 시도해주세요.",
+      "feedbackTitle": "행사 후 피드백",
+      "feedbackGuide": "오늘 식탁은 어떠셨나요? 남겨 주신 의견은 다음 매칭에 반영돼요.",
+      "feedbackButton": "피드백 남기기"
+    },
+    "diningFeedback": {
+      "title": "행사 후 피드백",
+      "subtitle": "솔직한 의견을 들려주세요. 다음 식탁을 더 잘 꾸리는 데 쓰여요.",
+      "scoresTitle": "만족도",
+      "scores": {
+        "tableScore": "테이블 전체",
+        "talkScore": "대화",
+        "venueScore": "식당"
+      },
+      "rejoinTitle": "다음에도 참여하고 싶으신가요?",
+      "rejoin": {
+        "YES": "네",
+        "MAYBE": "고민 중",
+        "NO": "아니요"
+      },
+      "peersTitle": "다시 만나고 싶은 멤버 (선택)",
+      "peersPrivacy": "선택 내용은 비공개예요. 운영자와 매칭에만 쓰이고 상대에게는 절대 알리지 않아요.",
+      "peerKinds": {
+        "AGAIN": "다시 만나고 싶어요",
+        "AVOID": "피하고 싶어요"
+      },
+      "noPeers": "지금은 선택할 수 있는 멤버가 없어요.",
+      "unselectableNotice": "일부 멤버는 아직 선택할 수 없어요.",
+      "commentTitle": "자유 의견 (선택)",
+      "commentPlaceholder": "좋았던 점, 아쉬웠던 점을 자유롭게 적어 주세요.",
+      "submit": "피드백 보내기",
+      "requiredNotice": "만족도 3항목과 재참여 의향을 선택해 주세요.",
+      "submitFailed": "피드백을 보내지 못했어요. 잠시 후 다시 시도해주세요.",
+      "backToTable": "테이블 상세로 돌아가기",
+      "viewHistory": "참가 이력 보기",
+      "result": {
+        "done": {
+          "title": "피드백을 보냈어요",
+          "description": "소중한 의견 고마워요. 다음 식탁 매칭에 반영할게요."
+        },
+        "alreadySubmitted": {
+          "title": "이미 피드백을 제출했어요",
+          "description": "피드백은 테이블마다 한 번만 남길 수 있어요."
+        },
+        "notOpen": {
+          "title": "아직 피드백을 남길 수 없어요",
+          "description": "피드백은 식탁 모임이 끝난 뒤에 남길 수 있어요."
+        }
+      }
+    },
+    "diningReport": {
+      "title": "멤버 신고",
+      "description": "불쾌하거나 위험한 일이 있었다면 알려 주세요. 운영자에게만 전달되고, 이후 같은 테이블에 배정되지 않아요.",
+      "selectLabel": "신고할 멤버",
+      "selectPlaceholder": "멤버 선택",
+      "button": "신고",
+      "noTargets": "지금은 신고할 수 있는 멤버가 없어요.",
+      "unselectableNotice": "일부 멤버는 아직 선택할 수 없어요.",
+      "confirmTitle": "{nickname}님을 신고할까요?",
+      "confirmDescription": "신고 사유를 적어 주세요. 운영자가 확인 후 조치해요.",
+      "reasonPlaceholder": "어떤 일이 있었는지 적어 주세요.",
+      "confirm": "신고하기",
+      "done": "신고가 접수됐어요.",
+      "failed": "신고하지 못했어요. 잠시 후 다시 시도해주세요."
     }
   },
   "review": {
@@ -721,7 +784,8 @@
       "logout": "로그아웃",
       "changePassword": "비밀번호 변경",
       "withdraw": "회원탈퇴",
-      "email": "이메일"
+      "email": "이메일",
+      "diningHistory": "우연한 식탁 참가 이력"
     },
     "applications": {
       "loading": "불러오는 중...",
@@ -977,6 +1041,21 @@
       "validation": {
         "password": "비밀번호를 입력해주세요"
       }
+    },
+    "diningHistory": {
+      "title": "우연한 식탁 참가 이력",
+      "loadFailed": "참가 이력을 불러오지 못했어요.",
+      "empty": "아직 참가한 식탁이 없어요.",
+      "tableStatus": {
+        "PROPOSED": "확정 대기",
+        "CONFIRMED": "확정",
+        "DONE": "종료",
+        "DISSOLVED": "해산"
+      },
+      "venuePending": "식당 배정 전",
+      "feedbackSubmitted": "피드백 제출 완료",
+      "writeFeedback": "피드백 남기기",
+      "viewTable": "테이블 보기"
     }
   },
   "social": {

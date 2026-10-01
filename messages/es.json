@@ -649,7 +649,70 @@
       "checkInUnavailable": "Ahora no puedes hacer check-in.",
       "checkInWindowClosed": "No es hora de hacer check-in.",
       "checkInSuccess": "¡Check-in hecho! Disfruta la comida.",
-      "checkInFailed": "No se pudo hacer check-in. Inténtalo de nuevo en un momento."
+      "checkInFailed": "No se pudo hacer check-in. Inténtalo de nuevo en un momento.",
+      "feedbackTitle": "Opinión después del evento",
+      "feedbackGuide": "¿Qué tal tu mesa? Tu opinión nos ayuda con el próximo emparejamiento.",
+      "feedbackButton": "Dejar opinión"
+    },
+    "diningFeedback": {
+      "title": "Opinión después del evento",
+      "subtitle": "Cuéntanos con sinceridad. Nos ayuda a organizar mejores mesas.",
+      "scoresTitle": "Satisfacción",
+      "scores": {
+        "tableScore": "Mesa en general",
+        "talkScore": "Conversación",
+        "venueScore": "Restaurante"
+      },
+      "rejoinTitle": "¿Te gustaría volver a participar?",
+      "rejoin": {
+        "YES": "Sí",
+        "MAYBE": "Tal vez",
+        "NO": "No"
+      },
+      "peersTitle": "Miembros que quieres volver a ver (opcional)",
+      "peersPrivacy": "Tu selección es privada. Solo la usa nuestro equipo para los emparejamientos y nunca se comparte con la otra persona.",
+      "peerKinds": {
+        "AGAIN": "Volver a ver",
+        "AVOID": "Prefiero no"
+      },
+      "noPeers": "Ahora no hay miembros disponibles para elegir.",
+      "unselectableNotice": "Algunos miembros aún no se pueden seleccionar.",
+      "commentTitle": "Comentarios (opcional)",
+      "commentPlaceholder": "Cuéntanos qué te gustó o qué se puede mejorar.",
+      "submit": "Enviar opinión",
+      "requiredNotice": "Valora los 3 puntos y elige si volverías a participar.",
+      "submitFailed": "No se pudo enviar tu opinión. Inténtalo de nuevo más tarde.",
+      "backToTable": "Volver a la mesa",
+      "viewHistory": "Ver mi historial",
+      "result": {
+        "done": {
+          "title": "Opinión enviada",
+          "description": "Gracias por compartirla. La tendremos en cuenta en los próximos emparejamientos."
+        },
+        "alreadySubmitted": {
+          "title": "Ya enviaste tu opinión",
+          "description": "Solo puedes dejar una opinión por mesa."
+        },
+        "notOpen": {
+          "title": "Aún no puedes dejar tu opinión",
+          "description": "Podrás dejarla cuando termine la cena."
+        }
+      }
+    },
+    "diningReport": {
+      "title": "Denunciar a un miembro",
+      "description": "Si pasó algo incómodo o peligroso, avísanos. Solo lo verá nuestro equipo y no volveréis a coincidir en la misma mesa.",
+      "selectLabel": "Miembro a denunciar",
+      "selectPlaceholder": "Elegir miembro",
+      "button": "Denunciar",
+      "noTargets": "Ahora no hay miembros disponibles para denunciar.",
+      "unselectableNotice": "Algunos miembros aún no se pueden seleccionar.",
+      "confirmTitle": "¿Denunciar a {nickname}?",
+      "confirmDescription": "Escribe el motivo. Nuestro equipo lo revisará y tomará medidas.",
+      "reasonPlaceholder": "Cuéntanos qué pasó.",
+      "confirm": "Denunciar",
+      "done": "Hemos recibido tu denuncia.",
+      "failed": "No se pudo enviar la denuncia. Inténtalo de nuevo más tarde."
     }
   },
   "review": {
@@ -721,7 +784,8 @@
       "logout": "Cerrar sesión",
       "changePassword": "Cambiar contraseña",
       "withdraw": "Eliminar cuenta",
-      "email": "Correo electrónico"
+      "email": "Correo electrónico",
+      "diningHistory": "Historial de Mesa al azar"
     },
     "applications": {
       "loading": "Cargando...",
@@ -977,6 +1041,21 @@
       "validation": {
         "password": "Por favor ingrese su contraseña"
       }
+    },
+    "diningHistory": {
+      "title": "Historial de Mesa al azar",
+      "loadFailed": "No se pudo cargar tu historial.",
+      "empty": "Aún no has participado en ninguna mesa.",
+      "tableStatus": {
+        "PROPOSED": "Pendiente",
+        "CONFIRMED": "Confirmada",
+        "DONE": "Finalizada",
+        "DISSOLVED": "Disuelta"
+      },
+      "venuePending": "Restaurante sin asignar",
+      "feedbackSubmitted": "Opinión enviada",
+      "writeFeedback": "Dejar opinión",
+      "viewTable": "Ver mesa"
     }
   },
   "social": {

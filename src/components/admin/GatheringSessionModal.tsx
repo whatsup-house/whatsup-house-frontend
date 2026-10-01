@@ -14,7 +14,8 @@ import {
   useRandomTableGatheringTypes,
   useUpdateSession,
 } from '@/lib/hooks/useAdminGathering'
-import { useDiningVenues, useUpdateSessionVenues } from '@/lib/hooks/useAdminDining'
+import { useUpdateSessionVenues } from '@/lib/hooks/useAdminDining'
+import DiningVenuePoolPicker from '@/components/admin/DiningVenuePoolPicker'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
@@ -91,8 +92,6 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
     gatheringId ?? (diningTypes.types.length === 1 ? diningTypes.types[0].id : pickedGatheringId)
 
   // 식당 풀: venueId → 수용 테이블 수. 회차 id가 생긴 뒤 따로 저장한다.
-  const { data: venues } = useDiningVenues(isDining)
-  const activeVenues = (venues ?? []).filter((venue) => venue.isActive)
   const [pool, setPool] = useState<Record<string, number>>({})
   const { mutate: saveVenues, isPending: isSavingVenues } = useUpdateSessionVenues()
 
@@ -133,18 +132,6 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
   const [eventDate, repeat, until] = useWatch({ control, name: ['eventDate', 'repeat', 'until'] })
   // BE와 같은 계산: 기준 날짜부터 until까지 7일 간격 (ChronoUnit.WEEKS + 1)
   const repeatCount = repeat && eventDate && until >= eventDate ? dayjs(until).diff(eventDate, 'week') + 1 : 0
-
-  const togglePoolVenue = (venueId: string, checked: boolean) =>
-    setPool((prev) => {
-      const next = { ...prev }
-      if (checked) next[venueId] = 1
-      else delete next[venueId]
-      return next
-    })
-
-  // BE 범위 1~100
-  const setPoolCapacity = (venueId: string, value: string) =>
-    setPool((prev) => ({ ...prev, [venueId]: Math.min(100, Math.max(1, Math.trunc(Number(value)) || 1)) }))
 
   const onSubmit = (v: FormValues) => {
     const body: AdminSessionRequest = {
@@ -193,46 +180,6 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
           <option key={type.id} value={type.id}>{type.title}</option>
         ))}
       </select>
-    )
-  }
-
-  const renderVenuePool = () => {
-    if (!venues) return <p className="text-xs text-tag-text">식당을 불러오는 중…</p>
-    if (activeVenues.length === 0) return <p className="text-xs text-tag-text">등록된 활성 식당이 없어요.</p>
-    return (
-      <ul className="flex flex-col gap-2">
-        {activeVenues.map((venue) => {
-          const capacity = pool[venue.id]
-          return (
-            <li key={venue.id} className="flex items-center gap-2 min-h-9">
-              <label className="flex flex-1 min-w-0 items-center gap-2 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 shrink-0 accent-primary"
-                  checked={capacity !== undefined}
-                  onChange={(e) => togglePoolVenue(venue.id, e.target.checked)}
-                />
-                <span className="truncate">{venue.name}</span>
-                <span className="shrink-0 text-xs text-tag-text">{venue.region}</span>
-              </label>
-              {capacity !== undefined && (
-                <label className="flex shrink-0 items-center gap-1 text-xs text-tag-text">
-                  <input
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={capacity}
-                    onChange={(e) => setPoolCapacity(venue.id, e.target.value)}
-                    aria-label={`${venue.name} 수용 테이블 수`}
-                    className="w-16 h-9 px-2 border border-tag-bg rounded-input text-sm text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  테이블
-                </label>
-              )}
-            </li>
-          )
-        })}
-      </ul>
     )
   }
 
@@ -364,7 +311,7 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
                   ? '고르면 기존 식당 풀을 이 목록으로 바꿔요. 아무것도 고르지 않으면 그대로 둬요.'
                   : '확정된 테이블에 고른 식당을 수용 테이블 수만큼 차례로 배정해요.'}
               </p>
-              {renderVenuePool()}
+              <DiningVenuePoolPicker pool={pool} onChange={setPool} />
             </div>
           )}
 
