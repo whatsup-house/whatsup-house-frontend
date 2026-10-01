@@ -53,8 +53,9 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
                 aria-checked={isSelected}
                 disabled={!applicable}
                 onClick={() => onSelect(session.id)}
-                className={`w-full rounded-card border p-3 text-left transition-colors disabled:opacity-50 ${
-                  isSelected ? 'border-primary bg-primary-light' : 'border-tag-bg bg-card'
+                // 강조된 회차는 신청 불가(지난·마감)여도 흐리게 하지 않는다 (KAN-370)
+                className={`w-full rounded-card border p-3 text-left transition-colors ${
+                  isSelected ? 'border-primary bg-primary-light' : 'border-tag-bg bg-card disabled:opacity-50'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
