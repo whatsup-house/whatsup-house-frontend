@@ -67,6 +67,11 @@ function isSameRun(a: ChatMessage | undefined, b: ChatMessage | undefined): bool
   )
 }
 
+// 맨 아래까지 남은 거리가 STICK_THRESHOLD 안인지. clientHeight 를 넘기면 그 높이였을 때 기준으로 본다.
+function isNearBottom(el: HTMLElement, clientHeight = el.clientHeight): boolean {
+  return el.scrollHeight - el.scrollTop - clientHeight < STICK_THRESHOLD
+}
+
 function CenterPill({ children }: { children: ReactNode }) {
   return (
     <div className="my-3 flex justify-center px-6">
@@ -164,10 +169,25 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
     if (stickToBottomRef.current) el.scrollTop = el.scrollHeight
   }, [messagesQuery.data, messagesQuery.isFetchingNextPage, outbox])
 
+  // 키보드 개폐 등으로 목록 높이가 바뀌면, 바뀌기 직전 높이 기준으로 맨 아래 근처였을 때만 다시 맨 아래로 (KAN-363)
+  // stickToBottomRef 는 리사이즈 직후 도착한 scroll 이벤트가 새 높이로 다시 계산해 false 로 만들 수 있어 직전 높이로 판정한다.
+  // 늘어날 때(키보드 닫힘)는 브라우저가 scrollTop 을 새 최대값으로 깎아 이미 맨 아래가 유지된다.
+  useEffect(() => {
+    const el = listRef.current
+    if (!el) return
+    let prevHeight = el.clientHeight
+    const observer = new ResizeObserver(() => {
+      if (isNearBottom(el, prevHeight)) el.scrollTop = el.scrollHeight
+      prevHeight = el.clientHeight
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   const handleScroll = () => {
     const el = listRef.current
     if (!el) return
-    stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < STICK_THRESHOLD
+    stickToBottomRef.current = isNearBottom(el)
     if (el.scrollTop < LOAD_MORE_THRESHOLD && messagesQuery.hasNextPage && !messagesQuery.isFetchingNextPage) {
       restoreScrollRef.current = { height: el.scrollHeight, top: el.scrollTop }
       messagesQuery.fetchNextPage()
@@ -331,7 +351,10 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-card lg:h-full">
+    // 모바일은 fixed 로 뷰포트에 고정해 문서 스크롤(키보드 개폐 후 잔존 오프셋)과 무관하게 한다.
+    // iOS Safari 는 interactive-widget 미지원이라 키보드가 레이아웃 뷰포트를 줄이지 않는데, fixed 가 그 완화책이다. (KAN-363)
+    // md↑는 430px 컬럼(.mobile-layout) 안에 기존처럼 흐름 배치, lg↑는 데스크탑 목업 프레임을 채운다.
+    <div className="fixed inset-0 z-40 flex flex-col bg-card md:static md:h-dvh lg:h-full">
       <header className="flex h-14 shrink-0 items-center gap-1 border-b border-tag-bg bg-card px-1">
         <button
           type="button"

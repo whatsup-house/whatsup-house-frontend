@@ -64,7 +64,7 @@ export default function BottomNav() {
   ]
 
   return (
-    <nav className="sticky bottom-0 bg-card border-t border-tag-bg">
+    <nav className="sticky bottom-0 bg-card border-t border-tag-bg pb-[env(safe-area-inset-bottom)]">
       <div className="grid grid-cols-5 items-center h-16">
         {navItems.map((item, index) => {
           if (!item) {
