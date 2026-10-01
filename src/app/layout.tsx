@@ -16,6 +16,7 @@ const allura = Allura({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-allura',
+  preload: false,
 })
 
 // 에러 페이지 숫자(404/500)용 픽셀 폰트 (KAN-248)
@@ -23,6 +24,7 @@ const pressStart2P = Press_Start_2P({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-press-start',
+  preload: false,
 })
 
 export async function generateMetadata(): Promise<Metadata> {

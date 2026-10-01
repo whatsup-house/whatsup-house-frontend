@@ -11,7 +11,6 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyTickets } from '@/lib/hooks/useTickets'
 import { useLocalizedJobs } from '@/lib/hooks/useLocalizedJobs'
 import Button from '@/components/ui/Button'
-import ProfileEditOverlay from '@/components/mypage/ProfileEditOverlay'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
 import PasswordChangeDialog from '@/components/mypage/PasswordChangeDialog'
 
@@ -56,7 +55,6 @@ export default function MyProfile() {
   const { data: tickets } = useMyTickets()
   const { data: jobGroups } = useLocalizedJobs()
   const logout = useLogout()
-  const [showEdit, setShowEdit] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
   const [showPasswordChange, setShowPasswordChange] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
@@ -101,9 +99,6 @@ export default function MyProfile() {
 
   return (
     <>
-    {showEdit && (
-      <ProfileEditOverlay profile={profile} onClose={() => setShowEdit(false)} />
-    )}
     {showWithdraw && (
       <WithdrawAccountDialog onClose={() => setShowWithdraw(false)} />
     )}
@@ -118,7 +113,7 @@ export default function MyProfile() {
         {/* 프로필 요약 — 좌측 직업 캐릭터 / 우측 닉네임·한줄소개·마일리지 (KAN-285) */}
         <div className="bg-card rounded-card p-5 flex items-center gap-4 relative">
           <button
-            onClick={() => setShowEdit(true)}
+            onClick={() => router.push('/mypage/edit')}
             className="absolute top-4 right-4 min-w-[36px] min-h-[36px] flex items-center justify-center text-tag-text"
             aria-label={t('editProfile')}
           >

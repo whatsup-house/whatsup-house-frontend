@@ -54,9 +54,9 @@ function ChatRoomRow({ name, isInquiry, memberCount, preview, time, unreadCount,
           <p className="mt-0.5 truncate text-[13px] text-tag-text">{preview}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1 self-start pt-0.5">
-          <span className="text-[11px] text-tag-text/70">{time}</span>
+          <span className="text-xs text-tag-text/70">{time}</span>
           {unreadCount > 0 && (
-            <span className="min-w-[18px] rounded-full bg-primary px-1.5 text-center text-[11px] font-bold leading-[18px] text-white">
+            <span className="min-w-[18px] rounded-full bg-primary px-1.5 text-center text-xs font-bold leading-[18px] text-white">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}

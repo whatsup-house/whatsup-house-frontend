@@ -35,7 +35,7 @@ export default function ChatMemberDrawer({ members, myUserId, renderMemberAction
             <button
               type="button"
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center text-tag-text"
+              className="flex h-10 w-10 items-center justify-center text-tag-text transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={tCommon('close')}
             >
               <X size={20} />
@@ -50,7 +50,7 @@ export default function ChatMemberDrawer({ members, myUserId, renderMemberAction
                     <ChatAvatar name={name} avatarUrl={null} size="sm" />
                     <span className="min-w-0 truncate text-sm text-foreground">{name}</span>
                     {member.userId === myUserId && (
-                      <span className="shrink-0 rounded-full bg-tag-bg px-1.5 py-0.5 text-[10px] text-tag-text">
+                      <span className="shrink-0 rounded-full bg-tag-bg px-1.5 py-0.5 text-xs text-tag-text">
                         {t('room.me')}
                       </span>
                     )}

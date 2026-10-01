@@ -93,13 +93,13 @@ export default function ChatMessageBubble({
           >
             {body}
           </div>
-          <div className={`flex shrink-0 flex-col text-[10px] leading-tight ${isMine ? 'items-end' : 'items-start'}`}>
+          <div className={`flex shrink-0 flex-col text-xs leading-tight ${isMine ? 'items-end' : 'items-start'}`}>
             {status === 'failed' ? (
               <div className="flex gap-1">
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="flex h-6 w-6 items-center justify-center rounded-full bg-tag-bg text-primary"
+                  className="relative flex h-6 w-6 items-center justify-center rounded-full after:absolute after:-inset-2.5 after:content-[''] bg-tag-bg text-primary"
                   aria-label={t('retry')}
                 >
                   <RotateCw size={12} />
@@ -107,7 +107,7 @@ export default function ChatMessageBubble({
                 <button
                   type="button"
                   onClick={onDiscard}
-                  className="flex h-6 w-6 items-center justify-center rounded-full bg-tag-bg text-tag-text"
+                  className="relative flex h-6 w-6 items-center justify-center rounded-full after:absolute after:-inset-2.5 after:content-[''] bg-tag-bg text-tag-text"
                   aria-label={t('discard')}
                 >
                   <X size={12} />
@@ -126,7 +126,7 @@ export default function ChatMessageBubble({
             )}
           </div>
         </div>
-        {status === 'failed' && <span className="mt-0.5 text-[10px] text-primary">{t('failed')}</span>}
+        {status === 'failed' && <span className="mt-0.5 text-xs text-primary">{t('failed')}</span>}
         {linkPreview && !isDeleted && isHttpUrl(linkPreview.url) && (
           <a
             href={linkPreview.url}

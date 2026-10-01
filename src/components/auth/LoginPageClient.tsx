@@ -1,13 +1,13 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useLogin } from '@/lib/hooks/useAuth'
 import { safeReturnUrl } from '@/lib/utils/url'
@@ -18,6 +18,7 @@ type LoginFormValues = { email: string; password: string }
 export default function LoginPageClient() {
   const t = useTranslations('auth.login')
   const tCommon = useTranslations('common')
+  const [showPassword, setShowPassword] = useState(false)
   const searchParams = useSearchParams()
   const rawReturnUrl = searchParams.get('returnUrl')
   const returnUrl = safeReturnUrl(rawReturnUrl)
@@ -80,7 +81,8 @@ export default function LoginPageClient() {
                 type="email"
                 placeholder={t('emailPlaceholder')}
                 autoComplete="username"
-                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
+                aria-invalid={errors.email || hasLoginError ? true : undefined}
+                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary/30 ${
                   errors.email || hasLoginError ? 'border-primary' : 'border-tag-bg'
                 }`}
                 {...register('email')}
@@ -89,26 +91,37 @@ export default function LoginPageClient() {
 
             <label className="flex flex-col gap-1.5">
               <span className="ml-1 text-xs font-medium text-tag-text">{t('passwordLabel')}</span>
-              <input
-                type="password"
-                placeholder={t('passwordPlaceholder')}
-                autoComplete="current-password"
-                className={`w-full rounded-[10px] border bg-card px-4 py-3.5 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary-light ${
-                  errors.password || hasLoginError ? 'border-primary' : 'border-tag-bg'
-                }`}
-                {...register('password')}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={t('passwordPlaceholder')}
+                  autoComplete="current-password"
+                  aria-invalid={errors.password || hasLoginError ? true : undefined}
+                  className={`w-full rounded-[10px] border bg-card py-3.5 pl-4 pr-12 text-sm text-foreground outline-none transition-colors placeholder:text-tag-text/70 focus:border-primary focus:ring-2 focus:ring-primary/30 ${
+                    errors.password || hasLoginError ? 'border-primary' : 'border-tag-bg'
+                  }`}
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                  className="absolute right-1 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center text-tag-text"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </label>
           </div>
 
           {(errors.email || errors.password) && !hasLoginError && (
-            <p className="mt-2 text-xs text-primary">
+            <p role="alert" className="mt-2 text-xs text-primary">
               {errors.email?.message ?? errors.password?.message}
             </p>
           )}
 
           {hasLoginError && (
-            <div className="mt-2 flex flex-col gap-1.5">
+            <div role="alert" className="mt-2 flex flex-col gap-1.5">
               <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-primary">
                 <AlertCircle size={13} />
                 <span>{t('credentialError')}</span>

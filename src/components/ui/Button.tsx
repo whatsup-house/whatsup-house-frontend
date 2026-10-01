@@ -37,7 +37,9 @@ export default function Button({
     <button
       disabled={disabled || isLoading}
       className={`
-        inline-flex items-center justify-center font-medium rounded-button transition-colors
+        inline-flex items-center justify-center font-medium rounded-button
+        transition-[transform,opacity,background-color] duration-150 ease-out active:scale-[0.97]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
         disabled:opacity-50 disabled:pointer-events-none
         ${isLoading ? 'pointer-events-none opacity-70' : ''}
         ${variantMap[variant]}

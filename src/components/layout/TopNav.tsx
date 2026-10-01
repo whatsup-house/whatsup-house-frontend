@@ -19,6 +19,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   '/chat': 'chat',
   '/mypage': 'mypage',
   '/mypage/mileage': 'mileage',
+  '/mypage/edit': 'profileEdit',
   '/applications/check': 'applicationCheck',
   '/applications/result': 'applicationCheck',
   '/login': 'login',
@@ -38,7 +39,7 @@ function getTitleKey(pathname: string): string {
 }
 
 function getFallbackPath(pathname: string): string {
-  if (pathname === '/mypage/mileage') return '/mypage'
+  if (pathname === '/mypage/mileage' || pathname === '/mypage/edit') return '/mypage'
   if (pathname.startsWith('/gatherings/')) {
     const match = pathname.match(/^\/gatherings\/([^/]+)/)
     if (pathname.includes('/apply') && match) return `/gatherings/${match[1]}`
