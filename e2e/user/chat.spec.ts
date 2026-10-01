@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test'
+import type { Page, WebSocketRoute } from '@playwright/test'
 import { captureFullPage } from '../fixtures/screenshot'
 import {
+  MOCK_GROUP_ROOM_ID,
   MOCK_INQUIRY_ROOM_ID,
   apiRes,
   mockChatApis,
@@ -11,6 +13,38 @@ import {
   mockUserProfile,
   setupUserContext,
 } from '../fixtures/mocks'
+
+// STOMP 브로커 흉내 (lib/chat/socket.ts 가 붙는 /ws-chat). CONNECT → CONNECTED, SUBSCRIBE 기록, SEND 는 onSend 로 넘긴다.
+// close() 로 끊으면 클라이언트가 백오프(1s) 뒤 다시 붙고, 그때마다 새 연결로 바뀐다.
+async function mockChatSocket(page: Page, onSend: (destination: string, body: string) => void = () => {}) {
+  let connection: WebSocketRoute | null = null
+  let subscriptions = new Map<string, string>()
+  let messageSeq = 0
+  await page.route('**/api/chat/socket-token', (route) => route.fulfill({ json: apiRes({ token: 'e2e', expiresIn: 120 }) }))
+  await page.routeWebSocket(/\/ws-chat$/, (ws) => {
+    connection = ws
+    subscriptions = new Map()
+    ws.onMessage((raw) => {
+      const frame = String(raw).replace(/\0$/, '')
+      const split = frame.indexOf('\n\n')
+      const [command, ...lines] = frame.slice(0, split).split('\n')
+      const headers = new Map(lines.map((line) => [line.slice(0, line.indexOf(':')), line.slice(line.indexOf(':') + 1)]))
+      if (command === 'CONNECT' || command === 'STOMP') ws.send('CONNECTED\nversion:1.2\nheart-beat:0,0\n\n\0')
+      else if (command === 'SUBSCRIBE') subscriptions.set(headers.get('destination') ?? '', headers.get('id') ?? '')
+      else if (command === 'SEND') onSend(headers.get('destination') ?? '', frame.slice(split + 2))
+    })
+  })
+  return {
+    publish: (destination: string, payload: unknown) => {
+      const subscription = subscriptions.get(destination)
+      if (!connection || !subscription) throw new Error(`${destination} 구독 없음`)
+      connection.send(
+        `MESSAGE\ndestination:${destination}\nsubscription:${subscription}\nmessage-id:${++messageSeq}\ncontent-type:application/json\n\n${JSON.stringify(payload)}\0`,
+      )
+    },
+    close: () => connection?.close(),
+  }
+}
 
 // CHAT-U-01: 채팅 목록 → 문의방 열기 → 텍스트 전송 → 내 말풍선 표시 (KAN-332)
 test.describe('회원 - 채팅', () => {
@@ -120,4 +154,106 @@ test.describe('회원 - 채팅', () => {
       await expect(input).toHaveAttribute('placeholder', reason)
     })
   }
+
+  // KAN-364: sender.nickname 은 조회 시점 스냅샷이라 옛 페이지와 새 메시지가 다를 수 있다 → 방 멤버의 현재 닉네임으로 그린다.
+  // KAN-365: 재연결(재구독)하면 방 상세를 다시 받고, 같은 id 라도 읽음을 다시 보낸다.
+  test('단체방 보낸 사람 이름은 멤버 현재 닉네임을 쓰고, 재연결하면 바뀐 닉네임·읽음을 다시 맞춘다', async ({ page }) => {
+    const otherId = 'b1000000-0000-0000-0000-000000000003'
+    const me = { id: mockUserProfile.id, nickname: mockUserProfile.nickname, admin: false }
+    let otherNickname = '준서'
+    let readSends = 0
+    await page.route(`**/api/chat/rooms/${MOCK_GROUP_ROOM_ID}`, (route) =>
+      route.fulfill({
+        json: apiRes({
+          ...mockInquiryRoomDetail,
+          id: MOCK_GROUP_ROOM_ID,
+          type: 'GROUP',
+          name: '퇴근 게더링 3조',
+          members: [
+            { userId: me.id, nickname: me.nickname, admin: false },
+            { userId: otherId, nickname: otherNickname, admin: false },
+          ],
+        }),
+      })
+    )
+    const base = { ...mockInquiryWelcomeMessage, roomId: MOCK_GROUP_ROOM_ID }
+    await page.route(`**/api/chat/rooms/${MOCK_GROUP_ROOM_ID}/messages**`, (route) =>
+      route.fulfill({
+        json: apiRes([
+          // 상대가 닉네임을 바꾸기 전에 받은 옛 스냅샷
+          { ...base, id: 'e4000000-0000-0000-0000-000000000001', sender: { id: otherId, nickname: '옛준서', admin: false }, content: '어제 잘 들어가셨어요?', createdAt: '2026-09-29T10:00:00' },
+          { ...base, id: 'e4000000-0000-0000-0000-000000000002', sender: me, content: '네 덕분에요', createdAt: '2026-09-29T10:01:00' },
+          { ...base, id: 'e4000000-0000-0000-0000-000000000003', sender: { id: otherId, nickname: '준서', admin: false }, content: '다음에 또 봬요', createdAt: '2026-09-29T10:02:00' },
+        ]),
+      })
+    )
+    const socket = await mockChatSocket(page, (destination) => {
+      if (destination === `/app/rooms/${MOCK_GROUP_ROOM_ID}/read`) readSends += 1
+    })
+    await page.goto(`/chat/${MOCK_GROUP_ROOM_ID}`)
+
+    await expect(page.getByText('다음에 또 봬요')).toBeVisible()
+    await expect(page.getByText('준서', { exact: true })).toHaveCount(2)
+    await expect(page.getByText('옛준서')).toHaveCount(0)
+    await expect.poll(() => readSends).toBeGreaterThan(0)
+
+    const sendsBeforeReconnect = readSends
+    otherNickname = '새준서'
+    socket.close()
+    await expect(page.getByText('새준서', { exact: true })).toHaveCount(2)
+    await expect.poll(() => readSends).toBeGreaterThan(sendsBeforeReconnect)
+  })
+
+  // KAN-365: 내 READ 는 로컬로 빼지 않고 최신 페이지를 다시 받아 서버 값으로 맞춘다. 문의방 관리자 이름은 멤버 실명 대신 "와썹하우스" 유지.
+  test('문의방에서 내 읽음 이벤트가 오면 메시지를 다시 받아 안 읽은 수를 서버 값으로 맞춘다', async ({ page }) => {
+    let isRead = false
+    await page.route(`**/api/chat/rooms/${MOCK_INQUIRY_ROOM_ID}`, (route) =>
+      route.fulfill({
+        json: apiRes({
+          ...mockInquiryRoomDetail,
+          members: [mockInquiryRoomDetail.members[0], { ...mockInquiryRoomDetail.members[1], nickname: '김관리' }],
+        }),
+      })
+    )
+    await page.route(`**/api/chat/rooms/${MOCK_INQUIRY_ROOM_ID}/messages**`, (route) => {
+      if (route.request().method() !== 'GET') return route.fallback()
+      if (new URL(route.request().url()).searchParams.has('after')) return route.fulfill({ json: apiRes([]) })
+      // 자리 비운 사이 온 관리자 메시지 2개: 읽기 전엔 1, 읽은 뒤 서버 값은 0
+      const unreadCount = isRead ? 0 : 1
+      return route.fulfill({
+        json: apiRes([
+          { ...mockInquiryWelcomeMessage, unreadCount },
+          { ...mockInquiryWelcomeMessage, id: 'e5000000-0000-0000-0000-000000000002', content: '확인 후 다시 안내드릴게요', unreadCount, createdAt: '2026-09-29T10:01:00' },
+        ]),
+      })
+    })
+    const socket = await mockChatSocket(page, (destination, body) => {
+      if (destination !== `/app/rooms/${MOCK_INQUIRY_ROOM_ID}/read`) return
+      isRead = true
+      const { messageId } = JSON.parse(body) as { messageId: string }
+      socket.publish(`/topic/rooms/${MOCK_INQUIRY_ROOM_ID}`, {
+        kind: 'READ',
+        roomId: MOCK_INQUIRY_ROOM_ID,
+        payload: { userId: mockUserProfile.id, messageId },
+      })
+    })
+    const refetchAfterRead = page.waitForRequest((request) => {
+      const url = new URL(request.url())
+      return (
+        isRead &&
+        request.method() === 'GET' &&
+        url.pathname.endsWith(`/api/chat/rooms/${MOCK_INQUIRY_ROOM_ID}/messages`) &&
+        !url.searchParams.has('after') &&
+        !url.searchParams.has('before')
+      )
+    })
+    await page.goto(`/chat/${MOCK_INQUIRY_ROOM_ID}`)
+
+    await expect(page.getByText('확인 후 다시 안내드릴게요')).toBeVisible()
+    // 헤더 방 이름 + 보낸 사람 이름. 멤버 목록의 관리자 실명은 쓰지 않는다
+    await expect(page.getByText('와썹하우스', { exact: true })).toHaveCount(2)
+    await expect(page.getByText('김관리')).toHaveCount(0)
+    await refetchAfterRead
+    await expect(page.getByLabel(/안 읽은 사람/)).toHaveCount(0)
+  })
 })
