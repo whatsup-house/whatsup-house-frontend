@@ -12,15 +12,16 @@ import type { GatheringDetail as GatheringDetailType, GatheringSession } from '@
 
 interface GatheringDetailProps {
   gathering: GatheringDetailType
-  // 예정된 회차 (신청 대상)
-  upcomingSessions: GatheringSession[]
+  // 예정된 회차 + ?session=으로 온 지난 회차 (KAN-370)
+  sessions: GatheringSession[]
+  // 강조할(보고 있는) 회차
   selectedSessionId: string | null
   price: number
   onSelectSession: (sessionId: string) => void
 }
 
 export default function GatheringDetail({
-  gathering, upcomingSessions, selectedSessionId, price, onSelectSession,
+  gathering, sessions, selectedSessionId, price, onSelectSession,
 }: GatheringDetailProps) {
   const t = useTranslations('gathering.detail')
   const locale = useLocale()
@@ -125,7 +126,7 @@ export default function GatheringDetail({
 
         {/* 회차 목록 — 날짜·시간·지역·잔여 정원·마감, 신청할 회차 선택 (KAN-339) */}
         <GatheringSessionList
-          sessions={upcomingSessions}
+          sessions={sessions}
           selectedSessionId={selectedSessionId}
           onSelect={onSelectSession}
         />
