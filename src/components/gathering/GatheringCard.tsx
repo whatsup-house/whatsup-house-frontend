@@ -27,8 +27,11 @@ export default function GatheringCard({ gathering, session }: GatheringCardProps
   const thumbnailPosition = title === '우연한 식탁' ? 'center 32%' : undefined
 
   return (
-    <Link href={`/gatherings/${id}?session=${session.id}`}>
-      <div className="rounded-card bg-card shadow-sm overflow-hidden">
+    <Link
+      href={`/gatherings/${id}?session=${session.id}`}
+      className="block rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+    >
+      <div className="rounded-card bg-card shadow-sm overflow-hidden transition-transform duration-150 ease-out active:scale-[0.98]">
         {/* 썸네일 */}
         <div className="relative w-full aspect-video bg-tag-bg">
           {thumbnailUrl ? (

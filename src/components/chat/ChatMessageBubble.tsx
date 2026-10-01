@@ -11,7 +11,6 @@ interface ChatMessageBubbleProps {
   // 상대 메시지 연속 묶음의 첫 번째만 아바타·닉네임을 보여준다
   showProfile: boolean
   senderName: string
-  senderAvatarUrl: string | null
   isHouseSender: boolean
   type: 'TEXT' | 'IMAGE'
   content: string | null
@@ -36,7 +35,6 @@ export default function ChatMessageBubble({
   isMine,
   showProfile,
   senderName,
-  senderAvatarUrl,
   isHouseSender,
   type,
   content,
@@ -80,7 +78,7 @@ export default function ChatMessageBubble({
     <div className={`flex gap-2 px-3 ${isMine ? 'justify-end' : 'justify-start'} ${showProfile ? 'mt-3' : 'mt-1'}`}>
       {!isMine &&
         (showProfile ? (
-          <ChatAvatar name={senderName} avatarUrl={senderAvatarUrl} isHouse={isHouseSender} size="sm" />
+          <ChatAvatar name={senderName} avatarUrl={null} isHouse={isHouseSender} size="sm" />
         ) : (
           <div className="w-9 shrink-0" />
         ))}
@@ -95,13 +93,13 @@ export default function ChatMessageBubble({
           >
             {body}
           </div>
-          <div className={`flex shrink-0 flex-col text-[10px] leading-tight ${isMine ? 'items-end' : 'items-start'}`}>
+          <div className={`flex shrink-0 flex-col text-xs leading-tight ${isMine ? 'items-end' : 'items-start'}`}>
             {status === 'failed' ? (
               <div className="flex gap-1">
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="flex h-6 w-6 items-center justify-center rounded-full bg-tag-bg text-primary"
+                  className="relative flex h-6 w-6 items-center justify-center rounded-full after:absolute after:-inset-2.5 after:content-[''] bg-tag-bg text-primary"
                   aria-label={t('retry')}
                 >
                   <RotateCw size={12} />
@@ -109,7 +107,7 @@ export default function ChatMessageBubble({
                 <button
                   type="button"
                   onClick={onDiscard}
-                  className="flex h-6 w-6 items-center justify-center rounded-full bg-tag-bg text-tag-text"
+                  className="relative flex h-6 w-6 items-center justify-center rounded-full after:absolute after:-inset-2.5 after:content-[''] bg-tag-bg text-tag-text"
                   aria-label={t('discard')}
                 >
                   <X size={12} />
@@ -128,7 +126,7 @@ export default function ChatMessageBubble({
             )}
           </div>
         </div>
-        {status === 'failed' && <span className="mt-0.5 text-[10px] text-primary">{t('failed')}</span>}
+        {status === 'failed' && <span className="mt-0.5 text-xs text-primary">{t('failed')}</span>}
         {linkPreview && !isDeleted && isHttpUrl(linkPreview.url) && (
           <a
             href={linkPreview.url}
@@ -155,9 +153,9 @@ export default function ChatMessageBubble({
                 key={reaction.emoji}
                 type="button"
                 onClick={() => onToggleReaction(reaction.emoji)}
-                aria-pressed={reaction.reactedByMe}
+                aria-pressed={reaction.mine}
                 className={`flex items-center gap-0.5 rounded-full border bg-card px-2 py-0.5 text-xs ${
-                  reaction.reactedByMe ? 'border-primary text-primary' : 'border-tag-bg text-tag-text'
+                  reaction.mine ? 'border-primary text-primary' : 'border-tag-bg text-tag-text'
                 }`}
               >
                 <span>{reaction.emoji}</span>

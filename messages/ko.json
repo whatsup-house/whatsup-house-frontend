@@ -57,6 +57,8 @@
       "emailPlaceholder": "이메일 주소",
       "passwordLabel": "비밀번호",
       "passwordPlaceholder": "비밀번호 입력",
+      "showPassword": "비밀번호 보기",
+      "hidePassword": "비밀번호 숨기기",
       "findEmail": "아이디 찾기",
       "findPassword": "비밀번호 찾기",
       "credentialError": "아이디 또는 비밀번호를 확인해주세요.",
@@ -158,6 +160,8 @@
       "passwordPlaceholder": "영문+숫자 포함 8자 이상",
       "passwordConfirmLabel": "비밀번호 확인",
       "passwordConfirmPlaceholder": "비밀번호를 다시 입력해주세요",
+      "showPassword": "비밀번호 보기",
+      "hidePassword": "비밀번호 숨기기",
       "phoneLabel": "연락처",
       "phonePlaceholder": "01012345678 (11자리)",
       "checking": "확인 중...",
@@ -378,6 +382,7 @@
       "social": "소셜",
       "mypage": "마이페이지",
       "mileage": "마일리지",
+      "profileEdit": "프로필 수정",
       "applicationCheck": "신청 내역 조회",
       "login": "로그인",
       "register": "회원가입",
@@ -425,7 +430,9 @@
       "calendarCta": "탭해서 전체 게더링 보기 →",
       "openBadge": "모집중",
       "previous": "이전",
-      "next": "다음"
+      "next": "다음",
+      "pause": "일시정지",
+      "play": "재생"
     },
     "curated": {
       "title": "이번 주 가장 많이 본 게더링",
@@ -908,9 +915,8 @@
       "reviews": "내가 쓴 후기"
     },
     "mileage": {
-      "balanceAsOf": "{time} 기준 보유 마일리지",
+      "balanceLabel": "보유 마일리지",
       "unit": "마일리지",
-      "howToEarnEyebrow": "적립 방법",
       "howToEarnTitle": "어떻게 쌓나요?",
       "earnMethods": [
         {
@@ -956,7 +962,6 @@
         }
       },
       "browseGatherings": "게더링 둘러보기",
-      "logEyebrow": "마일리지 기록",
       "logTitle": "마일리지 내역",
       "itemCount": "{count}건",
       "sortLatest": "최신순",
@@ -1365,6 +1370,7 @@
       "loadError": "메시지를 불러오지 못했어요",
       "empty": "첫 메시지를 보내보세요",
       "muted": "채팅이 제한되어 메시지를 보낼 수 없어요",
+      "cannotSend": "현재 계정 상태로는 메시지를 보낼 수 없어요",
       "notMember": "참여하지 않은 채팅방이에요",
       "me": "나"
     },
@@ -1378,8 +1384,8 @@
       "unread": "안 읽은 사람 {count}명"
     },
     "system": {
-      "JOINED": "{nickname}님이 들어왔습니다",
-      "KICKED": "{nickname}님이 내보내졌습니다",
+      "JOINED": "{nicknames}님이 들어왔습니다",
+      "KICKED": "{nicknames}님이 내보내졌습니다",
       "NOTICE_SET": "공지가 등록되었습니다"
     },
     "composer": {

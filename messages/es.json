@@ -57,6 +57,8 @@
       "emailPlaceholder": "Correo electrónico",
       "passwordLabel": "Contraseña",
       "passwordPlaceholder": "Ingresa tu contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
       "findEmail": "Buscar ID",
       "findPassword": "Buscar contraseña",
       "credentialError": "Por favor revisa tu correo electrónico o contraseña.",
@@ -158,6 +160,8 @@
       "passwordPlaceholder": "Al menos 8 caracteres con letras y números.",
       "passwordConfirmLabel": "Confirmar contraseña",
       "passwordConfirmPlaceholder": "Ingrese su contraseña nuevamente",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
       "phoneLabel": "Número de contacto",
       "phonePlaceholder": "01012345678 (11 dígitos)",
       "checking": "Comprobando...",
@@ -378,6 +382,7 @@
       "social": "Social",
       "mypage": "Mi página",
       "mileage": "Puntos",
+      "profileEdit": "Editar perfil",
       "applicationCheck": "Consultar solicitudes",
       "login": "Iniciar sesión",
       "register": "Crear cuenta",
@@ -425,7 +430,9 @@
       "calendarCta": "Toca para ver todos los encuentros →",
       "openBadge": "Abierto",
       "previous": "Anterior",
-      "next": "Siguiente"
+      "next": "Siguiente",
+      "pause": "Pausar",
+      "play": "Reproducir"
     },
     "curated": {
       "title": "Encuentros seleccionados",
@@ -908,9 +915,8 @@
       "reviews": "Mis reseñas"
     },
     "mileage": {
-      "balanceAsOf": "Saldo de puntos a partir del {time}",
+      "balanceLabel": "Millaje disponible",
       "unit": "Puntos",
-      "howToEarnEyebrow": "CÓMO GANAR",
       "howToEarnTitle": "¿Cómo lo gano?",
       "earnMethods": [
         {
@@ -956,7 +962,6 @@
         }
       },
       "browseGatherings": "Explorar encuentros",
-      "logEyebrow": "REGISTRO DE KILOMETRAJE",
       "logTitle": "Historial de puntos",
       "itemCount": "{count} artículos",
       "sortLatest": "Lo más nuevo",
@@ -1365,6 +1370,7 @@
       "loadError": "No se pudieron cargar los mensajes",
       "empty": "Envía el primer mensaje",
       "muted": "Tienes restringido el envío de mensajes",
+      "cannotSend": "No puedes enviar mensajes con el estado actual de tu cuenta",
       "notMember": "No eres miembro de este chat",
       "me": "Yo"
     },
@@ -1378,8 +1384,8 @@
       "unread": "{count} sin leer"
     },
     "system": {
-      "JOINED": "{nickname} se unió",
-      "KICKED": "{nickname} fue expulsado",
+      "JOINED": "{nicknames} {count, plural, one {se unió} other {se unieron}}",
+      "KICKED": "{nicknames} {count, plural, one {fue expulsado} other {fueron expulsados}}",
       "NOTICE_SET": "Se publicó un aviso"
     },
     "composer": {

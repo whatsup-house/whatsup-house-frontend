@@ -57,6 +57,8 @@
       "emailPlaceholder": "Email address",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Enter password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "findEmail": "Find ID",
       "findPassword": "Find password",
       "credentialError": "Please check your email or password.",
@@ -158,6 +160,8 @@
       "passwordPlaceholder": "At least 8 characters with letters and numbers",
       "passwordConfirmLabel": "Confirm password",
       "passwordConfirmPlaceholder": "Enter your password again",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "phoneLabel": "Contact number",
       "phonePlaceholder": "01012345678 (11 digits)",
       "checking": "Checking...",
@@ -378,6 +382,7 @@
       "social": "Social",
       "mypage": "My Page",
       "mileage": "Mileage",
+      "profileEdit": "Edit profile",
       "applicationCheck": "Check applications",
       "login": "Log in",
       "register": "Sign up",
@@ -425,7 +430,9 @@
       "calendarCta": "Tap to view all gatherings →",
       "openBadge": "Open",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "pause": "Pause",
+      "play": "Play"
     },
     "curated": {
       "title": "Most viewed gatherings this week",
@@ -908,9 +915,8 @@
       "reviews": "My Reviews"
     },
     "mileage": {
-      "balanceAsOf": "Mileage balance as of {time}",
+      "balanceLabel": "Available mileage",
       "unit": "Mileage",
-      "howToEarnEyebrow": "HOW TO EARN",
       "howToEarnTitle": "How do I earn it?",
       "earnMethods": [
         {
@@ -956,7 +962,6 @@
         }
       },
       "browseGatherings": "Browse gatherings",
-      "logEyebrow": "MILEAGE LOG",
       "logTitle": "Mileage history",
       "itemCount": "{count} items",
       "sortLatest": "Newest",
@@ -1365,6 +1370,7 @@
       "loadError": "Couldn't load messages",
       "empty": "Send the first message",
       "muted": "You've been restricted from sending messages",
+      "cannotSend": "You can't send messages with your current account status",
       "notMember": "You're not a member of this chat",
       "me": "Me"
     },
@@ -1378,8 +1384,8 @@
       "unread": "{count} unread"
     },
     "system": {
-      "JOINED": "{nickname} joined",
-      "KICKED": "{nickname} was removed",
+      "JOINED": "{nicknames} joined",
+      "KICKED": "{nicknames} {count, plural, one {was} other {were}} removed",
       "NOTICE_SET": "A notice was posted"
     },
     "composer": {

@@ -63,10 +63,10 @@ function appendMessage(queryClient: QueryClient, roomId: string, message: ChatMe
 // 토글은 두 번 적용하면 원래대로 돌아온다 → 실패 시 같은 함수로 롤백한다.
 function toggleReaction(reactions: ChatReaction[], emoji: string): ChatReaction[] {
   const target = reactions.find((r) => r.emoji === emoji)
-  if (!target) return [...reactions, { emoji, count: 1, reactedByMe: true }]
-  const count = target.count + (target.reactedByMe ? -1 : 1)
+  if (!target) return [...reactions, { emoji, count: 1, mine: true }]
+  const count = target.count + (target.mine ? -1 : 1)
   if (count <= 0) return reactions.filter((r) => r.emoji !== emoji)
-  return reactions.map((r) => (r.emoji === emoji ? { emoji, count, reactedByMe: !r.reactedByMe } : r))
+  return reactions.map((r) => (r.emoji === emoji ? { emoji, count, mine: !r.mine } : r))
 }
 
 function removeRoomFromList(queryClient: QueryClient, roomId: string) {
@@ -176,7 +176,7 @@ export function useEditMessage(roomId: string) {
     mutationFn: ({ messageId, content }: { messageId: string; content: string }) =>
       updateChatMessage(messageId, content),
     onSuccess: (_data, { messageId, content }) => {
-      patchMessage(queryClient, roomId, messageId, (m) => ({ ...m, content, editedAt: new Date().toISOString() }))
+      patchMessage(queryClient, roomId, messageId, (m) => ({ ...m, content, edited: true }))
       queryClient.invalidateQueries({ queryKey: roomKey(roomId) })
     },
   })
@@ -190,9 +190,10 @@ export function useDeleteMessage(roomId: string) {
       patchMessage(queryClient, roomId, messageId, (m) => ({
         ...m,
         content: null,
+        imageUrl: null,
         linkPreview: null,
         reactions: [],
-        deletedAt: new Date().toISOString(),
+        deleted: true,
       }))
       queryClient.invalidateQueries({ queryKey: roomKey(roomId) })
       queryClient.invalidateQueries({ queryKey: roomsKey })
@@ -264,10 +265,10 @@ export function useMarkRead(): (roomId: string, messageId: string) => void {
 // 방마다 "읽는 사람 → 마지막으로 읽은 메시지 id". 방 토픽을 구독할 때마다 그 방 것을 비운다(구독 전 이벤트는 못 봤으므로).
 type ReadPointers = Map<string, Map<string, string>>
 
-// 소켓 메시지는 방 전체에 한 번 보내는 뷰어 중립 값이다(reactedByMe 항상 false, 문의방 관리자 표시명 고정).
-// 이미 가진 메시지면 내 시점 값(sender·reactedByMe)은 캐시 쪽을 유지한다.
+// 소켓 메시지는 방 전체에 한 번 보내는 뷰어 중립 값이다(mine 항상 false, 문의방 관리자 표시명 고정).
+// 이미 가진 메시지면 내 시점 값(sender·mine)은 캐시 쪽을 유지한다.
 function keepMyReactions(incoming: ChatReaction[], current: ChatReaction[]): ChatReaction[] {
-  return incoming.map((r) => ({ ...r, reactedByMe: current.some((c) => c.emoji === r.emoji && c.reactedByMe) }))
+  return incoming.map((r) => ({ ...r, mine: current.some((c) => c.emoji === r.emoji && c.mine) }))
 }
 
 function mergeSocketMessage(current: ChatMessage, incoming: ChatMessage): ChatMessage {
@@ -319,7 +320,7 @@ function applyRead(queryClient: QueryClient, roomId: string, readerId: string, m
   const counts = new Map(
     ordered
       .slice(start, end + 1)
-      .filter((m) => m.unreadCount > 0 && !readerIds.includes(m.sender?.userId ?? ''))
+      .filter((m) => m.unreadCount > 0 && !readerIds.includes(m.sender?.id ?? ''))
       .map((m): [string, number] => [m.id, m.unreadCount - 1]),
   )
   if (counts.size > 0) patchUnreadCounts(queryClient, roomId, counts)
@@ -336,7 +337,7 @@ function applyRoomEvent(queryClient: QueryClient, event: ChatSocketEvent, pointe
       patchMessage(queryClient, roomId, message.id, (m) => mergeSocketMessage(m, message))
       if (event.kind === 'MESSAGE_CREATED') {
         appendMessage(queryClient, roomId, message)
-        if (message.sender) applyRead(queryClient, roomId, message.sender.userId, message.id, pointers)
+        if (message.sender) applyRead(queryClient, roomId, message.sender.id, message.id, pointers)
       }
       return
     }
@@ -357,8 +358,8 @@ function applyRoomEvent(queryClient: QueryClient, event: ChatSocketEvent, pointe
       return
     }
     case 'NOTICE_CHANGED': {
-      const noticeMessage = event.payload
-      queryClient.setQueryData<ChatRoomDetail>(roomKey(roomId), (room) => room && { ...room, noticeMessage })
+      const notice = event.payload
+      queryClient.setQueryData<ChatRoomDetail>(roomKey(roomId), (room) => room && { ...room, notice })
       return
     }
     case 'MEMBER_CHANGED':

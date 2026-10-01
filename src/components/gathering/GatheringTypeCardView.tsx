@@ -275,7 +275,7 @@ export default function GatheringTypeCardView() {
               key={card.id}
               type="button"
               onClick={() => router.push(`/gatherings/${card.id}`)}
-              className="flex flex-col rounded-card bg-card shadow-sm overflow-hidden text-left"
+              className="flex flex-col rounded-card bg-card shadow-sm overflow-hidden text-left transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               <div className="relative w-full aspect-square bg-tag-bg">
                 {card.thumbnailUrl ? (
