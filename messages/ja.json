@@ -1370,6 +1370,7 @@
       "loadError": "メッセージを読み込めませんでした",
       "empty": "最初のメッセージを送ってみましょう",
       "muted": "チャットが制限されているため送信できません",
+      "cannotSend": "現在のアカウント状態ではメッセージを送信できません",
       "notMember": "参加していないチャットです",
       "me": "自分"
     },
@@ -1383,8 +1384,8 @@
       "unread": "未読 {count}人"
     },
     "system": {
-      "JOINED": "{nickname}さんが参加しました",
-      "KICKED": "{nickname}さんが退出させられました",
+      "JOINED": "{nicknames}さんが参加しました",
+      "KICKED": "{nicknames}さんが退出させられました",
       "NOTICE_SET": "お知らせが登録されました"
     },
     "composer": {

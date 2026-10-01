@@ -11,7 +11,7 @@ import ChatGroupRoomFormPanel from './ChatGroupRoomFormPanel'
 import { useAddChatMembers, useAdminChatRooms, useChatSourceGatherings } from '@/lib/hooks/useAdminChat'
 import { useAuthStore } from '@/lib/store/authStore'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
-import type { AdminChatLastMessage, AdminChatRoomSummary, ChatRoomType } from '@/lib/api/types'
+import type { AdminChatRoomSummary, ChatLastMessage, ChatRoomType } from '@/lib/api/types'
 
 const TABS: { type: ChatRoomType; label: string }[] = [
   { type: 'INQUIRY', label: '문의방' },
@@ -20,10 +20,11 @@ const TABS: { type: ChatRoomType; label: string }[] = [
 
 const SYSTEM_PREVIEW = { JOINED: '멤버가 들어왔어요', KICKED: '멤버를 내보냈어요', NOTICE_SET: '공지가 등록되었어요' }
 
-function getPreview(message: AdminChatLastMessage | null): string {
+function getPreview(message: ChatLastMessage | null): string {
   if (!message) return '아직 메시지가 없어요'
   if (message.deleted) return '삭제된 메시지입니다'
   if (message.type === 'IMAGE') return '사진'
+  if (message.systemKind === 'SYSTEM_NOTICE') return message.systemParams?.text ?? ''
   if (message.type === 'SYSTEM') return message.systemKind ? SYSTEM_PREVIEW[message.systemKind] : ''
   return message.content ?? ''
 }

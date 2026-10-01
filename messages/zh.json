@@ -1370,6 +1370,7 @@
       "loadError": "无法加载消息",
       "empty": "发送第一条消息吧",
       "muted": "你已被禁言,无法发送消息",
+      "cannotSend": "当前账号状态无法发送消息",
       "notMember": "你不是该聊天的成员",
       "me": "我"
     },
@@ -1383,8 +1384,8 @@
       "unread": "{count}人未读"
     },
     "system": {
-      "JOINED": "{nickname}加入了聊天",
-      "KICKED": "{nickname}已被移出聊天",
+      "JOINED": "{nicknames}加入了聊天",
+      "KICKED": "{nicknames}已被移出聊天",
       "NOTICE_SET": "已发布公告"
     },
     "composer": {

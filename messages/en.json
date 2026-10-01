@@ -1370,6 +1370,7 @@
       "loadError": "Couldn't load messages",
       "empty": "Send the first message",
       "muted": "You've been restricted from sending messages",
+      "cannotSend": "You can't send messages with your current account status",
       "notMember": "You're not a member of this chat",
       "me": "Me"
     },
@@ -1383,8 +1384,8 @@
       "unread": "{count} unread"
     },
     "system": {
-      "JOINED": "{nickname} joined",
-      "KICKED": "{nickname} was removed",
+      "JOINED": "{nicknames} joined",
+      "KICKED": "{nicknames} {count, plural, one {was} other {were}} removed",
       "NOTICE_SET": "A notice was posted"
     },
     "composer": {

@@ -47,7 +47,7 @@ export default function ChatMemberDrawer({ members, myUserId, renderMemberAction
                 const name = member.nickname ?? t('withdrawn')
                 return (
                   <li key={member.userId} className="flex items-center gap-3 px-4 py-2">
-                    <ChatAvatar name={name} avatarUrl={member.avatarUrl} size="sm" />
+                    <ChatAvatar name={name} avatarUrl={null} size="sm" />
                     <span className="min-w-0 truncate text-sm text-foreground">{name}</span>
                     {member.userId === myUserId && (
                       <span className="shrink-0 rounded-full bg-tag-bg px-1.5 py-0.5 text-xs text-tag-text">

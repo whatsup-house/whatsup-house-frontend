@@ -1248,13 +1248,21 @@ export interface DiningTableVenueResponse {
 // 백엔드(KAN-328) 계약: docs chat-design 5절. 모든 시각은 ISO 문자열.
 export type ChatRoomType = 'INQUIRY' | 'GROUP'
 export type ChatMessageType = 'TEXT' | 'IMAGE' | 'SYSTEM'
-export type ChatSystemKind = 'JOINED' | 'KICKED' | 'NOTICE_SET'
+// SYSTEM_NOTICE: 서버가 남기는 안내문(우연한 식탁 확정 안내 등)
+export type ChatSystemKind = 'JOINED' | 'KICKED' | 'NOTICE_SET' | 'SYSTEM_NOTICE'
 
-// 탈퇴·정지 회원은 nickname 이 null. 문의방에서 관리자는 nickname "와썹하우스"로 내려온다.
+// BE ChatMessage.system 호출부 기준. JOINED·KICKED·NOTICE_SET → nicknames(탈퇴 회원은 null), SYSTEM_NOTICE → text
+export interface ChatSystemParams {
+  nicknames?: (string | null)[]
+  text?: string
+}
+
+// BE ChatMessageResponse.Sender. 탈퇴 회원은 nickname 이 null. 문의방에서 관리자는 사용자에게 nickname "와썹하우스"로 내려온다.
+// Lombok boolean isAdmin → JSON "admin"
 export interface ChatSender {
-  userId: string
+  id: string
   nickname: string | null
-  avatarUrl: string | null
+  admin: boolean
 }
 
 export interface ChatLinkPreview {
@@ -1264,28 +1272,46 @@ export interface ChatLinkPreview {
   image: string | null
 }
 
+// Lombok boolean isMine → JSON "mine"
 export interface ChatReaction {
   emoji: string
   count: number
-  reactedByMe: boolean
+  // 내가 누른 리액션인지
+  mine: boolean
 }
 
+// BE ChatMessageResponse. Lombok boolean isEdited/isDeleted → JSON "edited"/"deleted"
 export interface ChatMessage {
   id: string
   roomId: string
-  // SYSTEM 메시지·탈퇴 회원은 null
-  sender: ChatSender | null
   type: ChatMessageType
-  // TEXT: 본문, IMAGE: 서명 URL, SYSTEM·삭제됨: null
+  // SYSTEM 이면 null
+  sender: ChatSender | null
+  // TEXT 본문. 삭제·IMAGE·SYSTEM 이면 null
   content: string | null
+  // IMAGE 서명 URL(1시간 유효). 그 외 null
+  imageUrl: string | null
   systemKind: ChatSystemKind | null
-  systemParams: Record<string, string> | null
+  systemParams: ChatSystemParams | null
   linkPreview: ChatLinkPreview | null
   reactions: ChatReaction[]
   // 이 메시지를 아직 안 읽은 멤버 수 (카톡식)
   unreadCount: number
-  editedAt: string | null
-  deletedAt: string | null
+  edited: boolean
+  deleted: boolean
+  createdAt: string
+}
+
+// 방 목록 미리보기용 마지막 메시지 (BE ChatLastMessageResponse). Lombok boolean isDeleted → JSON "deleted"
+export interface ChatLastMessage {
+  id: string
+  type: ChatMessageType
+  senderId: string | null
+  // TEXT 본문. IMAGE·SYSTEM·삭제면 null
+  content: string | null
+  systemKind: ChatSystemKind | null
+  systemParams: ChatSystemParams | null
+  deleted: boolean
   createdAt: string
 }
 
@@ -1295,26 +1321,40 @@ export interface ChatRoomSummary {
   type: ChatRoomType
   name: string
   memberCount: number
-  lastMessage: ChatMessage | null
+  lastMessage: ChatLastMessage | null
   unreadCount: number
 }
 
+// BE ChatRoomDetailResponse.Member. Lombok boolean isAdmin → JSON "admin"
 export interface ChatMember {
   userId: string
   nickname: string | null
-  avatarUrl: string | null
   admin: boolean
 }
 
-// GET /api/chat/rooms/{id}
+// BE ChatRoomDetailResponse.Permissions. Lombok boolean isMuted/isAdmin → JSON "muted"/"admin"
+export interface ChatRoomPermissions {
+  // 멤버 & 미뮤트 & 계정 정상
+  canSend: boolean
+  muted: boolean
+  canLeave: boolean
+  canHide: boolean
+  admin: boolean
+}
+
+// GET /api/chat/rooms/{id} (BE ChatRoomDetailResponse)
 export interface ChatRoomDetail {
   id: string
   type: ChatRoomType
-  name: string
+  // INQUIRY 를 관리자가 볼 때 문의자가 탈퇴했으면 null
+  name: string | null
+  sourceType: ChatSourceType | null
+  sourceId: string | null
+  memberCount: number
   members: ChatMember[]
-  noticeMessage: ChatMessage | null
-  // 내 권한: 뮤트·퇴장 상태면 false
-  canSend: boolean
+  // 없거나 삭제됐으면 null
+  notice: ChatMessage | null
+  permissions: ChatRoomPermissions
 }
 
 export interface ChatSendMessageRequest {
@@ -1361,7 +1401,7 @@ export type ChatSocketEvent =
 // /user/queue/rooms — 새 메시지가 생긴 방의 목록 미리보기 (봉투 없음, BE ChatRoomPreviewResponse)
 export interface ChatRoomPreviewEvent {
   roomId: string
-  lastMessage: NonNullable<ChatRoomSummary['lastMessage']>
+  lastMessage: ChatLastMessage
   unreadCount: number
 }
 
@@ -1385,19 +1425,6 @@ export interface ChatPushSubscriptionRequest {
 export type ChatSourceType = 'GATHERING' | 'DINING_TABLE'
 export type ChatReportStatus = 'OPEN' | 'RESOLVED'
 
-// 방 목록 미리보기용 마지막 메시지 (ChatLastMessageResponse)
-export interface AdminChatLastMessage {
-  id: string
-  type: ChatMessageType
-  senderId: string | null
-  // TEXT 본문. IMAGE·SYSTEM·삭제면 null
-  content: string | null
-  systemKind: ChatSystemKind | null
-  systemParams: Record<string, unknown> | null
-  deleted: boolean
-  createdAt: string
-}
-
 // GET /api/admin/chat/rooms — 전체 방
 export interface AdminChatRoomSummary {
   id: string
@@ -1407,7 +1434,7 @@ export interface AdminChatRoomSummary {
   sourceType: ChatSourceType | null
   sourceId: string | null
   memberCount: number
-  lastMessage: AdminChatLastMessage | null
+  lastMessage: ChatLastMessage | null
   unreadCount: number
   // 문의방 미답변(마지막 메시지를 문의자가 보냄)
   unanswered: boolean
