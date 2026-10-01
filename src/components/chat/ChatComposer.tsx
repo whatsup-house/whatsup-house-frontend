@@ -104,11 +104,6 @@ export default function ChatComposer({ disabled, disabledReason, onSendText, onS
           <ArrowUp size={20} />
         </button>
       </div>
-      {text.length > 0 && (
-        <p className="mt-1 pr-12 text-right text-xs text-tag-text/70">
-          {text.length}/{MAX_LENGTH}
-        </p>
-      )}
     </div>
   )
 }
