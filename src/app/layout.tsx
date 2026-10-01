@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('description'),
-    icons: { icon: '/assets/whatsup-logo.png' },
+    icons: { icon: '/assets/whatsup-favicon.png' },
   }
 }
 
