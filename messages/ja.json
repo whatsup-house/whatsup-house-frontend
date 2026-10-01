@@ -57,6 +57,8 @@
       "emailPlaceholder": "メールアドレス",
       "passwordLabel": "パスワード",
       "passwordPlaceholder": "パスワードを入力",
+      "showPassword": "パスワードを表示",
+      "hidePassword": "パスワードを隠す",
       "findEmail": "ID検索",
       "findPassword": "パスワード検索",
       "credentialError": "メールまたはパスワードをご確認ください。",
@@ -158,6 +160,8 @@
       "passwordPlaceholder": "英字＋数字を含む8文字以上",
       "passwordConfirmLabel": "パスワード確認",
       "passwordConfirmPlaceholder": "パスワードを再入力してください",
+      "showPassword": "パスワードを表示",
+      "hidePassword": "パスワードを隠す",
       "phoneLabel": "連絡先",
       "phonePlaceholder": "01012345678（11桁）",
       "checking": "確認中...",
@@ -378,6 +382,7 @@
       "social": "ソーシャル",
       "mypage": "マイページ",
       "mileage": "マイレージ",
+      "profileEdit": "プロフィール編集",
       "applicationCheck": "申請履歴照会",
       "login": "ログイン",
       "register": "会員登録",
@@ -425,7 +430,9 @@
       "calendarCta": "タップしてすべてのギャザリングを見る →",
       "openBadge": "募集中",
       "previous": "前へ",
-      "next": "次へ"
+      "next": "次へ",
+      "pause": "一時停止",
+      "play": "再生"
     },
     "curated": {
       "title": "今週よく見られたギャザリング",
@@ -908,9 +915,8 @@
       "reviews": "自分のレビュー"
     },
     "mileage": {
-      "balanceAsOf": "{time}時点の保有マイレージ",
+      "balanceLabel": "保有マイレージ",
       "unit": "マイレージ",
-      "howToEarnEyebrow": "貯め方",
       "howToEarnTitle": "どうやって貯まりますか？",
       "earnMethods": [
         {
@@ -956,7 +962,6 @@
         }
       },
       "browseGatherings": "ギャザリングを見る",
-      "logEyebrow": "マイレージ履歴",
       "logTitle": "マイレージ履歴",
       "itemCount": "{count}件",
       "sortLatest": "新しい順",

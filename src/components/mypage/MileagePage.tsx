@@ -1,25 +1,14 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Gift, Users, Pencil, ImagePlus, Settings2,
-  ChevronRight, ChevronDown, ArrowDownUp, Check, Coins,
-} from 'lucide-react'
+import { ChevronDown, ArrowDownUp } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import dayjs from 'dayjs'
+import { Button } from '@/components/ui'
 import { useMyMileageBalance, useMyMileageHistory } from '@/lib/hooks/useMileage'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import type { MileageHistoryItem, MileageType } from '@/lib/api/types'
-
-// ── 타입 메타 ──────────────────────────────────────────────
-const TYPE_ICON: Record<MileageType, React.ElementType> = {
-  SIGNUP: Gift,
-  ATTENDANCE: Users,
-  REVIEW_REWARD: Pencil,
-  REVIEW_UPGRADE: ImagePlus,
-  ADMIN_ADJUST: Settings2,
-}
 
 function getTypeLabel(type: MileageType, amount: number, t: (key: string) => string): string {
   if (type === 'ADMIN_ADJUST') {
@@ -27,22 +16,6 @@ function getTypeLabel(type: MileageType, amount: number, t: (key: string) => str
   }
   return t(`typeLabels.${type}`)
 }
-
-// ── 적립 방법 ──────────────────────────────────────────────
-const EARN_METHODS = [
-  {
-    num: '01',
-    Icon: Users,
-  },
-  {
-    num: '02',
-    Icon: Pencil,
-  },
-  {
-    num: '03',
-    Icon: Gift,
-  },
-]
 
 type FilterKind = 'ALL' | 'EARN' | 'USE'
 type SortOrder = 'desc' | 'asc'
@@ -57,23 +30,16 @@ const FILTER_OPTIONS: { value: FilterKind; labelKey: string }[] = [
 function BalanceBlock({ balance, isLoading }: { balance: number | null; isLoading: boolean }) {
   const t = useTranslations('mypage.mileage')
   const locale = useLocale()
-  const now = dayjs().format('YYYY.MM.DD HH:mm')
-  const formatted = isLoading
-    ? '—'
-    : balance === null
-    ? '— M'
-    : balance.toLocaleString(locale)
+  const formatted = isLoading || balance === null ? '—' : balance.toLocaleString(locale)
 
   return (
-    <div className="px-1">
-      <p className="text-xs font-medium text-tag-text mb-1.5">{t('balanceAsOf', { time: now })}</p>
-      <div className="flex items-baseline gap-2">
-        <span className="text-6xl font-bold tracking-tight text-foreground tabular-nums leading-none">
-          {formatted}
-        </span>
-        <span className="text-base font-semibold text-tag-text whitespace-nowrap">{t('unit')}</span>
-      </div>
-    </div>
+    <section className="px-1">
+      <h2 className="text-sm font-medium text-tag-text">{t('balanceLabel')}</h2>
+      <p className="mt-1 flex items-baseline gap-1.5">
+        <span className="text-4xl font-bold tracking-tight text-foreground tabular-nums">{formatted}</span>
+        <span className="text-base font-semibold text-tag-text">{t('unit')}</span>
+      </p>
+    </section>
   )
 }
 
@@ -84,61 +50,37 @@ function EarnSection() {
   const [open, setOpen] = useState(false)
 
   return (
-    <section>
-      <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden">
-        <button
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          className="w-full flex items-center justify-between px-4 py-4 text-left"
-        >
-          <div>
-            <p className="text-[10px] font-bold tracking-widest uppercase text-primary mb-1">
-              {t('howToEarnEyebrow')}
-            </p>
-            <p className="text-base font-bold text-foreground">{t('howToEarnTitle')}</p>
-          </div>
-          <div
-            className={`w-7 h-7 rounded-full bg-tag-bg flex items-center justify-center shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
-          >
-            <ChevronRight size={14} className="text-tag-text" />
-          </div>
-        </button>
+    <section className="rounded-card bg-card">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full min-h-[52px] items-center justify-between px-4 text-left"
+      >
+        <span className="text-sm font-semibold text-foreground">{t('howToEarnTitle')}</span>
+        <ChevronDown
+          size={16}
+          className={`text-tag-text transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
 
-        {open && (
-          <div className="pb-2">
-            {EARN_METHODS.map((m, index) => (
-              <div
-                key={m.num}
-                className="flex gap-3.5 px-4 py-4 border-t border-tag-bg/40"
-              >
-                <div className="w-11 h-11 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
-                  <m.Icon size={20} className="text-primary" />
-                </div>
-                <div className="flex-1 pt-0.5">
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-[11px] font-bold text-primary tracking-wider tabular-nums">
-                      {m.num}
-                    </span>
-                    <span className="text-[15px] font-bold text-foreground">{methods[index]?.title}</span>
-                  </div>
-                  <p className="text-[12.5px] text-tag-text leading-relaxed whitespace-pre-line">
-                    {methods[index]?.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {open && (
+        <ul className="border-t border-tag-bg px-4 py-1">
+          {methods.map((method) => (
+            <li key={method.title} className="py-3 [&+&]:border-t [&+&]:border-tag-bg">
+              <p className="text-sm font-semibold text-foreground">{method.title}</p>
+              <p className="mt-0.5 text-sm leading-relaxed text-tag-text whitespace-pre-line">{method.desc}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
 
 // ── LogRow ─────────────────────────────────────────────────
-function LogRow({ item, isFirst }: { item: MileageHistoryItem; isFirst: boolean }) {
+function LogRow({ item }: { item: MileageHistoryItem }) {
   const t = useTranslations('mypage.mileage')
   const locale = useLocale()
-  const Icon = TYPE_ICON[item.type]
   const isEarn = item.amount > 0
   const label = getTypeLabel(item.type, item.amount, t)
   const sign = isEarn ? '+' : '−'
@@ -151,34 +93,19 @@ function LogRow({ item, isFirst }: { item: MileageHistoryItem; isFirst: boolean 
       : t('balance', { balance: formattedBalance })
 
   return (
-    <div
-      className={`flex items-center gap-3.5 px-4 py-3.5 ${!isFirst ? 'border-t border-tag-bg/40' : ''}`}
-    >
-      <div
-        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-          isEarn ? 'bg-primary-light' : 'bg-tag-bg'
-        }`}
+    <li className="flex items-center justify-between gap-4 py-3.5 [&+&]:border-t [&+&]:border-tag-bg">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-foreground">{label}</p>
+        <p className="mt-0.5 truncate text-xs text-tag-text">
+          {formattedDate} · {subText}
+        </p>
+      </div>
+      <span
+        className={`shrink-0 text-base font-bold tabular-nums ${isEarn ? 'text-mileage-earn' : 'text-foreground'}`}
       >
-        <Icon size={20} className={isEarn ? 'text-primary' : 'text-tag-text'} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline justify-between gap-3 mb-0.5">
-          <span className="text-sm font-bold text-foreground truncate">{label}</span>
-          <span
-            className={`text-base font-bold tabular-nums shrink-0 ${
-              isEarn ? 'text-mileage-earn' : 'text-primary'
-            }`}
-          >
-            {formattedAmount}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-tag-text min-w-0">
-          <span className="truncate min-w-0">{subText}</span>
-          <span className="shrink-0 text-tag-text/50">·</span>
-          <span className="shrink-0">{formattedDate}</span>
-        </div>
-      </div>
-    </div>
+        {formattedAmount}
+      </span>
+    </li>
   )
 }
 
@@ -189,18 +116,12 @@ function EmptyState({ filter }: { filter: FilterKind }) {
   const copy = t.raw(`empty.${filter}`) as { head: string; body: string }
 
   return (
-    <div className="flex flex-col items-center py-8 px-6 text-center">
-      <div className="w-14 h-14 rounded-full bg-tag-bg/60 flex items-center justify-center mb-3">
-        <Coins size={24} className="text-tag-text/50" />
-      </div>
-      <p className="text-sm font-bold text-tag-text mb-1">{copy.head}</p>
-      <p className="text-xs text-tag-text leading-relaxed whitespace-pre-line mb-4">{copy.body}</p>
-      <button
-        onClick={() => router.push('/gatherings')}
-        className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-full text-[13px] font-bold"
-      >
-        {t('browseGatherings')} <ChevronRight size={14} />
-      </button>
+    <div className="py-10 text-center">
+      <p className="text-sm font-semibold text-foreground">{copy.head}</p>
+      <p className="mt-1 text-sm leading-relaxed text-tag-text whitespace-pre-line">{copy.body}</p>
+      <Button variant="outlined" size="sm" className="mt-4" onClick={() => router.push('/gatherings')}>
+        {t('browseGatherings')}
+      </Button>
     </div>
   )
 }
@@ -212,8 +133,6 @@ function LogSection({ enabled }: { enabled: boolean }) {
   const [filter, setFilter] = useState<FilterKind>('ALL')
   const [sort, setSort] = useState<SortOrder>('desc')
   const [page, setPage] = useState(0)
-  const [filterOpen, setFilterOpen] = useState(false)
-  const filterRef = useRef<HTMLDivElement>(null)
 
   const { data, isLoading } = useMyMileageHistory(page, 20, enabled)
 
@@ -231,121 +150,76 @@ function LogSection({ enabled }: { enabled: boolean }) {
   const handleFilterChange = (f: FilterKind) => {
     setFilter(f)
     setPage(0)
-    setFilterOpen(false)
   }
-
-  useEffect(() => {
-    if (!filterOpen) return
-    const handler = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-        setFilterOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [filterOpen])
-
-  const currentOption = FILTER_OPTIONS.find((o) => o.value === filter) ?? FILTER_OPTIONS[0]
-  const currentLabel = t(currentOption.labelKey)
 
   return (
     <section>
-      {/* 섹션 헤더 */}
-      <div className="flex items-end justify-between px-1 mb-2.5">
-        <div>
-          <p className="text-[10px] font-bold tracking-widest uppercase text-primary mb-1">
-            {t('logEyebrow')}
-          </p>
-          <p className="text-lg font-bold text-foreground">{t('logTitle')}</p>
-        </div>
+      <div className="mb-3 flex items-baseline justify-between px-1">
+        <h2 className="text-base font-bold text-foreground">{t('logTitle')}</h2>
         {filteredItems.length > 0 && (
-          <span className="text-[11px] font-bold text-tag-text tabular-nums">
+          <span className="text-xs text-tag-text tabular-nums">
             {t('itemCount', { count: filteredItems.length })}
           </span>
         )}
       </div>
 
-      {/* 필터 + 정렬 컨트롤 */}
-      <div className="flex items-center justify-between gap-2 px-1 mb-2.5">
-        {/* 필터 드롭다운 */}
-        <div ref={filterRef} className="relative">
-          <button
-            onClick={() => setFilterOpen((o) => !o)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-card border border-tag-bg/40 rounded-full text-[13px] font-semibold text-foreground"
-          >
-            {currentLabel}
-            <ChevronDown
-              size={12}
-              className={`text-tag-text transition-transform duration-200 ${filterOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
-          {filterOpen && (
-            <div className="absolute top-[calc(100%+6px)] left-0 min-w-[130px] bg-card border border-tag-bg/40 rounded-2xl shadow-lg overflow-hidden z-20">
-              {FILTER_OPTIONS.map((opt, i) => (
-                <button
-                  key={opt.value}
-                  onClick={() => handleFilterChange(opt.value)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-[13px] text-left ${
-                    i > 0 ? 'border-t border-tag-bg/40' : ''
-                  } ${
-                    filter === opt.value
-                      ? 'bg-primary-light font-bold text-primary'
-                      : 'font-medium text-foreground'
-                  }`}
-                >
-                  {t(opt.labelKey)}
-                  {filter === opt.value && <Check size={14} className="text-primary" />}
-                </button>
-              ))}
-            </div>
-          )}
+      {/* 필터(전체/적립/사용) + 정렬 */}
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex gap-1.5">
+          {FILTER_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              aria-pressed={filter === opt.value}
+              onClick={() => handleFilterChange(opt.value)}
+              className={`min-h-[36px] rounded-full px-3.5 text-sm font-medium transition-colors ${
+                filter === opt.value ? 'bg-foreground text-background' : 'bg-card text-tag-text'
+              }`}
+            >
+              {t(opt.labelKey)}
+            </button>
+          ))}
         </div>
-
-        {/* 정렬 토글 */}
         <button
+          type="button"
           onClick={() => setSort((s) => (s === 'desc' ? 'asc' : 'desc'))}
-          className="inline-flex items-center gap-1.5 px-3 py-2 border border-tag-bg/40 rounded-full text-[13px] font-semibold text-tag-text"
+          className="inline-flex min-h-[36px] items-center gap-1 px-2 text-sm text-tag-text"
         >
-          <ArrowDownUp size={12} />
+          <ArrowDownUp size={14} />
           {sort === 'desc' ? t('sortLatest') : t('sortOldest')}
         </button>
       </div>
 
-      {/* 이력 목록 */}
-      <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden">
+      <div className="rounded-card bg-card px-4">
         {isLoading ? (
-          <div className="flex items-center justify-center py-10">
-            <p className="text-sm text-tag-text">{tCommon('loading')}</p>
-          </div>
+          <p className="py-10 text-center text-sm text-tag-text">{tCommon('loading')}</p>
         ) : filteredItems.length > 0 ? (
-          filteredItems.map((item, i) => (
-            <LogRow key={item.id} item={item} isFirst={i === 0} />
-          ))
+          <ul>
+            {filteredItems.map((item) => (
+              <LogRow key={item.id} item={item} />
+            ))}
+          </ul>
         ) : (
           <EmptyState filter={filter} />
         )}
       </div>
 
-      {/* 페이지네이션 */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-4">
-          <button
-            onClick={() => setPage((p) => p - 1)}
-            disabled={page === 0}
-            className="px-4 py-2 rounded-full border border-tag-bg/40 text-[13px] font-semibold text-tag-text disabled:opacity-40"
-          >
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => setPage((p) => p - 1)} disabled={page === 0}>
             {tCommon('previous')}
-          </button>
-          <span className="text-[13px] font-medium text-tag-text tabular-nums">
+          </Button>
+          <span className="text-sm text-tag-text tabular-nums">
             {page + 1} / {totalPages}
           </span>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setPage((p) => p + 1)}
             disabled={page >= totalPages - 1}
-            className="px-4 py-2 rounded-full border border-tag-bg/40 text-[13px] font-semibold text-tag-text disabled:opacity-40"
           >
             {tCommon('next')}
-          </button>
+          </Button>
         </div>
       )}
     </section>

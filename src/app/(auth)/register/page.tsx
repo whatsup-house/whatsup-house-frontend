@@ -711,14 +711,15 @@ export default function RegisterPage() {
           {/* 1. 성별 */}
           {visible(1) && (
             <div ref={(node) => { fieldRefs.current[1] = node }} className="animate-field-reveal flex flex-col gap-2">
-              <label className="text-sm font-medium text-foreground">
+              <p id="register-gender-label" className="text-sm font-medium text-foreground">
                 {t('genderLabel')}<span className="text-primary"> *</span>
-              </label>
-              <div className="flex gap-2">
+              </p>
+              <div role="group" aria-labelledby="register-gender-label" className="flex gap-2">
                 {GENDER_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     type="button"
+                    aria-pressed={genderValue === option.value}
                     onClick={() => setValue('gender', option.value, { shouldValidate: true })}
                     className={`flex-1 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${genderValue === option.value ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'}`}
                   >
@@ -733,12 +734,14 @@ export default function RegisterPage() {
           {/* 2. 생년월일 + 만 나이 표시 */}
           {visible(2) && (
             <div ref={(node) => { fieldRefs.current[2] = node }} className="animate-field-reveal flex flex-col gap-1">
-              <label className="text-sm font-medium text-foreground">
+              <label htmlFor="register-birth-date" className="text-sm font-medium text-foreground">
                 {t('birthDateLabel')}<span className="text-primary"> *</span>
               </label>
               <input type="hidden" {...register('birthDate')} />
               <div className="relative">
                 <input
+                  id="register-birth-date"
+                  aria-invalid={errors.birthDate ? true : undefined}
                   value={birthDateInputValue}
                   onChange={(e) => handleBirthDateInputChange(e.target.value)}
                   inputMode="numeric"
@@ -873,11 +876,12 @@ export default function RegisterPage() {
           {visible(5) && (
             <div ref={(node) => { fieldRefs.current[5] = node }} className="animate-field-reveal flex flex-col gap-5">
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-foreground">
+                <label htmlFor="register-password" className="text-sm font-medium text-foreground">
                   {t('passwordLabel')}<span className="text-primary"> *</span>
                 </label>
                 <div className="relative">
                   <input
+                    id="register-password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder={t('passwordPlaceholder')}
                     className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${password.length > 0 && !passwordValid ? 'border-primary' : 'border-tag-bg'}`}
@@ -886,6 +890,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tag-text"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -899,11 +904,12 @@ export default function RegisterPage() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-foreground">
+                <label htmlFor="register-password-confirm" className="text-sm font-medium text-foreground">
                   {t('passwordConfirmLabel')}<span className="text-primary"> *</span>
                 </label>
                 <div className="relative">
                   <input
+                    id="register-password-confirm"
                     type={showPasswordConfirm ? 'text' : 'password'}
                     placeholder={t('passwordConfirmPlaceholder')}
                     className={`w-full px-4 py-3 pr-12 rounded-input border bg-card text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${passwordConfirmValue.length > 0 && !confirmMatch ? 'border-primary' : 'border-tag-bg'}`}
@@ -912,6 +918,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                    aria-label={showPasswordConfirm ? t('hidePassword') : t('showPassword')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-tag-text"
                   >
                     {showPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}

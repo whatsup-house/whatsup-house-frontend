@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { Button } from '@/components/ui'
+import { Button, MbtiSelector } from '@/components/ui'
 import JobSelect from '@/components/auth/JobSelect'
 import { useRegisterAndLogin } from '@/lib/hooks/useAuth'
 import { useBackNavigation } from '@/lib/hooks/useBackNavigation'
@@ -12,11 +12,6 @@ import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, resolveApiErrorMessage } from '@/lib/utils/apiError'
 import type { Gender } from '@/lib/api/types'
 import { REGISTER_EMAIL_ERROR_KEY, REGISTER_SESSION_KEY } from '../register/page'
-
-const MBTI_ROWS = [
-  ['E', 'S', 'T', 'J'],
-  ['I', 'N', 'F', 'P'],
-] as const
 
 interface Step1Data {
   email: string
@@ -177,33 +172,11 @@ export default function OnboardingPage() {
 
         <div>
           <label className="text-sm font-medium text-foreground block mb-2">{t('mbtiLabel')}</label>
-          <div className="grid grid-cols-4 gap-2">
-            {MBTI_ROWS[0].map((letter, colIndex) => (
-              <button
-                key={`row0-${letter}`}
-                type="button"
-                onClick={() => handleMbtiSelect(colIndex, letter)}
-                className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'}`}
-              >
-                {letter}
-              </button>
-            ))}
-            {MBTI_ROWS[1].map((letter, colIndex) => (
-              <button
-                key={`row1-${letter}`}
-                type="button"
-                onClick={() => handleMbtiSelect(colIndex, letter)}
-                className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${mbti[colIndex] === letter ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'}`}
-              >
-                {letter}
-              </button>
-            ))}
-          </div>
-          {mbtiString && (
-            <p className="text-center text-sm text-primary font-medium mt-2">
-              {t('mbtiResult', { mbti: mbtiString })}
-            </p>
-          )}
+          <MbtiSelector
+            value={mbti}
+            onSelect={handleMbtiSelect}
+            resultText={mbtiString ? t('mbtiResult', { mbti: mbtiString }) : undefined}
+          />
         </div>
 
         {formError && (

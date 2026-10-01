@@ -70,7 +70,7 @@ function isSameRun(a: ChatMessage | undefined, b: ChatMessage | undefined): bool
 function CenterPill({ children }: { children: ReactNode }) {
   return (
     <div className="my-3 flex justify-center px-6">
-      <span className="rounded-full bg-tag-bg px-3 py-1 text-center text-[11px] text-tag-text">{children}</span>
+      <span className="rounded-full bg-tag-bg px-3 py-1 text-center text-xs text-tag-text">{children}</span>
     </div>
   )
 }
@@ -335,7 +335,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
         <button
           type="button"
           onClick={handleBack}
-          className="flex h-10 w-10 shrink-0 items-center justify-center text-foreground"
+          className="flex h-10 w-10 shrink-0 items-center justify-center text-foreground transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={tCommon('back')}
         >
           <ArrowLeft size={20} />
@@ -348,7 +348,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
           type="button"
           onClick={() => setIsMembersOpen(true)}
           disabled={!room}
-          className="flex h-10 w-10 shrink-0 items-center justify-center text-foreground disabled:opacity-40"
+          className="flex h-10 w-10 shrink-0 items-center justify-center text-foreground disabled:opacity-40 transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={t('room.openMembers')}
         >
           <Menu size={20} />
@@ -452,7 +452,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
           <button
             type="button"
             onClick={() => setViewerUrl(null)}
-            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center text-white"
+            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center text-white transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label={tCommon('close')}
           >
             <X size={24} />

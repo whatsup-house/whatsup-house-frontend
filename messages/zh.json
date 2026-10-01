@@ -57,6 +57,8 @@
       "emailPlaceholder": "电子邮箱地址",
       "passwordLabel": "密码",
       "passwordPlaceholder": "请输入密码",
+      "showPassword": "显示密码",
+      "hidePassword": "隐藏密码",
       "findEmail": "查找账号",
       "findPassword": "找回密码",
       "credentialError": "请检查您的电子邮件或密码。",
@@ -158,6 +160,8 @@
       "passwordPlaceholder": "至少 8 个字符，包含字母和数字",
       "passwordConfirmLabel": "确认密码",
       "passwordConfirmPlaceholder": "再次输入您的密码",
+      "showPassword": "显示密码",
+      "hidePassword": "隐藏密码",
       "phoneLabel": "联系电话",
       "phonePlaceholder": "01012345678（11位）",
       "checking": "正在检查...",
@@ -378,6 +382,7 @@
       "social": "社交",
       "mypage": "我的页面",
       "mileage": "积分",
+      "profileEdit": "编辑资料",
       "applicationCheck": "申请记录查询",
       "login": "登录",
       "register": "注册",
@@ -425,7 +430,9 @@
       "calendarCta": "点击查看全部聚会 →",
       "openBadge": "招募中",
       "previous": "上一页",
-      "next": "下一步"
+      "next": "下一步",
+      "pause": "暂停",
+      "play": "播放"
     },
     "curated": {
       "title": "精选聚会",
@@ -908,9 +915,8 @@
       "reviews": "我的评价"
     },
     "mileage": {
-      "balanceAsOf": "截至 {time} 的积分余额",
+      "balanceLabel": "当前里程",
       "unit": "积分",
-      "howToEarnEyebrow": "如何赚取",
       "howToEarnTitle": "我如何赚取它？",
       "earnMethods": [
         {
@@ -956,7 +962,6 @@
         }
       },
       "browseGatherings": "浏览聚会",
-      "logEyebrow": "积分记录",
       "logTitle": "积分记录",
       "itemCount": "{count} 项目",
       "sortLatest": "最新",

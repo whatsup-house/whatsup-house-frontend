@@ -3,16 +3,11 @@
 import { useState } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Input } from '@/components/ui'
+import { Input, MbtiSelector } from '@/components/ui'
 import JobSelect from '@/components/auth/JobSelect'
 import { useTranslations } from 'next-intl'
 import type { FormQuestionDetail } from '@/lib/api/types'
 import { getAge } from '@/lib/utils/date'
-
-const MBTI_ROWS = [
-  ['E', 'S', 'F', 'J'],
-  ['I', 'N', 'T', 'P'],
-] as const
 
 // 성별 선택지는 값(MALE/FEMALE)은 유지하되 화면에는 한국어로 노출한다. (KAN-258)
 const GENDER_CHOICE_LABEL_KEYS: Record<string, string> = { MALE: 'male', FEMALE: 'female' }
@@ -468,27 +463,11 @@ export default function DynamicQuestionField({
     return (
       <div className="flex flex-col gap-3">
         {labelNode}
-        <div className="grid grid-cols-4 gap-2">
-          {[...MBTI_ROWS[0], ...MBTI_ROWS[1]].map((letter, idx) => {
-            const colIndex = idx % 4
-            const active = slots[colIndex] === letter
-            return (
-              <button
-                key={`${letter}-${idx}`}
-                type="button"
-                onClick={() => select(colIndex, letter)}
-                className={`py-3 rounded-input text-sm font-bold transition-colors min-h-[44px] ${
-                  active ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                }`}
-              >
-                {letter}
-              </button>
-            )
-          })}
-        </div>
-        {isComplete && (
-          <p className="text-center text-sm text-primary font-medium">{t('mbtiResult', { mbti: slots.join('') })}</p>
-        )}
+        <MbtiSelector
+          value={slots.map((c) => (c === '·' ? null : c))}
+          onSelect={select}
+          resultText={isComplete ? t('mbtiResult', { mbti: slots.join('') }) : undefined}
+        />
         {error && <p className="text-xs text-primary pl-1">{error}</p>}
       </div>
     )
