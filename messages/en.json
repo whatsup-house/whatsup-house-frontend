@@ -57,6 +57,8 @@
       "emailPlaceholder": "Email address",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Enter password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "findEmail": "Find ID",
       "findPassword": "Find password",
       "credentialError": "Please check your email or password.",

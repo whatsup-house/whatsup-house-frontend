@@ -57,6 +57,8 @@
       "emailPlaceholder": "メールアドレス",
       "passwordLabel": "パスワード",
       "passwordPlaceholder": "パスワードを入力",
+      "showPassword": "パスワードを表示",
+      "hidePassword": "パスワードを隠す",
       "findEmail": "ID検索",
       "findPassword": "パスワード検索",
       "credentialError": "メールまたはパスワードをご確認ください。",

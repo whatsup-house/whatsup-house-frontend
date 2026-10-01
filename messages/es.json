@@ -57,6 +57,8 @@
       "emailPlaceholder": "Correo electrónico",
       "passwordLabel": "Contraseña",
       "passwordPlaceholder": "Ingresa tu contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
       "findEmail": "Buscar ID",
       "findPassword": "Buscar contraseña",
       "credentialError": "Por favor revisa tu correo electrónico o contraseña.",

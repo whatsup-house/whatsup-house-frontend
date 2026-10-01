@@ -57,6 +57,8 @@
       "emailPlaceholder": "이메일 주소",
       "passwordLabel": "비밀번호",
       "passwordPlaceholder": "비밀번호 입력",
+      "showPassword": "비밀번호 보기",
+      "hidePassword": "비밀번호 숨기기",
       "findEmail": "아이디 찾기",
       "findPassword": "비밀번호 찾기",
       "credentialError": "아이디 또는 비밀번호를 확인해주세요.",

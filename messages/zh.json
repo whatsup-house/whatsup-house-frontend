@@ -57,6 +57,8 @@
       "emailPlaceholder": "电子邮箱地址",
       "passwordLabel": "密码",
       "passwordPlaceholder": "请输入密码",
+      "showPassword": "显示密码",
+      "hidePassword": "隐藏密码",
       "findEmail": "查找账号",
       "findPassword": "找回密码",
       "credentialError": "请检查您的电子邮件或密码。",
