@@ -75,7 +75,8 @@ export default function ChatComposer({ disabled, disabledReason, onSendText, onS
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={isDisabled || isProcessing}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-tag-text disabled:opacity-40"
+          aria-busy={isProcessing}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-tag-text disabled:opacity-40 transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={t('attachImage')}
         >
           <Plus size={22} />
@@ -91,20 +92,20 @@ export default function ChatComposer({ disabled, disabledReason, onSendText, onS
           maxLength={MAX_LENGTH}
           rows={1}
           aria-label={t('placeholder')}
-          className="max-h-[100px] min-h-10 flex-1 resize-none rounded-[20px] bg-tag-bg px-4 py-2.5 text-[15px] leading-5 text-foreground outline-none placeholder:text-tag-text/70 disabled:opacity-60"
+          className="max-h-[100px] min-h-10 flex-1 resize-none rounded-[20px] bg-tag-bg px-4 py-2.5 text-[15px] leading-5 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary/40 placeholder:text-tag-text/70 disabled:opacity-60"
         />
         <button
           type="button"
           onClick={submit}
           disabled={!canSend}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tag-text text-background disabled:bg-tag-bg disabled:text-tag-text/40"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tag-text text-background disabled:bg-tag-bg disabled:text-tag-text/40 transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={t('send')}
         >
           <ArrowUp size={20} />
         </button>
       </div>
       {text.length > 0 && (
-        <p className="mt-1 pr-12 text-right text-[11px] text-tag-text/70">
+        <p className="mt-1 pr-12 text-right text-xs text-tag-text/70">
           {text.length}/{MAX_LENGTH}
         </p>
       )}

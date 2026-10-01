@@ -76,7 +76,7 @@ h1, h2, h3 {
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+  animation: slide-up 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* 회원가입 폼 필드 순차 노출 애니메이션 */
