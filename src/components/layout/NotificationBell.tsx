@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   AlarmClock,
@@ -70,6 +70,7 @@ export default function NotificationBell() {
   const router = useRouter()
   const { isLoggedIn } = useAuthStore()
   const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
   const { data: unread } = useUnreadCount()
   const { data: notifications, isLoading } = useNotifications(open)
   const markRead = useMarkNotificationRead()
@@ -78,16 +79,22 @@ export default function NotificationBell() {
   const unreadCount = unread?.unreadCount ?? 0
 
   // 모달 열림 동안 ESC 키 닫기 + body 스크롤 잠금. (KAN-303)
+  // 바깥 클릭은 백드롭 대신 document pointerdown으로 감지한다. 헤더의 backdrop-filter가 fixed 백드롭을 헤더 안에 가두기 때문. (KAN-367)
   useEffect(() => {
     if (!open) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false)
     }
+    const handlePointerDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
     document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('pointerdown', handlePointerDown)
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('pointerdown', handlePointerDown)
       document.body.style.overflow = previousOverflow
     }
   }, [open])
@@ -101,9 +108,10 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="relative">
+    // relative를 두지 않는다 → 팝오버가 sticky 헤더(폭 = 모바일 프레임 폭) 기준으로 배치된다. (KAN-367)
+    <div ref={ref}>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => setOpen((prev) => !prev)}
         className="relative p-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-foreground"
         aria-label={t('label')}
       >
@@ -117,12 +125,14 @@ export default function NotificationBell() {
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
+          {/* 폭: 헤더 좌우 16px 안쪽, 최대 390px, 오른쪽 정렬(ml-auto).
+              높이 상한(--popover-max): 헤더 아래(56px)부터 바텀 네비(65px) 위 8px까지.
+              모바일·태블릿은 화면(100dvh) 기준, lg는 프레임 높이(AppShell의 min(932px,100dvh-32px)) 기준. (KAN-367) */}
           <div
             role="dialog"
             aria-modal="true"
             aria-label={t('label')}
-            className="absolute right-0 top-[calc(100%+10px)] z-[100] flex h-[54vh] min-h-[320px] max-h-[430px] w-[calc(100vw-32px)] max-w-[390px] flex-col overflow-visible rounded-card border border-tag-bg bg-background shadow-lg lg:h-[420px] lg:min-h-0"
+            className="absolute inset-x-4 top-full z-[100] ml-auto flex h-[54vh] min-h-[min(320px,var(--popover-max))] max-h-[min(430px,var(--popover-max))] max-w-[390px] flex-col overflow-visible rounded-card border border-tag-bg bg-background shadow-lg [--popover-max:calc(100dvh-129px-env(safe-area-inset-bottom))] lg:h-[420px] lg:min-h-0 lg:[--popover-max:calc(min(932px,100dvh-32px)-129px)]"
             onClick={(e) => e.stopPropagation()}
           >
             <span
