@@ -289,10 +289,26 @@ function patchUnreadCounts(queryClient: QueryClient, roomId: string, counts: Map
   )
 }
 
+// 최신 페이지의 안 읽은 수를 서버 값으로 맞춘다. 실패하면 기존 값 유지.
+function refetchUnreadCounts(queryClient: QueryClient, roomId: string) {
+  fetchChatMessages(roomId).then(
+    (latest) => patchUnreadCounts(queryClient, roomId, new Map(latest.map((m) => [m.id, m.unreadCount]))),
+    () => {},
+  )
+}
+
 // "readerId 가 messageId 까지 읽음"을 안 읽은 수에 반영한다. READ 와 새 메시지(보내면 서버가 보낸 사람을 거기까지 읽음 처리) 둘 다 여기로 온다.
 // 규칙은 BE ChatResponseAssembler 와 같다: 보낸 사람은 세지 않고, 문의방은 관리자 전원을 한 명으로 센다.
 // 이전 읽은 지점 다음 ~ messageId 사이에서 그 사람이 보내지 않은 메시지마다 1을 뺀다.
-function applyRead(queryClient: QueryClient, roomId: string, readerId: string, messageId: string, pointers: ReadPointers) {
+// isMyRead: 내 READ 이벤트. 자리 비운 사이 보충된 메시지와 순서가 엇갈리기 쉬워 로컬로 빼지 않고 서버 값으로 맞춘다 (KAN-365).
+function applyRead(
+  queryClient: QueryClient,
+  roomId: string,
+  readerId: string,
+  messageId: string,
+  pointers: ReadPointers,
+  isMyRead = false,
+) {
   const room = queryClient.getQueryData<ChatRoomDetail>(roomKey(roomId))
   const isInquiry = room?.type === 'INQUIRY'
   const staffIds = isInquiry ? room.members.filter((m) => m.admin).map((m) => m.userId) : []
@@ -307,16 +323,18 @@ function applyRead(queryClient: QueryClient, roomId: string, readerId: string, m
   // 단체방에서 처음 보는 사람은 이전에 어디까지 읽었는지 몰라 최신 페이지 값을 서버에서 받아 맞춘다.
   // 문의방은 읽는 쪽이 둘뿐이라 처음부터 빼도 정확하다.
   // ponytail: 멤버별 읽은 지점이 API 에 없어 구독마다 사람당 1회 조회한다. 방 상세가 lastReadMessageId 를 주면 이 분기를 없앤다.
-  if (!previous && !isInquiry) {
-    fetchChatMessages(roomId).then(
-      (latest) => patchUnreadCounts(queryClient, roomId, new Map(latest.map((m) => [m.id, m.unreadCount]))),
-      () => {},
-    )
+  if (isMyRead || (!previous && !isInquiry)) {
+    refetchUnreadCounts(queryClient, roomId)
     return
   }
   const ordered = [...(queryClient.getQueryData<MessagePages>(messagesKey(roomId))?.pages ?? [])].reverse().flat()
   const end = ordered.findIndex((m) => m.id === messageId)
   const start = previous ? ordered.findIndex((m) => m.id === previous) + 1 : 0
+  // 읽은 지점이 캐시에 없으면(보충 전에 온 이벤트 등) 뺄 구간을 알 수 없다
+  if (end === -1 || (previous && start === 0)) {
+    refetchUnreadCounts(queryClient, roomId)
+    return
+  }
   const counts = new Map(
     ordered
       .slice(start, end + 1)
@@ -348,9 +366,10 @@ function applyRoomEvent(queryClient: QueryClient, event: ChatSocketEvent, pointe
     }
     case 'READ': {
       const { userId, messageId } = event.payload
-      applyRead(queryClient, roomId, userId, messageId, pointers)
+      const isMine = userId === useAuthStore.getState().userId
+      applyRead(queryClient, roomId, userId, messageId, pointers, isMine)
       // 내가 방의 마지막 메시지까지 읽었으면 방 목록(바텀 내비 배지)도 바로 0
-      if (userId === useAuthStore.getState().userId) {
+      if (isMine) {
         queryClient.setQueryData<ChatRoomSummary[]>(roomsKey, (rooms) =>
           rooms?.map((r) => (r.id === roomId && r.lastMessage?.id === messageId ? { ...r, unreadCount: 0 } : r)),
         )
@@ -424,6 +443,8 @@ export function useChatSocket() {
     connectChatSocket({
       onRoomSubscribed: (id) => {
         pointers.delete(id)
+        // 재진입·재연결: 끊긴 동안 바뀐 멤버 닉네임·권한을 다시 받는다. 방 진입 직후의 첫 조회가 진행 중이면 그걸 쓴다.
+        queryClient.invalidateQueries({ queryKey: roomKey(id) }, { cancelRefetch: false })
         fillMessageGap(queryClient, id).catch(() => {})
       },
       onRoomEvent: (event) => applyRoomEvent(queryClient, event, pointers),

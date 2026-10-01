@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ChevronDown, Megaphone, Menu, X } from 'lucide-react'
@@ -113,6 +113,10 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
   const room = roomQuery.data
   const roomErrorCode = getApiErrorCode(roomQuery.error)
   const isRedirecting = roomErrorCode === 'CHAT_NOT_MEMBER' || getApiErrorStatus(roomQuery.error) === 404
+  // 문의방을 회원이 볼 때 관리자는 "와썹하우스"로 보인다(BE 메시지 스냅샷). 멤버 닉네임은 실명일 수 있어 쓰지 않는다.
+  const isHouseSender = room?.type === 'INQUIRY' && !isAdmin
+  // 메시지의 sender.nickname 은 조회 시점 스냅샷이라 옛 페이지와 새 메시지가 다를 수 있다 → 방 상세의 현재 닉네임 우선 (KAN-364)
+  const memberNicknames = useMemo(() => new Map(room?.members.map((m) => [m.userId, m.nickname] as const)), [room])
 
   // 서버 페이지는 최신 페이지가 앞, 페이지 안은 오래된 → 최신 순
   const messages = messagesQuery.data ? [...messagesQuery.data.pages].reverse().flat() : []
@@ -293,13 +297,14 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
     const isMine = !!pending || (!!userId && message.sender?.id === userId)
     const isDeleted = message.deleted
     const hideTime = isSameRun(message, next) && !!next && dayjs(message.createdAt).isSame(next.createdAt, 'minute')
+    const memberName = isHouseSender ? undefined : memberNicknames.get(message.sender?.id ?? '')
 
     return (
       <ChatMessageBubble
         isMine={isMine}
         showProfile={!isSameRun(prev, message)}
-        senderName={message.sender?.nickname ?? t('withdrawn')}
-        isHouseSender={room?.type === 'INQUIRY' && !isAdmin}
+        senderName={memberName ?? message.sender?.nickname ?? t('withdrawn')}
+        isHouseSender={isHouseSender}
         type={message.type === 'IMAGE' ? 'IMAGE' : 'TEXT'}
         content={message.type === 'IMAGE' ? message.imageUrl : message.content}
         isDeleted={isDeleted}

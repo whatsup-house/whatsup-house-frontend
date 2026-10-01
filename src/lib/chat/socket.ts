@@ -31,6 +31,8 @@ function subscribeRoom() {
   roomSubscription = client.subscribe(`/topic/rooms/${roomId}`, (frame) =>
     handlers?.onRoomEvent(JSON.parse(frame.body) as ChatSocketEvent),
   )
+  // 끊기기 직전에 보낸 읽음은 유실됐을 수 있어 구독마다 다시 보낸다(서버는 같은·역행 위치를 무시한다)
+  sentRead.delete(roomId)
   handlers?.onRoomSubscribed(roomId)
 }
 
