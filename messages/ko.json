@@ -1365,6 +1365,7 @@
       "loadError": "메시지를 불러오지 못했어요",
       "empty": "첫 메시지를 보내보세요",
       "muted": "채팅이 제한되어 메시지를 보낼 수 없어요",
+      "cannotSend": "현재 계정 상태로는 메시지를 보낼 수 없어요",
       "notMember": "참여하지 않은 채팅방이에요",
       "me": "나"
     },
@@ -1378,8 +1379,8 @@
       "unread": "안 읽은 사람 {count}명"
     },
     "system": {
-      "JOINED": "{nickname}님이 들어왔습니다",
-      "KICKED": "{nickname}님이 내보내졌습니다",
+      "JOINED": "{nicknames}님이 들어왔습니다",
+      "KICKED": "{nicknames}님이 내보내졌습니다",
       "NOTICE_SET": "공지가 등록되었습니다"
     },
     "composer": {

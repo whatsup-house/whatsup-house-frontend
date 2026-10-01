@@ -62,7 +62,7 @@ function isSameRun(a: ChatMessage | undefined, b: ChatMessage | undefined): bool
     !!b &&
     a.type !== 'SYSTEM' &&
     b.type !== 'SYSTEM' &&
-    a.sender?.userId === b.sender?.userId &&
+    a.sender?.id === b.sender?.id &&
     dayjs(a.createdAt).isSame(b.createdAt, 'day')
   )
 }
@@ -70,7 +70,7 @@ function isSameRun(a: ChatMessage | undefined, b: ChatMessage | undefined): bool
 function CenterPill({ children }: { children: ReactNode }) {
   return (
     <div className="my-3 flex justify-center px-6">
-      <span className="rounded-full bg-tag-bg px-3 py-1 text-center text-[11px] text-tag-text">{children}</span>
+      <span className="rounded-full bg-tag-bg px-3 py-1 text-center text-[11px] text-tag-text whitespace-pre-wrap break-words">{children}</span>
     </div>
   )
 }
@@ -117,16 +117,18 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
     ...outbox.map((item) => ({
       id: item.tempId,
       roomId,
-      sender: { userId: userId ?? '', nickname, avatarUrl: null },
+      sender: { id: userId ?? '', nickname, admin: isAdmin },
       type: item.type,
-      content: item.content,
+      // IMAGE 는 로컬 미리보기 object URL
+      content: item.type === 'TEXT' ? item.content : null,
+      imageUrl: item.type === 'IMAGE' ? item.content : null,
       systemKind: null,
       systemParams: null,
       linkPreview: null,
       reactions: [],
       unreadCount: 0,
-      editedAt: null,
-      deletedAt: null,
+      edited: false,
+      deleted: false,
       createdAt: item.createdAt,
     })),
   ]
@@ -198,7 +200,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
   }
 
   const buildActions = (message: ChatMessage): ChatSheetAction[] => {
-    const isMine = message.sender?.userId === userId
+    const isMine = message.sender?.id === userId
     const actions: ChatSheetAction[] = []
     const text = message.type === 'TEXT' ? message.content : null
     if (text) actions.push({ key: 'copy', label: t('actions.copy'), onSelect: () => copyText(text) })
@@ -206,7 +208,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
       actions.push({ key: 'edit', label: t('actions.edit'), onSelect: () => setDialog({ kind: 'edit', message }) })
     }
     if (isAdmin) {
-      const isNotice = room?.noticeMessage?.id === message.id
+      const isNotice = room?.notice?.id === message.id
       actions.push({
         key: 'notice',
         label: t(isNotice ? 'actions.clearNotice' : 'actions.setNotice'),
@@ -268,8 +270,8 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
     if (message.type === 'SYSTEM') return <CenterPill>{getSystemMessageText(message, t)}</CenterPill>
 
     const pending = outboxById.get(message.id)
-    const isMine = !!pending || (!!userId && message.sender?.userId === userId)
-    const isDeleted = !!message.deletedAt
+    const isMine = !!pending || (!!userId && message.sender?.id === userId)
+    const isDeleted = message.deleted
     const hideTime = isSameRun(message, next) && !!next && dayjs(message.createdAt).isSame(next.createdAt, 'minute')
 
     return (
@@ -277,12 +279,11 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
         isMine={isMine}
         showProfile={!isSameRun(prev, message)}
         senderName={message.sender?.nickname ?? t('withdrawn')}
-        senderAvatarUrl={message.sender?.avatarUrl ?? null}
         isHouseSender={room?.type === 'INQUIRY' && !isAdmin}
         type={message.type === 'IMAGE' ? 'IMAGE' : 'TEXT'}
-        content={message.content}
+        content={message.type === 'IMAGE' ? message.imageUrl : message.content}
         isDeleted={isDeleted}
-        isEdited={!!message.editedAt}
+        isEdited={message.edited}
         time={hideTime ? null : dayjs(message.createdAt).format('HH:mm')}
         unreadCount={message.unreadCount}
         linkPreview={message.linkPreview}
@@ -355,7 +356,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
         </button>
       </header>
 
-      {room?.noticeMessage && (
+      {room?.notice && (
         <div className="shrink-0 bg-card px-3 pt-2">
           <div className="flex items-start gap-2 rounded-[12px] border border-tag-bg bg-background px-3 py-2">
             <Megaphone size={16} className="mt-0.5 shrink-0 text-primary" />
@@ -367,7 +368,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
                 isNoticeExpanded ? 'whitespace-pre-wrap break-words' : 'truncate'
               }`}
             >
-              {getMessagePreview(room.noticeMessage, t)}
+              {getMessagePreview(room.notice, t)}
             </button>
             {isAdmin && isNoticeExpanded && (
               <button
@@ -404,7 +405,9 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
 
       <ChatComposer
         disabled={!room || !messagesQuery.data}
-        disabledReason={room && !room.canSend ? t('room.muted') : null}
+        disabledReason={
+          !room || room.permissions.canSend ? null : t(room.permissions.muted ? 'room.muted' : 'room.cannotSend')
+        }
         onSendText={handleSendText}
         onSendImage={handleSendImage}
       />

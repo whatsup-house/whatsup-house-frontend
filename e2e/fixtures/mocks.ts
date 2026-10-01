@@ -571,8 +571,8 @@ export async function mockAdminHomeApis(page: Page) {
 export const MOCK_INQUIRY_ROOM_ID = 'd1000000-0000-0000-0000-000000000001'
 export const MOCK_GROUP_ROOM_ID = 'd1000000-0000-0000-0000-000000000002'
 
-// 문의방에서 관리자는 "와썹하우스"로 내려온다
-const mockHouseSender = { userId: mockAdminProfile.id, nickname: '와썹하우스', avatarUrl: null }
+// 문의방에서 관리자는 "와썹하우스"로 내려온다. BE ChatMessageResponse 실제 JSON 키(isX → x)
+const mockHouseSender = { id: mockAdminProfile.id, nickname: '와썹하우스', admin: true }
 
 export const mockInquiryWelcomeMessage: ChatMessage = {
   id: 'e1000000-0000-0000-0000-000000000001',
@@ -580,14 +580,39 @@ export const mockInquiryWelcomeMessage: ChatMessage = {
   sender: mockHouseSender,
   type: 'TEXT',
   content: '안녕하세요, 와썹하우스입니다. 무엇을 도와드릴까요?',
+  imageUrl: null,
   systemKind: null,
   systemParams: null,
   linkPreview: null,
   reactions: [],
   unreadCount: 0,
-  editedAt: null,
-  deletedAt: null,
+  edited: false,
+  deleted: false,
   createdAt: '2026-09-29T10:00:00',
+}
+
+// 시스템 메시지: BE AdminChatService(JOINED·KICKED·NOTICE_SET → nicknames 배열), ChatService.postSystemNotice(SYSTEM_NOTICE → text)
+const mockSystemMessageBase: ChatMessage = {
+  ...mockInquiryWelcomeMessage,
+  type: 'SYSTEM',
+  sender: null,
+  content: null,
+}
+
+export const mockJoinedSystemMessage: ChatMessage = {
+  ...mockSystemMessageBase,
+  id: 'e1000000-0000-0000-0000-000000000010',
+  systemKind: 'JOINED',
+  systemParams: { nicknames: ['준서', '민지'] },
+  createdAt: '2026-09-29T10:05:00',
+}
+
+export const mockSystemNoticeMessage: ChatMessage = {
+  ...mockSystemMessageBase,
+  id: 'e1000000-0000-0000-0000-000000000011',
+  systemKind: 'SYSTEM_NOTICE',
+  systemParams: { text: '우연한 식탁 테이블이 확정되었어요.\n일시: 2026.10.03 19:00~21:00' },
+  createdAt: '2026-09-29T10:06:00',
 }
 
 export const mockChatRooms: ChatRoomSummary[] = [
@@ -596,27 +621,35 @@ export const mockChatRooms: ChatRoomSummary[] = [
     type: 'GROUP',
     name: '퇴근 게더링 3조',
     memberCount: 5,
+    // BE ChatLastMessageResponse
     lastMessage: {
-      ...mockInquiryWelcomeMessage,
       id: 'e1000000-0000-0000-0000-000000000002',
-      roomId: MOCK_GROUP_ROOM_ID,
-      sender: { userId: 'b1000000-0000-0000-0000-000000000003', nickname: '준서', avatarUrl: null },
+      type: 'TEXT',
+      senderId: 'b1000000-0000-0000-0000-000000000003',
       content: '다들 잘 들어가셨나요?',
+      systemKind: null,
+      systemParams: null,
+      deleted: false,
+      createdAt: '2026-09-29T10:00:00',
     },
     unreadCount: 3,
   },
 ]
 
+// BE ChatRoomDetailResponse 실제 JSON 키 (Lombok boolean isX → x)
 export const mockInquiryRoomDetail: ChatRoomDetail = {
   id: MOCK_INQUIRY_ROOM_ID,
   type: 'INQUIRY',
   name: '와썹하우스',
+  sourceType: null,
+  sourceId: null,
+  memberCount: 2,
   members: [
-    { userId: mockUserProfile.id, nickname: mockUserProfile.nickname, avatarUrl: null, admin: false },
-    { ...mockHouseSender, admin: true },
+    { userId: mockUserProfile.id, nickname: mockUserProfile.nickname, admin: false },
+    { userId: mockHouseSender.id, nickname: mockHouseSender.nickname, admin: true },
   ],
-  noticeMessage: null,
-  canSend: true,
+  notice: null,
+  permissions: { canSend: true, muted: false, canLeave: false, canHide: true, admin: false },
 }
 
 // 방 목록·문의방 열기·방 상세·메시지 조회/전송. 전송한 메시지는 이후 조회에도 포함된다.
@@ -638,7 +671,7 @@ export async function mockChatApis(page: Page) {
     const message: ChatMessage = {
       ...mockInquiryWelcomeMessage,
       id: `e2000000-0000-0000-0000-${String(messages.length).padStart(12, '0')}`,
-      sender: { userId: mockUserProfile.id, nickname: mockUserProfile.nickname, avatarUrl: null },
+      sender: { id: mockUserProfile.id, nickname: mockUserProfile.nickname, admin: false },
       type: body.type,
       content: body.content,
       unreadCount: 1,

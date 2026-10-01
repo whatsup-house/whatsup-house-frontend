@@ -1365,6 +1365,7 @@
       "loadError": "No se pudieron cargar los mensajes",
       "empty": "Envía el primer mensaje",
       "muted": "Tienes restringido el envío de mensajes",
+      "cannotSend": "No puedes enviar mensajes con el estado actual de tu cuenta",
       "notMember": "No eres miembro de este chat",
       "me": "Yo"
     },
@@ -1378,8 +1379,8 @@
       "unread": "{count} sin leer"
     },
     "system": {
-      "JOINED": "{nickname} se unió",
-      "KICKED": "{nickname} fue expulsado",
+      "JOINED": "{nicknames} {count, plural, one {se unió} other {se unieron}}",
+      "KICKED": "{nicknames} {count, plural, one {fue expulsado} other {fueron expulsados}}",
       "NOTICE_SET": "Se publicó un aviso"
     },
     "composer": {

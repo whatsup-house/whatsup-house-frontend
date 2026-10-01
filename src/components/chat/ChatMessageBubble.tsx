@@ -11,7 +11,6 @@ interface ChatMessageBubbleProps {
   // 상대 메시지 연속 묶음의 첫 번째만 아바타·닉네임을 보여준다
   showProfile: boolean
   senderName: string
-  senderAvatarUrl: string | null
   isHouseSender: boolean
   type: 'TEXT' | 'IMAGE'
   content: string | null
@@ -36,7 +35,6 @@ export default function ChatMessageBubble({
   isMine,
   showProfile,
   senderName,
-  senderAvatarUrl,
   isHouseSender,
   type,
   content,
@@ -80,7 +78,7 @@ export default function ChatMessageBubble({
     <div className={`flex gap-2 px-3 ${isMine ? 'justify-end' : 'justify-start'} ${showProfile ? 'mt-3' : 'mt-1'}`}>
       {!isMine &&
         (showProfile ? (
-          <ChatAvatar name={senderName} avatarUrl={senderAvatarUrl} isHouse={isHouseSender} size="sm" />
+          <ChatAvatar name={senderName} avatarUrl={null} isHouse={isHouseSender} size="sm" />
         ) : (
           <div className="w-9 shrink-0" />
         ))}
@@ -155,9 +153,9 @@ export default function ChatMessageBubble({
                 key={reaction.emoji}
                 type="button"
                 onClick={() => onToggleReaction(reaction.emoji)}
-                aria-pressed={reaction.reactedByMe}
+                aria-pressed={reaction.mine}
                 className={`flex items-center gap-0.5 rounded-full border bg-card px-2 py-0.5 text-xs ${
-                  reaction.reactedByMe ? 'border-primary text-primary' : 'border-tag-bg text-tag-text'
+                  reaction.mine ? 'border-primary text-primary' : 'border-tag-bg text-tag-text'
                 }`}
               >
                 <span>{reaction.emoji}</span>
