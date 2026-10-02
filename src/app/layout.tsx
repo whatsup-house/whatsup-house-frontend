@@ -29,12 +29,13 @@ const pressStart2P = Press_Start_2P({
 
 // resizes-content: 안드로이드 크롬에서 키보드가 레이아웃 뷰포트를 줄여 dvh·fixed 가 키보드 위까지로 맞춰지고,
 // 포커스된 입력창을 보이려고 문서를 스크롤하지 않는다. viewportFit cover 는 env(safe-area-inset-*) 용. (KAN-363)
+// themeColor 는 안드로이드 상단바 색. 헤더(TopNav bg-card)와 같은 --color-card. (KAN-385)
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',
-  themeColor: '#F5F0EB',
+  themeColor: '#FFFFFF',
 }
 
 export async function generateMetadata(): Promise<Metadata> {
