@@ -83,6 +83,24 @@ export default function BottomNav() {
               : pathname.startsWith(item.href) || (item.href === '/mypage' && pathname === '/login')
           const Icon = item.icon
 
+          // 가운데 홈: 라벨 없이 primary 원(52px)으로 강조하고 상단선 위로 살짝 띄운다. 현재 화면이면 ring. (KAN-369)
+          // 튀어나온 부분도 nav(z-40) 스태킹 안이라 콘텐츠에 가리지 않고, lg 프레임(overflow-hidden) 안쪽이라 잘리지 않는다.
+          if (item.href === '/') {
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex size-13 -translate-y-3 items-center justify-center justify-self-center rounded-full bg-primary text-white shadow-md ${
+                  isActive ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''
+                }`}
+              >
+                <Icon size={24} />
+              </Link>
+            )
+          }
+
           if (item.requireLogin) {
             return (
               <button
