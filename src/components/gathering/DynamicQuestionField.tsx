@@ -8,10 +8,11 @@ import JobSelect from '@/components/auth/JobSelect'
 import { useTranslations } from 'next-intl'
 import type { FormQuestionDetail } from '@/lib/api/types'
 import { getAge } from '@/lib/utils/date'
+import { stripMultiChoiceMarker } from '@/lib/utils/questionLabel'
 
 // 성별 선택지는 값(MALE/FEMALE)은 유지하되 화면에는 한국어로 노출한다. (KAN-258)
 const GENDER_CHOICE_LABEL_KEYS: Record<string, string> = { MALE: 'male', FEMALE: 'female' }
-const QUESTION_LABEL_CLASS = 'text-[15px] leading-relaxed font-semibold text-foreground whitespace-pre-line'
+const QUESTION_LABEL_CLASS = 'text-[17px] leading-relaxed font-semibold text-foreground whitespace-pre-line'
 
 type FieldValue = string | number | string[]
 
@@ -214,12 +215,15 @@ function BirthDateAgeField({
   required,
   value,
   error,
+  submitBirthYear,
   onChange,
 }: {
   label: string
   required: boolean
   value: FieldValue | undefined
   error?: string
+  // true 면 나이 대신 생년월일의 연도(예: 1996)를 값으로 쓴다 (우연한 식탁 BIRTH_YEAR, KAN-387)
+  submitBirthYear: boolean
   onChange: (value: number) => void
 }) {
   const t = useTranslations('auth.register')
@@ -229,7 +233,9 @@ function BirthDateAgeField({
   const [isBirthCalendarOpen, setIsBirthCalendarOpen] = useState(false)
   const [birthCalendarMonthValue, setBirthCalendarMonthValue] = useState<string | null>(null)
 
-  const agePreview = birthDate ? getAge(birthDate) : typeof value === 'number' ? value : NaN
+  // 생년월일 없이 값만 있으면(프리필·단계 되돌아가기): 나이 질문은 그 나이, 출생연도 질문은 생일을 몰라 'N년생'으로 보여준다.
+  const savedYear = !birthDate && submitBirthYear && typeof value === 'number' ? value : null
+  const agePreview = birthDate ? getAge(birthDate) : !submitBirthYear && typeof value === 'number' ? value : NaN
   const birthValid = !Number.isNaN(agePreview) && agePreview >= 14 && agePreview <= 120
   const calendarSelectedDate = birthDate || defaultBirthDate
   const birthCalendarMonth = dayjs(birthCalendarMonthValue ?? calendarSelectedDate).startOf('month')
@@ -238,7 +244,7 @@ function BirthDateAgeField({
   const commitBirthDate = (date: string) => {
     const age = getAge(date)
     setBirthDate(date)
-    if (!Number.isNaN(age)) onChange(age)
+    if (!Number.isNaN(age)) onChange(submitBirthYear ? dayjs(date).year() : age)
   }
 
   const handleBirthDateInputChange = (next: string) => {
@@ -309,6 +315,9 @@ function BirthDateAgeField({
       {birthValid && (
         <p className="text-xs text-tag-text pl-1">{t('agePreview', { age: agePreview })}</p>
       )}
+      {savedYear !== null && (
+        <p className="text-xs text-tag-text pl-1">{t('birthYearPreview', { year: String(savedYear) })}</p>
+      )}
     </div>
   )
 }
@@ -327,21 +336,24 @@ export default function DynamicQuestionField({
   const choiceLabel = (choice: string) =>
     questionKey === 'gender' && GENDER_CHOICE_LABEL_KEYS[choice] ? t(GENDER_CHOICE_LABEL_KEYS[choice]) : choice
 
+  // 복수 선택 질문은 라벨 속 표기를 떼고 통일 문구(multiChoice)만 붙인다. (KAN-387)
   const labelNode = (
     <label className={QUESTION_LABEL_CLASS}>
-      {label}
+      {type === 'MULTI_CHOICE' ? stripMultiChoiceMarker(label) : label}
       {required && <span className="text-primary"> *</span>}
     </label>
   )
 
-  // 단답/숫자
-  if (questionKey === 'age') {
+  // 나이 / 우연한 식탁 출생연도: 같은 생년월일 입력 UI, 제출 값만 나이 vs 연도 (KAN-387)
+  const isBirthYear = question.reservedKey ? question.reservedKey === 'BIRTH_YEAR' : questionKey === 'birth_year'
+  if (questionKey === 'age' || isBirthYear) {
     return (
       <BirthDateAgeField
         label={label}
         required={required}
         value={value}
         error={error}
+        submitBirthYear={isBirthYear}
         onChange={onChange}
       />
     )
@@ -403,7 +415,7 @@ export default function DynamicQuestionField({
               key={choice}
               type="button"
               onClick={() => onChange(choice)}
-              className={`px-4 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
+              className={`grow px-4 py-2.5 rounded-input text-sm text-center font-medium transition-colors min-h-[44px] ${
                 value === choice ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
               }`}
             >
@@ -438,7 +450,7 @@ export default function DynamicQuestionField({
               key={choice}
               type="button"
               onClick={() => toggle(choice)}
-              className={`px-4 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
+              className={`grow px-4 py-2.5 rounded-input text-sm text-center font-medium transition-colors min-h-[44px] ${
                 selected.includes(choice) ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
               }`}
             >

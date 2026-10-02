@@ -152,6 +152,7 @@
       },
       "birthDateLabel": "생년월일",
       "agePreview": "만 {age}세",
+      "birthYearPreview": "{year}년생",
       "nicknameLabel": "닉네임",
       "nicknamePlaceholder": "2자 이상 입력해주세요",
       "emailLabel": "이메일(아이디)",
@@ -536,6 +537,7 @@
       "otherDate": "다른 날짜",
       "apply": "신청하기",
       "viewOtherDate": "다른 날짜 보기",
+      "selectOtherDate": "다른 날짜 선택",
       "closed": "운영 종료",
       "scheduleTitle": "일정 선택",
       "noSchedule": "예정된 일정 없음",
@@ -564,7 +566,7 @@
       "question": {
         "male": "남성",
         "female": "여성",
-        "multiChoice": "(중복 선택 가능)",
+        "multiChoice": "(복수 선택 가능)",
         "mbtiResult": "{mbti} 유형이군요!"
       },
       "result": {

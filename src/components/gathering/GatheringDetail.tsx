@@ -1,29 +1,32 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Share2, CreditCard, AlertTriangle, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import dayjs from 'dayjs'
+import { Share2, CreditCard, AlertTriangle, ChevronLeft, ChevronRight, X, MapPin, CalendarDays } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Card } from '@/components/ui'
+import { Card, Badge } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
 import GatheringReviewSection from './GatheringReviewSection'
-import GatheringSessionList from './GatheringSessionList'
+import MapLinkButton from './MapLinkButton'
 import TicketPassSection from './TicketPassSection'
 import type { GatheringDetail as GatheringDetailType, GatheringSession } from '@/lib/api/types'
+import { formatLocalizedShortDate, formatTimeRange } from '@/lib/utils/date'
+import { isSessionApplicable, toBadgeStatus } from '@/lib/utils/gatheringStatus'
+import { getKakaoMapUrl, getNaverMapUrl } from '@/lib/utils/mapUrl'
 
 const SWIPE_THRESHOLD = 50
 
 interface GatheringDetailProps {
   gathering: GatheringDetailType
-  // 예정된 회차 + ?session=으로 온 지난 회차 (KAN-370)
-  sessions: GatheringSession[]
-  // 강조할(보고 있는) 회차
-  selectedSessionId: string | null
+  // 보고 있는 회차 (지났거나 마감됐어도 보여준다, KAN-370). 예정 회차가 없으면 null
+  session: GatheringSession | null
   price: number
-  onSelectSession: (sessionId: string) => void
+  // 고를 수 있는 다른 회차가 있을 때만 준다 → 카드에 '다른 날짜' 버튼 (KAN-386)
+  onShowOtherDates?: () => void
 }
 
 export default function GatheringDetail({
-  gathering, sessions, selectedSessionId, price, onSelectSession,
+  gathering, session, price, onShowOtherDates,
 }: GatheringDetailProps) {
   const t = useTranslations('gathering.detail')
   const tCommon = useTranslations('common')
@@ -93,6 +96,12 @@ export default function GatheringDetail({
 
   const isRandomTable = gatheringType === 'RANDOM_TABLE'
   const isFreeGathering = price === 0
+  const isApplicable = !!session && isSessionApplicable(session)
+  const deadline = isApplicable && session.applyDeadlineAt
+    ? t('applyDeadline', {
+      date: `${formatLocalizedShortDate(session.applyDeadlineAt, locale)} ${dayjs(session.applyDeadlineAt).format('HH:mm')}`,
+    })
+    : null
 
   return (
     <>
@@ -175,12 +184,63 @@ export default function GatheringDetail({
           <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
         </div>
 
-        {/* 회차 목록 — 날짜·시간·지역·잔여 정원·마감, 신청할 회차 선택 (KAN-339) */}
-        <GatheringSessionList
-          sessions={sessions}
-          selectedSessionId={selectedSessionId}
-          onSelect={onSelectSession}
-        />
+        {/* 일정 — 보고 있는 회차 1개 요약. 다른 회차는 달력 바텀시트에서 고른다 (KAN-386) */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1 h-5 bg-primary rounded-full" />
+            <h2 className="text-base font-bold text-foreground">{t('scheduleTitle')}</h2>
+          </div>
+          {session ? (
+            <Card className="border border-tag-bg/50 overflow-hidden">
+              <div className="p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-foreground">
+                    {formatLocalizedShortDate(session.eventDate, locale)} {formatTimeRange(session.startTime, session.endTime)}
+                  </p>
+                  {isApplicable ? (
+                    <span className="shrink-0 text-xs font-medium text-primary">
+                      {t('remainingSeats', { count: session.maxAttendees - session.confirmedCount })}
+                    </span>
+                  ) : (
+                    // 모집중이어도 신청 마감이 지났거나 정원이 찼으면 마감
+                    <Badge variant={session.status === 'OPEN' ? 'CLOSED' : toBadgeStatus(session.status)} />
+                  )}
+                </div>
+                {deadline && <p className="mt-1 text-xs text-tag-text">{deadline}</p>}
+                {session.location && (
+                  <div className="mt-3 flex items-start gap-3">
+                    <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground">{session.location.name}</p>
+                      {session.location.address && (
+                        <p className="text-xs text-tag-text mt-0.5 break-keep">{session.location.address}</p>
+                      )}
+                      <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                        <MapLinkButton provider="naver" href={getNaverMapUrl(session.location, session.location.address)} />
+                        <MapLinkButton provider="kakao" href={getKakaoMapUrl(session.location, session.location.address)} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {onShowOtherDates && (
+                <button
+                  type="button"
+                  onClick={onShowOtherDates}
+                  className="flex w-full min-h-[44px] items-center justify-center gap-1.5 border-t border-tag-bg/50 text-sm font-medium text-tag-text active:bg-tag-bg"
+                >
+                  <CalendarDays size={16} />
+                  {t('otherDate')}
+                  <ChevronRight size={16} />
+                </button>
+              )}
+            </Card>
+          ) : (
+            <p className="rounded-card border border-dashed border-tag-bg py-6 text-center text-sm text-tag-text">
+              {t('noSchedule')}
+            </p>
+          )}
+        </div>
 
         {/* 정보 카드 */}
         <Card className="p-4 mb-6 border border-tag-bg/50">

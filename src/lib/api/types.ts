@@ -674,6 +674,7 @@ export interface FormQuestionDetail {
   options: QuestionOptions | null
   validation: Record<string, unknown> | null
   systemReserved: boolean   // name/phone 등 시스템 예약 질문 (회원은 계정값 사용)
+  reservedKey?: ReservedQuestionKey | null   // 표준 질문 키. 응답에 없을 수 있어 questionKey 로도 판정한다
 }
 
 // 게더링 신청폼 전체

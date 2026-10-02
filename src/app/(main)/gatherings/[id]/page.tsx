@@ -8,6 +8,7 @@ import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { LoadingSpinner, ApiErrorMessage, Button } from '@/components/ui'
 import GatheringDetail from '@/components/gathering/GatheringDetail'
 import ApplyModal from '@/components/gathering/ApplyModal'
+import GatheringDateSheet from '@/components/gathering/GatheringDateSheet'
 import { getUpcomingSessions, isSessionApplicable } from '@/lib/utils/gatheringStatus'
 
 // 모임 종류 페이지. 회차를 골라 신청한다. (KAN-339)
@@ -25,6 +26,7 @@ export default function GatheringDetailPage({
   const { data: gathering, isLoading, isError, refetch } = useGatheringDetail(id)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pickedSessionId, setPickedSessionId] = useState<string | null>(null)
+  const [isDateSheetOpen, setIsDateSheetOpen] = useState(false)
 
   // 옛 회차 ID(= 옛 게더링 ID)로 들어오면 BE가 그 회차의 종류로 응답한다 → 종류 페이지로 바꾸고 그 회차를 미리 선택
   const legacySessionId = gathering && gathering.id !== id ? id : null
@@ -55,17 +57,14 @@ export default function GatheringDetailPage({
 
   const upcomingSessions = getUpcomingSessions(gathering.sessions)
   const applicableSessions = upcomingSessions.filter(isSessionApplicable)
-  const linkedSessionId = searchParams.get('session')
-  const requestedSessionId = pickedSessionId ?? linkedSessionId
-  // ?session=으로 온 지난 회차도 목록에 보여준다. 지난 날짜라 예정 목록 맨 앞에 붙이면 날짜순. 없는 ID·다른 종류 회차는 무시. (KAN-370)
-  const linkedPastSession = gathering.sessions.find((session) => session.id === linkedSessionId && !upcomingSessions.includes(session))
-  const listedSessions = linkedPastSession ? [linkedPastSession, ...upcomingSessions] : upcomingSessions
-  const requestedSession = listedSessions.find((session) => session.id === requestedSessionId)
-  // 마감된 회차는 선택 불가. 지정한 회차가 없고 신청 가능한 회차가 하나뿐이면 자동 선택.
-  const selectedSession = applicableSessions.find((session) => session.id === requestedSessionId)
-    ?? (!requestedSession && applicableSessions.length === 1 ? applicableSessions[0] : undefined)
-  // 보고 있는 회차: 지났거나 마감됐어도 강조하고 가격·장소를 보여준다. 신청은 selectedSession으로만.
-  const viewedSession = requestedSession ?? selectedSession
+  const requestedSessionId = pickedSessionId ?? searchParams.get('session')
+  // 보고 있는 회차: ?session=·달력에서 고른 회차(지난 회차도, KAN-370) → 없으면 가장 가까운 신청 가능 회차 → 가장 가까운 예정 회차.
+  // 없는 ID·다른 종류 회차는 무시. sessions는 날짜·시작 시간 순. (KAN-386)
+  const viewedSession = gathering.sessions.find((session) => session.id === requestedSessionId)
+    ?? applicableSessions[0] ?? upcomingSessions[0]
+  // 신청은 보고 있는 회차가 신청 가능할 때만 (진행완료·마감 회차를 보면서 신청하기가 눌리던 버그, KAN-386)
+  const selectedSession = viewedSession && isSessionApplicable(viewedSession) ? viewedSession : undefined
+  const hasOtherApplicable = applicableSessions.some((session) => session.id !== viewedSession?.id)
   const price = viewedSession?.price ?? gathering.basePrice ?? 0
   const selectedPath = selectedSession ? `/gatherings/${gathering.id}?session=${selectedSession.id}` : `/gatherings/${gathering.id}`
   const applyPath = selectedSession ? `/gatherings/${gathering.id}/apply?session=${selectedSession.id}` : ''
@@ -100,16 +99,22 @@ export default function GatheringDetailPage({
     router.push(`${applyPath}&type=guest`)
   }
 
+  // 달력에서 고른 회차는 URL에도 맞춰 공유 링크가 그 회차를 가리키게 한다
+  const handlePickSession = (sessionId: string) => {
+    setPickedSessionId(sessionId)
+    setIsDateSheetOpen(false)
+    router.replace(`/gatherings/${gathering.id}?session=${sessionId}`, { scroll: false })
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* 상세 본문 */}
       <div className="flex-1">
         <GatheringDetail
           gathering={gathering}
-          sessions={listedSessions}
-          selectedSessionId={viewedSession?.id ?? null}
+          session={viewedSession ?? null}
           price={price}
-          onSelectSession={setPickedSessionId}
+          onShowOtherDates={hasOtherApplicable ? () => setIsDateSheetOpen(true) : undefined}
         />
       </div>
 
@@ -120,15 +125,13 @@ export default function GatheringDetailPage({
             <p className="text-xs text-tag-text">{t('priceLabel')}</p>
             <p className="text-lg font-bold text-foreground">{t('price', { price: price.toLocaleString(locale) })}</p>
           </div>
-          {applicableSessions.length > 0 ? (
-            <Button
-              variant="primary"
-              size="default"
-              className="px-6"
-              disabled={!selectedSession && !isRandomTable}
-              onClick={handleApplyClick}
-            >
-              {selectedSession || isRandomTable ? t('apply') : t('selectSession')}
+          {selectedSession ? (
+            <Button variant="primary" size="default" className="px-6" onClick={handleApplyClick}>
+              {t('apply')}
+            </Button>
+          ) : hasOtherApplicable ? (
+            <Button variant="outlined" size="default" className="px-6" onClick={() => setIsDateSheetOpen(true)}>
+              {t('selectOtherDate')}
             </Button>
           ) : (
             <Button
@@ -142,6 +145,15 @@ export default function GatheringDetailPage({
           )}
         </div>
       </div>
+
+      {isDateSheetOpen && (
+        <GatheringDateSheet
+          sessions={gathering.sessions}
+          currentSessionId={viewedSession?.id ?? null}
+          onSelect={handlePickSession}
+          onClose={() => setIsDateSheetOpen(false)}
+        />
+      )}
 
       {/* 신청 방법 선택 모달 */}
       {selectedSession && (
