@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 포토리뷰",
     "anonymous": "익명",
     "countForGathering": "이 게더링의 후기 {count}개",
     "sort": {
@@ -760,7 +759,6 @@
       "deleteFailed": "삭제에 실패했어요. 다시 시도해주세요",
       "anonymous": "익명",
       "gatheringFallback": "게더링",
-      "photoReview": "📷 포토리뷰",
       "writtenAt": "{date} 작성",
       "more": "더보기",
       "unlike": "추천 취소",

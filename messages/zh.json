@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 照片回顾",
     "anonymous": "匿名",
     "countForGathering": "{count} 对这次聚会的评论",
     "sort": {
@@ -760,7 +759,6 @@
       "deleteFailed": "删除失败。请重试",
       "anonymous": "匿名",
       "gatheringFallback": "聚会",
-      "photoReview": "📷 照片回顾",
       "writtenAt": "写于 {date}",
       "more": "更多",
       "unlike": "不像",

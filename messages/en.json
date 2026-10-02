@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 Photo review",
     "anonymous": "Anonymous",
     "countForGathering": "{count} reviews for this gathering",
     "sort": {
@@ -760,7 +759,6 @@
       "deleteFailed": "Failed to delete. Please try again",
       "anonymous": "Anonymous",
       "gatheringFallback": "Gathering",
-      "photoReview": "📷 Photo review",
       "writtenAt": "Written on {date}",
       "more": "More",
       "unlike": "Unlike",
