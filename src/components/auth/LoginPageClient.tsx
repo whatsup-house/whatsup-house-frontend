@@ -52,7 +52,7 @@ export default function LoginPageClient() {
     <div className="bg-background">
       <AuthOnlyRedirect redirectTo={returnUrl} />
 
-      <div className="flex min-h-[calc(100vh-120px)] flex-col px-7 pb-4 pt-9">
+      <div className="flex min-h-[calc(100vh-120px)] flex-col px-7 pb-4 pt-9 lg:min-h-0">
         <section className="mb-9 flex flex-col items-center text-center">
           <Image
             src="/assets/whatsup-logo.png"
