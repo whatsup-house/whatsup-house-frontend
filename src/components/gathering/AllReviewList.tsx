@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { ChevronDown } from 'lucide-react'
+import { Camera, ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import ReviewCard from './ReviewCard'
 import { useAuthStore } from '@/lib/store/authStore'
@@ -115,12 +115,13 @@ export default function AllReviewList() {
   const [sort, setSort] = useState<SortType>('LIKES')
   const [gatheringId, setGatheringId] = useState<string | undefined>(gatheringParam ?? undefined)
   const [page, setPage] = useState(0)
+  const [photoOnly, setPhotoOnly] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
   const [locateApplied, setLocateApplied] = useState(false)
 
   const { data: gatheringsData } = useGatheringsAll()
-  const { data, isLoading } = useAllReviews(sort, page, gatheringId)
+  const { data, isLoading } = useAllReviews(sort, page, gatheringId, true, photoOnly)
   const { data: locateData } = useReviewLocate(highlightId ?? undefined, sort, gatheringId, !!highlightId)
 
   const gatheringOptions = (gatheringsData ?? []).map((g) => ({ id: g.id, title: g.title }))
@@ -158,6 +159,13 @@ export default function AllReviewList() {
     setPage(0)
   }
 
+  const handlePhotoOnly = () => {
+    setPhotoOnly((p) => !p)
+    setPage(0)
+    // locate API는 photoOnly를 모르므로, 토글 이후 도착한 locate 결과로 페이지를 옮기지 않는다
+    setLocateApplied(true)
+  }
+
   const handlePage = (p: number) => {
     setPage(p)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -165,16 +173,16 @@ export default function AllReviewList() {
 
   return (
     <div className="relative px-4 py-5">
-      {/* 필터 바: 게더링 드롭다운 + 정렬 탭 */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <div className="min-w-0">
+      {/* 필터 바: 게더링 드롭다운 + 정렬 탭 + 포토리뷰 토글 (좁은 폭에선 줄바꿈) */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="min-w-0 mr-auto">
           <GatheringDropdown
             value={gatheringId ?? 'all'}
             onChange={handleGathering}
             options={gatheringOptions}
           />
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex flex-wrap gap-2">
           {(['LIKES', 'LATEST'] as const).map((s) => (
             <button
               key={s}
@@ -186,6 +194,16 @@ export default function AllReviewList() {
               {s === 'LIKES' ? t('sort.likes') : t('sort.latest')}
             </button>
           ))}
+          <button
+            onClick={handlePhotoOnly}
+            aria-pressed={photoOnly}
+            className={`flex items-center gap-1 px-2.5 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              photoOnly ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+            }`}
+          >
+            <Camera size={14} className="shrink-0" aria-hidden />
+            {t('photoOnly')}
+          </button>
         </div>
       </div>
 
@@ -197,7 +215,7 @@ export default function AllReviewList() {
       {/* 빈 상태 */}
       {!isLoading && reviews.length === 0 && (
         <p className="py-8 text-center text-sm text-tag-text">
-          {t('empty')}
+          {photoOnly ? t('emptyPhoto') : t('empty')}
         </p>
       )}
 

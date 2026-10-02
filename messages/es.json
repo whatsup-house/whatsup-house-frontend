@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 Revisión de fotos",
     "anonymous": "anónimo",
     "countForGathering": "{count} reseñas para este encuentro",
     "sort": {
@@ -732,6 +731,8 @@
     },
     "loading": "Cargando...",
     "empty": "Aún no hay reseñas. ¡Sé el primero en dejar uno!",
+    "photoOnly": "Con fotos",
+    "emptyPhoto": "Aún no hay reseñas con fotos.",
     "emptyShort": "Aún no hay reseñas.",
     "alreadyWritten": "Ya escribiste una reseña",
     "allGatherings": "Todos los encuentros",
@@ -760,7 +761,6 @@
       "deleteFailed": "No se pudo eliminar. Por favor inténtalo de nuevo",
       "anonymous": "anónimo",
       "gatheringFallback": "encuentro",
-      "photoReview": "📷 Revisión de fotos",
       "writtenAt": "Escrito el {date}",
       "more": "Más",
       "unlike": "a diferencia",

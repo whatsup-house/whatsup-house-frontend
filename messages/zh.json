@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 照片回顾",
     "anonymous": "匿名",
     "countForGathering": "{count} 对这次聚会的评论",
     "sort": {
@@ -732,6 +731,8 @@
     },
     "loading": "正在加载...",
     "empty": "还没有评论。成为第一个离开的人！",
+    "photoOnly": "照片评论",
+    "emptyPhoto": "还没有带照片的评论。",
     "emptyShort": "还没有评论。",
     "alreadyWritten": "您已经写过评论",
     "allGatherings": "所有聚会",
@@ -760,7 +761,6 @@
       "deleteFailed": "删除失败。请重试",
       "anonymous": "匿名",
       "gatheringFallback": "聚会",
-      "photoReview": "📷 照片回顾",
       "writtenAt": "写于 {date}",
       "more": "更多",
       "unlike": "不像",

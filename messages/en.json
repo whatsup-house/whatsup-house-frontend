@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 Photo review",
     "anonymous": "Anonymous",
     "countForGathering": "{count} reviews for this gathering",
     "sort": {
@@ -732,6 +731,8 @@
     },
     "loading": "Loading...",
     "empty": "No reviews yet. Be the first to leave one!",
+    "photoOnly": "Photo reviews",
+    "emptyPhoto": "No photo reviews yet.",
     "emptyShort": "No reviews yet.",
     "alreadyWritten": "You already wrote a review",
     "allGatherings": "All gatherings",
@@ -760,7 +761,6 @@
       "deleteFailed": "Failed to delete. Please try again",
       "anonymous": "Anonymous",
       "gatheringFallback": "Gathering",
-      "photoReview": "📷 Photo review",
       "writtenAt": "Written on {date}",
       "more": "More",
       "unlike": "Unlike",

@@ -43,11 +43,6 @@ function HorizontalReviewCard({ review }: { review: ReviewItem }) {
         ) : (
           <ReviewImageFallback />
         )}
-        {review.reviewType === 'PHOTO' && (
-          <span className="absolute top-2 left-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary-light text-primary">
-            {t('photoReview')}
-          </span>
-        )}
       </div>
 
       {/* 텍스트 영역 */}

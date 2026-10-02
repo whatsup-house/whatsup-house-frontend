@@ -55,11 +55,18 @@ export default function GatheringDetailPage({
 
   const upcomingSessions = getUpcomingSessions(gathering.sessions)
   const applicableSessions = upcomingSessions.filter(isSessionApplicable)
-  const requestedSessionId = pickedSessionId ?? searchParams.get('session')
-  // 마감된 회차는 선택 불가. 신청 가능한 회차가 하나뿐이면 자동 선택.
+  const linkedSessionId = searchParams.get('session')
+  const requestedSessionId = pickedSessionId ?? linkedSessionId
+  // ?session=으로 온 지난 회차도 목록에 보여준다. 지난 날짜라 예정 목록 맨 앞에 붙이면 날짜순. 없는 ID·다른 종류 회차는 무시. (KAN-370)
+  const linkedPastSession = gathering.sessions.find((session) => session.id === linkedSessionId && !upcomingSessions.includes(session))
+  const listedSessions = linkedPastSession ? [linkedPastSession, ...upcomingSessions] : upcomingSessions
+  const requestedSession = listedSessions.find((session) => session.id === requestedSessionId)
+  // 마감된 회차는 선택 불가. 지정한 회차가 없고 신청 가능한 회차가 하나뿐이면 자동 선택.
   const selectedSession = applicableSessions.find((session) => session.id === requestedSessionId)
-    ?? (applicableSessions.length === 1 ? applicableSessions[0] : undefined)
-  const price = selectedSession?.price ?? gathering.basePrice ?? 0
+    ?? (!requestedSession && applicableSessions.length === 1 ? applicableSessions[0] : undefined)
+  // 보고 있는 회차: 지났거나 마감됐어도 강조하고 가격·장소를 보여준다. 신청은 selectedSession으로만.
+  const viewedSession = requestedSession ?? selectedSession
+  const price = viewedSession?.price ?? gathering.basePrice ?? 0
   const selectedPath = selectedSession ? `/gatherings/${gathering.id}?session=${selectedSession.id}` : `/gatherings/${gathering.id}`
   const applyPath = selectedSession ? `/gatherings/${gathering.id}/apply?session=${selectedSession.id}` : ''
   // 우연한 식탁은 회원 전용 단계형 신청(회차 복수 선택)으로 간다. 고른 회차가 있으면 1지망으로 넘긴다. (KAN-344)
@@ -99,8 +106,8 @@ export default function GatheringDetailPage({
       <div className="flex-1">
         <GatheringDetail
           gathering={gathering}
-          upcomingSessions={upcomingSessions}
-          selectedSessionId={selectedSession?.id ?? null}
+          sessions={listedSessions}
+          selectedSessionId={viewedSession?.id ?? null}
           price={price}
           onSelectSession={setPickedSessionId}
         />

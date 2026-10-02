@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import type { AdminGatheringTypeRequest, GatheringDetail, GatheringType } from '@/lib/api/types'
 import { useAdminGatheringDetail, useCreateGathering, useUpdateGathering, useSetCuration } from '@/lib/hooks/useAdminGathering'
 import { useCuratedGatherings } from '@/lib/hooks/useHome'
@@ -22,6 +23,14 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
+
+const MAX_DETAIL_IMAGES = 10
+
+// 상세 사진 한 장 — value는 저장 요청에 보낼 값(새 사진은 tempPath, 남길 사진은 기존 URL)
+interface DetailImage {
+  previewUrl: string
+  value: string
+}
 
 interface GatheringFormPanelProps {
   gatheringId: string | null   // null이면 새 종류 생성
@@ -60,6 +69,11 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
   const [newThumbnailUrl, setNewThumbnailUrl] = useState<string | null>(null)
   const [thumbnailTempPath, setThumbnailTempPath] = useState<string | null>(null)
   const thumbnailPreviewUrl = newThumbnailUrl ?? detail?.thumbnailUrl ?? null
+
+  // 상세 사진: 손대기 전(null)엔 서버 값을 보여주고 저장 요청에서 생략해 기존을 유지한다. (KAN-372)
+  const [editedImages, setEditedImages] = useState<DetailImage[] | null>(null)
+  const detailImages = editedImages ?? (detail?.imageUrls ?? []).map((url) => ({ previewUrl: url, value: url }))
+  const [imageNotice, setImageNotice] = useState<string | null>(null)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -109,6 +123,41 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
     setThumbnailTempPath(null)
   }
 
+  const handleDetailImagesSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    // 같은 파일 재선택 허용
+    e.target.value = ''
+    if (files.length === 0) return
+    if (detailImages.length + files.length > MAX_DETAIL_IMAGES) {
+      setImageNotice(`상세 사진은 최대 ${MAX_DETAIL_IMAGES}장까지 올릴 수 있어요. (지금 ${detailImages.length}장)`)
+      return
+    }
+    setImageNotice(null)
+    const startImages = detailImages
+    let failed = 0
+    // 업로드 훅의 isUploading이 하나라 순서대로 올린다. 업로드 중 삭제·이동도 반영되게 함수형으로 붙인다.
+    for (const file of files) {
+      try {
+        const result = await uploadWithTempPath(file, file.name, 'gathering')
+        setEditedImages((prev) => [...(prev ?? startImages), { previewUrl: result.previewUrl, value: result.tempPath }])
+      } catch {
+        failed += 1
+      }
+    }
+    if (failed > 0) setImageNotice(`${failed}장 업로드에 실패했어요. 다시 시도해주세요.`)
+  }
+
+  const moveDetailImage = (index: number, delta: -1 | 1) => {
+    const next = [...detailImages]
+    ;[next[index], next[index + delta]] = [next[index + delta], next[index]]
+    setEditedImages(next)
+  }
+
+  const removeDetailImage = (index: number) => {
+    setEditedImages(detailImages.filter((_, i) => i !== index))
+    setImageNotice(null)
+  }
+
   const onSubmit = (values: FormValues) => {
     const data: AdminGatheringTypeRequest = {
       title: values.title,
@@ -116,6 +165,8 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
       basePrice: values.basePrice,
       // 새 이미지를 올렸을 때만 tempPath를 보낸다. 생략하면 백엔드가 기존 썸네일을 유지한다.
       thumbnailUrl: thumbnailTempPath ?? undefined,
+      // 손댔을 때만 순서대로 보낸다. 생략하면 백엔드가 기존 상세 사진을 유지한다.
+      imageUrls: editedImages?.map((image) => image.value),
       howToRun: values.howToRunText ? values.howToRunText.split('\n').filter(Boolean) : [],
       tags: values.tagsText ? values.tagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
     }
@@ -223,6 +274,64 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
                 isUploading={isUploading}
                 aspectClassName="aspect-[3/2]"
               />
+            </div>
+
+            {/* 상세 사진 — 상세 상단 슬라이더에서 썸네일 다음으로 넘겨 본다. (KAN-372) */}
+            <div>
+              <p className="text-sm font-medium text-foreground mb-1">
+                상세 사진 ({detailImages.length}/{MAX_DETAIL_IMAGES})
+              </p>
+              {detailImages.length > 0 && (
+                <ul className="flex flex-col gap-2 mb-2">
+                  {detailImages.map((image, index) => (
+                    <li key={image.value} className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- 임시 업로드 미리보기 URL */}
+                      <img src={image.previewUrl} alt={`상세 사진 ${index + 1}`} className="w-16 aspect-[3/2] rounded-lg object-cover bg-tag-bg" />
+                      <span className="flex-1 text-xs text-tag-text">{index + 1}번째</span>
+                      <button
+                        type="button"
+                        onClick={() => moveDetailImage(index, -1)}
+                        disabled={index === 0}
+                        className="p-1.5 text-tag-text disabled:opacity-30"
+                        aria-label="위로 이동"
+                      >
+                        <ChevronUp size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveDetailImage(index, 1)}
+                        disabled={index === detailImages.length - 1}
+                        className="p-1.5 text-tag-text disabled:opacity-30"
+                        aria-label="아래로 이동"
+                      >
+                        <ChevronDown size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeDetailImage(index)}
+                        className="p-1.5 text-tag-text hover:text-red-500"
+                        aria-label="삭제"
+                      >
+                        <X size={18} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {detailImages.length < MAX_DETAIL_IMAGES && (
+                <label className={`inline-flex items-center px-4 py-2 border border-dashed border-tag-bg rounded-input text-sm text-foreground ${isUploading || (isEdit && !detail) ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="sr-only"
+                    disabled={isUploading || (isEdit && !detail)}
+                    onChange={handleDetailImagesSelect}
+                  />
+                  {isUploading ? '업로드 중...' : '+ 사진 추가'}
+                </label>
+              )}
+              {imageNotice && <p className="text-xs text-red-500 mt-1">{imageNotice}</p>}
             </div>
 
             <Input

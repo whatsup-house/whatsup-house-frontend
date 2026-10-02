@@ -62,6 +62,7 @@ export interface GatheringDetail {
   howToRun: string[] | null
   tags: string[] | null
   thumbnailUrl: string | null
+  imageUrls?: string[]           // 상세 사진 (썸네일 제외). BE 배포 전엔 없을 수 있다 (KAN-372)
   gatheringType: GatheringType | null
   basePrice: number | null
   sessions: GatheringSession[]   // 날짜·시작 시간 순
@@ -96,6 +97,7 @@ export interface AdminGatheringTypeRequest {
   tags: string[]
   basePrice: number
   thumbnailUrl?: string          // 새로 올린 이미지의 tempPath만. 생략하면 기존 썸네일 유지
+  imageUrls?: string[]           // 상세 사진 순서대로: 새 사진은 tempPath, 남길 사진은 기존 URL. 생략하면 기존 유지 (KAN-372)
   gatheringType?: GatheringType  // 생성 시에만 반영 (수정 불가)
 }
 

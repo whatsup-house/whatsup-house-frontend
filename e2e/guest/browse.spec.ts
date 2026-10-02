@@ -33,7 +33,7 @@ test.describe('비회원 - 게더링 탐색', () => {
     await page.goto('/?guest=1')
 
     const bottomNav = page.locator('nav')
-    await expect(bottomNav.getByText('홈')).toBeVisible()
+    await expect(bottomNav.getByRole('link', { name: '홈' })).toBeVisible()
     await expect(bottomNav.getByText('게더링')).toBeVisible()
     await expect(bottomNav.getByText('마이')).toBeVisible()
     await expect(bottomNav.getByText('소셜')).toHaveCount(0)

@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { ReactNode, RefObject } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ChevronDown, Megaphone, Menu, X } from 'lucide-react'
 import dayjs from 'dayjs'
@@ -72,6 +72,31 @@ function isNearBottom(el: HTMLElement, clientHeight = el.clientHeight): boolean 
   return el.scrollHeight - el.scrollTop - clientHeight < STICK_THRESHOLD
 }
 
+// 한 줄(truncate) 요소가 잘리는지 직접 잰다 — CSS 만으로 말줄임 발생을 감지하는 표준이 없다 (KAN-373)
+// 창 크기·회전·확대/축소·lg 프레임 변화는 요소 폭 변화(ResizeObserver)로, 내용 변경은 text 로,
+// 대체 폰트로 잰 뒤 웹폰트(Pretendard)가 늦게 붙는 경우는 fonts.ready 로 다시 잰다.
+function useIsTruncated(ref: RefObject<HTMLElement | null>, text: string): boolean {
+  const [isTruncated, setIsTruncated] = useState(false)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let active = true
+    const measure = () => {
+      if (active) setIsTruncated(el.scrollWidth > el.clientWidth)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    // measure() 의 레이아웃이 트리거한 서브셋 폰트 로드까지 기다리도록 그 뒤에 ready 를 잡는다
+    document.fonts.ready.then(measure)
+    return () => {
+      active = false
+      observer.disconnect()
+    }
+  }, [ref, text])
+  return isTruncated
+}
+
 function CenterPill({ children }: { children: ReactNode }) {
   return (
     <div className="my-3 flex justify-center px-6">
@@ -109,6 +134,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
   const listRef = useRef<HTMLDivElement>(null)
   const stickToBottomRef = useRef(true)
   const restoreScrollRef = useRef<{ height: number; top: number } | null>(null)
+  const noticeRulerRef = useRef<HTMLSpanElement>(null)
 
   const room = roomQuery.data
   const roomErrorCode = getApiErrorCode(roomQuery.error)
@@ -117,6 +143,10 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
   const isHouseSender = room?.type === 'INQUIRY' && !isAdmin
   // 메시지의 sender.nickname 은 조회 시점 스냅샷이라 옛 페이지와 새 메시지가 다를 수 있다 → 방 상세의 현재 닉네임 우선 (KAN-364)
   const memberNicknames = useMemo(() => new Map(room?.members.map((m) => [m.userId, m.nickname] as const)), [room])
+  const noticeText = room?.notice ? getMessagePreview(room.notice, t) : ''
+  const isNoticeTruncated = useIsTruncated(noticeRulerRef, noticeText)
+  // 펼친 채로 넓어져 한 줄에 들어오면 접힘으로 되돌린다 (다시 좁아져도 저절로 펼쳐지지 않게 상태를 비움)
+  if (isNoticeExpanded && !isNoticeTruncated) setIsNoticeExpanded(false)
 
   // 서버 페이지는 최신 페이지가 앞, 페이지 안은 오래된 → 최신 순
   const messages = messagesQuery.data ? [...messagesQuery.data.pages].reverse().flat() : []
@@ -388,34 +418,50 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
         <div className="shrink-0 bg-card px-3 pt-2">
           <div className="flex items-start gap-2 rounded-[12px] border border-tag-bg bg-background px-3 py-2">
             <Megaphone size={16} className="mt-0.5 shrink-0 text-primary" />
-            <button
-              type="button"
-              onClick={() => setIsNoticeExpanded((v) => !v)}
-              aria-expanded={isNoticeExpanded}
-              className={`min-w-0 flex-1 text-left text-sm text-foreground ${
-                isNoticeExpanded ? 'whitespace-pre-wrap break-words' : 'truncate'
-              }`}
-            >
-              {getMessagePreview(room.notice, t)}
-            </button>
-            {isAdmin && isNoticeExpanded && (
-              <button
-                type="button"
-                onClick={() => handleNotice(null)}
-                disabled={setNotice.isPending}
-                className="shrink-0 text-xs font-semibold text-primary disabled:opacity-50"
-              >
-                {t('room.noticeClear')}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setIsNoticeExpanded((v) => !v)}
-              className="shrink-0 text-tag-text"
-              aria-label={t('room.noticeToggle')}
-            >
-              <ChevronDown size={16} className={isNoticeExpanded ? 'rotate-180' : ''} />
-            </button>
+            <div className="relative flex min-w-0 flex-1 items-start gap-2">
+              {/* 잘림 판정용 보이지 않는 사본: 한 줄에 다 보일 때의 배치(관리자는 '해제' 포함)를 펼침·버튼 유무와 상관없이 유지한다.
+                  보이는 텍스트를 재면 펼칠 때 truncate 가 풀리고, 오른쪽 버튼이 바뀌며 폭이 달라져 판정이 흔들린다. */}
+              <div aria-hidden className="invisible absolute inset-x-0 top-0 flex gap-2">
+                <span ref={noticeRulerRef} className="min-w-0 flex-1 truncate text-sm">
+                  {noticeText}
+                </span>
+                {isAdmin && <span className="shrink-0 text-xs font-semibold">{t('room.noticeClear')}</span>}
+              </div>
+              {isNoticeTruncated ? (
+                <button
+                  type="button"
+                  onClick={() => setIsNoticeExpanded((v) => !v)}
+                  aria-expanded={isNoticeExpanded}
+                  className={`min-w-0 flex-1 text-left text-sm text-foreground ${
+                    isNoticeExpanded ? 'whitespace-pre-wrap break-words' : 'truncate'
+                  }`}
+                >
+                  {noticeText}
+                </button>
+              ) : (
+                <p className="min-w-0 flex-1 truncate text-sm text-foreground">{noticeText}</p>
+              )}
+              {isAdmin && (isNoticeExpanded || !isNoticeTruncated) && (
+                <button
+                  type="button"
+                  onClick={() => handleNotice(null)}
+                  disabled={setNotice.isPending}
+                  className="shrink-0 text-xs font-semibold text-primary disabled:opacity-50"
+                >
+                  {t('room.noticeClear')}
+                </button>
+              )}
+              {isNoticeTruncated && (
+                <button
+                  type="button"
+                  onClick={() => setIsNoticeExpanded((v) => !v)}
+                  className="shrink-0 text-tag-text"
+                  aria-label={t('room.noticeToggle')}
+                >
+                  <ChevronDown size={16} className={isNoticeExpanded ? 'rotate-180' : ''} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
