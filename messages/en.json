@@ -152,6 +152,7 @@
       },
       "birthDateLabel": "Date of birth",
       "agePreview": "Age {age}",
+      "birthYearPreview": "Born in {year}",
       "nicknameLabel": "Nickname",
       "nicknamePlaceholder": "Enter at least 2 characters",
       "emailLabel": "Email (ID)",

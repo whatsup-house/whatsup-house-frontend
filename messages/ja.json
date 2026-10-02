@@ -152,6 +152,7 @@
       },
       "birthDateLabel": "生年月日",
       "agePreview": "満{age}歳",
+      "birthYearPreview": "{year}年生まれ",
       "nicknameLabel": "ニックネーム",
       "nicknamePlaceholder": "2文字以上入力してください",
       "emailLabel": "メール（ID）",

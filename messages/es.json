@@ -152,6 +152,7 @@
       },
       "birthDateLabel": "fecha de nacimiento",
       "agePreview": "Edad {age}",
+      "birthYearPreview": "Nacimiento: {year}",
       "nicknameLabel": "Apodo",
       "nicknamePlaceholder": "Introduzca al menos 2 caracteres",
       "emailLabel": "Correo electrónico (ID)",
