@@ -731,6 +731,8 @@
     },
     "loading": "正在加载...",
     "empty": "还没有评论。成为第一个离开的人！",
+    "photoOnly": "照片评论",
+    "emptyPhoto": "还没有带照片的评论。",
     "emptyShort": "还没有评论。",
     "alreadyWritten": "您已经写过评论",
     "allGatherings": "所有聚会",
