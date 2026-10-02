@@ -26,20 +26,22 @@ test.describe('회원 - 우연한 식탁 신청', () => {
     await mockDiningApplyApis(page)
     await mockMyDiningApplications(page, () => applications)
 
-    // 1. 종류 페이지 → 신청하기 (우연한 식탁은 회차를 고르지 않아도 신청 흐름으로 간다)
+    // 1. 종류 페이지 → 신청하기 (보고 있던 가장 가까운 회차를 ?session= 으로 넘긴다)
     await page.goto(`/gatherings/${DINING_GATHERING_ID}`)
     await expect(page.getByText(DINING_TITLE).first()).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/dining-apply-01-detail.png')
+    const applyNavigation = page.waitForURL(`/gatherings/${DINING_GATHERING_ID}/apply/dining?session=${DINING_SESSION_ID}`)
     await page.getByRole('button', { name: '신청하기', exact: true }).click()
-    await expect(page).toHaveURL(`/gatherings/${DINING_GATHERING_ID}/apply/dining`)
+    await applyNavigation
 
-    // 2. 1단계 — 희망 회차 2개. 고른 순서가 우선순위다
+    // 2. 1단계 — 넘어온 회차가 1지망으로 골라져 있다(반영한 ?session= 은 URL 에서 지운다). 하나 더 고르면 2지망 (고른 순서 = 우선순위)
     await expect(page.getByText('1/3')).toBeVisible()
+    await expect(page).toHaveURL(`/gatherings/${DINING_GATHERING_ID}/apply/dining`)
     const next = page.getByRole('button', { name: '다음', exact: true })
-    await expect(next).toBeDisabled()
     const first = page.getByRole('checkbox', { name: /19:00/ })
     const second = page.getByRole('checkbox', { name: /12:30/ })
-    await first.click()
+    await expect(first).toHaveAttribute('aria-checked', 'true')
+    await expect(next).toBeEnabled()
     await second.click()
     await expect(first).toHaveAttribute('aria-checked', 'true')
     await expect(second).toHaveAttribute('aria-checked', 'true')
