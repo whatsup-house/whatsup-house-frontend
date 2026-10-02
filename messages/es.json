@@ -732,6 +732,8 @@
     },
     "loading": "Cargando...",
     "empty": "Aún no hay reseñas. ¡Sé el primero en dejar uno!",
+    "photoOnly": "Con fotos",
+    "emptyPhoto": "Aún no hay reseñas con fotos.",
     "emptyShort": "Aún no hay reseñas.",
     "alreadyWritten": "Ya escribiste una reseña",
     "allGatherings": "Todos los encuentros",

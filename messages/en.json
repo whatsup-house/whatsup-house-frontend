@@ -732,6 +732,8 @@
     },
     "loading": "Loading...",
     "empty": "No reviews yet. Be the first to leave one!",
+    "photoOnly": "Photo reviews",
+    "emptyPhoto": "No photo reviews yet.",
     "emptyShort": "No reviews yet.",
     "alreadyWritten": "You already wrote a review",
     "allGatherings": "All gatherings",

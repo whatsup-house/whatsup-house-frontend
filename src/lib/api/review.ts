@@ -34,10 +34,11 @@ export const fetchAllReviews = async (
   page: number,
   size = 10,
   gatheringId?: string,
+  photoOnly = false,
 ): Promise<GatheringReviewPageResponse> => {
   const response = await apiClient.get<ApiResponse<GatheringReviewPageResponse>>(
     '/api/reviews',
-    { params: { sort, page, size, ...(gatheringId ? { gatheringId } : {}) } },
+    { params: { sort, page, size, ...(gatheringId ? { gatheringId } : {}), ...(photoOnly ? { photoOnly } : {}) } },
   )
   return response.data.data
 }

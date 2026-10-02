@@ -7,10 +7,11 @@ export function useAllReviews(
   page: number,
   gatheringId?: string,
   enabled = true,
+  photoOnly = false,
 ) {
   return useQuery({
-    queryKey: ['reviews', 'all', sort, page, gatheringId],
-    queryFn: () => fetchAllReviews(sort, page, 10, gatheringId),
+    queryKey: ['reviews', 'all', sort, page, gatheringId, photoOnly],
+    queryFn: () => fetchAllReviews(sort, page, 10, gatheringId, photoOnly),
     enabled,
   })
 }
