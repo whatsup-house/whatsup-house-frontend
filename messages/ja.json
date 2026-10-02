@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 写真レビュー",
     "anonymous": "匿名",
     "countForGathering": "このギャザリングのレビュー {count}件",
     "sort": {
@@ -760,7 +759,6 @@
       "deleteFailed": "削除に失敗しました。もう一度お試しください",
       "anonymous": "匿名",
       "gatheringFallback": "ギャザリング",
-      "photoReview": "📷 写真レビュー",
       "writtenAt": "{date} 作成",
       "more": "もっと見る",
       "unlike": "おすすめを取り消す",

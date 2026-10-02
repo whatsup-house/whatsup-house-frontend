@@ -149,19 +149,12 @@ export default function ReviewCard({
   return (
     <>
       <div className="bg-card rounded-card border border-tag-bg/40 shadow-sm overflow-hidden mb-3.5">
-        {/* 헤더: 아바타, 타입 배지 */}
+        {/* 헤더: 아바타, 작성자·날짜 */}
         <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2.5">
           <div className="w-9 h-9 rounded-full bg-tag-bg flex items-center justify-center shrink-0">
             <User size={18} className="text-tag-text" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              {review.reviewType === 'PHOTO' && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 bg-primary-light text-primary">
-                  {t('photoReview')}
-                </span>
-              )}
-            </div>
             <p className="text-[11px] text-tag-text truncate">
               <span>{authorName}</span>
               <span className="mx-1">·</span>

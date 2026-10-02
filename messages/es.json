@@ -723,7 +723,6 @@
     }
   },
   "review": {
-    "photoReview": "📷 Revisión de fotos",
     "anonymous": "anónimo",
     "countForGathering": "{count} reseñas para este encuentro",
     "sort": {
@@ -760,7 +759,6 @@
       "deleteFailed": "No se pudo eliminar. Por favor inténtalo de nuevo",
       "anonymous": "anónimo",
       "gatheringFallback": "encuentro",
-      "photoReview": "📷 Revisión de fotos",
       "writtenAt": "Escrito el {date}",
       "more": "Más",
       "unlike": "a diferencia",
