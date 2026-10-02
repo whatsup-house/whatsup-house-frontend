@@ -152,6 +152,7 @@
       },
       "birthDateLabel": "생년월일",
       "agePreview": "만 {age}세",
+      "birthYearPreview": "{year}년생",
       "nicknameLabel": "닉네임",
       "nicknamePlaceholder": "2자 이상 입력해주세요",
       "emailLabel": "이메일(아이디)",
@@ -564,7 +565,7 @@
       "question": {
         "male": "남성",
         "female": "여성",
-        "multiChoice": "(중복 선택 가능)",
+        "multiChoice": "(복수 선택 가능)",
         "mbtiResult": "{mbti} 유형이군요!"
       },
       "result": {

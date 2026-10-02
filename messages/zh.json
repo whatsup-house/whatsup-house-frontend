@@ -152,6 +152,7 @@
       },
       "birthDateLabel": "出生日期",
       "agePreview": "年龄 {age}",
+      "birthYearPreview": "{year}年出生",
       "nicknameLabel": "昵称",
       "nicknamePlaceholder": "输入至少2个字符",
       "emailLabel": "电子邮件 (ID)",
