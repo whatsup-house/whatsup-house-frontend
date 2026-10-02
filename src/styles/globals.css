@@ -65,6 +65,14 @@ h1, h2, h3 {
   }
 }
 
+/* lg↑ AppShell 프레임 안에서는 페이지의 min-h-screen(100vh)을 내부 스크롤 영역(main) 높이로 바꾼다. (KAN-384)
+   main 은 고정 높이 flex 컨테이너의 flex-1 이라 % 가 해석된다. /welcome 본문은 lg 에서 숨김이라 영향 없다. */
+@media (min-width: 1024px) {
+  .mobile-layout .min-h-screen {
+    min-height: 100%;
+  }
+}
+
 /* 바텀시트 슬라이드업 애니메이션 */
 @keyframes slide-up {
   from {

@@ -116,7 +116,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 bg-background border-b border-tag-bg/50">
+      <header className="sticky top-0 z-30 bg-card/85 backdrop-blur-md border-b border-tag-bg/50">
         <div className="flex items-center px-4 py-3">
           <button
             onClick={handleBack}
