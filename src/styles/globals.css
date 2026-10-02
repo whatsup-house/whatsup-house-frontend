@@ -103,6 +103,36 @@ h1, h2, h3 {
   animation: field-reveal 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* 우연한 식탁 단계형 신청 단계 전환: 다음 단계는 오른쪽에서, 이전 단계는 왼쪽에서 들어온다 (KAN-389) */
+@keyframes step-in-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes step-in-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+.animate-step-next {
+  animation: step-in-from-right 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-step-prev {
+  animation: step-in-from-left 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-step-next,
+  .animate-step-prev {
+    animation: none;
+  }
+}
+
 /* 모션 최소화 설정: 이동 애니메이션을 끄고 페이드만 남긴다 */
 @media (prefers-reduced-motion: reduce) {
   .animate-slide-up,
