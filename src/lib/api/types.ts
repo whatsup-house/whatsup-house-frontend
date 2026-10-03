@@ -1478,3 +1478,33 @@ export interface AdminChatReport {
   messageContent: string | null
   messageDeleted: boolean
 }
+
+// GET /api/feed?cursor=&size= — 릴스형 피드 (KAN-380/382)
+export type FeedItemKind = 'POST' | 'REVIEW'
+export type FeedMediaType = 'IMAGE' | 'VIDEO'
+
+export interface FeedMedia {
+  type: FeedMediaType
+  url: string
+  posterUrl?: string | null
+  width?: number | null
+  height?: number | null
+}
+
+export interface FeedItem {
+  kind: FeedItemKind
+  id: string
+  media: FeedMedia[]
+  caption: string | null
+  postedAt: string
+  gathering: { id: string; title: string } | null
+  // POST만
+  instagramUrl?: string | null
+  // REVIEW만
+  reviewId?: string | null
+}
+
+export interface FeedResponse {
+  items: FeedItem[]
+  nextCursor: string | null
+}

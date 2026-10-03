@@ -374,7 +374,8 @@
       "home": "首页",
       "gatherings": "聚会",
       "my": "我的",
-      "chat": "聊天"
+      "chat": "聊天",
+      "feed": "动态"
     },
     "titles": {
       "home": "首页",
@@ -391,7 +392,8 @@
       "applyComplete": "申请完成",
       "apply": "申请",
       "story": "关于",
-      "chat": "聊天"
+      "chat": "聊天",
+      "feed": "动态"
     }
   },
   "desktopBrand": {
@@ -1421,5 +1423,27 @@
       "later": "稍后",
       "iosGuide": "添加到主屏幕即可接收通知"
     }
+  },
+  "feed": {
+    "kind": {
+      "reels": "短视频",
+      "post": "帖子",
+      "review": "照片评价"
+    },
+    "more": "更多",
+    "dateFormat": "M月D日",
+    "viewGathering": "查看这个聚会",
+    "viewInstagram": "在 Instagram 查看",
+    "viewReview": "查看评价",
+    "endTitle": "已经看完所有动态了",
+    "nextGatherings": "查看接下来的聚会",
+    "empty": "还没有动态",
+    "emptyAction": "查看聚会",
+    "error": "无法加载动态",
+    "retry": "重试",
+    "loading": "加载中",
+    "play": "播放",
+    "mute": "静音",
+    "unmute": "取消静音"
   }
 }

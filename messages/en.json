@@ -374,7 +374,8 @@
       "home": "Home",
       "gatherings": "Gatherings",
       "my": "My",
-      "chat": "Chat"
+      "chat": "Chat",
+      "feed": "Feed"
     },
     "titles": {
       "home": "Home",
@@ -391,7 +392,8 @@
       "applyComplete": "Application complete",
       "apply": "Apply",
       "story": "About",
-      "chat": "Chat"
+      "chat": "Chat",
+      "feed": "Feed"
     }
   },
   "desktopBrand": {
@@ -1421,5 +1423,27 @@
       "later": "Later",
       "iosGuide": "Add this site to your Home Screen to get notifications"
     }
+  },
+  "feed": {
+    "kind": {
+      "reels": "Reels",
+      "post": "Post",
+      "review": "Photo review"
+    },
+    "more": "more",
+    "dateFormat": "MMM D",
+    "viewGathering": "See this gathering",
+    "viewInstagram": "View on Instagram",
+    "viewReview": "See review",
+    "endTitle": "You're all caught up",
+    "nextGatherings": "Browse upcoming gatherings",
+    "empty": "No posts yet",
+    "emptyAction": "Browse gatherings",
+    "error": "Couldn't load the feed",
+    "retry": "Try again",
+    "loading": "Loading",
+    "play": "Play",
+    "mute": "Mute",
+    "unmute": "Unmute"
   }
 }
