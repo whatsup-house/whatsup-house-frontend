@@ -14,6 +14,7 @@ const HIDDEN_PATTERNS: RegExp[] = [/^\/chat\/[^/]+$/]
 const PAGE_TITLE_KEYS: Record<string, string> = {
   '/': 'home',
   '/gatherings': 'gatherings',
+  '/feed': 'feed',
   '/reviews': 'reviews',
   '/social': 'social',
   '/chat': 'chat',
@@ -27,7 +28,7 @@ const PAGE_TITLE_KEYS: Record<string, string> = {
   '/onboarding': 'onboarding',
 }
 
-const ROOT_PATHS = new Set(['/', '/gatherings', '/mypage'])
+const ROOT_PATHS = new Set(['/', '/feed', '/gatherings', '/mypage'])
 
 function getTitleKey(pathname: string): string {
   if (PAGE_TITLE_KEYS[pathname]) return PAGE_TITLE_KEYS[pathname]

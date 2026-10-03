@@ -374,7 +374,8 @@
       "home": "Inicio",
       "gatherings": "Encuentros",
       "my": "Mi página",
-      "chat": "Chat"
+      "chat": "Chat",
+      "feed": "Feed"
     },
     "titles": {
       "home": "Inicio",
@@ -391,7 +392,8 @@
       "applyComplete": "Solicitud completa",
       "apply": "Solicitar",
       "story": "Acerca de",
-      "chat": "Chat"
+      "chat": "Chat",
+      "feed": "Feed"
     }
   },
   "desktopBrand": {
@@ -1421,5 +1423,27 @@
       "later": "Más tarde",
       "iosGuide": "Añádela a tu pantalla de inicio para recibir notificaciones"
     }
+  },
+  "feed": {
+    "kind": {
+      "reels": "Reels",
+      "post": "Publicación",
+      "review": "Reseña con fotos"
+    },
+    "more": "más",
+    "dateFormat": "D MMM",
+    "viewGathering": "Ver este encuentro",
+    "viewInstagram": "Ver en Instagram",
+    "viewReview": "Ver reseña",
+    "endTitle": "Ya lo viste todo",
+    "nextGatherings": "Ver próximos encuentros",
+    "empty": "Aún no hay publicaciones",
+    "emptyAction": "Ver encuentros",
+    "error": "No se pudo cargar el feed",
+    "retry": "Reintentar",
+    "loading": "Cargando",
+    "play": "Reproducir",
+    "mute": "Silenciar",
+    "unmute": "Activar sonido"
   }
 }

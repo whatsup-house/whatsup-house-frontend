@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, User, Compass, MessageCircle, Circle } from 'lucide-react'
+import { Home, User, Compass, MessageCircle, Clapperboard } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyProfile } from '@/lib/hooks/useAuth'
@@ -55,10 +55,9 @@ export default function BottomNav() {
   // 조회 실패·비로그인이면 0 → 배지 숨김
   const unreadTotal = isLoggedIn && !isError ? (rooms ?? []).reduce((sum, room) => sum + room.unreadCount, 0) : 0
 
-  // null = 가운데 빈칸
   const navItems = [
     { href: '/gatherings', icon: Compass, label: t('tabs.gatherings'), requireLogin: false },
-    null,
+    { href: '/feed', icon: Clapperboard, label: t('tabs.feed'), requireLogin: false },
     { href: '/', icon: Home, label: t('tabs.home'), requireLogin: false },
     { href: '/chat', icon: MessageCircle, label: t('tabs.chat'), requireLogin: true },
     { href: '/mypage', icon: User, label: t('tabs.my'), requireLogin: true },
@@ -68,16 +67,7 @@ export default function BottomNav() {
   return (
     <nav className="sticky bottom-0 z-40 bg-card border-t border-tag-bg pb-[env(safe-area-inset-bottom)]">
       <div className="grid grid-cols-5 items-center h-16">
-        {navItems.map((item, index) => {
-          if (!item) {
-            return (
-              <div key={`blank-${index}`} aria-hidden="true" className="flex flex-col items-center gap-1 text-xs text-tag-text/40">
-                <Circle size={20} />
-                <span className="h-4" />
-              </div>
-            )
-          }
-
+        {navItems.map((item) => {
           const isActive =
             item.href === '/'
               ? pathname === '/'
