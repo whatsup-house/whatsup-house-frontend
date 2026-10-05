@@ -1445,6 +1445,8 @@
     "mute": "ミュート",
     "unmute": "ミュート解除",
     "lockHint": "下にスワイプして2倍速を固定",
-    "unlockHint": "下にスワイプして通常の速度に戻す"
+    "unlockHint": "下にスワイプして通常の速度に戻す",
+    "lockReleaseHint": "指を離すと2倍速を固定",
+    "unlockReleaseHint": "指を離すと通常の速度に戻る"
   }
 }
