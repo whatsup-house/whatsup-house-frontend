@@ -1430,7 +1430,6 @@
       "post": "Publicación",
       "review": "Reseña con fotos"
     },
-    "more": "más",
     "dateFormat": "D MMM",
     "viewGathering": "Ver este encuentro",
     "viewInstagram": "Ver en Instagram",
@@ -1444,6 +1443,8 @@
     "loading": "Cargando",
     "play": "Reproducir",
     "mute": "Silenciar",
-    "unmute": "Activar sonido"
+    "unmute": "Activar sonido",
+    "lockHint": "Desliza hacia abajo para fijar la velocidad 2x",
+    "unlockHint": "Desliza hacia abajo para volver a la velocidad normal"
   }
 }

@@ -17,6 +17,7 @@ export default function FeedView() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [muted, setMuted] = useState(true)  // 한 번 소리를 켜면 다음 영상도 켠 채로
+  const [speedLocked, setSpeedLocked] = useState(false)  // 2배속 고정도 다음 영상까지 유지
   const items = data?.pages.flatMap((page) => page.items) ?? []
 
   // 화면의 60% 이상 보이는 칸이 현재 칸
@@ -79,6 +80,8 @@ export default function FeedView() {
             isActive={index === activeIndex}
             muted={muted}
             onToggleMute={() => setMuted((m) => !m)}
+            speedLocked={speedLocked}
+            onToggleSpeedLock={() => setSpeedLocked((l) => !l)}
           />
         </div>
       ))}
