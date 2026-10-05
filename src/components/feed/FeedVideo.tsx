@@ -25,6 +25,8 @@ interface FeedVideoProps {
 
 // 안드로이드 크롬만 진동한다. 사용자 활성화 전 호출은 콘솔 경고가 나서 막는다.
 // Vibration API는 세기 조절이 없어 길이만 조절할 수 있다 — 10ms 펄스는 많은 안드로이드 모터에서 느껴지지 않는다.
+// 진동은 두 번뿐: 2배속 진입(15ms), 고정 안 된 상태에서 아래로 밀어 대기(armed)되는 순간(30ms, 손가락이 닿아 있을 때).
+// 떼는 순간은 진동해도 손가락이 떨어져 느껴지지 않아 진동하지 않는다.
 const vibrate = (pattern: number | number[]) => {
   if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(pattern)
 }
@@ -135,10 +137,12 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     }
     // 2배속 홀드 중 아래로 밀면 대기(armed), 다시 올리면 취소. 실제 고정/해제는 손을 뗄 때
     if (press.mode !== 'fast') return
-    const nextArmed = dy >= LOCK_DRAG_PX && dy > Math.abs(dx)
+    // 해제는 10px 더 올라와야 — 경계선에서 손가락이 떨려도 진동이 연달아 나지 않게
+    const nextArmed = dy >= LOCK_DRAG_PX - (press.armed ? 10 : 0) && dy > Math.abs(dx)
     if (nextArmed !== press.armed) {
       press.armed = nextArmed
       setArmed(nextArmed)
+      if (nextArmed && !speedLocked) vibrate(30)
     }
   }
 
@@ -147,10 +151,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     const isTap = !!press?.timer
     const commit = press?.mode === 'fast' && press.armed && activeRef.current
     endHold()
-    if (commit) {
-      vibrate(30)  // 2배속 진입(15ms)보다 조금 강하게
-      onToggleSpeedLock()
-    }
+    if (commit) onToggleSpeedLock()
     if (isTap) {
       onToggleMute()
       setFlash(true)
