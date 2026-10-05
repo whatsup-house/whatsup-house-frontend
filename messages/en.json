@@ -1430,7 +1430,6 @@
       "post": "Post",
       "review": "Photo review"
     },
-    "more": "more",
     "dateFormat": "MMM D",
     "viewGathering": "See this gathering",
     "viewInstagram": "View on Instagram",
@@ -1444,6 +1443,8 @@
     "loading": "Loading",
     "play": "Play",
     "mute": "Mute",
-    "unmute": "Unmute"
+    "unmute": "Unmute",
+    "lockHint": "Swipe down to lock 2x speed",
+    "unlockHint": "Swipe down to return to normal speed"
   }
 }

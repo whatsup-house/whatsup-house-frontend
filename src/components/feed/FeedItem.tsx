@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import dayjs from 'dayjs'
@@ -20,13 +20,15 @@ interface FeedItemProps {
   isActive: boolean
   muted: boolean
   onToggleMute: () => void
+  speedLocked: boolean
+  onToggleSpeedLock: () => void
 }
 
 const MEDIA_SIZES = '(min-width: 1024px) 390px, 100vw'
 const pillCls = 'pointer-events-auto rounded-full bg-white/20 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm'
 
 export default function FeedItem({
-  kind, media, caption, postedAt, gathering, instagramUrl, reviewId, isActive, muted, onToggleMute,
+  kind, media, caption, postedAt, gathering, instagramUrl, reviewId, isActive, muted, onToggleMute, speedLocked, onToggleSpeedLock,
 }: FeedItemProps) {
   const t = useTranslations('feed')
   const [holding, setHolding] = useState(false)
@@ -34,19 +36,6 @@ export default function FeedItem({
   const [slide, setSlide] = useState(0)
 
   const kindLabel = kind === 'REVIEW' ? t('kind.review') : media[0]?.type === 'VIDEO' ? t('kind.reels') : t('kind.post')
-  const captionRef = useRef<HTMLSpanElement>(null)
-  const [overflows, setOverflows] = useState(false)
-
-  // 2줄로 잘렸을 때만 '더 보기'
-  useEffect(() => {
-    const el = captionRef.current
-    if (!el || expanded) return
-    const measure = () => setOverflows(el.scrollHeight > el.clientHeight + 1)
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [caption, expanded])
 
   const renderMedia = (m: FeedMedia, index: number) =>
     m.type === 'VIDEO' ? (
@@ -57,6 +46,8 @@ export default function FeedItem({
         muted={muted}
         onToggleMute={onToggleMute}
         onHoldChange={setHolding}
+        speedLocked={speedLocked}
+        onToggleSpeedLock={onToggleSpeedLock}
       />
     ) : (
       <AppImage src={m.url} alt={caption ?? kindLabel} sizes={MEDIA_SIZES} className="select-none object-contain" draggable={false} />
@@ -103,12 +94,10 @@ export default function FeedItem({
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="pointer-events-auto relative mt-2 block w-full text-left text-sm leading-snug"
+            aria-expanded={expanded}
+            className="pointer-events-auto mt-2 block w-full text-left text-sm leading-snug"
           >
-            <span ref={captionRef} className={`whitespace-pre-line ${expanded ? 'block' : 'line-clamp-2'}`}>{caption}</span>
-            {overflows && !expanded && (
-              <span className="absolute bottom-0 right-0 bg-black/80 pl-1 text-white/70 [box-shadow:-1.5rem_0_1.5rem_rgb(0_0_0/0.8)]">… {t('more')}</span>
-            )}
+            <span data-testid="feed-caption" className={`whitespace-pre-line ${expanded ? 'block' : 'line-clamp-2'}`}>{caption}</span>
           </button>
         )}
         <p className="mt-1 text-xs text-white/70">{dayjs(postedAt).format(t('dateFormat'))}</p>
