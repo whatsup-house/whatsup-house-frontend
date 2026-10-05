@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
-import { FastForward, Play, Volume2, VolumeX } from 'lucide-react'
+import { FastForward, Lock, Play, Volume2, VolumeX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 const HOLD_MS = 250
 const MOVE_TOLERANCE_PX = 10
 const EDGE_RATIO = 0.25
+const LOCK_DRAG_PX = 60
 
 type HoldMode = 'fast' | 'pause'
 
@@ -18,13 +19,21 @@ interface FeedVideoProps {
   muted: boolean
   onToggleMute: () => void
   onHoldChange: (holding: boolean) => void
+  speedLocked: boolean
+  onToggleSpeedLock: () => void
 }
 
-// 릴스 영상. 화면에 있는 것만 재생. 짧게 탭 = 음소거 토글, 좌우 가장자리 길게 누름 = 2배속, 가운데 길게 누름 = 일시정지.
-export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMute, onHoldChange }: FeedVideoProps) {
+// 안드로이드 크롬만 진동한다. 사용자 활성화 전 호출은 콘솔 경고가 나서 막는다.
+const vibrate = (pattern: number | number[]) => {
+  if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(pattern)
+}
+
+// 릴스 영상. 화면에 있는 것만 재생. 짧게 탭 = 음소거 토글, 좌우 가장자리 길게 누름 = 2배속(누른 채 아래로 밀면 2배속 고정/해제), 가운데 길게 누름 = 일시정지.
+export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMute, onHoldChange, speedLocked, onToggleSpeedLock }: FeedVideoProps) {
   const t = useTranslations('feed')
   const videoRef = useRef<HTMLVideoElement>(null)
-  const pressRef = useRef<{ x: number; y: number; timer: ReturnType<typeof setTimeout> | null; wasPlaying: boolean; mode: HoldMode | null } | null>(null)
+  const layerRef = useRef<HTMLDivElement>(null)
+  const pressRef = useRef<{ x: number; y: number; timer: ReturnType<typeof setTimeout> | null; wasPlaying: boolean; mode: HoldMode | null; dragged: boolean } | null>(null)
   const activeRef = useRef(isActive)
   const [hold, setHold] = useState<HoldMode | null>(null)
   const [blocked, setBlocked] = useState(false)  // 자동재생 거부·모션 줄이기·로드 실패 → 재생 버튼
@@ -45,7 +54,6 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     if (!video) return
     if (!isActive) {
       video.pause()
-      video.playbackRate = 1
       return
     }
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -60,6 +68,22 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
   }, [muted])
 
   useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = isActive && (speedLocked || hold === 'fast') ? 2 : 1
+  }, [isActive, speedLocked, hold])
+
+  // 홀드가 걸린 뒤의 드래그는 피드 스크롤이 아니라 고정 제스처다. React의 onTouchMove는 passive라 직접 등록한다.
+  // touch-action은 기본값(auto)이어야 홀드 전 스와이프로 피드가 스크롤되고, touchmove를 막으면 스크롤이 시작되지 않아 pointercancel도 오지 않는다.
+  useEffect(() => {
+    const layer = layerRef.current
+    if (!layer) return
+    const onTouchMove = (e: TouchEvent) => {
+      if (pressRef.current?.mode && e.cancelable) e.preventDefault()
+    }
+    layer.addEventListener('touchmove', onTouchMove, { passive: false })
+    return () => layer.removeEventListener('touchmove', onTouchMove)
+  }, [])
+
+  useEffect(() => {
     if (!flash) return
     const timer = setTimeout(() => setFlash(false), 600)
     return () => clearTimeout(timer)
@@ -72,11 +96,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     // 렌더 클로저의 hold state는 타이머 직후 아직 커밋 전일 수 있어 ref로 판단
     const mode = press?.mode
     if (!mode) return
-    const video = videoRef.current
-    if (video) {
-      video.playbackRate = 1
-      if (mode === 'pause' && press.wasPlaying && activeRef.current) play()
-    }
+    if (mode === 'pause' && press.wasPlaying && activeRef.current) play()
     setHold(null)
     onHoldChange(false)
   }
@@ -87,11 +107,11 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     const ratio = (e.clientX - rect.left) / rect.width
     const mode: HoldMode = ratio < EDGE_RATIO || ratio > 1 - EDGE_RATIO ? 'fast' : 'pause'
     const video = videoRef.current
-    const press = { x: e.clientX, y: e.clientY, timer: null as ReturnType<typeof setTimeout> | null, wasPlaying: !!video && !video.paused, mode: null as HoldMode | null }
+    const press = { x: e.clientX, y: e.clientY, timer: null as ReturnType<typeof setTimeout> | null, wasPlaying: !!video && !video.paused, mode: null as HoldMode | null, dragged: false }
     press.timer = setTimeout(() => {
       press.timer = null
       if (!video) return
-      if (mode === 'fast') video.playbackRate = 2
+      if (mode === 'fast') vibrate(15)
       else video.pause()
       press.mode = mode
       setHold(mode)
@@ -102,8 +122,20 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
 
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const press = pressRef.current
+    if (!press) return
+    const dx = e.clientX - press.x
+    const dy = e.clientY - press.y
     // 누르기 전에 움직이면 스크롤/스와이프 — 탭도 홀드도 아니다
-    if (press?.timer && Math.hypot(e.clientX - press.x, e.clientY - press.y) > MOVE_TOLERANCE_PX) endHold()
+    if (press.timer) {
+      if (Math.hypot(dx, dy) > MOVE_TOLERANCE_PX) endHold()
+      return
+    }
+    // 2배속 홀드 중 아래로 밀면 손을 떼기 전에 바로 고정/해제 (홀드 한 번에 한 번)
+    if (press.mode === 'fast' && !press.dragged && dy >= LOCK_DRAG_PX && dy > Math.abs(dx)) {
+      press.dragged = true
+      vibrate([10, 40, 10])
+      onToggleSpeedLock()
+    }
   }
 
   const handlePointerUp = () => {
@@ -129,6 +161,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
         className="h-full w-full object-cover"
       />
       <div
+        ref={layerRef}
         data-testid="feed-gesture-layer"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -139,10 +172,21 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
         className="absolute inset-0 select-none [-webkit-touch-callout:none]"
       />
 
-      {hold === 'fast' && (
-        <div className="pointer-events-none absolute left-1/2 top-4 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/50 px-3 py-1 text-sm font-semibold text-white">
-          2x <FastForward size={14} fill="currentColor" />
+      {(hold === 'fast' || (speedLocked && isActive)) && (
+        <div
+          data-testid="feed-speed-pill"
+          className="pointer-events-none absolute left-1/2 top-4 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/50 px-3 py-1 text-sm font-semibold text-white"
+        >
+          2x {speedLocked ? <Lock size={13} strokeWidth={2.5} /> : <FastForward size={14} fill="currentColor" />}
         </div>
+      )}
+
+      {hold === 'fast' && (
+        <p className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-4 transition-opacity duration-300 starting:opacity-0">
+          <span className="rounded-full bg-black/25 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]">
+            {speedLocked ? t('unlockHint') : t('lockHint')}
+          </span>
+        </p>
       )}
 
       {flash && (

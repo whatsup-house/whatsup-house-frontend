@@ -1430,7 +1430,6 @@
       "post": "帖子",
       "review": "照片评价"
     },
-    "more": "更多",
     "dateFormat": "M月D日",
     "viewGathering": "查看这个聚会",
     "viewInstagram": "在 Instagram 查看",
@@ -1444,6 +1443,8 @@
     "loading": "加载中",
     "play": "播放",
     "mute": "静音",
-    "unmute": "取消静音"
+    "unmute": "取消静音",
+    "lockHint": "向下滑动以锁定 2 倍速",
+    "unlockHint": "向下滑动以恢复正常速度"
   }
 }
