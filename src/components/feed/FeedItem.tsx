@@ -75,7 +75,7 @@ export default function FeedItem({
 
       <div
         className={`pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pb-4 pt-20 text-white transition-opacity ${
-          holding ? 'opacity-0' : ''
+          holding ? 'opacity-0 [&_*]:pointer-events-none' : ''
         }`}
       >
         {media.length > 1 && (

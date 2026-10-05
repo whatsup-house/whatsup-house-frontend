@@ -43,7 +43,7 @@ test.describe('피드 탭', () => {
     await expect.poll(async () => (await state()).paused).toBe(false)
   })
 
-  test('2배속 홀드 중 아래로 밀면 2배속이 고정되고, 다시 홀드해 밀면 풀린다', async ({ page }) => {
+  test('2배속 홀드 중 아래로 밀고 떼면 2배속이 고정되고, 다시 밀고 떼면 풀린다', async ({ page }) => {
     await page.addInitScript(() => {
       const calls: unknown[] = []
       ;(window as unknown as { __vibrations: unknown[] }).__vibrations = calls
@@ -57,6 +57,9 @@ test.describe('피드 탭', () => {
     const video = first.locator('video')
     const rate = () => video.evaluate((v: HTMLVideoElement) => v.playbackRate)
     const pill = first.getByTestId('feed-speed-pill')
+    const lock = pill.locator('.lucide-lock')
+    const vibrations = () => page.evaluate(() => (window as unknown as { __vibrations: unknown[] }).__vibrations)
+    const scrolled = () => feed.evaluate((el) => el.scrollTop)
     await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused), { timeout: 10_000 }).toBe(false)
 
     // 실제 터치 입력 (안드로이드 크롬처럼 스크롤·pointercancel 판정을 거친다)
@@ -74,22 +77,24 @@ test.describe('피드 탭', () => {
     const tapBox = (await first.getByTestId('feed-caption').boundingBox())!
     await touch('touchStart', tapBox.x + 5, tapBox.y + 5)
     await touch('touchEnd', 0, 0)
-    const scrollTop = await feed.evaluate((el) => el.scrollTop)
+    const scrollTop = await scrolled()
 
-    // 홀드 → 2배속, 아래로 밀면 손을 떼기 전에 고정 문구로 바뀐다
+    // 홀드 → 2배속, 아래로 밀면 '떼세요' 안내만 나오고 아직 고정되지 않는다
     await touch('touchStart', x, y)
     await expect.poll(rate).toBe(2)
     await expect(page.getByText('2배속을 고정하려면 아래로 미세요')).toBeVisible()
     await dragDown()
-    await expect(page.getByText('보통 속도로 돌아가려면 아래로 미세요')).toBeVisible()
-    await expect(pill.locator('.lucide-lock')).toBeVisible()
-    await touch('touchEnd', 0, 0)
+    await expect(page.getByText('2배속으로 고정하려면 손가락을 떼세요')).toBeVisible()
     expect(await rate()).toBe(2)
-    await expect(pill.locator('.lucide-lock')).toBeVisible()
+    await expect(lock).toHaveCount(0)
+    expect(await scrolled()).toBe(scrollTop)
+    // 떼는 순간 고정
+    await touch('touchEnd', 0, 0)
+    await expect(lock).toBeVisible()
+    expect(await rate()).toBe(2)
     await expect(first.getByText('whatsup.house')).toBeVisible()
-    expect(await feed.evaluate((el) => el.scrollTop)).toBe(scrollTop)
-    const vibrations = await page.evaluate(() => (window as unknown as { __vibrations: unknown[] }).__vibrations)
-    expect(vibrations).toEqual([15, [10, 40, 10]])
+    expect(await scrolled()).toBe(scrollTop)
+    expect(await vibrations()).toEqual([15, 30])
 
     // 고정은 다음 릴스(4번째 칸)에도 이어진다
     const next = page.locator('[data-feed-index="3"]')
@@ -99,15 +104,57 @@ test.describe('피드 탭', () => {
     await first.scrollIntoViewIfNeeded()
     await expect.poll(rate).toBe(2)
 
-    // 다시 홀드 → 해제 안내, 아래로 밀고 떼면 1배속
+    // 다시 홀드 → 해제 안내, 아래로 밀면 '떼세요', 떼면 1배속
     await touch('touchStart', x, y)
     await expect(page.getByText('보통 속도로 돌아가려면 아래로 미세요')).toBeVisible()
     await dragDown()
+    await expect(page.getByText('보통 속도로 돌아가려면 손가락을 떼세요')).toBeVisible()
+    await expect(lock).toBeVisible()
+    await touch('touchEnd', 0, 0)
+    await expect.poll(rate).toBe(1)
+    await expect(pill).toBeHidden()
+    expect(await scrolled()).toBe(scrollTop)
+  })
+
+  test('아래로 밀었다가 다시 올리고 떼면 고정되지 않는다', async ({ page }) => {
+    await page.addInitScript(() => {
+      const calls: unknown[] = []
+      ;(window as unknown as { __vibrations: unknown[] }).__vibrations = calls
+      navigator.vibrate = (pattern) => (calls.push(pattern), true)
+    })
+    await setupGuestContext(page)
+    await page.goto('/feed')
+
+    const feed = page.getByTestId('feed')
+    const first = page.locator('[data-feed-index="0"]')
+    const video = first.locator('video')
+    const rate = () => video.evaluate((v: HTMLVideoElement) => v.playbackRate)
+    const pill = first.getByTestId('feed-speed-pill')
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused), { timeout: 10_000 }).toBe(false)
+
+    const cdp = await page.context().newCDPSession(page)
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number, y: number) =>
+      cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] })
+    const box = (await first.getByTestId('feed-gesture-layer').boundingBox())!
+    const x = box.x + box.width - 10
+    const y = box.y + box.height / 3
+    const tapBox = (await first.getByTestId('feed-caption').boundingBox())!
+    await touch('touchStart', tapBox.x + 5, tapBox.y + 5)
+    await touch('touchEnd', 0, 0)
+    const scrollTop = await feed.evaluate((el) => el.scrollTop)
+
+    await touch('touchStart', x, y)
+    await expect.poll(rate).toBe(2)
+    for (let d = 10; d <= 100; d += 10) await touch('touchMove', x, y + d)
+    await expect(page.getByText('2배속으로 고정하려면 손가락을 떼세요')).toBeVisible()
+    for (let d = 90; d >= 0; d -= 10) await touch('touchMove', x, y + d)
     await expect(page.getByText('2배속을 고정하려면 아래로 미세요')).toBeVisible()
     await touch('touchEnd', 0, 0)
     await expect.poll(rate).toBe(1)
     await expect(pill).toBeHidden()
     expect(await feed.evaluate((el) => el.scrollTop)).toBe(scrollTop)
+    const vibrations = await page.evaluate(() => (window as unknown as { __vibrations: unknown[] }).__vibrations)
+    expect(vibrations).not.toContain(30)
   })
 
   test('엔드 카드에 도달하면 재생 중인 영상이 없다', async ({ page }) => {
