@@ -88,7 +88,9 @@ test.describe('피드 탭', () => {
     expect(await rate()).toBe(2)
     await expect(lock).toHaveCount(0)
     expect(await scrolled()).toBe(scrollTop)
-    // 떼는 순간 고정
+    // 대기(armed)되는 순간 진동 — 손가락이 닿아 있을 때
+    expect(await vibrations()).toEqual([15, 30])
+    // 떼는 순간 고정, 진동은 없다
     await touch('touchEnd', 0, 0)
     await expect(lock).toBeVisible()
     expect(await rate()).toBe(2)
@@ -104,14 +106,17 @@ test.describe('피드 탭', () => {
     await first.scrollIntoViewIfNeeded()
     await expect.poll(rate).toBe(2)
 
-    // 다시 홀드 → 해제 안내, 아래로 밀면 '떼세요', 떼면 1배속
+    // 다시 홀드 → 해제 안내, 아래로 밀면 '떼세요', 떼면 1배속. 해제 대기·해제에는 진동이 없다
     await touch('touchStart', x, y)
     await expect(page.getByText('보통 속도로 돌아가려면 아래로 미세요')).toBeVisible()
+    expect(await vibrations()).toEqual([15, 30, 15])
     await dragDown()
     await expect(page.getByText('보통 속도로 돌아가려면 손가락을 떼세요')).toBeVisible()
     await expect(lock).toBeVisible()
+    expect(await vibrations()).toEqual([15, 30, 15])
     await touch('touchEnd', 0, 0)
     await expect.poll(rate).toBe(1)
+    expect(await vibrations()).toEqual([15, 30, 15])
     await expect(pill).toBeHidden()
     expect(await scrolled()).toBe(scrollTop)
   })
@@ -147,14 +152,22 @@ test.describe('피드 탭', () => {
     await expect.poll(rate).toBe(2)
     for (let d = 10; d <= 100; d += 10) await touch('touchMove', x, y + d)
     await expect(page.getByText('2배속으로 고정하려면 손가락을 떼세요')).toBeVisible()
+    const vibrations = () => page.evaluate(() => (window as unknown as { __vibrations: unknown[] }).__vibrations)
+    expect(await vibrations()).toEqual([15, 30])
+    for (let d = 90; d >= 0; d -= 10) await touch('touchMove', x, y + d)
+    await expect(page.getByText('2배속을 고정하려면 아래로 미세요')).toBeVisible()
+    expect(await vibrations()).toEqual([15, 30])
+    // 같은 홀드에서 다시 밀면 다시 진동, 올리면 진동 없음
+    for (let d = 10; d <= 100; d += 10) await touch('touchMove', x, y + d)
+    await expect(page.getByText('2배속으로 고정하려면 손가락을 떼세요')).toBeVisible()
+    expect(await vibrations()).toEqual([15, 30, 30])
     for (let d = 90; d >= 0; d -= 10) await touch('touchMove', x, y + d)
     await expect(page.getByText('2배속을 고정하려면 아래로 미세요')).toBeVisible()
     await touch('touchEnd', 0, 0)
     await expect.poll(rate).toBe(1)
     await expect(pill).toBeHidden()
     expect(await feed.evaluate((el) => el.scrollTop)).toBe(scrollTop)
-    const vibrations = await page.evaluate(() => (window as unknown as { __vibrations: unknown[] }).__vibrations)
-    expect(vibrations).not.toContain(30)
+    expect(await vibrations()).toEqual([15, 30, 30])
   })
 
   test('엔드 카드에 도달하면 재생 중인 영상이 없다', async ({ page }) => {
