@@ -1445,6 +1445,8 @@
     "mute": "Silenciar",
     "unmute": "Activar sonido",
     "lockHint": "Desliza hacia abajo para fijar la velocidad 2x",
-    "unlockHint": "Desliza hacia abajo para volver a la velocidad normal"
+    "unlockHint": "Desliza hacia abajo para volver a la velocidad normal",
+    "lockReleaseHint": "Suelta para fijar la velocidad 2x",
+    "unlockReleaseHint": "Suelta para volver a la velocidad normal"
   }
 }

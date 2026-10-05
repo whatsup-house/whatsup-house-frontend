@@ -1445,6 +1445,8 @@
     "mute": "Mute",
     "unmute": "Unmute",
     "lockHint": "Swipe down to lock 2x speed",
-    "unlockHint": "Swipe down to return to normal speed"
+    "unlockHint": "Swipe down to return to normal speed",
+    "lockReleaseHint": "Release to lock 2x speed",
+    "unlockReleaseHint": "Release to return to normal speed"
   }
 }

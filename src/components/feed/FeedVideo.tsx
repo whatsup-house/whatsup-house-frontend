@@ -24,18 +24,20 @@ interface FeedVideoProps {
 }
 
 // 안드로이드 크롬만 진동한다. 사용자 활성화 전 호출은 콘솔 경고가 나서 막는다.
+// Vibration API는 세기 조절이 없어 길이만 조절할 수 있다 — 10ms 펄스는 많은 안드로이드 모터에서 느껴지지 않는다.
 const vibrate = (pattern: number | number[]) => {
   if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(pattern)
 }
 
-// 릴스 영상. 화면에 있는 것만 재생. 짧게 탭 = 음소거 토글, 좌우 가장자리 길게 누름 = 2배속(누른 채 아래로 밀면 2배속 고정/해제), 가운데 길게 누름 = 일시정지.
+// 릴스 영상. 화면에 있는 것만 재생. 짧게 탭 = 음소거 토글, 좌우 가장자리 길게 누름 = 2배속(누른 채 아래로 밀었다가 떼면 2배속 고정/해제), 가운데 길게 누름 = 일시정지.
 export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMute, onHoldChange, speedLocked, onToggleSpeedLock }: FeedVideoProps) {
   const t = useTranslations('feed')
   const videoRef = useRef<HTMLVideoElement>(null)
   const layerRef = useRef<HTMLDivElement>(null)
-  const pressRef = useRef<{ x: number; y: number; timer: ReturnType<typeof setTimeout> | null; wasPlaying: boolean; mode: HoldMode | null; dragged: boolean } | null>(null)
+  const pressRef = useRef<{ x: number; y: number; timer: ReturnType<typeof setTimeout> | null; wasPlaying: boolean; mode: HoldMode | null; armed: boolean } | null>(null)
   const activeRef = useRef(isActive)
   const [hold, setHold] = useState<HoldMode | null>(null)
+  const [armed, setArmed] = useState(false)  // 아래로 민 상태 — 떼는 순간 고정/해제
   const [blocked, setBlocked] = useState(false)  // 자동재생 거부·모션 줄이기·로드 실패 → 재생 버튼
   const [flash, setFlash] = useState(false)
 
@@ -98,6 +100,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     if (!mode) return
     if (mode === 'pause' && press.wasPlaying && activeRef.current) play()
     setHold(null)
+    setArmed(false)
     onHoldChange(false)
   }
 
@@ -107,7 +110,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     const ratio = (e.clientX - rect.left) / rect.width
     const mode: HoldMode = ratio < EDGE_RATIO || ratio > 1 - EDGE_RATIO ? 'fast' : 'pause'
     const video = videoRef.current
-    const press = { x: e.clientX, y: e.clientY, timer: null as ReturnType<typeof setTimeout> | null, wasPlaying: !!video && !video.paused, mode: null as HoldMode | null, dragged: false }
+    const press = { x: e.clientX, y: e.clientY, timer: null as ReturnType<typeof setTimeout> | null, wasPlaying: !!video && !video.paused, mode: null as HoldMode | null, armed: false }
     press.timer = setTimeout(() => {
       press.timer = null
       if (!video) return
@@ -130,17 +133,24 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
       if (Math.hypot(dx, dy) > MOVE_TOLERANCE_PX) endHold()
       return
     }
-    // 2배속 홀드 중 아래로 밀면 손을 떼기 전에 바로 고정/해제 (홀드 한 번에 한 번)
-    if (press.mode === 'fast' && !press.dragged && dy >= LOCK_DRAG_PX && dy > Math.abs(dx)) {
-      press.dragged = true
-      vibrate([10, 40, 10])
-      onToggleSpeedLock()
+    // 2배속 홀드 중 아래로 밀면 대기(armed), 다시 올리면 취소. 실제 고정/해제는 손을 뗄 때
+    if (press.mode !== 'fast') return
+    const nextArmed = dy >= LOCK_DRAG_PX && dy > Math.abs(dx)
+    if (nextArmed !== press.armed) {
+      press.armed = nextArmed
+      setArmed(nextArmed)
     }
   }
 
   const handlePointerUp = () => {
-    const isTap = !!pressRef.current?.timer
+    const press = pressRef.current
+    const isTap = !!press?.timer
+    const commit = press?.mode === 'fast' && press.armed && activeRef.current
     endHold()
+    if (commit) {
+      vibrate(30)  // 2배속 진입(15ms)보다 조금 강하게
+      onToggleSpeedLock()
+    }
     if (isTap) {
       onToggleMute()
       setFlash(true)
@@ -184,7 +194,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
       {hold === 'fast' && (
         <p className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center px-4 transition-opacity duration-300 starting:opacity-0">
           <span className="rounded-full bg-black/25 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm [text-shadow:0_1px_2px_rgb(0_0_0/0.6)]">
-            {speedLocked ? t('unlockHint') : t('lockHint')}
+            {t(armed ? (speedLocked ? 'unlockReleaseHint' : 'lockReleaseHint') : speedLocked ? 'unlockHint' : 'lockHint')}
           </span>
         </p>
       )}
