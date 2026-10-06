@@ -66,6 +66,10 @@ export interface GatheringDetail {
   gatheringType: GatheringType | null
   basePrice: number | null
   sessions: GatheringSession[]   // 날짜·시작 시간 순
+  // 입금 계좌. 미설정이면 null, BE 배포 전엔 없을 수 있다 (KAN-391)
+  accountBank?: string | null
+  accountNumber?: string | null
+  accountHolder?: string | null
 }
 
 // 목록 파생: 날짜별 목록의 한 줄 = 종류 + 그 날의 회차
@@ -99,6 +103,10 @@ export interface AdminGatheringTypeRequest {
   thumbnailUrl?: string          // 새로 올린 이미지의 tempPath만. 생략하면 기존 썸네일 유지
   imageUrls?: string[]           // 상세 사진 순서대로: 새 사진은 tempPath, 남길 사진은 기존 URL. 생략하면 기존 유지 (KAN-372)
   gatheringType?: GatheringType  // 생성 시에만 반영 (수정 불가)
+  // 입금 계좌 (각 50자). 빈 문자열은 BE가 null로 정규화한다 (KAN-391)
+  accountBank?: string
+  accountNumber?: string
+  accountHolder?: string
 }
 
 // 우연한 식탁 회차 전용 필드 — RANDOM_TABLE 회차에서만 보낸다. null이면 매칭 규칙 기본값 (KAN-345)
@@ -535,7 +543,7 @@ export type CropRatio = '4:3' | '3:2' | '9:16' | '1:1'
 export type CropContext = 'review' | 'carousel' | 'avatar' | 'gathering'
 
 // 백엔드 SupabaseStorageService.ALLOWED_FOLDERS와 일치해야 한다.
-export type UploadFolder = 'carousel' | 'gathering' | 'review' | 'avatar'
+export type UploadFolder = 'carousel' | 'gathering' | 'review' | 'avatar' | 'feed'
 
 export interface ImageUploadResponse {
   tempPath: string
@@ -1507,4 +1515,39 @@ export interface FeedItem {
 export interface FeedResponse {
   items: FeedItem[]
   nextCursor: string | null
+}
+
+// 어드민 피드 관리 (KAN-383). media url: 새 사진은 업로드 tempPath, 기존 사진·영상은 받은 URL 그대로.
+export interface AdminFeedPost {
+  id: string
+  media: FeedMedia[]
+  caption: string | null
+  instagramUrl: string | null
+  postedAt: string
+  gathering: { id: string; title: string } | null
+  visible: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminFeedPostRequest {
+  media: FeedMedia[]
+  caption?: string
+  instagramUrl?: string
+  postedAt: string // YYYY-MM-DDTHH:mm:ss
+  gatheringId?: string | null
+  visible?: boolean
+}
+
+export interface AdminFeedPostPage {
+  content: AdminFeedPost[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+export interface AdminFeedFilters {
+  visible?: boolean
+  page: number
 }

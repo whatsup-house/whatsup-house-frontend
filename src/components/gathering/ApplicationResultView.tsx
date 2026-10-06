@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { Button, Card } from '@/components/ui'
 import { formatLocalizedFullDate, formatTime } from '@/lib/utils/date'
-import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
+import { resolvePaymentAccount } from '@/lib/utils/paymentAccount'
 import type { ApplicationStatus, GatheringDetail, GatheringSession } from '@/lib/api/types'
 
 type Mode = 'completed' | 'confirmed'
@@ -143,7 +143,7 @@ export default function ApplicationResultView({
           ) : paymentConfirmed ? (
             <PaymentConfirmedCard />
           ) : (
-            <PaymentAccountCard price={price} />
+            <PaymentAccountCard price={price} gathering={gathering} />
           )
         )}
 
@@ -219,12 +219,16 @@ function FreeConfirmedCard() {
   )
 }
 
-function PaymentAccountCard({ price }: { price: number }) {
+function PaymentAccountCard({ price, gathering }: {
+  price: number
+  gathering: Pick<GatheringDetail, 'accountBank' | 'accountNumber' | 'accountHolder'>
+}) {
   const t = useTranslations('gathering.apply.result')
   const tPayment = useTranslations('payment.account')
   const locale = useLocale()
   const [copied, setCopied] = useState(false)
-  const accountText = `${tPayment('bankName')} ${PAYMENT_ACCOUNT.accountNumber}`
+  const account = resolvePaymentAccount(gathering, tPayment('bankName'))
+  const accountText = account.text
 
   const handleCopy = async () => {
     try {
@@ -265,10 +269,13 @@ function PaymentAccountCard({ price }: { price: number }) {
         </button>
 
         <div className="flex flex-col gap-1 pt-2 border-t border-primary/10">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-tag-text">{t('accountHolder')}</span>
-            <span className="text-foreground font-medium">{tPayment('accountHolder')}</span>
-          </div>
+          {/* 게더링 계좌는 예금주가 계좌 줄에 붙으므로 폴백일 때만 따로 보여준다. (KAN-391) */}
+          {account.isFallback && (
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-tag-text">{t('accountHolder')}</span>
+              <span className="text-foreground font-medium">{tPayment('accountHolder')}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between text-xs">
             <span className="text-tag-text">{t('depositAmount')}</span>
             <span className="text-foreground font-medium">{t('priceValue', { price: price.toLocaleString(locale) })}</span>
