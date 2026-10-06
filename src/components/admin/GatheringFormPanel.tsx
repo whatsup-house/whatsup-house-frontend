@@ -20,6 +20,15 @@ const schema = z.object({
   howToRunText: z.string().optional(),
   basePrice: z.number({ error: '기본 참가비를 입력해주세요' }).min(0, '참가비는 0원 이상이어야 합니다'),
   tagsText: z.string().optional(),
+  // 입금 계좌 (선택). 비우면 BE가 null로 저장하고 유저 화면은 폴백 계좌를 쓴다. (KAN-391)
+  accountBank: z.string().max(50, '50자 이내로 입력해주세요').optional(),
+  accountNumber: z.string().max(50, '50자 이내로 입력해주세요').optional(),
+  accountHolder: z.string().max(50, '50자 이내로 입력해주세요').optional(),
+}).superRefine((values, ctx) => {
+  // 번호만 있으면 유저 화면에 폴백 은행명이 붙어 다른 은행으로 안내될 수 있다 — 번호를 넣으면 은행명도 받는다.
+  if (values.accountNumber?.trim() && !values.accountBank?.trim()) {
+    ctx.addIssue({ code: 'custom', path: ['accountBank'], message: '계좌번호를 입력하면 은행명도 입력해주세요' })
+  }
 })
 
 type FormValues = z.infer<typeof schema>
@@ -81,6 +90,9 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
       basePrice: 0,
       howToRunText: '',
       tagsText: '',
+      accountBank: '',
+      accountNumber: '',
+      accountHolder: '',
     },
   })
 
@@ -93,6 +105,9 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
       howToRunText: detail.howToRun?.join('\n') ?? '',
       basePrice: detail.basePrice ?? 0,
       tagsText: detail.tags?.join(',') ?? '',
+      accountBank: detail.accountBank ?? '',
+      accountNumber: detail.accountNumber ?? '',
+      accountHolder: detail.accountHolder ?? '',
     })
   }, [detail, reset])
 
@@ -169,6 +184,9 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
       imageUrls: editedImages?.map((image) => image.value),
       howToRun: values.howToRunText ? values.howToRunText.split('\n').filter(Boolean) : [],
       tags: values.tagsText ? values.tagsText.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      accountBank: values.accountBank?.trim() ?? '',
+      accountNumber: values.accountNumber?.trim() ?? '',
+      accountHolder: values.accountHolder?.trim() ?? '',
     }
 
     if (gatheringId) {
@@ -339,6 +357,15 @@ export function GatheringFormPanel({ gatheringId, onClose, onSuccess }: Gatherin
               placeholder="조용한,감성적인"
               {...register('tagsText')}
             />
+
+            {/* 입금 계좌 — 비우면 기본 계좌로 안내된다. (KAN-391) */}
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-medium text-foreground">입금 계좌 (선택)</p>
+              <Input label="은행" placeholder="우리은행" error={errors.accountBank?.message} {...register('accountBank')} />
+              <Input label="계좌번호" placeholder="1002-000-000000" error={errors.accountNumber?.message} {...register('accountNumber')} />
+              <Input label="예금주" placeholder="와썹하우스" error={errors.accountHolder?.message} {...register('accountHolder')} />
+              <p className="text-xs text-tag-text">계좌번호를 비우면 기본 계좌로 안내돼요.</p>
+            </div>
 
             <label className="flex items-center gap-2 text-sm text-foreground">
               <input

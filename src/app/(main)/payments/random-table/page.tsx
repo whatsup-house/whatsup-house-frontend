@@ -2,14 +2,15 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { Check, Ticket } from 'lucide-react'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
-import { fetchMyApplicationDetail } from '@/lib/api/application'
+import { useMyApplicationDetail } from '@/lib/hooks/useApplications'
+import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseTicketPass, useTicketProducts } from '@/lib/hooks/useTickets'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useToastStore } from '@/lib/store/toastStore'
-import { PAYMENT_ACCOUNT } from '@/lib/constants/payment'
+import { resolvePaymentAccount } from '@/lib/utils/paymentAccount'
 import { safeReturnUrl } from '@/lib/utils/url'
 import type { TicketPass } from '@/lib/api/types'
 
@@ -24,12 +25,13 @@ function PaymentContent() {
   const productsQuery = useTicketProducts()
   const memberTickets = useMyTickets(applicationId)
   const guestTickets = useGuestTickets(bookingNumber)
-  const memberApplicationDetail = useQuery({
-    queryKey: ['application', applicationId],
-    queryFn: () => fetchMyApplicationDetail(applicationId!),
-    enabled: Boolean(applicationId && isLoggedIn),
-    retry: false,
-  })
+  // 빈 id면 훅이 비활성화된다(enabled: !!id).
+  const memberApplicationDetail = useMyApplicationDetail(applicationId && isLoggedIn ? applicationId : '')
+  // 입금 계좌는 게더링 상세에서 가져온다. 비회원은 이용권 응답의 gatheringId를 쓴다. 못 구하면 폴백 계좌. (KAN-391)
+  const gatheringId = memberApplicationDetail.data?.gathering.id ?? guestTickets.data?.gatheringId ?? ''
+  const gatheringDetail = useGatheringDetail(gatheringId)
+  const tPayment = useTranslations('payment.account')
+  const account = resolvePaymentAccount(gatheringDetail.data, tPayment('bankName'))
   const memberPurchase = usePurchaseTicketPass()
   const guestPurchase = usePurchaseGuestTicketPass()
   const showToast = useToastStore((state) => state.show)
@@ -48,6 +50,8 @@ function PaymentContent() {
   const isLoading = productsQuery.isLoading
     || (isGuestPurchase ? guestTickets.isLoading : memberTickets.isLoading)
     || Boolean(applicationId && isLoggedIn && memberApplicationDetail.isLoading)
+    // 게더링 상세가 오기 전에 폴백 계좌가 먼저 보이지 않게 한다 (송금 안내라 잠깐이라도 다른 계좌가 뜨면 안 됨)
+    || Boolean(gatheringId && gatheringDetail.isLoading)
   const purchase = isGuestPurchase ? guestPurchase : memberPurchase
 
   if (!isInitialized || (!isGuestPurchase && !isLoggedIn) || isLoading) {
@@ -136,8 +140,8 @@ function PaymentContent() {
             </Card>
             <Card className="p-5 mb-4">
               <p className="text-xs text-tag-text mb-2">입금 계좌</p>
-              <p className="font-semibold">우리은행 {PAYMENT_ACCOUNT.accountNumber}</p>
-              <p className="text-sm text-tag-text mt-2">예금주 와썹하우스</p>
+              <p className="font-semibold">{account.text}</p>
+              {account.isFallback && <p className="text-sm text-tag-text mt-2">예금주 {tPayment('accountHolder')}</p>}
               <p className="text-lg font-bold text-primary mt-3">{displayPass.purchaseAmount.toLocaleString()}원</p>
             </Card>
             <p className="mb-4 text-center text-xs text-tag-text">입금 확인 → 이용권 1회 자동 사용 → 신청 확정</p>

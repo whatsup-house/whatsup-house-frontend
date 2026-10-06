@@ -58,6 +58,13 @@ export const mockGathering = {
   reviewCount: 8,
 }
 
+// 게더링 입금 계좌 (KAN-391). 없으면 유저 화면은 폴백 계좌(우리은행 1002-157-849052)를 쓴다.
+export const mockGatheringAccount = {
+  accountBank: '국민은행',
+  accountNumber: '123-45-678901',
+  accountHolder: '홍길동',
+}
+
 export const mockClosedGathering = {
   ...mockGathering,
   id: MOCK_CLOSED_GATHERING_ID,

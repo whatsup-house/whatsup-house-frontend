@@ -1,5 +1,4 @@
-// TODO: 백엔드에서 GatheringDetail에 계좌 정보 필드가 추가되면 그 값을 우선 사용하도록 교체할 것
-//       현재는 백엔드 미연동 상태라 프론트에서 임시 하드코딩으로 관리
+// 게더링에 계좌가 없을 때만 쓰는 폴백 계좌. 표시 로직은 lib/utils/paymentAccount.ts (KAN-391)
 export const PAYMENT_ACCOUNT = {
   accountNumber: '1002-157-849052',
 } as const
