@@ -5,6 +5,9 @@ import type {
   ChatMessage,
   ChatRoomDetail,
   ChatRoomSummary,
+  FeedItem,
+  FeedMedia,
+  FeedResponse,
   GatheringForm,
 } from '@/lib/api/types'
 
@@ -570,6 +573,55 @@ export async function mockAdminHomeApis(page: Page) {
       return route.fulfill({ json: apiRes({ content: rawReviews }) })
     }
     return route.fulfill({ json: apiRes(rawReviews[0]) })
+  })
+}
+
+// ─── 피드 (KAN-382) — /api/feed 커서 페이지 목 ────────────────────────────────
+// 미디어는 public/feed/* 정적 에셋. 0번은 릴스(VIDEO), 3번도 릴스(2배속 고정 이어짐 테스트용).
+
+const FEED_COMMUTE = { id: MOCK_GATHERING_ID, title: '퇴근 게더링' }
+const FEED_INSTAGRAM = 'https://www.instagram.com/whatsup_house/'
+const feedImg = (name: string): FeedMedia => ({ type: 'IMAGE', url: `/feed/${name}.jpg` })
+const feedReel = (n: number): FeedMedia => ({
+  type: 'VIDEO',
+  url: `/feed/reel-${n}.mp4`,
+  posterUrl: `/feed/reel-${n}-poster.jpg`,
+  width: 720,
+  height: 1280,
+})
+
+const FEED_BASE: Omit<FeedItem, 'id' | 'postedAt'>[] = [
+  { kind: 'POST', media: [feedReel(1)], gathering: FEED_COMMUTE, instagramUrl: FEED_INSTAGRAM,
+    caption: '퇴근하고 바로 와도 괜찮아요 🙌\n처음 보는 사이인데 어느새 마지막 지하철 걱정하던 금요일 밤.\n이번 주 퇴근 게더링도 자리 남아 있어요!' },
+  { kind: 'REVIEW', media: [feedImg('review-2'), feedImg('review-6')], gathering: FEED_COMMUTE, reviewId: 'mock-review-1',
+    caption: '혼자 가서 어색할까 걱정했는데 호스트님이 자연스럽게 대화를 이어주셔서 3시간이 금방 갔어요. 다음엔 친구도 데려갈게요!' },
+  { kind: 'POST', media: [feedImg('home-1'), feedImg('review-1'), feedImg('review-4')], gathering: null, instagramUrl: FEED_INSTAGRAM,
+    caption: '청춘이 와썹 5월 🌿\n이번 달 게더링 일정이 나왔어요.' },
+  { kind: 'POST', media: [feedReel(2)], gathering: null, instagramUrl: FEED_INSTAGRAM,
+    caption: '처음 보는 4~6명이 함께하는 작은 저녁 🍽️' },
+  { kind: 'REVIEW', media: [feedImg('review-5')], gathering: FEED_COMMUTE, reviewId: 'mock-review-2',
+    caption: '음식도 맛있었지만 대화가 더 맛있었던 저녁.' },
+  { kind: 'POST', media: [feedImg('home-3')], gathering: null, instagramUrl: FEED_INSTAGRAM,
+    caption: '보라매공원 경찰과 도둑 🚓' },
+]
+
+const FEED_LATEST = new Date('2026-09-30T20:00:00+09:00').getTime()
+const feedPage = (page: number, size: number): FeedItem[] =>
+  Array.from({ length: size }, (_, i) => {
+    const n = page * 10 + i
+    return { ...FEED_BASE[n % FEED_BASE.length], id: `feed-${n}`, postedAt: new Date(FEED_LATEST - n * 30 * 3_600_000).toISOString() }
+  })
+
+// 첫 페이지 10개 + 커서 'p2' 로 한 번 더(4개) 붙고 끝난다.
+export const mockFeedPages: Record<string, FeedResponse> = {
+  first: { items: feedPage(0, 10), nextCursor: 'p2' },
+  p2: { items: feedPage(1, 4), nextCursor: null },
+}
+
+export async function mockFeedApis(page: Page) {
+  await page.route('**/api/feed**', (route) => {
+    const cursor = new URL(route.request().url()).searchParams.get('cursor')
+    return route.fulfill({ json: apiRes(mockFeedPages[cursor ?? 'first']) })
   })
 }
 

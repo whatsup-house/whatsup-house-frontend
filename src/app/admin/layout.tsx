@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, CalendarDays, MapPin, Users, LogOut, ClipboardList, Home, Utensils, FileText, Mail, Menu, X,
-  Ticket, MessageCircle,
+  Ticket, MessageCircle, Clapperboard,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useLogout } from '@/lib/hooks/useAuth'
@@ -14,6 +14,7 @@ const sidebarItems = [
   { href: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
   { href: '/admin/gatherings', icon: CalendarDays, label: '게더링 관리' },
   { href: '/admin/home', icon: Home, label: '홈화면 관리' },
+  { href: '/admin/feed', icon: Clapperboard, label: '피드 관리' }, // (KAN-383)
   { href: '/admin/applications', icon: ClipboardList, label: '참가자 관리' },
   { href: '/admin/forms', icon: FileText, label: '신청폼 관리' },
   { href: '/admin/dining', icon: Utensils, label: '우연한 식탁' },

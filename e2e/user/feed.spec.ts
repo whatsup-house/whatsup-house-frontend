@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test'
-import { setupGuestContext } from '../fixtures/mocks'
+import { mockFeedApis, setupGuestContext } from '../fixtures/mocks'
 
-// KAN-382: 릴스형 피드 — 목 데이터 첫 칸은 영상(릴스)
+// KAN-382: 릴스형 피드 — /api/feed 를 route 목으로 응답. 첫 칸은 영상(릴스)
 test.describe('피드 탭', () => {
   test('첫 릴스가 재생되고 가장자리 길게 누르면 2배속, 가운데 길게 누르면 일시정지된다', async ({ page }) => {
     await setupGuestContext(page)
+    await mockFeedApis(page)
     await page.goto('/feed')
 
     const first = page.locator('[data-feed-index="0"]')
@@ -50,6 +51,7 @@ test.describe('피드 탭', () => {
       navigator.vibrate = (pattern) => (calls.push(pattern), true)
     })
     await setupGuestContext(page)
+    await mockFeedApis(page)
     await page.goto('/feed')
 
     const feed = page.getByTestId('feed')
@@ -128,6 +130,7 @@ test.describe('피드 탭', () => {
       navigator.vibrate = (pattern) => (calls.push(pattern), true)
     })
     await setupGuestContext(page)
+    await mockFeedApis(page)
     await page.goto('/feed')
 
     const feed = page.getByTestId('feed')
@@ -172,6 +175,7 @@ test.describe('피드 탭', () => {
 
   test('엔드 카드에 도달하면 재생 중인 영상이 없다', async ({ page }) => {
     await setupGuestContext(page)
+    await mockFeedApis(page)
     await page.goto('/feed')
     const feed = page.getByTestId('feed')
     const end = page.getByTestId('feed-end')
