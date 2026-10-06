@@ -535,7 +535,7 @@ export type CropRatio = '4:3' | '3:2' | '9:16' | '1:1'
 export type CropContext = 'review' | 'carousel' | 'avatar' | 'gathering'
 
 // 백엔드 SupabaseStorageService.ALLOWED_FOLDERS와 일치해야 한다.
-export type UploadFolder = 'carousel' | 'gathering' | 'review' | 'avatar'
+export type UploadFolder = 'carousel' | 'gathering' | 'review' | 'avatar' | 'feed'
 
 export interface ImageUploadResponse {
   tempPath: string
@@ -1507,4 +1507,39 @@ export interface FeedItem {
 export interface FeedResponse {
   items: FeedItem[]
   nextCursor: string | null
+}
+
+// 어드민 피드 관리 (KAN-383). media url: 새 사진은 업로드 tempPath, 기존 사진·영상은 받은 URL 그대로.
+export interface AdminFeedPost {
+  id: string
+  media: FeedMedia[]
+  caption: string | null
+  instagramUrl: string | null
+  postedAt: string
+  gathering: { id: string; title: string } | null
+  visible: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminFeedPostRequest {
+  media: FeedMedia[]
+  caption?: string
+  instagramUrl?: string
+  postedAt: string // YYYY-MM-DDTHH:mm:ss
+  gatheringId?: string | null
+  visible?: boolean
+}
+
+export interface AdminFeedPostPage {
+  content: AdminFeedPost[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+export interface AdminFeedFilters {
+  visible?: boolean
+  page: number
 }
