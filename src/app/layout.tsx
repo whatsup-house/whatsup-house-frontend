@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Allura, Gowun_Batang, Press_Start_2P } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { SITE_URL } from '@/lib/constants/site'
 import { Providers } from './providers'
 import '@/styles/globals.css'
 
@@ -42,11 +43,17 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.root')
 
   return {
+    metadataBase: new URL(SITE_URL),
     title: t('title'),
     description: t('description'),
     icons: { icon: '/assets/whatsup-favicon.png', apple: '/icons/apple-touch-icon.png' },
     // iOS 홈 화면 추가 시 standalone 실행 (KAN-366)
     appleWebApp: { capable: true, title: t('title'), statusBarStyle: 'default' },
+    // 서치콘솔·서치어드바이저 소유 확인
+    verification: {
+      google: 'AZnkFsq37-PI1N5X6Oy2YdO3_WQ9K38-2bWTHbb9zKQ',
+      other: { 'naver-site-verification': '7456f49b48996d4ef6eebb9c9127f114fedb5318' },
+    },
   }
 }
 
