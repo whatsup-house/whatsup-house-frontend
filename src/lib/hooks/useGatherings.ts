@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { useQuery, type QueryClient } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import {
@@ -67,4 +68,14 @@ export async function prefetchGatheringsQueries(queryClient: QueryClient) {
     queryKey: ['gatherings', 'all'],
     queryFn: fetchGatheringsAll,
   })
+}
+
+// 서버 전용: 상세 page의 generateMetadata와 프리페치가 같은 요청에서 API를 한 번만 부르도록 요청 단위로 캐시한다. 실패하면 null. (KAN-395)
+export const getGatheringDetailOnServer = cache((id: string) => fetchGatheringDetail(id).catch(() => null))
+
+export async function prefetchGatheringDetail(queryClient: QueryClient, id: string) {
+  const gathering = await getGatheringDetailOnServer(id)
+  // 실패는 캐시에 넣지 않는다 → 클라이언트가 다시 요청하고 기존 에러 화면을 보여준다.
+  if (gathering) queryClient.setQueryData(['gathering', id], gathering)
+  return gathering
 }
