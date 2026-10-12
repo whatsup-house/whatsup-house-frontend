@@ -1188,6 +1188,10 @@
     "gatherings": {
       "title": "Gatherings | Whatsup House",
       "description": "Check social gathering schedules by date and apply."
+    },
+    "reviews": {
+      "title": "Gathering reviews | Whatsup House",
+      "description": "Honest reviews and photos from people who joined Whatsup House gatherings."
     }
   },
   "payment": {
