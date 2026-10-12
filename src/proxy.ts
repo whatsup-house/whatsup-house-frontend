@@ -15,6 +15,8 @@ function isMobileRequest(request: NextRequest): boolean {
 export function proxy(request: NextRequest) {
   const { searchParams } = request.nextUrl
   if (searchParams.get('guest') === '1') return NextResponse.next()
+  // 검색·AI 크롤러(구글은 모바일 UA로 수집, 네이버 Yeti)는 홈을 그대로 읽게 한다.
+  if (/bot|crawl|spider|Yeti/i.test(request.headers.get('user-agent') ?? '')) return NextResponse.next()
   if (request.cookies.get(WELCOME_COOKIE_NAME)?.value === '1') return NextResponse.next()
   if (!isMobileRequest(request)) return NextResponse.next()
 
