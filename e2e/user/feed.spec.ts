@@ -19,7 +19,8 @@ test.describe('피드 탭', () => {
     expect(await clamp()).toEqual({ clamp: '2', cut: true })
     await expect(first.getByText('더 보기')).toHaveCount(0)
     await caption.click()
-    expect(await clamp()).toEqual({ clamp: 'none', cut: false })
+    // 펼침은 높이 애니메이션(0.3초) — 끝나면 잘림이 없어진다
+    await expect.poll(clamp).toEqual({ clamp: 'none', cut: false })
 
     const video = first.locator('video')
     const state = () => video.evaluate((v: HTMLVideoElement) => ({ rate: v.playbackRate, paused: v.paused }))

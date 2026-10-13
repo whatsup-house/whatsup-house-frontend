@@ -3,6 +3,8 @@
 @import "tailwindcss";
 
 @theme inline {
+  --animate-flash-2s: hold-then-fade 2s ease forwards;
+  --animate-flash-3s: hold-then-fade 3s ease forwards;
   --color-primary: #C8392B;
   --color-primary-light: #FDECEA;
   --color-background: #F5F0EB;
@@ -144,6 +146,12 @@ h1, h2, h3 {
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* 피드 오버레이(음소거 표시 2초·장 번호 3초): 보이다가 끝에서 서서히 사라지고 그대로 남는다. 유틸리티는 @theme 의 --animate-flash-* */
+@keyframes hold-then-fade {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* 스크롤바 숨김 */

@@ -17,7 +17,7 @@ export default function FeedView() {
   const { data, isPending, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed()
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
-  const [muted, setMuted] = useState(true)  // 한 번 소리를 켜면 다음 영상도 켠 채로
+  const [muted, setMuted] = useState(false)  // 소리 켠 채로 시작(막히면 FeedVideo가 음소거로 전환). 바꾼 상태는 다음 영상까지 유지
   const [speedLocked, setSpeedLocked] = useState(false)  // 2배속 고정도 다음 영상까지 유지
   const [jitter] = useState(() => new Map<string, number>())  // 들어올 때마다 순서가 조금씩 달라지게
   const items = data?.pages.flatMap((page) => shuffleNearby(page.items, jitter)) ?? []

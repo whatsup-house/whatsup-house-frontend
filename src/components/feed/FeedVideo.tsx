@@ -38,10 +38,12 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
   const layerRef = useRef<HTMLDivElement>(null)
   const pressRef = useRef<{ x: number; y: number; timer: ReturnType<typeof setTimeout> | null; wasPlaying: boolean; mode: HoldMode | null; armed: boolean } | null>(null)
   const activeRef = useRef(isActive)
+  const toggleMuteRef = useRef(onToggleMute)  // 재생 effect가 매 렌더 다시 돌지 않게 최신 콜백만 ref로
+  useEffect(() => { toggleMuteRef.current = onToggleMute })
   const [hold, setHold] = useState<HoldMode | null>(null)
   const [armed, setArmed] = useState(false)  // 아래로 민 상태 — 떼는 순간 고정/해제
   const [blocked, setBlocked] = useState(false)  // 자동재생 거부·모션 줄이기·로드 실패 → 재생 버튼
-  const [flash, setFlash] = useState(false)
+  const [flash, setFlash] = useState(0)  // 음소거가 바뀔 때마다 1씩 — 가운데 표시를 처음부터 다시 띄운다
 
   // 비활성화로 pause()되며 나는 AbortError나 이미 지나간 칸의 실패는 무시
   const onPlayFail = (err: unknown) => {
@@ -63,13 +65,39 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ;(reduced ? Promise.reject(new Error('reduced-motion')) : video.play()).then(
       () => setBlocked(false),
-      onPlayFail,
+      (err: unknown) => {
+        // 소리 켠 자동재생을 브라우저가 막으면(페이지와 상호작용 전) 음소거로 재생하고 알린다
+        if ((err as Error)?.name !== 'NotAllowedError' || video.muted) return onPlayFail(err)
+        video.muted = true
+        video.play().then(() => {
+          setBlocked(false)
+          toggleMuteRef.current()
+          setFlash((n) => n + 1)
+        }, onPlayFail)
+      },
     )
   }, [isActive])
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted
   }, [muted])
+
+  // 다른 탭·앱으로 가면 멈추고(소리 켠 채로 뒤에서 재생되지 않게) 돌아오면 다시 재생
+  useEffect(() => {
+    let resume = false  // 숨기기 직전에 재생 중이던 영상만 다시 튼다 (모션 줄이기·재생 버튼 상태는 그대로)
+    const onVisibility = () => {
+      const video = videoRef.current
+      if (!video || !activeRef.current) return
+      if (document.hidden) {
+        resume = !video.paused
+        video.pause()
+      } else if (resume) {
+        video.play().catch(() => {})
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.playbackRate = isActive && (speedLocked || hold === 'fast') ? 2 : 1
@@ -86,12 +114,6 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     layer.addEventListener('touchmove', onTouchMove, { passive: false })
     return () => layer.removeEventListener('touchmove', onTouchMove)
   }, [])
-
-  useEffect(() => {
-    if (!flash) return
-    const timer = setTimeout(() => setFlash(false), 600)
-    return () => clearTimeout(timer)
-  }, [flash])
 
   const endHold = () => {
     const press = pressRef.current
@@ -154,7 +176,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
     if (commit) onToggleSpeedLock()
     if (isTap) {
       onToggleMute()
-      setFlash(true)
+      setFlash((n) => n + 1)
     }
   }
 
@@ -200,9 +222,13 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
         </p>
       )}
 
-      {flash && (
-        <div className="pointer-events-none absolute left-1/2 top-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white">
-          {muted ? <VolumeX size={28} /> : <Volume2 size={28} />}
+      {flash > 0 && (
+        <div
+          key={flash}
+          onAnimationEnd={() => setFlash(0)}
+          className="animate-flash-2s pointer-events-none absolute left-1/2 top-1/2 flex size-[90px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white"
+        >
+          {muted ? <VolumeX size={45} /> : <Volume2 size={45} />}
         </div>
       )}
 
@@ -217,11 +243,12 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
         </button>
       )}
 
+      {/* 화면에는 탭 후 가운데 표시만 보이고, 이 버튼은 키보드로 포커스했을 때만 나타난다 */}
       <button
         type="button"
-        onClick={onToggleMute}
+        onClick={() => { onToggleMute(); setFlash((n) => n + 1) }}
         aria-label={muted ? t('unmute') : t('mute')}
-        className={`absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-black/40 text-white transition-opacity ${hold ? 'opacity-0' : ''}`}
+        className="sr-only right-3 top-3 flex size-9 items-center justify-center rounded-full bg-black/40 text-white focus-visible:not-sr-only focus-visible:absolute"
       >
         {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
       </button>
