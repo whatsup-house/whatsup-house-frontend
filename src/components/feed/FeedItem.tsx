@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
+import CarouselArrows from '@/components/ui/CarouselArrows'
+import { useHorizontalSwipe } from '@/lib/hooks/useHorizontalSwipe'
+import { useWheelStep } from '@/lib/hooks/useWheelStep'
 import FeedVideo from './FeedVideo'
 import type { FeedItemKind, FeedMedia } from '@/lib/api/types'
 
@@ -31,9 +34,14 @@ export default function FeedItem({
   kind, media, caption, postedAt, gathering, instagramUrl, reviewId, isActive, muted, onToggleMute, speedLocked, onToggleSpeedLock,
 }: FeedItemProps) {
   const t = useTranslations('feed')
+  const tScroll = useTranslations('ui.scroll')
   const [holding, setHolding] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [slide, setSlide] = useState(0)
+  const slidesRef = useRef<HTMLDivElement>(null)
+  const step = (dir: 1 | -1) => setSlide((s) => Math.max(0, Math.min(media.length - 1, s + dir)))
+  const swipe = useHorizontalSwipe({ onSwipeLeft: () => step(1), onSwipeRight: () => step(-1) })
+  useWheelStep(slidesRef, step)
 
   const kindLabel = kind === 'REVIEW' ? t('kind.review') : media[0]?.type === 'VIDEO' ? t('kind.reels') : t('kind.post')
 
@@ -59,15 +67,26 @@ export default function FeedItem({
       onContextMenu={(e) => e.preventDefault()}
     >
       {media.length > 1 ? (
-        <div
-          className="flex h-full snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          onScroll={(e) => setSlide(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
-        >
-          {media.map((m, i) => (
-            <div key={m.url + i} className="relative h-full w-full shrink-0 snap-center">
-              {renderMedia(m, i)}
-            </div>
-          ))}
+        // 홈 히어로 캐러셀과 같은 방식: 한 번 밀면 한 칸, translateX 로 감속하며 붙는다
+        <div ref={slidesRef} className="relative h-full touch-pan-y overflow-hidden" {...swipe}>
+          <div
+            className="flex h-full transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+            style={{ transform: `translateX(-${slide * 100}%)` }}
+          >
+            {media.map((m, i) => (
+              <div key={m.url + i} inert={i !== slide} className="relative h-full w-full shrink-0">
+                {renderMedia(m, i)}
+              </div>
+            ))}
+          </div>
+          <CarouselArrows
+            canPrev={slide > 0}
+            canNext={slide < media.length - 1}
+            onPrev={() => step(-1)}
+            onNext={() => step(1)}
+            prevLabel={tScroll('previous')}
+            nextLabel={tScroll('next')}
+          />
         </div>
       ) : (
         media[0] && renderMedia(media[0], 0)

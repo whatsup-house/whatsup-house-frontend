@@ -169,7 +169,7 @@ export default function FeedVideo({ src, posterUrl, isActive, muted, onToggleMut
         loop
         preload="none"
         onError={() => setBlocked(true)}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain"
       />
       <div
         ref={layerRef}
