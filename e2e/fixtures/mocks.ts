@@ -619,6 +619,12 @@ export const mockFeedPages: Record<string, FeedResponse> = {
 }
 
 export async function mockFeedApis(page: Page) {
+  // 피드는 가까운 칸끼리 무작위로 섞인다. 난수를 0에 아주 가깝게 두면 목 데이터 순서 그대로 나온다
+  // (상수로 고정하면 난수에 기대는 다른 코드가 깨지므로 값은 매번 조금씩 다르게)
+  await page.addInitScript(() => {
+    let n = 0
+    Math.random = () => (++n % 1000) / 1e6
+  })
   await page.route('**/api/feed**', (route) => {
     const cursor = new URL(route.request().url()).searchParams.get('cursor')
     return route.fulfill({ json: apiRes(mockFeedPages[cursor ?? 'first']) })

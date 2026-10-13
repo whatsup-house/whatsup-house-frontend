@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
-import { Flame, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
+import { Flame, Pause, Play } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
+import CarouselArrows from '@/components/ui/CarouselArrows'
 import { useHeroCarousel } from '@/lib/hooks/useHome'
+import { useWheelStep } from '@/lib/hooks/useWheelStep'
 import { findStoryByTitle } from '@/lib/constants/stories'
 import type { HeroCarouselSlide } from '@/lib/api/types'
 
@@ -17,8 +19,6 @@ function subscribeReducedMotion(onChange: () => void) {
   mq.addEventListener('change', onChange)
   return () => mq.removeEventListener('change', onChange)
 }
-const GESTURE_GAP = 100
-const SWIPE_THRESHOLD = 40
 
 function CarouselSkeleton() {
   return <div className="w-full aspect-[9/16] bg-tag-bg animate-pulse" />
@@ -41,11 +41,6 @@ export default function HeroCarousel() {
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
-  const wheelAccum = useRef(0)
-  const wheelGestureDir = useRef(0)
-  const wheelLastTime = useRef(0)
-  const wheelTriggered = useRef(false)
-
   const total = slides?.length ?? 0
   const activeIdx = total > 0 ? Math.min(idx, total - 1) : 0
 
@@ -66,45 +61,12 @@ export default function HeroCarousel() {
     }
   }, [resetTimer])
 
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
+  const step = useCallback((dir: 1 | -1) => {
+    setIdx(prev => Math.max(0, Math.min(total - 1, prev + dir)))
+    resetTimer()
+  }, [total, resetTimer])
 
-    const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) return
-      e.preventDefault()
-
-      const now = Date.now()
-      const gap = now - wheelLastTime.current
-      const dir = e.deltaX > 0 ? 1 : -1
-
-      const isNewGesture =
-        gap > GESTURE_GAP ||
-        (wheelGestureDir.current !== 0 && dir !== wheelGestureDir.current)
-
-      if (isNewGesture) {
-        wheelAccum.current = 0
-        wheelTriggered.current = false
-        wheelGestureDir.current = 0
-      }
-
-      wheelLastTime.current = now
-      if (wheelGestureDir.current === 0) wheelGestureDir.current = dir
-      if (wheelTriggered.current) return
-
-      wheelAccum.current += e.deltaX
-      if (Math.abs(wheelAccum.current) >= SWIPE_THRESHOLD) {
-        setIdx(prev => Math.max(0, Math.min(total - 1, prev + wheelGestureDir.current)))
-
-        resetTimer()
-        wheelTriggered.current = true
-        wheelAccum.current = 0
-      }
-    }
-
-    el.addEventListener('wheel', handleWheel, { passive: false })
-    return () => el.removeEventListener('wheel', handleWheel)
-  }, [resetTimer, total])
+  useWheelStep(containerRef, step)
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
@@ -113,8 +75,7 @@ export default function HeroCarousel() {
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartX.current - e.changedTouches[0].clientX
     if (Math.abs(diff) > 50) {
-      setIdx(prev => Math.max(0, Math.min(total - 1, prev + (diff > 0 ? 1 : -1))))
-      resetTimer()
+      step(diff > 0 ? 1 : -1)
     }
   }
 
@@ -226,22 +187,14 @@ export default function HeroCarousel() {
       </div>
 
       {/* 좌우 이동 버튼 (데스크탑 전용) */}
-      <button
-        type="button"
-        aria-label={t('previous')}
-        onClick={() => { setIdx((i) => Math.max(0, i - 1)); resetTimer() }}
-        className={`absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity lg:flex ${activeIdx > 0 ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
-      >
-        <ChevronLeft size={20} />
-      </button>
-      <button
-        type="button"
-        aria-label={t('next')}
-        onClick={() => { setIdx((i) => Math.min(total - 1, i + 1)); resetTimer() }}
-        className={`absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity lg:flex ${activeIdx < total - 1 ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
-      >
-        <ChevronRight size={20} />
-      </button>
+      <CarouselArrows
+        canPrev={activeIdx > 0}
+        canNext={activeIdx < total - 1}
+        onPrev={() => step(-1)}
+        onNext={() => step(1)}
+        prevLabel={t('previous')}
+        nextLabel={t('next')}
+      />
 
       {/* 인디케이터 */}
       <div className="absolute bottom-2 inset-x-0 flex justify-center gap-1.5 z-10">
