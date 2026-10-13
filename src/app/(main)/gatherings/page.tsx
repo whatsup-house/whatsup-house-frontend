@@ -15,6 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('title'),
       description: t('description'),
       type: 'website',
+      // openGraph 를 정의하면 루트 opengraph-image 가 덮이므로 같은 대표 이미지를 다시 지정
+      images: '/opengraph-image.png',
     },
   }
 }
