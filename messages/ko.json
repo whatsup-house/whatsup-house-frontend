@@ -609,7 +609,11 @@
       "purchase": "4회권 선결제 신청",
       "depositAccount": "입금 계좌 (신청 후 입금)",
       "accountHolder": "예금주 {holder}",
-      "loginRequired": "로그인 후 이용권을 구매할 수 있어요."
+      "loginRequired": "로그인 후 이용권을 구매할 수 있어요.",
+      "membershipApply": "멤버십으로 신청",
+      "membershipUntil": "{date}까지 · {days}일 남음",
+      "membershipNote": "추가 결제 없이 신청돼요.",
+      "select": "이용권 선택하기"
     },
     "diningApply": {
       "steps": {
@@ -630,7 +634,10 @@
       "paymentPendingTitle": "결제 대기",
       "paymentPendingDescription": "신청은 접수됐지만 이용권이 부족해요. 이용권을 구매하면 신청이 확정되고 매칭을 기다리게 돼요.",
       "buyTicket": "이용권 구매하기",
-      "viewMyApplications": "내 신청 보기"
+      "viewMyApplications": "내 신청 보기",
+      "refundMissing": "보증금 반환 계좌를 모두 입력해주세요.",
+      "depositPendingDescription": "신청은 접수됐어요. 보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요.",
+      "depositLabel": "보증금"
     },
     "diningTable": {
       "label": "우연한 식탁",
@@ -1198,6 +1205,47 @@
     "account": {
       "bankName": "우리은행",
       "accountHolder": "와썹하우스"
+    },
+    "pass": {
+      "selectLabel": "이용권 선택",
+      "useMembership": "멤버십으로 신청",
+      "membershipRemaining": "{date}까지 · {days}일 남음",
+      "membershipNoPayment": "추가 결제 없이 바로 신청돼요.",
+      "membershipDepositOnly": "이용권 결제는 필요 없어요. 보증금 {amount}원만 입금하면 돼요.",
+      "applyWithMembership": "멤버십으로 신청하기",
+      "periodDescription": "기간 동안 매주 1회 참여해요",
+      "perMonth": "월 {amount}원 꼴",
+      "deposit": "보증금",
+      "validUntil": "멤버십 이용 기한",
+      "backToApply": "돌아가기"
+    },
+    "pending": {
+      "account": "입금 계좌",
+      "holder": "예금주 {holder}",
+      "won": "{amount}원",
+      "total": "입금하실 금액",
+      "payerNameLabel": "입금자명은 반드시 실명으로",
+      "payerNameFallback": "신청서에 적은 실명",
+      "payerNameHint": "다른 이름으로 입금하면 자동으로 확인되지 않아요.",
+      "deadline": "입금 기한 {at}",
+      "autoConfirm": "입금되면 자동으로 확인돼요."
+    },
+    "policy": {
+      "title": "마감·취소·노쇼 안내",
+      "deadline": "신청 마감은 매칭 전날 0시예요. 목요일 회차는 화요일 24:00까지 신청할 수 있어요.",
+      "cancelBefore": "마감 전 취소: 1회권은 복원 또는 환불되고, 보증금은 돌려드려요.",
+      "cancelAfter": "마감 후~회차 전날 취소: 환불 없이 이용권이 사용돼요. 보증금은 돌려드려요.",
+      "sameDayNoShow": "당일 취소·노쇼: 보증금 50,000원은 돌려받을 수 없고, 이후 신청 때마다 보증금이 필요해요."
+    },
+    "refundAccount": {
+      "title": "보증금 반환 계좌",
+      "reason": "이전 노쇼 이력으로 보증금 {amount}원이 필요해요. 참석 체크인 후 돌려드려요.",
+      "bank": "은행",
+      "bankPlaceholder": "예: 우리은행",
+      "accountNumber": "계좌번호",
+      "accountNumberPlaceholder": "숫자만 입력해 주세요",
+      "holder": "예금주",
+      "holderPlaceholder": "예금주 이름"
     }
   },
   "errors": {

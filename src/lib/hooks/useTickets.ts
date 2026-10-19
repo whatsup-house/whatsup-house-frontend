@@ -20,6 +20,8 @@ export function useMyTickets(applicationId?: string | null) {
     enabled: isLoggedIn,
     retry: false,
     staleTime: 1000 * 30,
+    // 입금 대기 중이면 자동 대사로 확정되는 걸 화면이 따라가게 10초마다 다시 읽는다. (KAN-408)
+    refetchInterval: (query) => (query.state.data?.passes.some((pass) => pass.status === 'PENDING') ? 10_000 : false),
   })
 }
 

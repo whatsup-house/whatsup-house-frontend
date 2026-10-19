@@ -151,11 +151,16 @@ export type TicketProduct = 'RANDOM_TABLE_ONE' | 'RANDOM_TABLE_FOUR'
 export type ParticipantAccountStatus = 'ACTIVE' | 'BLOCKED'
 export type RandomTableEligibility = 'UNREVIEWED' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
 
+// 이용권 종류: COUNT 횟수권(1회권), PERIOD 기간제 멤버십. 구형 BE 응답엔 없어서 optional (없으면 COUNT) (KAN-408)
+export type TicketProductKind = 'COUNT' | 'PERIOD'
+
 export interface TicketProductItem {
   id: string
   name: string
   sessionCount: number
   price: number
+  kind?: TicketProductKind
+  periodMonths?: number | null
 }
 
 export interface TicketPass {
@@ -172,6 +177,8 @@ export interface TicketPass {
   purchaseAmount: number
   paymentDeadline: string | null
   paymentConfirmedAt: string | null
+  validUntil?: string | null   // 멤버십 만료일(YYYY-MM-DD). 횟수권은 null (KAN-408)
+  extendedDays?: number
 }
 
 export interface MyTickets {
@@ -625,6 +632,7 @@ export interface UserProfile {
   avatarUrl: string | null
   characterUrl: string | null
   admin?: boolean
+  depositRequired?: boolean   // 노쇼 이력으로 보증금 50,000원이 필요한 회원 (KAN-408)
 }
 
 // 마일리지 타입
@@ -704,10 +712,18 @@ export interface DynamicApplicationRequest {
   answers: AnswerItem[]
 }
 
+// 보증금 반환 계좌 — 보증금 대상 회원의 우연한 식탁 신청 시 필수 (KAN-408)
+export interface DepositReturnAccount {
+  bank: string
+  accountNumber: string
+  holder: string
+}
+
 // 회원 신청 POST /api/applications — 종류 + 희망 회차(일반 모임은 1개) (KAN-338)
 export interface ApplicationCreateRequest extends DynamicApplicationRequest {
   gatheringId: string
   candidateSessionIds: string[]
+  depositReturnAccount?: DepositReturnAccount
 }
 
 // 신청 생성 응답

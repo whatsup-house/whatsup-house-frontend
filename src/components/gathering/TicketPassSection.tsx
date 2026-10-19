@@ -2,10 +2,12 @@
 
 import { Ticket } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Card, Button } from '@/components/ui'
 import { useMyTickets } from '@/lib/hooks/useTickets'
 import { useAuthStore } from '@/lib/store/authStore'
+import { formatLocalizedShortDate } from '@/lib/utils/date'
+import { daysUntil, findActiveMembership } from '@/lib/utils/membership'
 
 interface TicketPassSectionProps {
   // 구매 화면에서 돌아올 경로 (신청 흐름에서 입력을 유지한 채 복귀, KAN-344)
@@ -15,6 +17,7 @@ interface TicketPassSectionProps {
 // 우연한 식탁(RANDOM_TABLE) 게더링 상세에 노출되는 이용권 선결제 섹션. (KAN-260)
 export default function TicketPassSection({ returnUrl }: TicketPassSectionProps) {
   const t = useTranslations('gathering.ticketPass')
+  const locale = useLocale()
   const { isLoggedIn } = useAuthStore()
   const { data } = useMyTickets()
   const router = useRouter()
@@ -23,6 +26,8 @@ export default function TicketPassSection({ returnUrl }: TicketPassSectionProps)
   const hasPending = data?.passes?.some((p) => p.status === 'PENDING') ?? false
 
   const eligibility = data?.randomTableEligibility
+  // 보유 멤버십이 있으면 신청은 멤버십으로 처리된다 (추가 결제 없음)
+  const membership = findActiveMembership(data?.passes)
 
   return (
     <Card className="p-4 mb-6 border border-primary/20">
@@ -38,10 +43,22 @@ export default function TicketPassSection({ returnUrl }: TicketPassSectionProps)
 
       {isLoggedIn ? (
         <>
-          <div className="flex items-center justify-between bg-tag-bg rounded-input px-4 py-3 mb-3">
-            <span className="text-sm text-tag-text">{t('remaining')}</span>
-            <span className="text-base font-bold text-primary">{t('remainingCount', { count: totalRemaining })}</span>
-          </div>
+          {membership?.validUntil ? (
+            <div className="bg-primary-light rounded-input px-4 py-3 mb-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-foreground">{t('membershipApply')}</span>
+                <span className="text-sm font-bold text-primary">
+                  {t('membershipUntil', { date: formatLocalizedShortDate(membership.validUntil, locale), days: daysUntil(membership.validUntil) })}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-tag-text">{t('membershipNote')}</p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between bg-tag-bg rounded-input px-4 py-3 mb-3">
+              <span className="text-sm text-tag-text">{t('remaining')}</span>
+              <span className="text-base font-bold text-primary">{t('remainingCount', { count: totalRemaining })}</span>
+            </div>
+          )}
 
           {hasPending && (
             <p className="text-xs text-tag-text mb-3 pl-1">
@@ -52,7 +69,7 @@ export default function TicketPassSection({ returnUrl }: TicketPassSectionProps)
           {data?.purchasable ? (
             <Button variant="primary" size="lg" className="w-full"
               onClick={() => router.push(`/payments/random-table${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`)}>
-              1회권·4회권 선택하기
+              {t('select')}
             </Button>
           ) : (
             <div className="rounded-input bg-tag-bg px-4 py-3 text-sm text-tag-text">
