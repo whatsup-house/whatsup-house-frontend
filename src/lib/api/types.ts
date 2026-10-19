@@ -1675,6 +1675,15 @@ export interface DepositNotificationLinkRequest {
   targetId: string
 }
 
+// GET /api/admin/payments/pending-targets — 수동 연결 후보(미결제 건)
+export interface PendingPaymentTarget {
+  type: PaymentTargetType
+  targetId: string
+  applicationId: string | null
+  payerName: string
+  amount: number
+}
+
 export type PayoutType = 'REFUND' | 'DEPOSIT_RETURN'
 export type PayoutStatus = 'REQUESTED' | 'SENT'
 

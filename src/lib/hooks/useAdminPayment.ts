@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   fetchDepositNotifications,
   fetchPayouts,
+  fetchPendingTargets,
   linkDepositNotification,
   markPayoutsSent,
 } from '@/lib/api/adminPayment'
@@ -23,6 +24,15 @@ export function useDepositNotifications(result: DepositMatchResult | undefined, 
     queryKey: [...paymentKey, 'deposit-notifications', result ?? 'ALL', page],
     queryFn: () => fetchDepositNotifications(result, page),
     refetchInterval: 10_000,
+    retry: false,
+  })
+}
+
+// 수동 연결 후보 — 연결 폼이 열릴 때만 조회한다
+export function usePendingTargets() {
+  return useQuery({
+    queryKey: [...paymentKey, 'pending-targets'],
+    queryFn: fetchPendingTargets,
     retry: false,
   })
 }

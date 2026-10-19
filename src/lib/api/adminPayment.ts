@@ -5,6 +5,7 @@ import type {
   DepositNotificationLinkRequest,
   DepositNotificationPage,
   PayoutItem,
+  PendingPaymentTarget,
   PayoutStatus,
   PayoutType,
 } from './types'
@@ -24,6 +25,11 @@ export const fetchDepositNotifications = async (
 
 export const linkDepositNotification = async (id: string, data: DepositNotificationLinkRequest): Promise<void> => {
   await apiClient.post<ApiResponse<unknown>>(`/api/admin/payments/deposit-notifications/${id}/link`, data)
+}
+
+export const fetchPendingTargets = async (): Promise<PendingPaymentTarget[]> => {
+  const response = await apiClient.get<ApiResponse<PendingPaymentTarget[]>>('/api/admin/payments/pending-targets')
+  return response.data.data
 }
 
 export const fetchPayouts = async (type: PayoutType, status: PayoutStatus): Promise<PayoutItem[]> => {

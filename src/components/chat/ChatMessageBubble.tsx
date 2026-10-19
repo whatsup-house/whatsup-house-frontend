@@ -3,6 +3,7 @@
 import { RotateCw, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useLongPress } from '@/lib/hooks/useLongPress'
+import { decodeHtmlEntities } from '@/lib/utils/decodeHtmlEntities'
 import type { ChatLinkPreview, ChatReaction } from '@/lib/api/types'
 import ChatAvatar from './ChatAvatar'
 
@@ -74,7 +75,9 @@ export default function ChatMessageBubble({
       </button>
     )
   } else {
-    body = <p className="whitespace-pre-wrap break-words px-3 py-2 text-[15px] leading-5">{content}</p>
+    body = <p className="whitespace-pre-wrap break-words px-3 py-2 text-[15px] leading-5">
+        {isAiGenerated && content ? decodeHtmlEntities(content) : content}
+      </p>
   }
 
   return (

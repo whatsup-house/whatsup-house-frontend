@@ -10,6 +10,7 @@ import {
   useLinkDepositNotification,
   useMarkPayoutsSent,
   usePayouts,
+  usePendingTargets,
 } from '@/lib/hooks/useAdminPayment'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import type {
@@ -19,6 +20,7 @@ import type {
   PaymentTargetType,
   PayoutStatus,
   PayoutType,
+  PendingPaymentTarget,
 } from '@/lib/api/types'
 
 const RESULT_LABEL: Record<DepositMatchResult, string> = {
@@ -46,7 +48,6 @@ const TARGET_LABEL: Record<PaymentTargetType, string> = {
   DEPOSIT: '보증금',
   REGULAR_APPLICATION: '일반 모임 신청',
 }
-const TARGET_TYPES = Object.keys(TARGET_LABEL) as PaymentTargetType[]
 const PAYOUT_TYPE_TABS: { type: PayoutType; label: string }[] = [
   { type: 'REFUND', label: '환불' },
   { type: 'DEPOSIT_RETURN', label: '보증금 반환' },
@@ -73,43 +74,67 @@ function Centered({ children }: { children: ReactNode }) {
 }
 
 interface LinkFormProps {
-  notificationId: string
+  item: DepositNotification
 }
 
-// 예외 건 수동 연결 — BE-4 link API가 요구하는 targetType + targetId
-function LinkForm({ notificationId }: LinkFormProps) {
-  const [targetType, setTargetType] = useState<PaymentTargetType>('TICKET_PASS')
-  const [targetId, setTargetId] = useState('')
+const targetKey = (t: PendingPaymentTarget) => `${t.type}:${t.targetId}`
+
+// 금액·이름이 입금 알림과 맞는 후보일수록 앞으로 (이름은 은행 표기가 잘리므로 접두 일치까지 인정)
+function matchScore(t: PendingPaymentTarget, item: DepositNotification) {
+  const name = item.parsedName?.trim()
+  const nameMatch = !!name && (t.payerName.startsWith(name) || name.startsWith(t.payerName))
+  return (item.parsedAmount === t.amount ? 1 : 0) + (nameMatch ? 1 : 0)
+}
+
+// 예외 건 수동 연결 — 미결제 후보를 골라 link API(targetType + targetId)에 넘긴다
+function LinkForm({ item }: LinkFormProps) {
+  const [selectedKey, setSelectedKey] = useState('')
+  const targets = usePendingTargets()
   const link = useLinkDepositNotification()
-  const trimmedId = targetId.trim()
+  // Array.sort 는 안정 정렬이라 점수가 같으면 서버 순서를 유지한다
+  const sorted = [...(targets.data ?? [])].sort((a, b) => matchScore(b, item) - matchScore(a, item))
+  const selected = sorted.find((t) => targetKey(t) === selectedKey)
+
+  if (targets.isLoading) {
+    return (
+      <div className="mt-2">
+        <LoadingSpinner />
+      </div>
+    )
+  }
+  if (targets.isError) {
+    return (
+      <ApiErrorMessage
+        message={getAdminApiErrorMessage(targets.error, '연결 후보를 불러오지 못했어요.')}
+        onRetry={() => targets.refetch()}
+      />
+    )
+  }
+  if (sorted.length === 0) {
+    return <p className="mt-2 text-xs text-tag-text">연결할 수 있는 미결제 건이 없어요.</p>
+  }
 
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2">
       <select
-        value={targetType}
-        onChange={(e) => setTargetType(e.target.value as PaymentTargetType)}
-        aria-label="연결 대상 유형"
-        className={INPUT_CLASS}
+        value={selectedKey}
+        onChange={(e) => setSelectedKey(e.target.value)}
+        aria-label="연결 대상"
+        className={`${INPUT_CLASS} min-w-0 flex-1`}
       >
-        {TARGET_TYPES.map((t) => (
-          <option key={t} value={t}>
-            {TARGET_LABEL[t]}
+        <option value="">연결할 대상을 선택하세요</option>
+        {sorted.map((t) => (
+          <option key={targetKey(t)} value={targetKey(t)}>
+            {t.payerName} · {won(t.amount)} · {TARGET_LABEL[t.type]}
           </option>
         ))}
       </select>
-      <input
-        value={targetId}
-        onChange={(e) => setTargetId(e.target.value)}
-        placeholder="대상 ID"
-        aria-label="연결 대상 ID"
-        className={`${INPUT_CLASS} min-w-0 flex-1`}
-      />
       <button
         type="button"
-        disabled={!trimmedId || link.isPending}
+        disabled={!selected || link.isPending}
         onClick={() => {
-          if (confirm('이 입금을 해당 대상의 결제 완료로 처리할까요?')) {
-            link.mutate({ id: notificationId, targetType, targetId: trimmedId })
+          if (selected && confirm('이 입금을 해당 대상의 결제 완료로 처리할까요?')) {
+            link.mutate({ id: item.id, targetType: selected.type, targetId: selected.targetId })
           }
         }}
         className="h-9 rounded-input border border-foreground bg-foreground px-3 text-xs font-medium text-white disabled:opacity-50"
@@ -144,18 +169,15 @@ function NotificationRow({ item, isHighlighted }: NotificationRowProps) {
         {item.parsedName ?? '이름 없음'}
         {item.parsedAmount != null && ` · ${won(item.parsedAmount)}`}
         {item.targetType && <span className="text-tag-text"> → {TARGET_LABEL[item.targetType]}</span>}
-        {item.applicationId && (
-          <Link href="/admin/applications" className="ml-2 text-xs text-primary hover:underline">
-            신청 {item.applicationId.slice(0, 8)}
-          </Link>
-        )}
+        {/* 신청 상세(/admin/applications/[id]) 라우트가 없어 링크 없이 짧은 ID만 보여준다 */}
+        {item.applicationId && <span className="ml-2 text-xs text-tag-text">신청 {item.applicationId.slice(0, 8)}</span>}
       </p>
       {item.exceptionCaseId && (
         <Link href="/admin/dining/exceptions" className="self-start text-xs text-primary hover:underline">
           예외함에서 보기
         </Link>
       )}
-      {needsLink && item.exceptionCaseId && <LinkForm notificationId={item.id} />}
+      {needsLink && item.exceptionCaseId && <LinkForm item={item} />}
     </li>
   )
 }

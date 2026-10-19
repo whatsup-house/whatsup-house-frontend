@@ -25,6 +25,7 @@ import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorStatus, resolveApiErrorMessage } from '@/lib/utils/apiError'
 import { getMessagePreview, getSystemMessageText } from '@/lib/utils/chatMessage'
 import { formatLocalizedFullDate } from '@/lib/utils/date'
+import { decodeHtmlEntities } from '@/lib/utils/decodeHtmlEntities'
 import type { ChatMember, ChatMessage } from '@/lib/api/types'
 import ChatActionSheet from './ChatActionSheet'
 import type { ChatSheetAction } from './ChatActionSheet'
@@ -260,7 +261,8 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
     const isMine = message.sender?.id === userId
     const actions: ChatSheetAction[] = []
     const text = message.type === 'TEXT' ? message.content : null
-    if (text) actions.push({ key: 'copy', label: t('actions.copy'), onSelect: () => copyText(text) })
+    const copyable = text && message.aiGenerated ? decodeHtmlEntities(text) : text
+    if (copyable) actions.push({ key: 'copy', label: t('actions.copy'), onSelect: () => copyText(copyable) })
     if (isMine && text !== null) {
       actions.push({ key: 'edit', label: t('actions.edit'), onSelect: () => setDialog({ kind: 'edit', message }) })
     }
