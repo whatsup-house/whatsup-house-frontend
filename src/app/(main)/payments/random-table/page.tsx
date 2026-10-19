@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Check, Ticket } from 'lucide-react'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import PaymentPendingPanel from '@/components/payment/PaymentPendingPanel'
+import DepositSimulatorCard from '@/components/payment/DepositSimulatorCard'
 import PaymentPolicyNotice from '@/components/payment/PaymentPolicyNotice'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { useMyApplicationDetail, useMyDiningApplications } from '@/lib/hooks/useApplications'
@@ -49,6 +50,8 @@ function PaymentContent() {
   const showToast = useToastStore((state) => state.show)
   const [selected, setSelected] = useState<string | null>(null)
   const [requestedPass, setRequestedPass] = useState<TicketPass | null>(null)
+  // 심사용 입금 시뮬레이터가 가리킬 결제 대기 건. 폴링으로 완료 화면으로 바뀌어도 카드가 끝까지 보이도록 한 번 잡으면 유지한다. (KAN-409)
+  const [demoTarget, setDemoTarget] = useState<{ applicationId?: string; passId?: string; amount: number } | null>(null)
 
   useEffect(() => {
     if (isInitialized && !isLoggedIn && !bookingNumber) {
@@ -100,6 +103,15 @@ function PaymentContent() {
     : (profile?.depositRequired && hasLinkedApplication ? DEPOSIT_AMOUNT : 0)
   // 이용권은 이미 쓰였고(차감 기록) 보증금만 남은 신청 → 이용권 선택 없이 보증금 입금 화면
   const isDepositFlow = !displayPass && deposit != null && diningApplication?.ticketStatus === 'DEDUCTED'
+  // 요청 id는 이용권 구매면 passId만(BE가 신청의 PENDING 보증금을 합산), 보증금 단독이면 applicationId만 보낸다.
+  const pendingDemoTarget = displayPass && !isPaymentComplete
+    ? { passId: displayPass.id, amount: displayPass.purchaseAmount + depositDue }
+    : isDepositFlow && deposit?.status === 'PENDING' && applicationId
+      ? { applicationId, amount: deposit.amount }
+      : null
+  if (pendingDemoTarget && (demoTarget?.passId !== pendingDemoTarget.passId || demoTarget?.applicationId !== pendingDemoTarget.applicationId || demoTarget?.amount !== pendingDemoTarget.amount)) {
+    setDemoTarget(pendingDemoTarget)
+  }
   const submit = async () => {
     if (useMembership) {
       goBack()
@@ -185,7 +197,6 @@ function PaymentContent() {
               gatheringId={gatheringId}
               payerName={profile?.name ?? null}
               deadline={displayPass.paymentDeadline}
-              demoTarget={{ applicationId: displayPass.applicationId ?? applicationId, passId: displayPass.id }}
               items={[
                 { label: displayPass.productLabel, amount: displayPass.purchaseAmount },
                 ...(depositDue > 0 ? [{ label: t('deposit'), amount: depositDue }] : []),
@@ -204,7 +215,6 @@ function PaymentContent() {
               gatheringId={gatheringId}
               payerName={profile?.name ?? null}
               items={[{ label: t('deposit'), amount: deposit.amount }]}
-              demoTarget={{ applicationId }}
             />
           </>
         ) : (
@@ -265,6 +275,11 @@ function PaymentContent() {
           )}
           <Button variant="primary" size="lg" className="w-full" disabled={!useMembership && (!canPurchase || !product)} isLoading={purchase.isPending} onClick={submit}>{useMembership ? t('applyWithMembership') : `${product?.name ?? '이용권'} 구매 요청`}</Button>
         </>
+      )}
+      {profile?.isDemo && demoTarget && (
+        <div className="mt-4">
+          <DepositSimulatorCard amount={demoTarget.amount} applicationId={demoTarget.applicationId} passId={demoTarget.passId} isSettled={pendingDemoTarget === null} />
+        </div>
       )}
       {returnUrl && (
         <Button variant="outlined" size="lg" className="w-full mt-3" onClick={() => router.push(safeReturnUrl(returnUrl))}>

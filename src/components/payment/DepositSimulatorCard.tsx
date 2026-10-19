@@ -14,6 +14,7 @@ interface DepositSimulatorCardProps {
   amount: number                  // 상태 카드가 보여주는 입금 합계. 버튼 문구에 그대로 쓴다
   applicationId?: string | null   // 결제 대기 건을 가리키는 id (신청 또는 이용권 중 아는 쪽)
   passId?: string | null
+  isSettled?: boolean             // 폴링으로 결제 상태가 이미 완료로 바뀜. 카드는 끝까지 보이되 새 입금은 막는다
 }
 
 // 대사 결과가 MATCHED 가 아닐 때 빨간 표시가 붙는 단계(1부터). 0 이면 전부 통과.
@@ -26,8 +27,9 @@ function failedStep(result: DemoDepositResult): number {
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // 심사용 입금 시뮬레이터: 운영자 폰에 은행 알림이 오고 와썹이 자동 대사하는 과정을 보여준다. 데모 회원에게만 노출. (KAN-409)
-export default function DepositSimulatorCard({ amount, applicationId, passId }: DepositSimulatorCardProps) {
+export default function DepositSimulatorCard({ amount, applicationId, passId, isSettled = false }: DepositSimulatorCardProps) {
   const t = useTranslations('payment.simulator')
+  const tPending = useTranslations('payment.pending')
   const demoDeposit = useDemoDeposit()
   const refreshPaymentStatus = useRefreshPaymentStatus()
   const [response, setResponse] = useState<DemoDepositResponse | null>(null)
@@ -47,8 +49,7 @@ export default function DepositSimulatorCard({ amount, applicationId, passId }: 
   // 애니메이션이 끝나면 결제 상태 화면이 따라가는 쿼리를 다시 읽어 상태 카드를 갱신한다.
   useEffect(() => {
     if (isFinished) void refreshPaymentStatus()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshPaymentStatus 는 매 렌더 새 함수다. 끝난 시점에 한 번만 호출한다
-  }, [isFinished])
+  }, [isFinished, refreshPaymentStatus])
 
   const start = () => {
     setResponse(null)
@@ -65,21 +66,26 @@ export default function DepositSimulatorCard({ amount, applicationId, passId }: 
     )
   }
 
+  // 시뮬레이션을 시작하지 않았는데 이미 완료로 바뀐 경우엔 보여줄 게 없다
+  if (isSettled && !response) return null
+
   return (
     <Card className="mb-4 p-5">
       <h2 className="font-bold">{t('title')}</h2>
       <p className="mt-1 text-sm text-tag-text">{t('description')}</p>
 
-      <Button
-        variant="primary"
-        size="default"
-        className="mt-4 w-full"
-        isLoading={demoDeposit.isPending}
-        disabled={isRunning}
-        onClick={start}
-      >
-        {isFinished ? t('retry') : t('button', { amount: amount.toLocaleString() })}
-      </Button>
+      {!isSettled && (
+        <Button
+          variant="primary"
+          size="default"
+          className="mt-4 w-full"
+          isLoading={demoDeposit.isPending}
+          disabled={isRunning}
+          onClick={start}
+        >
+          {isFinished ? t('retry') : t('button', { amount: tPending('won', { amount: amount.toLocaleString() }) })}
+        </Button>
+      )}
 
       {demoDeposit.isError && <p role="alert" className="mt-3 text-sm text-primary">{t('error')}</p>}
 
@@ -111,11 +117,13 @@ export default function DepositSimulatorCard({ amount, applicationId, passId }: 
                     {isFailed ? <X size={12} aria-hidden="true" /> : isDone ? <Check size={12} aria-hidden="true" /> : null}
                   </span>
                   <span>{t(`steps.${step}`)}</span>
+                  <span className="sr-only">{t(isFailed ? 'status.failed' : isDone ? 'status.done' : 'status.pending')}</span>
                   {isFailed && <span className="ml-auto text-xs">{t('exception')}</span>}
                 </li>
               )
             })}
           </ol>
+          {isSettled && isFinished && <p role="status" className="mt-3 text-center text-sm font-semibold text-foreground">{t('settledNotice')}</p>}
         </div>
       )}
     </Card>

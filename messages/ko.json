@@ -1240,7 +1240,7 @@
     "simulator": {
       "title": "심사용 입금 시뮬레이터",
       "description": "실제로는 운영자 폰에 은행 알림이 오고, 와썹이 자동으로 확인합니다",
-      "button": "{amount}원 입금하기",
+      "button": "{amount} 입금하기",
       "retry": "다시 입금해 보기",
       "error": "시뮬레이션에 실패했어요. 잠시 후 다시 시도해 주세요.",
       "phoneLabel": "운영자 폰",
@@ -1252,7 +1252,13 @@
         "linked": "신청 연결",
         "completed": "결제 완료"
       },
-      "exception": "예외함으로 넘어갔어요"
+      "exception": "예외함으로 넘어갔어요",
+      "status": {
+        "done": "완료",
+        "failed": "실패",
+        "pending": "대기"
+      },
+      "settledNotice": "결제 완료로 바뀌었어요"
     },
     "policy": {
       "title": "마감·취소·노쇼 안내",
