@@ -1188,7 +1188,7 @@ export interface UnreadCountResponse {
 
 // ===== 우연한 식탁 운영: 예외함·설정 (KAN-353) =====
 // 백엔드 AdminDiningController(KAN-348) 계약. 시각은 LocalDateTime ISO 문자열.
-export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND'
+export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND' | 'CS'
 export type DiningExceptionStatus = 'OPEN' | 'RESOLVED'
 // WARN=기록만, RESTRICT/BAN=우연한 식탁 참여 자격 RESTRICTED
 export type DiningSafetyAction = 'WARN' | 'RESTRICT' | 'BAN'
@@ -1550,4 +1550,54 @@ export interface AdminFeedPostPage {
 export interface AdminFeedFilters {
   visible?: boolean
   page: number
+}
+
+// ===== 운영자 입금 알림 로그·송금 목록 (KAN-411) =====
+// 백엔드 AdminPaymentController(BE-4 KAN-403, BE-5 KAN-404) 계약. 시각은 LocalDateTime ISO 문자열.
+export type DepositSource = 'MACRODROID' | 'IOS_SHORTCUT' | 'SIMULATOR'
+export type DepositMatchResult = 'MATCHED' | 'IGNORED' | 'NO_CANDIDATE' | 'MULTIPLE_CANDIDATES' | 'PARSE_FAILED'
+export type PaymentTargetType = 'TICKET_PASS' | 'DEPOSIT' | 'REGULAR_APPLICATION'
+
+export interface DepositNotification {
+  id: string
+  rawText: string
+  source: DepositSource
+  receivedAt: string
+  parsedName: string | null
+  parsedAmount: number | null
+  result: DepositMatchResult
+  targetType: PaymentTargetType | null
+  targetId: string | null
+  applicationId: string | null
+  exceptionCaseId: string | null
+  createdAt: string
+}
+
+export interface DepositNotificationPage {
+  content: DepositNotification[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
+}
+
+// POST /api/admin/payments/deposit-notifications/{id}/link — 예외 건 수동 연결
+export interface DepositNotificationLinkRequest {
+  targetType: PaymentTargetType
+  targetId: string
+}
+
+export type PayoutType = 'REFUND' | 'DEPOSIT_RETURN'
+export type PayoutStatus = 'REQUESTED' | 'SENT'
+
+export interface PayoutItem {
+  id: string
+  type: PayoutType
+  user: string
+  amount: number
+  bank: string
+  accountNumber: string
+  holder: string
+  status: PayoutStatus
+  createdAt: string
 }
