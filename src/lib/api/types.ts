@@ -813,6 +813,23 @@ export interface DiningResolution {
 export interface DiningResolutionChooseRequest {
   choice: DiningResolutionChoice
   sessionId?: string
+  refundAccount?: DepositReturnAccount   // REFUND 면 필수 (KAN-410)
+}
+
+// 취소 미리보기 — GET /api/dining/applications/{id}/cancel-preview. 지금 취소하면 적용되는 결과 (KAN-410)
+export type DiningCancelWindow = 'BEFORE_DEADLINE' | 'AFTER_DEADLINE' | 'SAME_DAY'
+
+export interface DiningCancelPreview {
+  window: DiningCancelWindow
+  ticketRestored: boolean
+  refundable: boolean
+  depositOutcome: 'RETURN' | 'FORFEIT' | 'NONE'
+  sanction: boolean
+}
+
+// 멤버십 환불 POST /api/tickets/{passId}/refund (KAN-410)
+export interface MembershipRefundRequest {
+  refundAccount: DepositReturnAccount
 }
 
 // 신청 폼 프리필 — GET /api/dining/prefill?gatheringId= . 답한 적 없는 표준 질문은 빠진다

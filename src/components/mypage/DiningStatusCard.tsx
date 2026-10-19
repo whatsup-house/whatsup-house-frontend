@@ -5,13 +5,24 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui'
 import ChatDialog from '@/components/chat/ChatDialog'
-import { useCancelDiningApplication, useChooseDiningResolution, useDiningResolution } from '@/lib/hooks/useApplications'
+import CancelPreviewModal from '@/components/dining/CancelPreviewModal'
+import RefundAccountDialog from '@/components/payment/RefundAccountDialog'
+import { useChooseDiningResolution, useDiningResolution } from '@/lib/hooks/useApplications'
 import { useToastStore } from '@/lib/store/toastStore'
 import { formatLocalizedShortDate, formatLocalizedShortDateTime, formatTime, formatTimeRange } from '@/lib/utils/date'
 import { DINING_RESOLUTION_ANCHOR, DINING_STEPS, getDiningPhase, getDiningStepIndex, getNextMatchRunAt, isDiningCancelOpen } from '@/lib/utils/diningStatus'
-import type { ApplicationStatus, DiningResolutionChoice, DiningSessionInfo, DiningTableStatus, MatchStatus } from '@/lib/api/types'
+import type { ApplicationStatus, DepositReturnAccount, DiningApplicationDeposit, DiningResolutionChoice, DiningSessionInfo, DiningTableStatus, MatchStatus, TicketDeductionStatus } from '@/lib/api/types'
 
 const CANCELLABLE: ReadonlySet<ApplicationStatus> = new Set(['PENDING', 'PAYMENT_PENDING', 'CONFIRMED'])
+
+// 보증금 상태 배지 색 (KAN-410)
+const DEPOSIT_BADGE_STYLE: Record<DiningApplicationDeposit['status'], string> = {
+  PENDING: 'bg-blue-50 text-blue-700',
+  PAID: 'bg-primary-light text-primary',
+  RETURN_PENDING: 'bg-yellow-50 text-yellow-700',
+  RETURNED: 'bg-tag-bg text-tag-text',
+  FORFEITED: 'bg-red-50 text-red-700',
+}
 
 const linkButtonClass = 'mt-3 flex min-h-[44px] w-full items-center justify-center rounded-button bg-primary px-4 text-sm font-bold text-white'
 
@@ -25,6 +36,8 @@ interface DiningStatusCardProps {
   candidateSessions: DiningSessionInfo[]
   resolutionId?: string | null
   depositOnly?: boolean   // 이용권은 준비됐고 보증금 입금만 남은 결제 대기
+  deposit?: DiningApplicationDeposit | null        // 보증금 상태 배지 (KAN-410)
+  ticketStatus?: TicketDeductionStatus | null      // 환불 진행 표시: REFUND_PROCESSING 송금 대기 / REFUNDED 환불 완료 (KAN-410)
   // 홈 요약 카드: 취소·해결 선택 없이 이동 링크만 보여준다
   summary?: boolean
 }
@@ -40,12 +53,12 @@ export default function DiningStatusCard({
   candidateSessions,
   resolutionId,
   depositOnly = false,
+  deposit,
+  ticketStatus,
   summary = false,
 }: DiningStatusCardProps) {
   const t = useTranslations('mypage.applications.dining')
   const locale = useLocale()
-  const showToast = useToastStore((s) => s.show)
-  const cancel = useCancelDiningApplication()
   const [confirmingCancel, setConfirmingCancel] = useState(false)
 
   const phase = getDiningPhase(status, matchStatus, table?.status)
@@ -67,13 +80,6 @@ export default function DiningStatusCard({
 
   const showCancel = !summary && CANCELLABLE.has(status) && phase !== 'attended'
   const cancelOpen = showCancel && isDiningCancelOpen(assignedSession, candidateSessions)
-
-  const handleCancel = () => {
-    cancel.mutate(applicationId, {
-      onSuccess: () => showToast(t('cancel.done')),
-      onSettled: () => setConfirmingCancel(false),
-    })
-  }
 
   return (
     <div className="bg-card rounded-card p-4">
@@ -98,6 +104,20 @@ export default function DiningStatusCard({
         ))}
       </div>
       <p className="mt-2 text-xs text-tag-text leading-relaxed break-keep">{detail}</p>
+      {(deposit || ticketStatus === 'REFUND_PROCESSING' || ticketStatus === 'REFUNDED') && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {deposit && (
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${DEPOSIT_BADGE_STYLE[deposit.status]}`}>
+              {t('deposit.label', { status: t(`deposit.status.${deposit.status}`) })}
+            </span>
+          )}
+          {(ticketStatus === 'REFUND_PROCESSING' || ticketStatus === 'REFUNDED') && (
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-tag-bg text-tag-text">
+              {t(`refundStatus.${ticketStatus}`)}
+            </span>
+          )}
+        </div>
+      )}
 
       {phase === 'payment' && (
         <Link href={`/payments/random-table?applicationId=${encodeURIComponent(applicationId)}`} className={linkButtonClass}>
@@ -138,16 +158,7 @@ export default function DiningStatusCard({
         </div>
       )}
 
-      {confirmingCancel && (
-        <ChatDialog
-          title={t('cancel.confirmTitle')}
-          description={t('cancel.confirmDescription')}
-          confirmLabel={t('cancel.confirm')}
-          isPending={cancel.isPending}
-          onConfirm={handleCancel}
-          onClose={() => setConfirmingCancel(false)}
-        />
-      )}
+      {confirmingCancel && <CancelPreviewModal applicationId={applicationId} onClose={() => setConfirmingCancel(false)} />}
     </div>
   )
 }
@@ -186,12 +197,16 @@ function ResolutionPanel({ resolutionId }: ResolutionPanelProps) {
           ? t('expired')
           : null
 
-  const handleChoose = () => {
+  const handleChoose = (refundAccount?: DepositReturnAccount) => {
     if (!resolutionId || !pendingChoice) return
     choose.mutate(
       {
         id: resolutionId,
-        data: pendingChoice === 'TRANSFER' && sessionId ? { choice: pendingChoice, sessionId } : { choice: pendingChoice },
+        data: pendingChoice === 'TRANSFER' && sessionId
+          ? { choice: pendingChoice, sessionId }
+          : pendingChoice === 'REFUND' && refundAccount
+            ? { choice: pendingChoice, refundAccount }
+            : { choice: pendingChoice },
       },
       {
         onSuccess: () => showToast(t('chosen')),
@@ -254,12 +269,22 @@ function ResolutionPanel({ resolutionId }: ResolutionPanelProps) {
         </div>
       </div>
 
-      {pendingChoice && (
+      {pendingChoice === 'REFUND' && (
+        <RefundAccountDialog
+          title={t('confirm.REFUND')}
+          description={t('refundAccountReason')}
+          confirmLabel={t('choices.REFUND')}
+          isPending={choose.isPending}
+          onConfirm={handleChoose}
+          onClose={() => setPendingChoice(null)}
+        />
+      )}
+      {pendingChoice && pendingChoice !== 'REFUND' && (
         <ChatDialog
           title={t(`confirm.${pendingChoice}`)}
           confirmLabel={t(`choices.${pendingChoice}`)}
           isPending={choose.isPending}
-          onConfirm={handleChoose}
+          onConfirm={() => handleChoose()}
           onClose={() => setPendingChoice(null)}
         />
       )}

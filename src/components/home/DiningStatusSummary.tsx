@@ -30,6 +30,8 @@ export default function DiningStatusSummary() {
         assignedSession={active.assignedSession}
         candidateSessions={active.candidateSessions}
         depositOnly={isDepositOnlyPending(active)}
+        deposit={active.deposit}
+        ticketStatus={active.ticketStatus}
       />
     </div>
   )

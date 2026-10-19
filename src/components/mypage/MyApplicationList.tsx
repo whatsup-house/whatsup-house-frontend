@@ -118,6 +118,8 @@ export default function MyApplicationList() {
                   candidateSessions={dining.candidateSessions}
                   resolutionId={dining.resolutionId}
                   depositOnly={isDepositOnlyPending(dining)}
+                  deposit={dining.deposit}
+                  ticketStatus={dining.ticketStatus}
                 />
               )
             }

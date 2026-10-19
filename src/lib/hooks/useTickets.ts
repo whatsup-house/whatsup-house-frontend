@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchGuestTickets, fetchMyTickets, fetchTicketProducts, purchaseGuestTicketPass, purchaseTicketPass } from '@/lib/api/ticket'
+import { useTranslations } from 'next-intl'
+import { fetchGuestTickets, fetchMyTickets, fetchTicketProducts, purchaseGuestTicketPass, purchaseTicketPass, refundMembership } from '@/lib/api/ticket'
 import { useAuthStore } from '@/lib/store/authStore'
-import type { GuestTicketPurchaseRequest, TicketPurchaseRequest } from '@/lib/api/types'
+import { useToastStore } from '@/lib/store/toastStore'
+import { getApiErrorCode, getApiErrorMessage } from '@/lib/utils/apiError'
+import type { GuestTicketPurchaseRequest, MembershipRefundRequest, TicketPurchaseRequest } from '@/lib/api/types'
 
 export function useTicketProducts() {
   return useQuery({
@@ -32,6 +35,28 @@ export function usePurchaseTicketPass() {
     mutationFn: (data: TicketPurchaseRequest) => purchaseTicketPass(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-tickets'] })
+    },
+  })
+}
+
+// 멤버십 환불 요청 — 첫 참석 전까지만. 성공하면 송금 대기 안내를 띄우고 이용권·신청 목록을 다시 읽는다. (KAN-410)
+export function useRefundMembership() {
+  const t = useTranslations('payment.membershipRefund')
+  const showToast = useToastStore((s) => s.show)
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ passId, data }: { passId: string; data: MembershipRefundRequest }) => refundMembership(passId, data),
+    onSuccess: () => {
+      showToast(t('done'))
+      queryClient.invalidateQueries({ queryKey: ['my-tickets'] })
+      queryClient.invalidateQueries({ queryKey: ['dining'] })
+      queryClient.invalidateQueries({ queryKey: ['my-applications'] })
+      queryClient.invalidateQueries({ queryKey: ['applications', 'me'] })
+    },
+    onError: (err) => {
+      const code = getApiErrorCode(err)
+      const known = ['MEMBERSHIP_REFUND_AFTER_ATTENDANCE', 'MEMBERSHIP_REFUND_ACTIVE_TABLE', 'REFUND_ACCOUNT_REQUIRED']
+      showToast(code && known.includes(code) ? t(`errors.${code}`) : getApiErrorMessage(err, t('errors.failed')), 'error')
     },
   })
 }

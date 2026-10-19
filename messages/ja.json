@@ -854,13 +854,31 @@
         "goResolve": "対応方法を選ぶ",
         "viewAll": "申込み一覧を見る",
         "cancel": {
-          "policy": "開催の2日前までキャンセルでき、使用した利用券はお返しします。それ以降はキャンセルできません。",
+          "policy": "회차 시작 전까지 취소할 수 있어요. 취소 버튼을 누르면 지금 적용되는 결과를 먼저 알려드려요.",
           "button": "申込みをキャンセル",
-          "closed": "開催の2日前を過ぎたため、キャンセルできません。",
+          "closed": "회차가 시작돼 취소할 수 없어요.",
           "confirmTitle": "申込みをキャンセルしますか？",
-          "confirmDescription": "キャンセルした申込みは元に戻せません。使用した利用券はお返しします。",
           "confirm": "キャンセルする",
-          "done": "申込みをキャンセルしました。"
+          "done": "申込みをキャンセルしました。",
+          "preview": {
+            "loading": "취소 결과를 확인하고 있어요.",
+            "failed": "취소 결과를 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
+            "window": {
+              "BEFORE_DEADLINE": "매칭 마감 전 취소예요.",
+              "AFTER_DEADLINE": "매칭 마감 후 취소예요.",
+              "SAME_DAY": "회차 당일 취소예요."
+            },
+            "ticketRestored": "사용한 이용권이 돌아와요.",
+            "ticketKept": "사용한 이용권은 돌아오지 않아요.",
+            "refundable": "이용권 환불을 받을 수 있어요.",
+            "notRefundable": "환불은 받을 수 없어요.",
+            "deposit": {
+              "RETURN": "보증금은 돌려드려요.",
+              "FORFEIT": "보증금은 돌려받을 수 없어요."
+            },
+            "sanction": "노쇼와 같게 처리돼 이후 신청할 때마다 보증금이 필요해져요.",
+            "irreversible": "취소한 신청은 되돌릴 수 없어요."
+          }
         },
         "resolution": {
           "title": "どうしますか？",
@@ -881,14 +899,30 @@
             "TRANSFER": "選択した日程に申込みを移動しますか？",
             "KEEP_TICKET": "申込みをキャンセルして利用券を保管しますか？次回の申込みで使えます。",
             "REFUND": "申込みをキャンセルして利用券の返金を受けますか？"
-          }
+          },
+          "refundAccountReason": "환불받을 계좌를 알려주세요. 운영팀이 확인 후 송금하면 환불이 완료돼요."
         },
         "errors": {
           "alreadyProcessed": "すでに処理された申込みです。最新の状態を読み込み直しました。",
-          "cancelWindowClosed": "開催の2日前までしかキャンセルできません。",
-          "failed": "処理できませんでした。しばらくしてから再度お試しください。"
+          "cancelWindowClosed": "회차가 시작돼 취소할 수 없어요.",
+          "failed": "処理できませんでした。しばらくしてから再度お試しください。",
+          "refundAccountRequired": "환불받을 계좌를 입력해주세요."
         },
-        "payDeposit": "보증금 입금하기"
+        "payDeposit": "보증금 입금하기",
+        "deposit": {
+          "label": "보증금 {status}",
+          "status": {
+            "PENDING": "입금 대기",
+            "PAID": "보관 중",
+            "RETURN_PENDING": "반환 대기",
+            "RETURNED": "반환 완료",
+            "FORFEITED": "몰수"
+          }
+        },
+        "refundStatus": {
+          "REFUND_PROCESSING": "송금 대기",
+          "REFUNDED": "환불 완료"
+        }
       },
       "emptyFiltered": "該当状態の申請履歴がありません。",
       "empty": "まだ申請したギャザリングがありません。",
@@ -1271,7 +1305,24 @@
       "accountNumber": "계좌번호",
       "accountNumberPlaceholder": "숫자만 입력해 주세요",
       "holder": "예금주",
-      "holderPlaceholder": "예금주 이름"
+      "holderPlaceholder": "예금주 이름",
+      "refundTitle": "환불 계좌",
+      "required": "필수 입력이에요"
+    },
+    "membershipRefund": {
+      "button": "멤버십 환불",
+      "validUntil": "{date}까지 이용",
+      "policy": "첫 참석 전까지만 전액 환불돼요. 진행 중인 신청이 있으면 함께 취소돼요.",
+      "confirmTitle": "멤버십을 환불받을까요?",
+      "reason": "결제한 {amount}원을 환불해 드려요. 운영팀이 확인 후 송금하면 환불이 완료돼요.",
+      "confirm": "환불 요청",
+      "done": "환불을 요청했어요. 송금 대기 중이에요.",
+      "errors": {
+        "MEMBERSHIP_REFUND_AFTER_ATTENDANCE": "이미 참석한 멤버십은 환불할 수 없어요.",
+        "MEMBERSHIP_REFUND_ACTIVE_TABLE": "확정된 테이블이 있어 환불할 수 없어요. 신청을 먼저 정리해주세요.",
+        "REFUND_ACCOUNT_REQUIRED": "환불받을 계좌를 입력해주세요.",
+        "failed": "환불을 요청하지 못했어요. 잠시 후 다시 시도해주세요."
+      }
     }
   },
   "errors": {

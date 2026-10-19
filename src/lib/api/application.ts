@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningPrefillResponse, DiningResolution, DiningResolutionChooseRequest, DiningAttendance, DiningTableDetail, DiningFeedbackRequest, DiningReportRequest, DiningHistoryItem } from './types'
+import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningCancelPreview, DiningPrefillResponse, DiningResolution, DiningResolutionChooseRequest, DiningAttendance, DiningTableDetail, DiningFeedbackRequest, DiningReportRequest, DiningHistoryItem } from './types'
 
 // 회원 동적 신청 — 종류 ID + 희망 회차 ID (KAN-338). JWT 필요
 export const submitDynamicApplication = async (
@@ -67,6 +67,12 @@ export const fetchMyDiningApplications = async (): Promise<DiningApplicationItem
 // 우연한 식탁 사전 취소 — 회차 시작 2일 전까지 (KAN-342)
 export const cancelDiningApplication = async (id: string): Promise<void> => {
   await apiClient.post(`/api/dining/applications/${id}/cancel`)
+}
+
+// 취소 전에 지금 시점에 적용되는 결과(복원·환불·보증금·제재)를 미리 본다 (KAN-410)
+export const fetchDiningCancelPreview = async (id: string): Promise<DiningCancelPreview> => {
+  const response = await apiClient.get<ApiResponse<DiningCancelPreview>>(`/api/dining/applications/${id}/cancel-preview`)
+  return response.data.data
 }
 
 // 매칭 실패 해결 선택지 (KAN-347)
