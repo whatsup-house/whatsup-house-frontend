@@ -13,7 +13,7 @@ import { useLocalizedJobs } from '@/lib/hooks/useLocalizedJobs'
 import Button from '@/components/ui/Button'
 import WithdrawAccountDialog from '@/components/mypage/WithdrawAccountDialog'
 import PasswordChangeDialog from '@/components/mypage/PasswordChangeDialog'
-import MembershipRefundSection from '@/components/mypage/MembershipRefundSection'
+import MembershipRefundSection, { MembershipRefundStatus } from '@/components/mypage/MembershipRefundSection'
 import { findActiveMembership } from '@/lib/utils/membership'
 
 // characterUrl 미존재/이미지 로드 실패 시 사용할 로컬 기본 캐릭터 (KAN-285)
@@ -56,6 +56,7 @@ export default function MyProfile() {
   const { data: profile, isLoading } = useMyProfile()
   const { data: tickets } = useMyTickets()
   const membership = findActiveMembership(tickets?.passes)
+  const refundingPass = tickets?.passes.find((pass) => pass.status === 'CANCELLED' && !!pass.refundStatus)
   const { data: jobGroups } = useLocalizedJobs()
   const logout = useLogout()
   const [showWithdraw, setShowWithdraw] = useState(false)
@@ -159,6 +160,7 @@ export default function MyProfile() {
 
         {/* 보유 멤버십 + 환불 (KAN-410) */}
         {membership && <MembershipRefundSection pass={membership} />}
+        {refundingPass && <MembershipRefundStatus pass={refundingPass} />}
 
         {/* 우연한 식탁 참가 이력 (KAN-356) */}
         <Link href="/dining/history" className="bg-card rounded-card px-5 py-4 flex items-center justify-between">

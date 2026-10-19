@@ -7,6 +7,18 @@ import { useRefundMembership } from '@/lib/hooks/useTickets'
 import { formatLocalizedShortDate } from '@/lib/utils/date'
 import type { TicketPass } from '@/lib/api/types'
 
+// 환불을 요청한 멤버십의 진행 상태 — 토스트가 사라진 뒤에도 남는다 (KAN-410)
+export function MembershipRefundStatus({ pass }: { pass: TicketPass }) {
+  const t = useTranslations('payment.membershipRefund')
+  if (!pass.refundStatus) return null
+  return (
+    <div className="bg-card rounded-card px-5 py-4 flex items-center justify-between gap-3">
+      <span className="min-w-0 text-sm font-medium text-foreground">{t('statusLabel', { name: pass.productLabel })}</span>
+      <span className="shrink-0 text-xs font-medium px-2 py-1 rounded-full bg-tag-bg text-tag-text">{t(`status.${pass.refundStatus}`)}</span>
+    </div>
+  )
+}
+
 // 보유 멤버십 1건 표시 + 환불(첫 참석 전까지만, 계좌 입력). 가능 여부의 최종 판단은 BE. (KAN-410)
 export default function MembershipRefundSection({ pass }: { pass: TicketPass }) {
   const t = useTranslations('payment.membershipRefund')

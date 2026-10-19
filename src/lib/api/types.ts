@@ -179,6 +179,7 @@ export interface TicketPass {
   paymentConfirmedAt: string | null
   validUntil?: string | null   // 멤버십 만료일(YYYY-MM-DD). 횟수권은 null (KAN-408)
   extendedDays?: number
+  refundStatus?: 'REQUESTED' | 'SENT' | null   // 환불 요청한 CANCELLED 멤버십: REQUESTED 송금 대기 / SENT 환불 완료 (KAN-410)
 }
 
 export interface MyTickets {

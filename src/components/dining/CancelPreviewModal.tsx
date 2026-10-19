@@ -1,5 +1,6 @@
 'use client'
 
+import { useId } from 'react'
 import { useTranslations } from 'next-intl'
 import { useCancelDiningApplication, useDiningCancelPreview } from '@/lib/hooks/useApplications'
 import { useToastStore } from '@/lib/store/toastStore'
@@ -17,6 +18,10 @@ export default function CancelPreviewModal({ applicationId, onClose }: CancelPre
   const previewQuery = useDiningCancelPreview(applicationId)
   const cancel = useCancelDiningApplication()
   const preview = previewQuery.data
+  const titleId = useId()
+  const close = () => {
+    if (!cancel.isPending) onClose()
+  }
 
   const handleConfirm = () => {
     cancel.mutate(applicationId, {
@@ -28,24 +33,30 @@ export default function CancelPreviewModal({ applicationId, onClose }: CancelPre
   const lines = preview
     ? [
         t(preview.ticketRestored ? 'preview.ticketRestored' : 'preview.ticketKept'),
-        t(preview.refundable ? 'preview.refundable' : 'preview.notRefundable'),
         preview.depositOutcome !== 'NONE' ? t(`preview.deposit.${preview.depositOutcome}`) : null,
         preview.sanction ? t('preview.sanction') : null,
       ].filter((line): line is string => !!line)
     : []
 
   return (
-    <div className="fixed lg:absolute inset-0 z-50 flex items-center justify-center bg-foreground/30 px-6" onClick={onClose}>
+    <div className="fixed lg:absolute inset-0 z-50 flex items-center justify-center bg-foreground/30 px-6" onClick={close}>
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={t('confirmTitle')}
+        aria-labelledby={titleId}
         className="w-full max-w-[340px] rounded-card bg-card p-5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-base font-bold text-foreground">{t('confirmTitle')}</h2>
-        {previewQuery.isPending && <p className="mt-2 text-sm text-tag-text">{t('preview.loading')}</p>}
-        {previewQuery.isError && <p className="mt-2 text-sm text-primary break-keep">{t('preview.failed')}</p>}
+        <h2 id={titleId} className="text-base font-bold text-foreground">{t('confirmTitle')}</h2>
+        {previewQuery.isPending && <p aria-live="polite" className="mt-2 text-sm text-tag-text">{t('preview.loading')}</p>}
+        {previewQuery.isError && (
+          <div role="alert" className="mt-2">
+            <p className="text-sm text-primary break-keep">{t('preview.failed')}</p>
+            <button type="button" onClick={() => previewQuery.refetch()} className="mt-1 min-h-[44px] text-sm text-tag-text underline">
+              {t('preview.retry')}
+            </button>
+          </div>
+        )}
         {preview && (
           <>
             <p className="mt-2 text-sm font-bold text-primary">{t(`preview.window.${preview.window}`)}</p>
@@ -61,7 +72,7 @@ export default function CancelPreviewModal({ applicationId, onClose }: CancelPre
           </>
         )}
         <div className="mt-5 grid grid-cols-2 gap-2">
-          <button type="button" onClick={onClose} className="flex min-h-[44px] items-center justify-center rounded-button bg-tag-bg text-sm font-bold text-tag-text">
+          <button type="button" onClick={close} disabled={cancel.isPending} className="flex min-h-[44px] items-center justify-center rounded-button bg-tag-bg text-sm font-bold text-tag-text disabled:opacity-50">
             {tCommon('close')}
           </button>
           <button

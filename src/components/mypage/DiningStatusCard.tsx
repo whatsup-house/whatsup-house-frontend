@@ -209,8 +209,14 @@ function ResolutionPanel({ resolutionId }: ResolutionPanelProps) {
             : { choice: pendingChoice },
       },
       {
-        onSuccess: () => showToast(t('chosen')),
-        onSettled: () => setPendingChoice(null),
+        onSuccess: () => {
+          showToast(t('chosen'))
+          setPendingChoice(null)
+        },
+        // 환불은 실패하면 다이얼로그를 열어 둬 입력한 계좌를 지키고 다시 시도하게 한다
+        onError: () => {
+          if (pendingChoice !== 'REFUND') setPendingChoice(null)
+        },
       },
     )
   }

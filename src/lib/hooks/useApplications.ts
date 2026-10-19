@@ -67,13 +67,15 @@ function useDiningActionErrorToast() {
   const showToast = useToastStore((s) => s.show)
   const queryClient = useQueryClient()
   return (err: unknown) => {
-    if (getApiErrorStatus(err) === 409) {
+    const code = getApiErrorCode(err)
+    // 구체적인 오류 코드가 상태 코드(409)보다 먼저다
+    if (code === 'CANCEL_WINDOW_CLOSED') {
+      showToast(t('cancelWindowClosed'), 'error')
+    } else if (code === 'REFUND_ACCOUNT_REQUIRED') {
+      showToast(t('refundAccountRequired'), 'error')
+    } else if (getApiErrorStatus(err) === 409) {
       showToast(t('alreadyProcessed'), 'error')
       invalidateDiningApplications(queryClient)
-    } else if (getApiErrorCode(err) === 'CANCEL_WINDOW_CLOSED') {
-      showToast(t('cancelWindowClosed'), 'error')
-    } else if (getApiErrorCode(err) === 'REFUND_ACCOUNT_REQUIRED') {
-      showToast(t('refundAccountRequired'), 'error')
     } else {
       showToast(getApiErrorMessage(err, t('failed')), 'error')
     }

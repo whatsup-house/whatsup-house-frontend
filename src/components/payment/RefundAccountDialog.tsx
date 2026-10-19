@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import RefundAccountForm from '@/components/payment/RefundAccountForm'
 import { EMPTY_REFUND_ACCOUNT, normalizeRefundAccount, validateRefundAccount, type RefundAccountErrors } from '@/lib/utils/refundAccount'
@@ -21,6 +21,10 @@ export default function RefundAccountDialog({ title, description, confirmLabel, 
   const tForm = useTranslations('payment.refundAccount')
   const [account, setAccount] = useState(EMPTY_REFUND_ACCOUNT)
   const [errors, setErrors] = useState<RefundAccountErrors>({})
+  const titleId = useId()
+  const close = () => {
+    if (!isPending) onClose()
+  }
 
   const handleConfirm = () => {
     const found = validateRefundAccount(account, tForm('required'))
@@ -29,15 +33,15 @@ export default function RefundAccountDialog({ title, description, confirmLabel, 
   }
 
   return (
-    <div className="fixed lg:absolute inset-0 z-50 flex items-center justify-center bg-foreground/30 px-6" onClick={onClose}>
+    <div className="fixed lg:absolute inset-0 z-50 flex items-center justify-center bg-foreground/30 px-6" onClick={close}>
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby={titleId}
         className="max-h-full w-full max-w-[340px] overflow-y-auto rounded-card bg-card p-5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-base font-bold text-foreground">{title}</h2>
+        <h2 id={titleId} className="text-base font-bold text-foreground">{title}</h2>
         <RefundAccountForm
           title={tForm('refundTitle')}
           reason={description}
@@ -49,7 +53,7 @@ export default function RefundAccountDialog({ title, description, confirmLabel, 
           }}
         />
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={onClose} className="flex min-h-[44px] items-center justify-center rounded-button bg-tag-bg text-sm font-bold text-tag-text">
+          <button type="button" onClick={close} disabled={isPending} className="flex min-h-[44px] items-center justify-center rounded-button bg-tag-bg text-sm font-bold text-tag-text disabled:opacity-50">
             {tCommon('cancel')}
           </button>
           <button

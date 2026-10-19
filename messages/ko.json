@@ -870,14 +870,13 @@
             },
             "ticketRestored": "사용한 이용권이 돌아와요.",
             "ticketKept": "사용한 이용권은 돌아오지 않아요.",
-            "refundable": "이용권 환불을 받을 수 있어요.",
-            "notRefundable": "환불은 받을 수 없어요.",
             "deposit": {
               "RETURN": "보증금은 돌려드려요.",
               "FORFEIT": "보증금은 돌려받을 수 없어요."
             },
             "sanction": "노쇼와 같게 처리돼 이후 신청할 때마다 보증금이 필요해져요.",
-            "irreversible": "취소한 신청은 되돌릴 수 없어요."
+            "irreversible": "취소한 신청은 되돌릴 수 없어요.",
+            "retry": "다시 불러오기"
           }
         },
         "resolution": {
@@ -1326,6 +1325,11 @@
         "MEMBERSHIP_REFUND_ACTIVE_TABLE": "확정된 테이블이 있어 환불할 수 없어요. 신청을 먼저 정리해주세요.",
         "REFUND_ACCOUNT_REQUIRED": "환불받을 계좌를 입력해주세요.",
         "failed": "환불을 요청하지 못했어요. 잠시 후 다시 시도해주세요."
+      },
+      "statusLabel": "{name} 환불",
+      "status": {
+        "REQUESTED": "송금 대기",
+        "SENT": "환불 완료"
       }
     }
   },
