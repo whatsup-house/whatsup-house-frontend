@@ -7,7 +7,6 @@ import { ApiErrorMessage, Button, Card, LoadingSpinner } from '@/components/ui'
 import DynamicQuestionField from './DynamicQuestionField'
 import GatheringSessionList from './GatheringSessionList'
 import TicketPassSection from './TicketPassSection'
-import PaymentPendingPanel from '@/components/payment/PaymentPendingPanel'
 import PaymentPolicyNotice from '@/components/payment/PaymentPolicyNotice'
 import RefundAccountForm from '@/components/payment/RefundAccountForm'
 import { isEmpty, prefillFromProfile, type FieldValue } from './DynamicApplicationForm'
@@ -19,7 +18,6 @@ import { useHorizontalSwipe } from '@/lib/hooks/useHorizontalSwipe'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useMyTickets } from '@/lib/hooks/useTickets'
 import { useToastStore } from '@/lib/store/toastStore'
-import { DEPOSIT_AMOUNT } from '@/lib/constants/payment'
 import { getApiErrorCode, getApiErrorMessage } from '@/lib/utils/apiError'
 import { formatLocalizedShortDate, formatTime } from '@/lib/utils/date'
 import { getUpcomingSessions, isSessionApplicable } from '@/lib/utils/gatheringStatus'
@@ -42,6 +40,8 @@ interface DiningApplyDraft {
 }
 
 const EMPTY_REFUND_ACCOUNT: DepositReturnAccount = { bank: '', accountNumber: '', holder: '' }
+
+const onlyDigits = (value: string) => value.replace(/\D/g, '')
 
 const draftKey = (gatheringId: string) => `dining-apply:${gatheringId}`
 
@@ -178,14 +178,13 @@ function DiningApplySteps({
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [refundErrors, setRefundErrors] = useState<Partial<Record<keyof DepositReturnAccount, string>>>({})
-  // depositOnly: 쓸 이용권이 이미 있어 이번엔 보증금만 입금하면 되는 경우 → 이용권 구매 없이 바로 입금 안내
-  const [paymentPending, setPaymentPending] = useState<{ id: string; depositOnly: boolean } | null>(null)
   // 단계 전환 슬라이드 방향. 첫 화면은 애니메이션 없이.
   const [slide, setSlide] = useState<'next' | 'prev' | null>(null)
 
   useEffect(() => {
     try {
-      window.sessionStorage.setItem(draftKey(gatheringId), JSON.stringify(draft))
+      // 계좌번호는 저장하지 않는다 (이용권 화면에 다녀오면 다시 입력)
+      window.sessionStorage.setItem(draftKey(gatheringId), JSON.stringify({ ...draft, refundAccount: { ...draft.refundAccount, accountNumber: '' } }))
     } catch {
       // 저장소를 못 쓰는 환경(사생활 보호 모드 등)에선 화면 안에서만 유지한다.
     }
@@ -298,7 +297,7 @@ function DiningApplySteps({
     if (!depositRequired) return true
     const missing: Partial<Record<keyof DepositReturnAccount, string>> = {}
     for (const key of ['bank', 'accountNumber', 'holder'] as const) {
-      if (!draft.refundAccount[key].trim()) missing[key] = tForm('requiredError')
+      if (!(key === 'accountNumber' ? onlyDigits(draft.refundAccount[key]) : draft.refundAccount[key].trim())) missing[key] = tForm('requiredError')
     }
     if (Object.keys(missing).length === 0) return true
     setRefundErrors(missing)
@@ -318,18 +317,16 @@ function DiningApplySteps({
       if (value === undefined || isEmpty(question, value)) continue
       answers.push({ questionId: question.questionId, value: question.type === 'NUMBER' ? Number(value) : value })
     }
-    // 제출 직전 기준: 이미 쓸 이용권이 있으면(제출로 소진돼도) 이번 결제 대기는 보증금뿐이다.
-    const hadUsablePass = findActiveMembership(tickets?.passes) !== null || (tickets?.totalRemaining ?? 0) > 0
     const { bank, accountNumber, holder } = draft.refundAccount
     const depositReturnAccount = depositRequired
-      ? { bank: bank.trim(), accountNumber: accountNumber.trim(), holder: holder.trim() }
+      ? { bank: bank.trim(), accountNumber: onlyDigits(accountNumber), holder: holder.trim() }
       : undefined
     submitMutation.mutate({ gatheringId, candidateSessionIds: selectedIds, answers, depositReturnAccount }, {
       onSuccess: (result) => {
         window.sessionStorage.removeItem(draftKey(gatheringId))
         if (result.status === 'PAYMENT_PENDING') {
-          setPaymentPending({ id: result.id, depositOnly: depositRequired && hadUsablePass })
-          scrollToTop()
+          // 이용권 구매가 필요한지, 보증금만 남았는지는 결제 화면이 서버 데이터로 정한다.
+          router.replace(`/payments/random-table?applicationId=${encodeURIComponent(result.id)}`)
           return
         }
         showToast(t('submitted'), 'welcome')
@@ -348,43 +345,6 @@ function DiningApplySteps({
         }
       },
     })
-  }
-
-  // 이용권 부족(또는 보증금 필요) → 결제 대기로 접수됨
-  if (paymentPending) {
-    return (
-      <div className="min-h-screen bg-background px-4 py-6">
-        <Card className="p-5 mb-5 bg-primary-light">
-          <p className="text-xs font-bold text-primary mb-2">{t('paymentPendingTitle')}</p>
-          <p className="font-bold text-foreground">{title}</p>
-          <p className="text-sm text-tag-text mt-2">
-            {paymentPending.depositOnly ? t('depositPendingDescription') : t('paymentPendingDescription')}
-          </p>
-        </Card>
-        {paymentPending.depositOnly ? (
-          <PaymentPendingPanel
-            gatheringId={gatheringId}
-            payerName={profile?.name ?? null}
-            items={[{ label: t('depositLabel'), amount: DEPOSIT_AMOUNT }]}
-          />
-        ) : (
-          <>
-            <PaymentPolicyNotice />
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full"
-              onClick={() => router.push(`/payments/random-table?applicationId=${encodeURIComponent(paymentPending.id)}`)}
-            >
-              {t('buyTicket')}
-            </Button>
-          </>
-        )}
-        <Button variant="outlined" size="lg" className="w-full mt-3" onClick={() => router.push('/mypage?tab=applications')}>
-          {t('viewMyApplications')}
-        </Button>
-      </div>
-    )
   }
 
   return (

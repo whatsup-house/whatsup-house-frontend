@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import type { ApplicationStatus, DiningSessionInfo, DiningTableDetail, DiningTableStatus, MatchStatus } from '@/lib/api/types'
+import type { ApplicationStatus, DiningApplicationItem, DiningSessionInfo, DiningTableDetail, DiningTableStatus, MatchStatus } from '@/lib/api/types'
 
 // 알림(DINING_RESOLUTION)이 이 앵커로 들어오면 상태 카드의 해결 영역으로 스크롤한다.
 export const DINING_RESOLUTION_ANCHOR = 'dining-resolution'
@@ -7,6 +7,11 @@ export const DINING_RESOLUTION_ANCHOR = 'dining-resolution'
 // 참가자 상태 카드의 단계 (KAN-354). 진행 막대는 앞 6개 순서대로 채운다.
 export const DINING_STEPS = ['payment', 'waiting', 'matching', 'reallocating', 'confirmed', 'attended'] as const
 export type DiningPhase = typeof DINING_STEPS[number] | 'alternative' | 'noMatch' | 'exception'
+
+// 쓸 이용권은 이미 있어(차감 기록 있음) 보증금 입금만 남은 결제 대기 (KAN-408)
+export function isDepositOnlyPending(item: Pick<DiningApplicationItem, 'status' | 'ticketStatus' | 'deposit'>): boolean {
+  return item.status === 'PAYMENT_PENDING' && item.deposit?.status === 'PENDING' && item.ticketStatus === 'DEDUCTED'
+}
 
 export function getDiningPhase(
   status: ApplicationStatus,

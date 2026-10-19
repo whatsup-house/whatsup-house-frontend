@@ -3,7 +3,7 @@
 import DiningStatusCard from '@/components/mypage/DiningStatusCard'
 import { useMyDiningApplications } from '@/lib/hooks/useApplications'
 import { useAuthStore } from '@/lib/store/authStore'
-import { getDiningPhase } from '@/lib/utils/diningStatus'
+import { getDiningPhase, isDepositOnlyPending } from '@/lib/utils/diningStatus'
 
 // 홈 상단: 진행 중(취소·참석 완료 아닌) 우연한 식탁 신청 중 가장 최근 1건을 요약한다. (KAN-354)
 export default function DiningStatusSummary() {
@@ -29,6 +29,7 @@ export default function DiningStatusSummary() {
         table={active.table}
         assignedSession={active.assignedSession}
         candidateSessions={active.candidateSessions}
+        depositOnly={isDepositOnlyPending(active)}
       />
     </div>
   )

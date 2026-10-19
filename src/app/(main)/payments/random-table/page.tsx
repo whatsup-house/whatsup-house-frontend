@@ -8,14 +8,14 @@ import { Button, Card, LoadingSpinner } from '@/components/ui'
 import PaymentPendingPanel from '@/components/payment/PaymentPendingPanel'
 import PaymentPolicyNotice from '@/components/payment/PaymentPolicyNotice'
 import { useMyProfile } from '@/lib/hooks/useAuth'
-import { useMyApplicationDetail } from '@/lib/hooks/useApplications'
+import { useMyApplicationDetail, useMyDiningApplications } from '@/lib/hooks/useApplications'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseTicketPass, useTicketProducts } from '@/lib/hooks/useTickets'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useToastStore } from '@/lib/store/toastStore'
 import { DEPOSIT_AMOUNT } from '@/lib/constants/payment'
 import { formatLocalizedShortDate } from '@/lib/utils/date'
-import { daysUntil, findActiveMembership, isMembershipProduct } from '@/lib/utils/membership'
+import { daysUntil, findActiveMembership, getTicketRestriction, isMembershipProduct } from '@/lib/utils/membership'
 import { safeReturnUrl } from '@/lib/utils/url'
 import type { TicketPass } from '@/lib/api/types'
 
@@ -41,6 +41,9 @@ function PaymentContent() {
   const t = useTranslations('payment.pass')
   const locale = useLocale()
   const { data: profile } = useMyProfile()
+  // 보증금 상태는 내 우연한 식탁 신청 목록의 신청별 deposit 에서 읽는다 (입금 대기 중엔 10초마다 갱신). (KAN-408)
+  const diningApplications = useMyDiningApplications(Boolean(applicationId && isLoggedIn))
+  const diningApplication = diningApplications.data?.find((item) => item.id === applicationId)
   const memberPurchase = usePurchaseTicketPass()
   const guestPurchase = usePurchaseGuestTicketPass()
   const showToast = useToastStore((state) => state.show)
@@ -59,6 +62,7 @@ function PaymentContent() {
   const isLoading = productsQuery.isLoading
     || (isGuestPurchase ? guestTickets.isLoading : memberTickets.isLoading)
     || Boolean(applicationId && isLoggedIn && memberApplicationDetail.isLoading)
+    || diningApplications.isLoading
     // 게더링 상세가 오기 전에 폴백 계좌가 먼저 보이지 않게 한다 (송금 안내라 잠깐이라도 다른 계좌가 뜨면 안 됨)
     || Boolean(gatheringId && gatheringDetail.isLoading)
   const purchase = isGuestPurchase ? guestPurchase : memberPurchase
@@ -72,7 +76,9 @@ function PaymentContent() {
   const selectedProductId = selected ?? (membership ? MEMBERSHIP_OPTION : products[0]?.id ?? null)
   const useMembership = membership !== null && selectedProductId === MEMBERSHIP_OPTION
   const product = useMembership ? undefined : (products.find((item) => item.id === selectedProductId) ?? products[0])
-  const canPurchase = data?.purchasable === true
+  // 참여 자격 심사는 자동 승인이라 제한·차단된 회원만 막는다.
+  const restriction = getTicketRestriction(data)
+  const canPurchase = restriction === null
   const matchesCurrentApplication = (pass: TicketPass) => {
     if (!applicationId && !bookingNumber) return true
     return !data?.applicationId || pass.applicationId === data.applicationId
@@ -85,8 +91,15 @@ function PaymentContent() {
   // 신청 없이 산 이용권은 입금 확인만으로 끝이다.
   const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt && (isApplicationConfirmed || !displayPass.applicationId))
   const goBack = () => router.push(returnUrl ? safeReturnUrl(returnUrl) : '/gatherings')
-  // 보증금 대상이 신청과 함께 사면 입금액에 보증금이 합산돼 온다.
-  const depositIncluded = Boolean(profile?.depositRequired && displayPass?.applicationId && displayPass.purchaseAmount > DEPOSIT_AMOUNT)
+  // purchaseAmount 는 이용권 가격뿐이다. 보증금은 별도 레코드라 입금 대기(PENDING)일 때만 합산한다.
+  // 신청의 deposit 정보가 없으면(구형 BE) 보증금 대상 회원이 신청과 함께 산 경우로 보고 기본 보증금을 더한다.
+  const deposit = diningApplication?.deposit
+  const hasLinkedApplication = Boolean(displayPass?.applicationId ?? applicationId)
+  const depositDue = deposit
+    ? (deposit.status === 'PENDING' ? deposit.amount : 0)
+    : (profile?.depositRequired && hasLinkedApplication ? DEPOSIT_AMOUNT : 0)
+  // 이용권은 이미 쓰였고(차감 기록) 보증금만 남은 신청 → 이용권 선택 없이 보증금 입금 화면
+  const isDepositFlow = !displayPass && deposit != null && diningApplication?.ticketStatus === 'DEDUCTED'
   const submit = async () => {
     if (useMembership) {
       goBack()
@@ -115,7 +128,7 @@ function PaymentContent() {
     <div className="min-h-screen bg-background px-5 py-6">
       <div className="flex items-center gap-2 mb-2"><Ticket size={22} className="text-primary" /><h1 className="text-xl font-bold">우연한 식탁 이용권</h1></div>
       <p className="text-sm text-tag-text mb-6">
-        {isPaymentComplete ? '참가 확정 정보를 확인해 주세요.' : displayPass ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}
+        {isPaymentComplete ? '참가 확정 정보를 확인해 주세요.' : displayPass || isDepositFlow ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}
       </p>
       {displayPass ? (
         isPaymentComplete ? (
@@ -172,13 +185,35 @@ function PaymentContent() {
               gatheringId={gatheringId}
               payerName={profile?.name ?? null}
               deadline={displayPass.paymentDeadline}
-              items={depositIncluded
-                ? [
-                    { label: displayPass.productLabel, amount: displayPass.purchaseAmount - DEPOSIT_AMOUNT },
-                    { label: t('deposit'), amount: DEPOSIT_AMOUNT },
-                  ]
-                : [{ label: displayPass.productLabel, amount: displayPass.purchaseAmount }]}
+              items={[
+                { label: displayPass.productLabel, amount: displayPass.purchaseAmount },
+                ...(depositDue > 0 ? [{ label: t('deposit'), amount: depositDue }] : []),
+              ]}
             />
+          </>
+        )
+      ) : isDepositFlow ? (
+        deposit?.status === 'PENDING' ? (
+          <>
+            <Card className="p-5 mb-4">
+              <p className="font-bold text-lg">{t('depositOnlyTitle')}</p>
+              <p className="text-sm text-tag-text mt-2">{t('depositOnlyDescription')}</p>
+            </Card>
+            <PaymentPendingPanel
+              gatheringId={gatheringId}
+              payerName={profile?.name ?? null}
+              items={[{ label: t('deposit'), amount: deposit.amount }]}
+            />
+          </>
+        ) : (
+          <>
+            <Card className="p-5 mb-5 bg-primary-light">
+              <p className="text-xs font-bold text-primary mb-2">입금완료</p>
+              <p className="font-bold text-lg">{t('depositConfirmed')}</p>
+            </Card>
+            <Button variant="primary" size="lg" className="w-full" onClick={() => router.push('/mypage?tab=applications')}>
+              {t('viewMyApplications')}
+            </Button>
           </>
         )
       ) : (
@@ -199,7 +234,7 @@ function PaymentContent() {
                 <p className="mt-1 text-sm text-primary font-semibold">
                   {t('membershipRemaining', { date: formatLocalizedShortDate(membership.validUntil, locale), days: daysUntil(membership.validUntil) })}
                 </p>
-                <p className="mt-1 text-xs text-tag-text">{profile?.depositRequired ? t('membershipDepositOnly', { amount: DEPOSIT_AMOUNT.toLocaleString() }) : t('membershipNoPayment')}</p>
+                <p className="mt-1 text-xs text-tag-text">{depositDue > 0 ? t('membershipDepositOnly', { amount: depositDue.toLocaleString() }) : t('membershipNoPayment')}</p>
               </button>
             )}
             {products.map((item) => {
@@ -219,11 +254,12 @@ function PaymentContent() {
             })}
           </div>
           )}
+          {depositDue > 0 && !useMembership && (
+            <p className="mb-4 rounded-input bg-tag-bg px-4 py-3 text-sm text-tag-text">{t('depositNote', { amount: depositDue.toLocaleString() })}</p>
+          )}
           <PaymentPolicyNotice />
-          {!canPurchase && !useMembership && (
-            <Card className="p-4 mb-4 text-sm text-tag-text">
-              심사가 완료되면 이용권을 구매할 수 있어요. 승인 안내를 받은 뒤 다시 확인해 주세요.
-            </Card>
+          {restriction && !useMembership && (
+            <Card className="p-4 mb-4 text-sm text-tag-text">{t(`restricted.${restriction}`)}</Card>
           )}
           <Button variant="primary" size="lg" className="w-full" disabled={!useMembership && (!canPurchase || !product)} isLoading={purchase.isPending} onClick={submit}>{useMembership ? t('applyWithMembership') : `${product?.name ?? '이용권'} 구매 요청`}</Button>
         </>

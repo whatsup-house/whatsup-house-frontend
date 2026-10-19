@@ -24,6 +24,7 @@ interface DiningStatusCardProps {
   assignedSession: DiningSessionInfo | null
   candidateSessions: DiningSessionInfo[]
   resolutionId?: string | null
+  depositOnly?: boolean   // 이용권은 준비됐고 보증금 입금만 남은 결제 대기
   // 홈 요약 카드: 취소·해결 선택 없이 이동 링크만 보여준다
   summary?: boolean
 }
@@ -38,6 +39,7 @@ export default function DiningStatusCard({
   assignedSession,
   candidateSessions,
   resolutionId,
+  depositOnly = false,
   summary = false,
 }: DiningStatusCardProps) {
   const t = useTranslations('mypage.applications.dining')
@@ -55,7 +57,9 @@ export default function DiningStatusCard({
     : ''
 
   const matchRunAt = phase === 'waiting' ? getNextMatchRunAt(candidateSessions) : null
-  const detail = matchRunAt
+  const detail = phase === 'payment' && depositOnly
+    ? t('detail.paymentDeposit')
+    : matchRunAt
     ? t('detail.waitingAt', { at: formatLocalizedShortDateTime(matchRunAt, locale) })
     : phase === 'matching' && table?.confirmAt
       ? t('detail.matchingUntil', { at: formatLocalizedShortDateTime(table.confirmAt, locale) })
@@ -97,7 +101,7 @@ export default function DiningStatusCard({
 
       {phase === 'payment' && (
         <Link href={`/payments/random-table?applicationId=${encodeURIComponent(applicationId)}`} className={linkButtonClass}>
-          {t('buyTicket')}
+          {depositOnly ? t('payDeposit') : t('buyTicket')}
         </Link>
       )}
       {table && (phase === 'confirmed' || phase === 'attended') && (

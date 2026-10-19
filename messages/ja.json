@@ -610,9 +610,6 @@
       "depositAccount": "入金口座（申請後に入金）",
       "accountHolder": "口座名義 {holder}",
       "loginRequired": "ログイン後に利用券を購入できます。",
-      "membershipApply": "멤버십으로 신청",
-      "membershipUntil": "{date}까지 · {days}일 남음",
-      "membershipNote": "추가 결제 없이 신청돼요.",
       "select": "이용권 선택하기"
     },
     "diningApply": {
@@ -635,9 +632,7 @@
       "paymentPendingDescription": "申請は受け付けましたが、利用券が不足しています。利用券を購入すると申請が確定し、マッチング待ちになります。",
       "buyTicket": "利用券を購入する",
       "viewMyApplications": "申請履歴を見る",
-      "refundMissing": "보증금 반환 계좌를 모두 입력해주세요.",
-      "depositPendingDescription": "신청은 접수됐어요. 보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요.",
-      "depositLabel": "보증금"
+      "refundMissing": "보증금 반환 계좌를 모두 입력해주세요."
     },
     "diningTable": {
       "label": "偶然の食卓",
@@ -851,7 +846,8 @@
           "attended": "ご参加ありがとうございました。",
           "alternative": "この日程ではテーブルが成立しませんでした。下からご希望の方法を選んでください。",
           "noMatch": "残念ながら今回はマッチングが成立しませんでした。",
-          "exception": "運営チームが申込みを確認しています。少々お待ちください。"
+          "exception": "運営チームが申込みを確認しています。少々お待ちください。",
+          "paymentDeposit": "보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요."
         },
         "buyTicket": "利用券を購入する",
         "viewTable": "テーブルを見る",
@@ -891,7 +887,8 @@
           "alreadyProcessed": "すでに処理された申込みです。最新の状態を読み込み直しました。",
           "cancelWindowClosed": "開催の2日前までしかキャンセルできません。",
           "failed": "処理できませんでした。しばらくしてから再度お試しください。"
-        }
+        },
+        "payDeposit": "보증금 입금하기"
       },
       "emptyFiltered": "該当状態の申請履歴がありません。",
       "empty": "まだ申請したギャザリングがありません。",
@@ -1213,7 +1210,17 @@
       "perMonth": "월 {amount}원 꼴",
       "deposit": "보증금",
       "validUntil": "멤버십 이용 기한",
-      "backToApply": "돌아가기"
+      "backToApply": "돌아가기",
+      "depositNote": "보증금 {amount}원이 이용권 가격과 별도로 함께 입금돼요.",
+      "depositOnlyTitle": "보증금 입금이 필요해요",
+      "depositOnlyDescription": "이용권은 준비돼 있어요. 보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요.",
+      "depositConfirmed": "보증금 입금이 확인됐어요",
+      "viewMyApplications": "내 신청 보기",
+      "restricted": {
+        "REJECTED": "현재 우연한 식탁 참여 자격이 승인되지 않았어요.",
+        "SUSPENDED": "현재 우연한 식탁 참여 자격이 정지되어 있어요.",
+        "BLOCKED": "차단된 계정은 이용권을 구매할 수 없어요."
+      }
     },
     "pending": {
       "account": "입금 계좌",

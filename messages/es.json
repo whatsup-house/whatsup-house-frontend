@@ -610,9 +610,6 @@
       "depositAccount": "Cuenta de depósito (pago después de la solicitud)",
       "accountHolder": "Titular de la cuenta {holder}",
       "loginRequired": "Inicia sesión para comprar un pase.",
-      "membershipApply": "멤버십으로 신청",
-      "membershipUntil": "{date}까지 · {days}일 남음",
-      "membershipNote": "추가 결제 없이 신청돼요.",
       "select": "이용권 선택하기"
     },
     "diningApply": {
@@ -635,9 +632,7 @@
       "paymentPendingDescription": "Recibimos tu solicitud, pero no tienes pases suficientes. Compra un pase para confirmarla y esperar el emparejamiento.",
       "buyTicket": "Comprar un pase",
       "viewMyApplications": "Ver mis solicitudes",
-      "refundMissing": "보증금 반환 계좌를 모두 입력해주세요.",
-      "depositPendingDescription": "신청은 접수됐어요. 보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요.",
-      "depositLabel": "보증금"
+      "refundMissing": "보증금 반환 계좌를 모두 입력해주세요."
     },
     "diningTable": {
       "label": "Mesa al azar",
@@ -851,7 +846,8 @@
           "attended": "Gracias por acompañarnos.",
           "alternative": "No pudimos formar una mesa para esta fecha. Elige una opción abajo.",
           "noMatch": "Lo sentimos, esta vez no hubo emparejamiento.",
-          "exception": "Nuestro equipo está revisando tu solicitud. Espera un momento."
+          "exception": "Nuestro equipo está revisando tu solicitud. Espera un momento.",
+          "paymentDeposit": "보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요."
         },
         "buyTicket": "Comprar pase",
         "viewTable": "Ver mesa",
@@ -891,7 +887,8 @@
           "alreadyProcessed": "Esta solicitud ya fue procesada. Cargamos el estado más reciente.",
           "cancelWindowClosed": "Solo puedes cancelar hasta 2 días antes de que empiece la sesión.",
           "failed": "No se pudo completar la solicitud. Inténtalo de nuevo en un momento."
-        }
+        },
+        "payDeposit": "보증금 입금하기"
       },
       "emptyFiltered": "No hay solicitudes con este estado.",
       "empty": "Aún no has solicitado ningún encuentro.",
@@ -1213,7 +1210,17 @@
       "perMonth": "월 {amount}원 꼴",
       "deposit": "보증금",
       "validUntil": "멤버십 이용 기한",
-      "backToApply": "돌아가기"
+      "backToApply": "돌아가기",
+      "depositNote": "보증금 {amount}원이 이용권 가격과 별도로 함께 입금돼요.",
+      "depositOnlyTitle": "보증금 입금이 필요해요",
+      "depositOnlyDescription": "이용권은 준비돼 있어요. 보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요.",
+      "depositConfirmed": "보증금 입금이 확인됐어요",
+      "viewMyApplications": "내 신청 보기",
+      "restricted": {
+        "REJECTED": "현재 우연한 식탁 참여 자격이 승인되지 않았어요.",
+        "SUSPENDED": "현재 우연한 식탁 참여 자격이 정지되어 있어요.",
+        "BLOCKED": "차단된 계정은 이용권을 구매할 수 없어요."
+      }
     },
     "pending": {
       "account": "입금 계좌",

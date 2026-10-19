@@ -770,6 +770,14 @@ export interface DiningSessionInfo {
 export type DiningTableStatus = 'PROPOSED' | 'CONFIRMED' | 'DONE' | 'DISSOLVED'
 
 // 내 우연한 식탁 신청 1건 — GET /api/dining/me/applications 의 applications[]
+// 보증금 상태 — 신청별 보증금 레코드. 보증금 대상이 아니면 deposit 자체가 없다 (KAN-408)
+export type DepositStatus = 'PENDING' | 'PAID' | 'RETURN_PENDING' | 'RETURNED' | 'FORFEITED'
+
+export interface DiningApplicationDeposit {
+  status: DepositStatus
+  amount: number
+}
+
 export interface DiningApplicationItem {
   id: string
   gathering: { id: string; title: string }
@@ -780,6 +788,7 @@ export interface DiningApplicationItem {
   ticketStatus: TicketDeductionStatus | null
   table: { id: string; status: DiningTableStatus; confirmAt: string | null } | null
   resolutionId?: string | null             // 매칭 실패 해결 선택 ID (KAN-347). 없으면 해결 버튼 비활성
+  deposit?: DiningApplicationDeposit | null // 이 신청의 보증금 (KAN-408). 구형 BE 응답엔 없다
 }
 
 export interface DiningApplicationListResponse {

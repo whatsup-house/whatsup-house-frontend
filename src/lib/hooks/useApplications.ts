@@ -148,6 +148,8 @@ export function useMyDiningApplications(enabled: boolean) {
     enabled,
     retry: false,
     staleTime: 1000 * 60,
+    // 보증금 입금 대기 중이면 자동 대사로 확인되는 걸 화면이 따라가게 10초마다 다시 읽는다. (KAN-408)
+    refetchInterval: (query) => (query.state.data?.some((item) => item.deposit?.status === 'PENDING') ? 10_000 : false),
   })
 }
 
