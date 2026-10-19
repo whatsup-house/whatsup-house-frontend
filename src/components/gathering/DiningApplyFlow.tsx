@@ -7,6 +7,8 @@ import { ApiErrorMessage, Button, Card, LoadingSpinner } from '@/components/ui'
 import DynamicQuestionField from './DynamicQuestionField'
 import GatheringSessionList from './GatheringSessionList'
 import TicketPassSection from './TicketPassSection'
+import PaymentPolicyNotice from '@/components/payment/PaymentPolicyNotice'
+import RefundAccountForm from '@/components/payment/RefundAccountForm'
 import { isEmpty, prefillFromProfile, type FieldValue } from './DynamicApplicationForm'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { useDiningPrefill, useSubmitDynamicApplication } from '@/lib/hooks/useApplications'
@@ -19,7 +21,8 @@ import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage } from '@/lib/utils/apiError'
 import { formatLocalizedShortDate, formatTime } from '@/lib/utils/date'
 import { getUpcomingSessions, isSessionApplicable } from '@/lib/utils/gatheringStatus'
-import type { AnswerItem, FormQuestionDetail, GatheringSession } from '@/lib/api/types'
+import { findActiveMembership } from '@/lib/utils/membership'
+import type { AnswerItem, DepositReturnAccount, FormQuestionDetail, GatheringSession } from '@/lib/api/types'
 
 type Step = 1 | 2 | 3
 const STEP_KEYS = ['sessions', 'form', 'ticket'] as const
@@ -33,7 +36,12 @@ interface DiningApplyDraft {
   step: Step
   sessionIds: string[]                    // 고른 순서 = 우선순위
   answers: Record<string, FieldValue>     // questionId → 직접 입력한 값 (프리필은 렌더 시 fallback)
+  refundAccount: DepositReturnAccount     // 보증금 반환 계좌 입력 (보증금 대상만 쓴다)
 }
+
+const EMPTY_REFUND_ACCOUNT: DepositReturnAccount = { bank: '', accountNumber: '', holder: '' }
+
+const onlyDigits = (value: string) => value.replace(/\D/g, '')
 
 const draftKey = (gatheringId: string) => `dining-apply:${gatheringId}`
 
@@ -42,12 +50,17 @@ function readDraft(gatheringId: string): DiningApplyDraft | null {
   try {
     const parsed: unknown = JSON.parse(window.sessionStorage.getItem(draftKey(gatheringId)) ?? 'null')
     if (typeof parsed !== 'object' || parsed === null) return null
-    const { step, sessionIds, answers } = parsed as Partial<DiningApplyDraft>
+    const { step, sessionIds, answers, refundAccount } = parsed as Partial<DiningApplyDraft>
     if (!Array.isArray(sessionIds) || typeof answers !== 'object' || answers === null) return null
     return {
       step: step === 2 || step === 3 ? step : 1,
       sessionIds: sessionIds.filter((id): id is string => typeof id === 'string'),
       answers,
+      refundAccount: {
+        bank: typeof refundAccount?.bank === 'string' ? refundAccount.bank : '',
+        accountNumber: typeof refundAccount?.accountNumber === 'string' ? refundAccount.accountNumber : '',
+        holder: typeof refundAccount?.holder === 'string' ? refundAccount.holder : '',
+      },
     }
   } catch {
     return null
@@ -154,22 +167,24 @@ function DiningApplySteps({
   const [draft, setDraft] = useState<DiningApplyDraft>(() => {
     const saved = readDraft(gatheringId)
     // ?session= 없음 = 이용권 구매 후 복귀(TicketPassSection returnUrl) 등 → 저장된 단계를 이어간다.
-    if (!initialSessionId) return saved ?? { step: 1, sessionIds: [], answers: {} }
+    if (!initialSessionId) return saved ?? { step: 1, sessionIds: [], answers: {}, refundAccount: EMPTY_REFUND_ACCOUNT }
     // 상세에서 회차를 골라 들어옴 → 1단계부터, 그 회차를 1지망으로(이미 골랐으면 맨 앞으로). 다른 선택·답변은 유지.
     return {
       step: 1,
       sessionIds: [initialSessionId, ...(saved?.sessionIds ?? []).filter((id) => id !== initialSessionId)],
       answers: saved?.answers ?? {},
+      refundAccount: saved?.refundAccount ?? EMPTY_REFUND_ACCOUNT,
     }
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [paymentPendingId, setPaymentPendingId] = useState<string | null>(null)
+  const [refundErrors, setRefundErrors] = useState<Partial<Record<keyof DepositReturnAccount, string>>>({})
   // 단계 전환 슬라이드 방향. 첫 화면은 애니메이션 없이.
   const [slide, setSlide] = useState<'next' | 'prev' | null>(null)
 
   useEffect(() => {
     try {
-      window.sessionStorage.setItem(draftKey(gatheringId), JSON.stringify(draft))
+      // 계좌번호는 저장하지 않는다 (이용권 화면에 다녀오면 다시 입력)
+      window.sessionStorage.setItem(draftKey(gatheringId), JSON.stringify({ ...draft, refundAccount: { ...draft.refundAccount, accountNumber: '' } }))
     } catch {
       // 저장소를 못 쓰는 환경(사생활 보호 모드 등)에선 화면 안에서만 유지한다.
     }
@@ -276,8 +291,25 @@ function DiningApplySteps({
     onSwipeRight: () => { if (step > 1) moveTo(step === 3 ? 2 : 1) },
   })
 
+  // 보증금 대상은 반환 계좌가 필수다. 비었으면 항목을 강조하고 계좌 입력 칸으로 스크롤한다. 다 채웠으면 true.
+  const depositRequired = profile?.depositRequired === true
+  const validateRefundAccount = (): boolean => {
+    if (!depositRequired) return true
+    const missing: Partial<Record<keyof DepositReturnAccount, string>> = {}
+    for (const key of ['bank', 'accountNumber', 'holder'] as const) {
+      if (!(key === 'accountNumber' ? onlyDigits(draft.refundAccount[key]) : draft.refundAccount[key].trim())) missing[key] = tForm('requiredError')
+    }
+    if (Object.keys(missing).length === 0) return true
+    setRefundErrors(missing)
+    showToast(t('refundMissing'), 'error')
+    requestAnimationFrame(() => {
+      document.getElementById('dining-refund-account')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    return false
+  }
+
   const handleSubmit = () => {
-    if (!validateAnswers()) return
+    if (!validateAnswers() || !validateRefundAccount()) return
     // 답변 payload (비어 있는 선택 항목은 제외) — 기존 신청 폼과 같은 규칙
     const answers: AnswerItem[] = []
     for (const question of visibleQuestions) {
@@ -285,12 +317,16 @@ function DiningApplySteps({
       if (value === undefined || isEmpty(question, value)) continue
       answers.push({ questionId: question.questionId, value: question.type === 'NUMBER' ? Number(value) : value })
     }
-    submitMutation.mutate({ gatheringId, candidateSessionIds: selectedIds, answers }, {
+    const { bank, accountNumber, holder } = draft.refundAccount
+    const depositReturnAccount = depositRequired
+      ? { bank: bank.trim(), accountNumber: onlyDigits(accountNumber), holder: holder.trim() }
+      : undefined
+    submitMutation.mutate({ gatheringId, candidateSessionIds: selectedIds, answers, depositReturnAccount }, {
       onSuccess: (result) => {
         window.sessionStorage.removeItem(draftKey(gatheringId))
         if (result.status === 'PAYMENT_PENDING') {
-          setPaymentPendingId(result.id)
-          scrollToTop()
+          // 이용권 구매가 필요한지, 보증금만 남았는지는 결제 화면이 서버 데이터로 정한다.
+          router.replace(`/payments/random-table?applicationId=${encodeURIComponent(result.id)}`)
           return
         }
         showToast(t('submitted'), 'welcome')
@@ -304,33 +340,11 @@ function DiningApplySteps({
           onSessionsStale()
         } else if (code && ANSWER_ERROR_CODES.has(code)) {
           moveTo(2)
+        } else if (code === 'DEPOSIT_ACCOUNT_REQUIRED') {
+          moveTo(3)
         }
       },
     })
-  }
-
-  // 이용권 부족 → 결제 대기로 접수됨
-  if (paymentPendingId) {
-    return (
-      <div className="min-h-screen bg-background px-4 py-6">
-        <Card className="p-5 mb-5 bg-primary-light">
-          <p className="text-xs font-bold text-primary mb-2">{t('paymentPendingTitle')}</p>
-          <p className="font-bold text-foreground">{title}</p>
-          <p className="text-sm text-tag-text mt-2">{t('paymentPendingDescription')}</p>
-        </Card>
-        <Button
-          variant="primary"
-          size="lg"
-          className="w-full"
-          onClick={() => router.push(`/payments/random-table?applicationId=${encodeURIComponent(paymentPendingId)}`)}
-        >
-          {t('buyTicket')}
-        </Button>
-        <Button variant="outlined" size="lg" className="w-full mt-3" onClick={() => router.push('/mypage?tab=applications')}>
-          {t('viewMyApplications')}
-        </Button>
-      </div>
-    )
   }
 
   return (
@@ -404,11 +418,24 @@ function DiningApplySteps({
               {needsTicket && (
                 <>
                   <TicketPassSection returnUrl={`/gatherings/${gatheringId}/apply/dining`} />
-                  {tickets?.totalRemaining === 0 && (
+                  {tickets?.totalRemaining === 0 && !findActiveMembership(tickets.passes) && (
                     <p className="mb-4 rounded-input bg-tag-bg px-4 py-3 text-sm text-tag-text">{t('noTicketNotice')}</p>
                   )}
                 </>
               )}
+              {depositRequired && (
+                <div id="dining-refund-account">
+                  <RefundAccountForm
+                    value={draft.refundAccount}
+                    errors={refundErrors}
+                    onChange={(refundAccount) => {
+                      setDraft((prev) => ({ ...prev, refundAccount }))
+                      setRefundErrors({})
+                    }}
+                  />
+                </div>
+              )}
+              <PaymentPolicyNotice />
             </>
           )}
         </div>

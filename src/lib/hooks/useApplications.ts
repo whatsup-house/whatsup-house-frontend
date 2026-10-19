@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory } from '@/lib/api/application'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory } from '@/lib/api/application'
 import type { ApplicationCreateRequest, ApplicationStatus, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
@@ -67,15 +67,29 @@ function useDiningActionErrorToast() {
   const showToast = useToastStore((s) => s.show)
   const queryClient = useQueryClient()
   return (err: unknown) => {
-    if (getApiErrorStatus(err) === 409) {
+    const code = getApiErrorCode(err)
+    // 구체적인 오류 코드가 상태 코드(409)보다 먼저다
+    if (code === 'CANCEL_WINDOW_CLOSED') {
+      showToast(t('cancelWindowClosed'), 'error')
+    } else if (code === 'REFUND_ACCOUNT_REQUIRED') {
+      showToast(t('refundAccountRequired'), 'error')
+    } else if (getApiErrorStatus(err) === 409) {
       showToast(t('alreadyProcessed'), 'error')
       invalidateDiningApplications(queryClient)
-    } else if (getApiErrorCode(err) === 'CANCEL_WINDOW_CLOSED') {
-      showToast(t('cancelWindowClosed'), 'error')
     } else {
       showToast(getApiErrorMessage(err, t('failed')), 'error')
     }
   }
+}
+
+// 취소 확인 모달이 열려 있는 동안만 조회한다. 열 때마다 시점 정책을 다시 평가해야 하므로 캐시하지 않는다. (KAN-410)
+export function useDiningCancelPreview(id: string) {
+  return useQuery({
+    queryKey: ['dining', 'cancel-preview', id],
+    queryFn: () => fetchDiningCancelPreview(id),
+    retry: false,
+    gcTime: 0,
+  })
 }
 
 // 우연한 식탁 사전 취소 (KAN-342)
@@ -148,6 +162,8 @@ export function useMyDiningApplications(enabled: boolean) {
     enabled,
     retry: false,
     staleTime: 1000 * 60,
+    // 보증금 입금 대기 중이면 자동 대사로 확인되는 걸 화면이 따라가게 10초마다 다시 읽는다. (KAN-408)
+    refetchInterval: (query) => (query.state.data?.some((item) => item.deposit?.status === 'PENDING') ? 10_000 : false),
   })
 }
 

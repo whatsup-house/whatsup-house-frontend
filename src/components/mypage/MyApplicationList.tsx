@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import AppImage from '@/components/ui/AppImage'
 import HScrollButtons from '@/components/ui/HScrollButtons'
 import DiningStatusCard from './DiningStatusCard'
+import { isDepositOnlyPending } from '@/lib/utils/diningStatus'
 import { useMyApplicationsMe, useCancelApplication, useMyDiningApplications } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { formatLocalizedNumericDate } from '@/lib/utils/date'
@@ -116,6 +117,9 @@ export default function MyApplicationList() {
                   assignedSession={dining.assignedSession}
                   candidateSessions={dining.candidateSessions}
                   resolutionId={dining.resolutionId}
+                  depositOnly={isDepositOnlyPending(dining)}
+                  deposit={dining.deposit}
+                  ticketStatus={dining.ticketStatus}
                 />
               )
             }

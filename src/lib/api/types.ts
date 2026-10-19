@@ -151,11 +151,16 @@ export type TicketProduct = 'RANDOM_TABLE_ONE' | 'RANDOM_TABLE_FOUR'
 export type ParticipantAccountStatus = 'ACTIVE' | 'BLOCKED'
 export type RandomTableEligibility = 'UNREVIEWED' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
 
+// 이용권 종류: COUNT 횟수권(1회권), PERIOD 기간제 멤버십. 구형 BE 응답엔 없어서 optional (없으면 COUNT) (KAN-408)
+export type TicketProductKind = 'COUNT' | 'PERIOD'
+
 export interface TicketProductItem {
   id: string
   name: string
   sessionCount: number
   price: number
+  kind?: TicketProductKind
+  periodMonths?: number | null
 }
 
 export interface TicketPass {
@@ -172,6 +177,9 @@ export interface TicketPass {
   purchaseAmount: number
   paymentDeadline: string | null
   paymentConfirmedAt: string | null
+  validUntil?: string | null   // 멤버십 만료일(YYYY-MM-DD). 횟수권은 null (KAN-408)
+  extendedDays?: number
+  refundStatus?: 'REQUESTED' | 'SENT' | null   // 환불 요청한 CANCELLED 멤버십: REQUESTED 송금 대기 / SENT 환불 완료 (KAN-410)
 }
 
 export interface MyTickets {
@@ -625,6 +633,8 @@ export interface UserProfile {
   avatarUrl: string | null
   characterUrl: string | null
   admin?: boolean
+  isDemo?: boolean            // 심사용 데모 회원 — 입금 시뮬레이터 노출 (KAN-409)
+  depositRequired?: boolean   // 노쇼 이력으로 보증금 50,000원이 필요한 회원 (KAN-408)
 }
 
 // 마일리지 타입
@@ -704,10 +714,18 @@ export interface DynamicApplicationRequest {
   answers: AnswerItem[]
 }
 
+// 보증금 반환 계좌 — 보증금 대상 회원의 우연한 식탁 신청 시 필수 (KAN-408)
+export interface DepositReturnAccount {
+  bank: string
+  accountNumber: string
+  holder: string
+}
+
 // 회원 신청 POST /api/applications — 종류 + 희망 회차(일반 모임은 1개) (KAN-338)
 export interface ApplicationCreateRequest extends DynamicApplicationRequest {
   gatheringId: string
   candidateSessionIds: string[]
+  depositReturnAccount?: DepositReturnAccount
 }
 
 // 신청 생성 응답
@@ -754,6 +772,14 @@ export interface DiningSessionInfo {
 export type DiningTableStatus = 'PROPOSED' | 'CONFIRMED' | 'DONE' | 'DISSOLVED'
 
 // 내 우연한 식탁 신청 1건 — GET /api/dining/me/applications 의 applications[]
+// 보증금 상태 — 신청별 보증금 레코드. 보증금 대상이 아니면 deposit 자체가 없다 (KAN-408)
+export type DepositStatus = 'PENDING' | 'PAID' | 'RETURN_PENDING' | 'RETURNED' | 'FORFEITED'
+
+export interface DiningApplicationDeposit {
+  status: DepositStatus
+  amount: number
+}
+
 export interface DiningApplicationItem {
   id: string
   gathering: { id: string; title: string }
@@ -764,6 +790,7 @@ export interface DiningApplicationItem {
   ticketStatus: TicketDeductionStatus | null
   table: { id: string; status: DiningTableStatus; confirmAt: string | null } | null
   resolutionId?: string | null             // 매칭 실패 해결 선택 ID (KAN-347). 없으면 해결 버튼 비활성
+  deposit?: DiningApplicationDeposit | null // 이 신청의 보증금 (KAN-408). 구형 BE 응답엔 없다
 }
 
 export interface DiningApplicationListResponse {
@@ -787,6 +814,23 @@ export interface DiningResolution {
 export interface DiningResolutionChooseRequest {
   choice: DiningResolutionChoice
   sessionId?: string
+  refundAccount?: DepositReturnAccount   // REFUND 면 필수 (KAN-410)
+}
+
+// 취소 미리보기 — GET /api/dining/applications/{id}/cancel-preview. 지금 취소하면 적용되는 결과 (KAN-410)
+export type DiningCancelWindow = 'BEFORE_DEADLINE' | 'AFTER_DEADLINE' | 'SAME_DAY'
+
+export interface DiningCancelPreview {
+  window: DiningCancelWindow
+  ticketRestored: boolean
+  refundable: boolean
+  depositOutcome: 'RETURN' | 'FORFEIT' | 'NONE'
+  sanction: boolean
+}
+
+// 멤버십 환불 POST /api/tickets/{passId}/refund (KAN-410)
+export interface MembershipRefundRequest {
+  refundAccount: DepositReturnAccount
 }
 
 // 신청 폼 프리필 — GET /api/dining/prefill?gatheringId= . 답한 적 없는 표준 질문은 빠진다
@@ -1550,4 +1594,20 @@ export interface AdminFeedPostPage {
 export interface AdminFeedFilters {
   visible?: boolean
   page: number
+}
+
+// 심사용 입금 시뮬레이터 (KAN-409) — 보내는 쪽은 결제 대기 건을 가리키는 id 하나면 된다.
+export interface DemoDepositRequest {
+  applicationId?: string
+  passId?: string
+}
+
+export type DemoDepositResult = 'MATCHED' | 'IGNORED' | 'NO_CANDIDATE' | 'MULTIPLE_CANDIDATES' | 'PARSE_FAILED'
+
+export interface DemoDepositResponse {
+  rawText: string
+  parsedName: string | null
+  parsedAmount: number | null
+  linkedApplicationId: string | null
+  result: DemoDepositResult
 }

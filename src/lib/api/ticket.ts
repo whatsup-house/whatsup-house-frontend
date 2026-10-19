@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, GuestTicketPurchaseRequest, MyTickets, TicketPass, TicketProductItem, TicketPurchaseRequest } from './types'
+import type { ApiResponse, GuestTicketPurchaseRequest, MembershipRefundRequest, MyTickets, TicketPass, TicketProductItem, TicketPurchaseRequest } from './types'
 
 export const fetchTicketProducts = async (): Promise<TicketProductItem[]> => {
   const response = await apiClient.get<ApiResponse<TicketProductItem[]>>('/api/tickets/products')
@@ -18,6 +18,11 @@ export const fetchMyTickets = async (applicationId?: string | null): Promise<MyT
 export const purchaseTicketPass = async (data: TicketPurchaseRequest): Promise<TicketPass> => {
   const response = await apiClient.post<ApiResponse<TicketPass>>('/api/tickets/purchase', data)
   return response.data.data
+}
+
+// 멤버십 환불 — 첫 참석 전까지만. 400/409 MEMBERSHIP_REFUND_AFTER_ATTENDANCE·MEMBERSHIP_REFUND_ACTIVE_TABLE·REFUND_ACCOUNT_REQUIRED (KAN-410)
+export const refundMembership = async (passId: string, data: MembershipRefundRequest): Promise<void> => {
+  await apiClient.post(`/api/tickets/${passId}/refund`, data)
 }
 
 export const fetchGuestTickets = async (bookingNumber: string): Promise<MyTickets> => {
