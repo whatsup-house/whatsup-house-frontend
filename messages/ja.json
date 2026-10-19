@@ -64,6 +64,10 @@
       "credentialError": "メールまたはパスワードをご確認ください。",
       "submit": "ログイン",
       "submitting": "ログイン中...",
+      "demoStart": "심사용 체험 시작",
+      "demoStarting": "체험 계정 만드는 중...",
+      "demoRateLimited": "잠시 후 다시 시도해 주세요",
+      "demoError": "체험을 시작하지 못했어요. 다시 시도해 주세요.",
       "noAccount": "まだ会員ではありませんか？",
       "validation": {
         "email": "正しいメール形式を入力してください",
@@ -1054,6 +1058,8 @@
     "diningHistory": {
       "title": "偶然の食卓 参加履歴",
       "loadFailed": "参加履歴を読み込めませんでした。",
+      "recommendTitle": "다음 추천 회차",
+      "recommendApply": "신청하기",
       "empty": "まだ参加した食卓がありません。",
       "tableStatus": {
         "PROPOSED": "確定待ち",

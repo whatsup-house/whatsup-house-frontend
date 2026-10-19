@@ -22,6 +22,12 @@ import Button from '@/components/ui/Button'
 // 빈 입력은 null(가격 → 종류 기본 가격, 마감 → 마감 없음, 우연한 식탁 규칙 → 매칭 규칙 기본값)
 const toNullableNumber = (v: unknown) => (v === '' || v === null || v === undefined ? null : Number(v))
 
+// 우연한 식탁 회차 지역은 서울 4곳으로 고정한다. 각 지역은 같은 이름의 장소(Location)로 저장한다. (KAN-413)
+const DINING_REGIONS = ['홍대/합정', '잠실', '강남/신논현', '을지로/종로']
+
+// 마감·매칭 실행 기본값: 회차 날짜 전날 00:00 (datetime-local 형식)
+const dayBeforeMidnight = (date: string) => dayjs(date).subtract(1, 'day').format('YYYY-MM-DDT00:00')
+
 const SELECT_CLASS =
   'w-full h-[52px] px-4 border border-tag-bg rounded-input text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary'
 
@@ -108,7 +114,7 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
     savePoolThenClose(editing ? [editing.sessionId] : [], false))
 
   const initial = editing?.values
-  const { register, handleSubmit, control, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, control, setValue, formState: { errors, dirtyFields } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       eventDate: initial?.eventDate ?? '',
@@ -128,6 +134,27 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
       maxAgeGap: initial?.maxAgeGap ?? null,
     },
   })
+
+  // 날짜를 고르면 관리자가 직접 고치지 않은 마감·매칭 실행 시각을 전날 00:00으로 맞춘다. (KAN-413)
+  const eventDateField = register('eventDate', {
+    onChange: (e: { target: { value: string } }) => {
+      const date = e.target.value
+      if (!isDining || !date) return
+      if (!dirtyFields.applyDeadlineAt) setValue('applyDeadlineAt', dayBeforeMidnight(date))
+      if (!dirtyFields.matchRunAt) setValue('matchRunAt', dayBeforeMidnight(date))
+    },
+  })
+
+  // 우연한 식탁: 고정 4곳을 항상 보여 주고, 같은 이름의 장소가 없으면 선택 불가로 표시한다.
+  // 수정 중인 회차의 기존 장소가 4곳이 아니어도 값이 비지 않게 남겨 둔다.
+  const regionOptions = isDining
+    ? [
+        ...DINING_REGIONS.map((name) => ({ name, id: locations?.find((l) => l.name === name)?.id })),
+        ...(locations ?? [])
+          .filter((l) => l.id === initial?.locationId && !DINING_REGIONS.includes(l.name))
+          .map((l) => ({ name: l.name, id: l.id })),
+      ]
+    : (locations ?? []).map((l) => ({ name: l.name, id: l.id }))
 
   const [eventDate, repeat, until] = useWatch({ control, name: ['eventDate', 'repeat', 'until'] })
   // BE와 같은 계산: 기준 날짜부터 until까지 7일 간격 (ChronoUnit.WEEKS + 1)
@@ -202,7 +229,7 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
             </div>
           )}
 
-          <Input label="날짜 *" type="date" min={today} error={errors.eventDate?.message} {...register('eventDate')} />
+          <Input label="날짜 *" type="date" min={today} error={errors.eventDate?.message} {...eventDateField} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input label="시작 시간 *" type="time" error={errors.startTime?.message} {...register('startTime')} />
@@ -213,8 +240,10 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
             <label className="text-sm font-medium text-foreground block mb-1">{isDining ? '지역' : '장소'} *</label>
             <select className={SELECT_CLASS} {...register('locationId')}>
               <option value="">{isDining ? '지역을' : '장소를'} 선택해주세요</option>
-              {locations?.map((loc) => (
-                <option key={loc.id} value={loc.id}>{loc.name}</option>
+              {regionOptions.map((r) => (
+                <option key={r.name} value={r.id ?? ''} disabled={!r.id}>
+                  {r.id ? r.name : `${r.name} (등록된 장소 없음)`}
+                </option>
               ))}
             </select>
             {errors.locationId && <p className="text-xs text-primary mt-1">{errors.locationId.message}</p>}

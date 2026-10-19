@@ -64,6 +64,10 @@
       "credentialError": "Por favor revisa tu correo electrónico o contraseña.",
       "submit": "Iniciar sesión",
       "submitting": "Iniciando sesión...",
+      "demoStart": "심사용 체험 시작",
+      "demoStarting": "체험 계정 만드는 중...",
+      "demoRateLimited": "잠시 후 다시 시도해 주세요",
+      "demoError": "체험을 시작하지 못했어요. 다시 시도해 주세요.",
       "noAccount": "¿Aún no tienes cuenta?",
       "validation": {
         "email": "Por favor introduce una dirección de correo electrónico válida",
@@ -1054,6 +1058,8 @@
     "diningHistory": {
       "title": "Historial de Mesa al azar",
       "loadFailed": "No se pudo cargar tu historial.",
+      "recommendTitle": "다음 추천 회차",
+      "recommendApply": "신청하기",
       "empty": "Aún no has participado en ninguna mesa.",
       "tableStatus": {
         "PROPOSED": "Pendiente",

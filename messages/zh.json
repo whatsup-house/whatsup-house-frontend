@@ -64,6 +64,10 @@
       "credentialError": "请检查您的电子邮件或密码。",
       "submit": "登录",
       "submitting": "登录中...",
+      "demoStart": "심사용 체험 시작",
+      "demoStarting": "체험 계정 만드는 중...",
+      "demoRateLimited": "잠시 후 다시 시도해 주세요",
+      "demoError": "체험을 시작하지 못했어요. 다시 시도해 주세요.",
       "noAccount": "还不是会员吗？",
       "validation": {
         "email": "请输入有效的电子邮件地址",
@@ -1054,6 +1058,8 @@
     "diningHistory": {
       "title": "偶遇餐桌参加记录",
       "loadFailed": "无法加载参加记录。",
+      "recommendTitle": "다음 추천 회차",
+      "recommendApply": "신청하기",
       "empty": "你还没有参加过餐桌。",
       "tableStatus": {
         "PROPOSED": "待确认",

@@ -625,6 +625,7 @@ export interface UserProfile {
   avatarUrl: string | null
   characterUrl: string | null
   admin?: boolean
+  isDemo?: boolean   // 심사용 체험 계정 (KAN-413)
 }
 
 // 마일리지 타입
@@ -856,6 +857,16 @@ export interface DiningHistoryItem {
   attendanceStatus: DiningAttendanceStatus | null  // 아직 BE 가 항상 null → 표시 생략
 }
 
+// 다음 추천 회차 — BE GET /api/dining/me/recommendations (KAN-413)
+export interface DiningRecommendation {
+  sessionId: string
+  gatheringId: string
+  date: string               // YYYY-MM-DD
+  startTime: string | null   // HH:mm:ss
+  region: string | null
+  deadlineAt: string | null  // ISO datetime
+}
+
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
 export interface AnswerView {
   questionKey: string
@@ -895,6 +906,7 @@ export type ReservedQuestionKey =
   | 'MY_STYLE'
   | 'WANTED_STYLE'
   | 'DIET'
+  | 'PRICE_RANGE'
 
 // 질문 추가/수정 요청 (POST/PUT /api/admin/.../form/questions)
 export interface FormQuestionUpsertRequest {
