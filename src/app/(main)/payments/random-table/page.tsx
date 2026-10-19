@@ -185,6 +185,7 @@ function PaymentContent() {
               gatheringId={gatheringId}
               payerName={profile?.name ?? null}
               deadline={displayPass.paymentDeadline}
+              demoTarget={{ applicationId: displayPass.applicationId ?? applicationId, passId: displayPass.id }}
               items={[
                 { label: displayPass.productLabel, amount: displayPass.purchaseAmount },
                 ...(depositDue > 0 ? [{ label: t('deposit'), amount: depositDue }] : []),
@@ -203,6 +204,7 @@ function PaymentContent() {
               gatheringId={gatheringId}
               payerName={profile?.name ?? null}
               items={[{ label: t('deposit'), amount: deposit.amount }]}
+              demoTarget={{ applicationId }}
             />
           </>
         ) : (

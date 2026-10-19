@@ -632,6 +632,7 @@ export interface UserProfile {
   avatarUrl: string | null
   characterUrl: string | null
   admin?: boolean
+  isDemo?: boolean            // 심사용 데모 회원 — 입금 시뮬레이터 노출 (KAN-409)
   depositRequired?: boolean   // 노쇼 이력으로 보증금 50,000원이 필요한 회원 (KAN-408)
 }
 
@@ -1575,4 +1576,20 @@ export interface AdminFeedPostPage {
 export interface AdminFeedFilters {
   visible?: boolean
   page: number
+}
+
+// 심사용 입금 시뮬레이터 (KAN-409) — 보내는 쪽은 결제 대기 건을 가리키는 id 하나면 된다.
+export interface DemoDepositRequest {
+  applicationId?: string
+  passId?: string
+}
+
+export type DemoDepositResult = 'MATCHED' | 'IGNORED' | 'NO_CANDIDATE' | 'MULTIPLE_CANDIDATES' | 'PARSE_FAILED'
+
+export interface DemoDepositResponse {
+  rawText: string
+  parsedName: string | null
+  parsedAmount: number | null
+  linkedApplicationId: string | null
+  result: DemoDepositResult
 }

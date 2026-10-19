@@ -154,6 +154,22 @@ h1, h2, h3 {
   100% { opacity: 0; }
 }
 
+/* 심사용 입금 시뮬레이터: 운영자 폰 알림이 위에서 슬라이드 인. 모션 줄이기 설정이면 애니메이션 없이 바로 보인다 */
+@keyframes push-in {
+  from { transform: translateY(-120%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-push-in {
+  animation: push-in 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-push-in {
+    animation: none;
+  }
+}
+
 /* 스크롤바 숨김 */
 .scrollbar-hide {
   -ms-overflow-style: none;
