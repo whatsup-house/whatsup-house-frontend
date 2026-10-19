@@ -12,6 +12,8 @@ interface ChatMessageBubbleProps {
   showProfile: boolean
   senderName: string
   isHouseSender: boolean
+  // 봇(와썹 AI)이 남긴 자동응답 — 발신자명 옆에 라벨, 아바타는 와썹하우스 로고
+  isAiGenerated: boolean
   type: 'TEXT' | 'IMAGE'
   content: string | null
   isDeleted: boolean
@@ -36,6 +38,7 @@ export default function ChatMessageBubble({
   showProfile,
   senderName,
   isHouseSender,
+  isAiGenerated,
   type,
   content,
   isDeleted,
@@ -78,12 +81,19 @@ export default function ChatMessageBubble({
     <div className={`flex gap-2 px-3 ${isMine ? 'justify-end' : 'justify-start'} ${showProfile ? 'mt-3' : 'mt-1'}`}>
       {!isMine &&
         (showProfile ? (
-          <ChatAvatar name={senderName} avatarUrl={null} isHouse={isHouseSender} size="sm" />
+          <ChatAvatar name={senderName} avatarUrl={null} isHouse={isHouseSender || isAiGenerated} size="sm" />
         ) : (
           <div className="w-9 shrink-0" />
         ))}
       <div className={`flex min-w-0 max-w-[78%] flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-        {!isMine && showProfile && <span className="mb-1 text-xs text-tag-text">{senderName}</span>}
+        {!isMine && showProfile && (
+          <span className="mb-1 flex items-center gap-1 text-xs text-tag-text">
+            {senderName}
+            {isAiGenerated && (
+              <span className="rounded-full bg-primary-light px-1.5 py-px text-[10px] font-medium text-primary">{t('aiLabel')}</span>
+            )}
+          </span>
+        )}
         <div className={`flex max-w-full items-end gap-1 ${isMine ? 'flex-row-reverse' : ''}`}>
           <div
             {...(onLongPress ? longPress : {})}

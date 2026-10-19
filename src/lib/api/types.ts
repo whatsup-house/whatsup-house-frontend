@@ -900,6 +900,16 @@ export interface DiningHistoryItem {
   attendanceStatus: DiningAttendanceStatus | null  // 아직 BE 가 항상 null → 표시 생략
 }
 
+// 다음 추천 회차 — BE GET /api/dining/me/recommendations (KAN-413)
+export interface DiningRecommendation {
+  sessionId: string
+  gatheringId: string
+  date: string               // YYYY-MM-DD
+  startTime: string | null   // HH:mm:ss
+  region: string | null
+  deadlineAt: string | null  // ISO datetime
+}
+
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
 export interface AnswerView {
   questionKey: string
@@ -939,6 +949,7 @@ export type ReservedQuestionKey =
   | 'MY_STYLE'
   | 'WANTED_STYLE'
   | 'DIET'
+  | 'PRICE_RANGE'
 
 // 질문 추가/수정 요청 (POST/PUT /api/admin/.../form/questions)
 export interface FormQuestionUpsertRequest {
@@ -1232,7 +1243,7 @@ export interface UnreadCountResponse {
 
 // ===== 우연한 식탁 운영: 예외함·설정 (KAN-353) =====
 // 백엔드 AdminDiningController(KAN-348) 계약. 시각은 LocalDateTime ISO 문자열.
-export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND'
+export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND' | 'CS'
 export type DiningExceptionStatus = 'OPEN' | 'RESOLVED'
 // WARN=기록만, RESTRICT/BAN=우연한 식탁 참여 자격 RESTRICTED
 export type DiningSafetyAction = 'WARN' | 'RESTRICT' | 'BAN'
@@ -1354,6 +1365,8 @@ export interface ChatMessage {
   unreadCount: number
   edited: boolean
   deleted: boolean
+  // 봇(와썹 AI)이 자동 응답으로 남긴 메시지 (KAN-406)
+  aiGenerated?: boolean
   createdAt: string
 }
 
@@ -1378,6 +1391,9 @@ export interface ChatRoomSummary {
   memberCount: number
   lastMessage: ChatLastMessage | null
   unreadCount: number
+  // AI 봇 이관 상태 (KAN-406)
+  needsHuman?: boolean
+  botPaused?: boolean
 }
 
 // BE ChatRoomDetailResponse.Member. Lombok boolean isAdmin → JSON "admin"
@@ -1410,6 +1426,10 @@ export interface ChatRoomDetail {
   // 없거나 삭제됐으면 null
   notice: ChatMessage | null
   permissions: ChatRoomPermissions
+  // AI 봇 상태 (KAN-406). handoffReason 은 관리자에게만 내려온다.
+  needsHuman?: boolean
+  botPaused?: boolean
+  handoffReason?: string | null
 }
 
 export interface ChatSendMessageRequest {
@@ -1495,6 +1515,14 @@ export interface AdminChatRoomSummary {
   unanswered: boolean
   // 내가 참여 중인지. 미참여 단체방은 멤버 API 로 먼저 들어가야 방을 볼 수 있다.
   member: boolean
+  // 담당자 필요(봇이 이관) / 봇 일시정지 (KAN-406)
+  needsHuman?: boolean
+  botPaused?: boolean
+}
+
+// GET/PUT /api/admin/bot/settings — AI 자동응답 전역 스위치 (KAN-406)
+export interface AdminBotSettings {
+  enabled: boolean
 }
 
 // POST /api/admin/chat/rooms — 생성한 관리자는 서버가 자동 포함
@@ -1610,4 +1638,54 @@ export interface DemoDepositResponse {
   parsedAmount: number | null
   linkedApplicationId: string | null
   result: DemoDepositResult
+}
+
+// ===== 운영자 입금 알림 로그·송금 목록 (KAN-411) =====
+// 백엔드 AdminPaymentController(BE-4 KAN-403, BE-5 KAN-404) 계약. 시각은 LocalDateTime ISO 문자열.
+export type DepositSource = 'MACRODROID' | 'IOS_SHORTCUT' | 'SIMULATOR'
+export type DepositMatchResult = 'MATCHED' | 'IGNORED' | 'NO_CANDIDATE' | 'MULTIPLE_CANDIDATES' | 'PARSE_FAILED'
+export type PaymentTargetType = 'TICKET_PASS' | 'DEPOSIT' | 'REGULAR_APPLICATION'
+
+export interface DepositNotification {
+  id: string
+  rawText: string
+  source: DepositSource
+  receivedAt: string
+  parsedName: string | null
+  parsedAmount: number | null
+  result: DepositMatchResult
+  targetType: PaymentTargetType | null
+  targetId: string | null
+  applicationId: string | null
+  exceptionCaseId: string | null
+  createdAt: string
+}
+
+export interface DepositNotificationPage {
+  content: DepositNotification[]
+  totalElements: number
+  totalPages: number
+  number: number
+  size: number
+}
+
+// POST /api/admin/payments/deposit-notifications/{id}/link — 예외 건 수동 연결
+export interface DepositNotificationLinkRequest {
+  targetType: PaymentTargetType
+  targetId: string
+}
+
+export type PayoutType = 'REFUND' | 'DEPOSIT_RETURN'
+export type PayoutStatus = 'REQUESTED' | 'SENT'
+
+export interface PayoutItem {
+  id: string
+  type: PayoutType
+  user: string
+  amount: number
+  bank: string
+  accountNumber: string
+  holder: string
+  status: PayoutStatus
+  createdAt: string
 }

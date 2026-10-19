@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory } from '@/lib/api/application'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory, fetchDiningRecommendations } from '@/lib/api/application'
 import type { ApplicationCreateRequest, ApplicationStatus, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
@@ -210,6 +210,16 @@ export function useMyDiningHistory(enabled: boolean) {
     queryKey: ['dining', 'me', 'history'],
     queryFn: fetchMyDiningHistory,
     enabled,
+  })
+}
+
+// 다음 추천 회차 카드 (KAN-413)
+export function useDiningRecommendations(enabled: boolean) {
+  return useQuery({
+    queryKey: ['dining', 'me', 'recommendations'],
+    queryFn: fetchDiningRecommendations,
+    enabled,
+    retry: false,
   })
 }
 

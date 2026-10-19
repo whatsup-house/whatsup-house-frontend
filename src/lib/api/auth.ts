@@ -25,6 +25,12 @@ export const login = async (email: string, password: string): Promise<LoginRespo
   return response.data.data
 }
 
+// 심사용 체험 로그인 — 본문 없이 호출하면 체험 계정을 만들고 로그인 쿠키를 심는다. (KAN-413)
+export const demoLogin = async (): Promise<LoginResponse> => {
+  const response = await apiClient.post<ApiResponse<LoginResponse>>('/api/auth/demo')
+  return response.data.data
+}
+
 // 로그아웃
 export const logout = async (): Promise<void> => {
   await apiClient.post('/api/auth/logout')

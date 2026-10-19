@@ -64,6 +64,10 @@
       "credentialError": "아이디 또는 비밀번호를 확인해주세요.",
       "submit": "로그인",
       "submitting": "로그인 중...",
+      "demoStart": "심사용 체험 시작",
+      "demoStarting": "체험 계정 만드는 중...",
+      "demoRateLimited": "잠시 후 다시 시도해 주세요",
+      "demoError": "체험을 시작하지 못했어요. 다시 시도해 주세요.",
       "noAccount": "아직 회원이 아니신가요?",
       "validation": {
         "email": "올바른 이메일 형식을 입력해주세요",
@@ -1091,6 +1095,8 @@
     "diningHistory": {
       "title": "우연한 식탁 참가 이력",
       "loadFailed": "참가 이력을 불러오지 못했어요.",
+      "recommendTitle": "다음 추천 회차",
+      "recommendApply": "신청하기",
       "empty": "아직 참가한 식탁이 없어요.",
       "tableStatus": {
         "PROPOSED": "확정 대기",
@@ -1522,7 +1528,8 @@
       "retry": "재전송",
       "discard": "전송 취소",
       "failed": "전송 실패",
-      "unread": "안 읽은 사람 {count}명"
+      "unread": "안 읽은 사람 {count}명",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames}님이 들어왔습니다",

@@ -64,6 +64,10 @@
       "credentialError": "Please check your email or password.",
       "submit": "Log in",
       "submitting": "Logging in...",
+      "demoStart": "심사용 체험 시작",
+      "demoStarting": "체험 계정 만드는 중...",
+      "demoRateLimited": "잠시 후 다시 시도해 주세요",
+      "demoError": "체험을 시작하지 못했어요. 다시 시도해 주세요.",
       "noAccount": "Don't have an account yet?",
       "validation": {
         "email": "Please enter a valid email address",
@@ -1091,6 +1095,8 @@
     "diningHistory": {
       "title": "Random Table history",
       "loadFailed": "Couldn’t load your history.",
+      "recommendTitle": "다음 추천 회차",
+      "recommendApply": "신청하기",
       "empty": "You haven’t joined any tables yet.",
       "tableStatus": {
         "PROPOSED": "Pending",
@@ -1522,7 +1528,8 @@
       "retry": "Resend",
       "discard": "Cancel",
       "failed": "Failed to send",
-      "unread": "{count} unread"
+      "unread": "{count} unread",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames} joined",
