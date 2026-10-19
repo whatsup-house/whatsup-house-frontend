@@ -1395,7 +1395,8 @@
       "retry": "Resend",
       "discard": "Cancel",
       "failed": "Failed to send",
-      "unread": "{count} unread"
+      "unread": "{count} unread",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames} joined",

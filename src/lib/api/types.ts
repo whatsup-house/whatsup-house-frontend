@@ -1322,6 +1322,8 @@ export interface ChatMessage {
   unreadCount: number
   edited: boolean
   deleted: boolean
+  // 봇(와썹 AI)이 자동 응답으로 남긴 메시지 (KAN-406)
+  aiGenerated?: boolean
   createdAt: string
 }
 
@@ -1346,6 +1348,9 @@ export interface ChatRoomSummary {
   memberCount: number
   lastMessage: ChatLastMessage | null
   unreadCount: number
+  // AI 봇 이관 상태 (KAN-406)
+  needsHuman?: boolean
+  botPaused?: boolean
 }
 
 // BE ChatRoomDetailResponse.Member. Lombok boolean isAdmin → JSON "admin"
@@ -1378,6 +1383,10 @@ export interface ChatRoomDetail {
   // 없거나 삭제됐으면 null
   notice: ChatMessage | null
   permissions: ChatRoomPermissions
+  // AI 봇 상태 (KAN-406). handoffReason 은 관리자에게만 내려온다.
+  needsHuman?: boolean
+  botPaused?: boolean
+  handoffReason?: string | null
 }
 
 export interface ChatSendMessageRequest {
@@ -1463,6 +1472,14 @@ export interface AdminChatRoomSummary {
   unanswered: boolean
   // 내가 참여 중인지. 미참여 단체방은 멤버 API 로 먼저 들어가야 방을 볼 수 있다.
   member: boolean
+  // 담당자 필요(봇이 이관) / 봇 일시정지 (KAN-406)
+  needsHuman?: boolean
+  botPaused?: boolean
+}
+
+// GET/PUT /api/admin/bot/settings — AI 자동응답 전역 스위치 (KAN-406)
+export interface AdminBotSettings {
+  enabled: boolean
 }
 
 // POST /api/admin/chat/rooms — 생성한 관리자는 서버가 자동 포함

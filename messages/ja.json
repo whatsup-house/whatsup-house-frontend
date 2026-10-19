@@ -1391,7 +1391,8 @@
       "retry": "再送信",
       "discard": "送信取消",
       "failed": "送信失敗",
-      "unread": "未読 {count}人"
+      "unread": "未読 {count}人",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames}さんが参加しました",

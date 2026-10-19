@@ -1391,7 +1391,8 @@
       "retry": "Reenviar",
       "discard": "Cancelar",
       "failed": "Error al enviar",
-      "unread": "{count} sin leer"
+      "unread": "{count} sin leer",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames} {count, plural, one {se unió} other {se unieron}}",

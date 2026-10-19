@@ -1395,7 +1395,8 @@
       "retry": "재전송",
       "discard": "전송 취소",
       "failed": "전송 실패",
-      "unread": "안 읽은 사람 {count}명"
+      "unread": "안 읽은 사람 {count}명",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames}님이 들어왔습니다",

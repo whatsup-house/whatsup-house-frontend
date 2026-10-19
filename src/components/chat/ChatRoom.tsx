@@ -48,6 +48,8 @@ interface ChatRoomProps {
   // 관리자 화면이 멤버 드로어에 붙이는 액션 (멤버 행 오른쪽, 목록 아래)
   memberActions?: (member: ChatMember) => ReactNode
   drawerFooter?: ReactNode
+  // 헤더 바로 아래에 붙는 관리자용 띠 (봇 상태 등)
+  headerExtra?: ReactNode
 }
 
 interface DialogState {
@@ -105,7 +107,7 @@ function CenterPill({ children }: { children: ReactNode }) {
   )
 }
 
-export default function ChatRoom({ roomId, listHref = '/chat', memberActions, drawerFooter }: ChatRoomProps) {
+export default function ChatRoom({ roomId, listHref = '/chat', memberActions, drawerFooter, headerExtra }: ChatRoomProps) {
   const t = useTranslations('chat')
   const tCommon = useTranslations('common')
   const locale = useLocale()
@@ -168,6 +170,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
       unreadCount: 0,
       edited: false,
       deleted: false,
+      aiGenerated: false,
       createdAt: item.createdAt,
     })),
   ]
@@ -335,6 +338,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
         showProfile={!isSameRun(prev, message)}
         senderName={memberName ?? message.sender?.nickname ?? t('withdrawn')}
         isHouseSender={isHouseSender}
+        isAiGenerated={!!message.aiGenerated}
         type={message.type === 'IMAGE' ? 'IMAGE' : 'TEXT'}
         content={message.type === 'IMAGE' ? message.imageUrl : message.content}
         isDeleted={isDeleted}
@@ -413,6 +417,8 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
           <Menu size={20} />
         </button>
       </header>
+
+      {headerExtra}
 
       {room?.notice && (
         <div className="shrink-0 bg-card px-3 pt-2">

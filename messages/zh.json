@@ -1391,7 +1391,8 @@
       "retry": "重新发送",
       "discard": "取消发送",
       "failed": "发送失败",
-      "unread": "{count}人未读"
+      "unread": "{count}人未读",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames}加入了聊天",
