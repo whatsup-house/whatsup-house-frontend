@@ -75,6 +75,28 @@ h1, h2, h3 {
   }
 }
 
+/* 심사용 운영자 화면 미리보기(KAN-417): lg↑에서 열리면 앱 셸을 화면 전체 너비로 펴고 오른쪽에 패널 폭만큼 비운다.
+   앱 프레임이 왼쪽으로 밀리고, 비운 자리에 AdminDepositPreview 가 고정 패널로 들어간다. 폭은 그 파일의 SIDE_PANEL_WIDTH 와 같다. */
+@media (min-width: 1024px) {
+  .app-shell {
+    transition: max-width 0.4s cubic-bezier(0.23, 1, 0.32, 1), padding-right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  html[data-admin-preview] .app-shell {
+    max-width: 100vw;
+    padding-right: 420px;
+  }
+  /* 좁은 노트북에서 브랜드 문구가 앱 프레임을 밀지 않게 잘라낸다 */
+  html[data-admin-preview] .app-shell > aside {
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell {
+    transition: none;
+  }
+}
+
 /* 바텀시트 슬라이드업 애니메이션 */
 @keyframes slide-up {
   from {

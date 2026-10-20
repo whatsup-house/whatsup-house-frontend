@@ -11,8 +11,8 @@ import type { DemoDepositResponse } from '@/lib/api/types'
 const FRAME_WIDTH = 375
 const FRAME_HEIGHT = 760
 const SETTLE_DELAY_MS = 800
-// 앱 프레임 오른쪽 빈 공간이 이보다 좁으면 옆에 두지 않고 전체 화면 시트로 띄운다
-const MIN_SIDE_SPACE = 300
+// lg↑ 오른쪽 고정 패널 폭. 열려 있는 동안 앱 셸이 이만큼 비켜 준다 (globals.css html[data-admin-preview] 와 같은 값)
+const SIDE_PANEL_WIDTH = 420
 
 export interface AdminPreviewApplicant {
   name: string
@@ -33,15 +33,13 @@ interface AdminDepositPreviewProps {
   onClose: () => void
 }
 
-type Layout = { mode: 'side'; left: number; width: number; scale: number } | { mode: 'sheet'; scale: number }
+type Layout = { mode: 'side' | 'sheet'; scale: number }
 
-// lg 이상이고 앱 프레임(AppShell 의 .mobile-layout) 오른쪽에 자리가 있으면 그 자리에, 아니면 전체 화면 시트로.
+// lg↑는 앱 오른쪽 패널(앱 셸이 왼쪽으로 비켜 줌), 그 아래는 전체 화면 시트. 프레임은 자리에 맞게 줄인다.
 function measureLayout(): Layout {
   const { innerWidth: vw, innerHeight: vh } = window
-  const appRight = document.querySelector('.mobile-layout')?.getBoundingClientRect().right ?? vw
-  const space = vw - appRight
-  if (vw >= 1024 && space >= MIN_SIDE_SPACE) {
-    return { mode: 'side', left: appRight, width: space, scale: Math.min(1, (space - 48) / FRAME_WIDTH, (vh - 140) / FRAME_HEIGHT) }
+  if (vw >= 1024) {
+    return { mode: 'side', scale: Math.min(1, (SIDE_PANEL_WIDTH - 48) / FRAME_WIDTH, (vh - 140) / FRAME_HEIGHT) }
   }
   return { mode: 'sheet', scale: Math.min(1, (vw - 32) / FRAME_WIDTH, (vh - 170) / FRAME_HEIGHT) }
 }
@@ -74,6 +72,14 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
   const [layout, setLayout] = useState(measureLayout)
   // 모션 줄이기: 알림과 결과를 한 번에 보여준다
   const [isSettled, setIsSettled] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+
+  const isSide = layout.mode === 'side'
+
+  // 패널이 떠 있는 동안 앱 셸이 왼쪽으로 비켜 주게 표시한다. 닫히면(언마운트) 원래 가운데 배치로 돌아간다.
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-admin-preview', isSide)
+    return () => document.documentElement.removeAttribute('data-admin-preview')
+  }, [isSide])
 
   useEffect(() => {
     const handleResize = () => setLayout(measureLayout())
@@ -194,7 +200,6 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
   )
 
   const { scale } = layout
-  const isSide = layout.mode === 'side'
   const label = t('previewLabel')
 
   return createPortal(
@@ -202,8 +207,8 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
       role={isSide ? 'region' : 'dialog'}
       aria-modal={isSide ? undefined : true}
       aria-label={label}
-      className={`fixed z-[110] flex flex-col items-center justify-center gap-3 ${isSide ? 'inset-y-0 px-6' : 'inset-0 bg-foreground/85 p-4'}`}
-      style={isSide ? { left: layout.left, width: layout.width } : undefined}
+      className={`fixed z-[110] flex flex-col items-center justify-center gap-3 ${isSide ? 'inset-y-0 right-0 px-6' : 'inset-0 bg-foreground/85 p-4'}`}
+      style={isSide ? { width: SIDE_PANEL_WIDTH } : undefined}
     >
       <div className="flex items-center justify-between gap-2" style={{ width: FRAME_WIDTH * scale }}>
         <span className="text-sm font-bold text-white">{label}</span>
