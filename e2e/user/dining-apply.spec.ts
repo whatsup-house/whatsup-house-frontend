@@ -88,6 +88,10 @@ test.describe('회원 - 우연한 식탁 신청', () => {
 
     // 5. 제출 — 본문: 종류 ID + 희망 회차(우선순위 순) + 프리필 답변
     applications = [diningApplication({ matchStatus: 'WAITING' })]
+    // 주의사항 미확인이면 제출하지 않고 안내한다 (KAN-419)
+    await page.getByRole('button', { name: '신청하기', exact: true }).click()
+    await expect(page.getByText('주의사항을 읽고 체크해주세요!')).toBeVisible()
+    await page.getByLabel('신청 주의 사항을 확인했습니다.').check()
     const submitRequest = page.waitForRequest((req) => req.method() === 'POST' && new URL(req.url()).pathname === '/api/applications')
     await page.getByRole('button', { name: '신청하기', exact: true }).click()
     const body = (await submitRequest).postDataJSON() as ApplicationCreateRequest

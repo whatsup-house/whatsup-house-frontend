@@ -822,10 +822,19 @@ export type DiningCancelWindow = 'BEFORE_DEADLINE' | 'AFTER_DEADLINE' | 'SAME_DA
 
 export interface DiningCancelPreview {
   window: DiningCancelWindow
-  ticketRestored: boolean
+  ticketRestored: boolean   // KAN-418 부터 항상 false (이용권은 복원 대신 금액 환불)
   refundable: boolean
-  depositOutcome: 'RETURN' | 'FORFEIT' | 'NONE'
+  depositOutcome: 'RETURN' | 'PARTIAL' | 'FORFEIT' | 'NONE'   // PARTIAL = 50% 반환 (KAN-418)
   sanction: boolean
+  // KAN-418 환불 정책. 병렬 개발이라 optional
+  ticketRefundAmount?: number
+  depositReturnAmount?: number
+  requiresRefundAccount?: boolean
+}
+
+// POST /api/dining/applications/{id}/cancel. 환불 계좌가 필요한데 없으면 REFUND_ACCOUNT_REQUIRED (KAN-418)
+export interface DiningCancelRequest {
+  refundAccount?: DepositReturnAccount
 }
 
 // 멤버십 환불 POST /api/tickets/{passId}/refund (KAN-410)

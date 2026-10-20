@@ -7,7 +7,7 @@ import { ApiErrorMessage, Button, Card, LoadingSpinner } from '@/components/ui'
 import DynamicQuestionField from './DynamicQuestionField'
 import GatheringSessionList from './GatheringSessionList'
 import TicketPassSection from './TicketPassSection'
-import PaymentPolicyNotice from '@/components/payment/PaymentPolicyNotice'
+import PaymentPolicyNotice, { POLICY_CONFIRM_ID } from '@/components/payment/PaymentPolicyNotice'
 import RefundAccountForm from '@/components/payment/RefundAccountForm'
 import { isEmpty, prefillFromProfile, type FieldValue } from './DynamicApplicationForm'
 import { useMyProfile } from '@/lib/hooks/useAuth'
@@ -154,6 +154,7 @@ function DiningApplySteps({
 }: DiningApplyStepsProps) {
   const t = useTranslations('gathering.diningApply')
   const tForm = useTranslations('gathering.apply.form')
+  const tPolicy = useTranslations('payment.policy')
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
@@ -180,6 +181,11 @@ function DiningApplySteps({
   const [refundErrors, setRefundErrors] = useState<Partial<Record<keyof DepositReturnAccount, string>>>({})
   // 단계 전환 슬라이드 방향. 첫 화면은 애니메이션 없이.
   const [slide, setSlide] = useState<'next' | 'prev' | null>(null)
+  // 신청 주의사항 확인. 매번 새로 체크한다(초안에 저장하지 않음). 안 체크하고 제출하면 0.5초 강조. (KAN-419)
+  const [policyConfirmed, setPolicyConfirmed] = useState(false)
+  const [policyHighlighted, setPolicyHighlighted] = useState(false)
+  const highlightTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(highlightTimer.current), [])
 
   useEffect(() => {
     try {
@@ -308,8 +314,21 @@ function DiningApplySteps({
     return false
   }
 
+  // 주의사항 미확인이면 토스트 + 체크박스로 스크롤 + 0.5초 강조. 확인했으면 true.
+  const validatePolicyConfirmed = (): boolean => {
+    if (policyConfirmed) return true
+    showToast(tPolicy('confirmRequired'), 'error')
+    // lg 프레임은 main 이 내부 스크롤이라 window 기준으로 가려짐을 판단할 수 없다 → 항상 가운데로 끌어온다
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.getElementById(POLICY_CONFIRM_ID)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
+    clearTimeout(highlightTimer.current)
+    setPolicyHighlighted(true)
+    highlightTimer.current = setTimeout(() => setPolicyHighlighted(false), 500)
+    return false
+  }
+
   const handleSubmit = () => {
-    if (!validateAnswers() || !validateRefundAccount()) return
+    if (!validatePolicyConfirmed() || !validateAnswers() || !validateRefundAccount()) return
     // 답변 payload (비어 있는 선택 항목은 제외) — 기존 신청 폼과 같은 규칙
     const answers: AnswerItem[] = []
     for (const question of visibleQuestions) {
@@ -435,7 +454,11 @@ function DiningApplySteps({
                   />
                 </div>
               )}
-              <PaymentPolicyNotice />
+              <PaymentPolicyNotice
+                confirmed={policyConfirmed}
+                onConfirmedChange={setPolicyConfirmed}
+                highlighted={policyHighlighted}
+              />
             </>
           )}
         </div>
@@ -454,7 +477,14 @@ function DiningApplySteps({
             {t('next')}
           </Button>
         ) : (
-          <Button variant="primary" className="flex-1 border border-transparent" isLoading={submitMutation.isPending} onClick={handleSubmit}>
+          // 미확인이어도 눌러서 안내를 받을 수 있게 disabled 대신 aria-disabled + 흐리게만 한다
+          <Button
+            variant="primary"
+            className={`flex-1 border border-transparent ${policyConfirmed ? '' : 'opacity-50 hover:opacity-50'}`}
+            aria-disabled={!policyConfirmed}
+            isLoading={submitMutation.isPending}
+            onClick={handleSubmit}
+          >
             {t('submit')}
           </Button>
         )}
