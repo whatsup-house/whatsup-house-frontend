@@ -6,6 +6,7 @@ import {
   AlarmClock,
   ArrowRightLeft,
   BadgeCheck,
+  Banknote,
   Bell,
   CalendarClock,
   CheckCircle,
@@ -16,6 +17,7 @@ import {
   MessageSquare,
   Shuffle,
   Sparkles,
+  TriangleAlert,
   Undo2,
   X,
   type LucideIcon,
@@ -45,6 +47,13 @@ const LINK_ROUTES: Record<NotificationLink, (linkId: string | null | undefined) 
   DINING_FEEDBACK_REQUEST: (linkId) => (linkId ? `/dining/tables/${linkId}/feedback` : '/dining/history'),
   // 다음 모집 알림. linkId = 새 회차가 열린 모임 종류 ID
   DINING_HISTORY: (linkId) => (linkId ? `/gatherings/${linkId}` : '/dining/history'),
+  ADMIN_PAYMENTS: () => '/admin/payments',
+}
+
+// link 값이 없거나 FE가 모르는 값이어도 유형만으로 이동할 곳이 정해진 알림 (KAN-417)
+const TYPE_FALLBACK_ROUTES: Partial<Record<NotificationType, string>> = {
+  ADMIN_DEPOSIT_MATCHED: '/admin/payments',
+  ADMIN_DEPOSIT_EXCEPTION: '/admin/payments',
 }
 
 const TYPE_ICON: Record<NotificationType, LucideIcon> = {
@@ -62,16 +71,22 @@ const TYPE_ICON: Record<NotificationType, LucideIcon> = {
   DINING_REMINDER: AlarmClock,
   DINING_FEEDBACK_REQUEST: MessageSquare,
   DINING_NEXT_SESSIONS: Sparkles,
+  ADMIN_DEPOSIT_MATCHED: Banknote,
+  ADMIN_DEPOSIT_EXCEPTION: TriangleAlert,
 }
 
-export default function NotificationBell() {
+interface NotificationBellProps {
+  pollInterval?: number   // 미확인 개수를 주기적으로 다시 읽는 간격(ms). 관리자 헤더는 입금 알림 때문에 켠다
+}
+
+export default function NotificationBell({ pollInterval }: NotificationBellProps) {
   const t = useTranslations('notifications')
   const locale = useLocale()
   const router = useRouter()
   const { isLoggedIn } = useAuthStore()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const { data: unread } = useUnreadCount()
+  const { data: unread } = useUnreadCount(pollInterval)
   const { data: notifications, isLoading } = useNotifications(open)
   const markRead = useMarkNotificationRead()
   const removeNotification = useDeleteNotification()
@@ -102,8 +117,8 @@ export default function NotificationBell() {
   const handleSelect = (item: NotificationItem) => {
     if (!item.isRead) markRead.mutate(item.id)
     setOpen(false)
-    // FE가 모르는 link 값(BE 선배포)이면 이동하지 않는다.
-    const route = item.link ? LINK_ROUTES[item.link]?.(item.linkId) : undefined
+    // FE가 모르는 link 값(BE 선배포)이면 유형 폴백만 보고, 그것도 없으면 이동하지 않는다.
+    const route = (item.link ? LINK_ROUTES[item.link]?.(item.linkId) : undefined) ?? TYPE_FALLBACK_ROUTES[item.type]
     if (route) router.push(route)
   }
 

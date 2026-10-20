@@ -9,6 +9,10 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/authStore'
 import { useLogout } from '@/lib/hooks/useAuth'
+import NotificationBell from '@/components/layout/NotificationBell'
+
+// 운영자 입금 알림(자동 대사 완료·예외)이 새로고침 없이 뱃지에 뜨도록 미확인 개수를 10초마다 읽는다. (KAN-417)
+const ADMIN_NOTIFICATION_POLL_MS = 10_000
 
 const sidebarItems = [
   { href: '/admin', icon: LayoutDashboard, label: '대시보드', exact: true },
@@ -115,14 +119,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <p className="text-[11px] font-bold uppercase tracking-widest text-tag-text">The Curator&apos;s</p>
           <p className="text-sm font-bold text-primary leading-tight">House Admin</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsDrawerOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-input border border-tag-bg text-foreground"
-          aria-label="관리자 메뉴 열기"
-        >
-          <Menu size={20} />
-        </button>
+        <div className="flex items-center gap-2">
+          <NotificationBell pollInterval={ADMIN_NOTIFICATION_POLL_MS} />
+          <button
+            type="button"
+            onClick={() => setIsDrawerOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-input border border-tag-bg text-foreground"
+            aria-label="관리자 메뉴 열기"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
       </div>
 
       {isDrawerOpen && (
@@ -150,7 +157,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* 콘텐츠 */}
-      <main className="flex-1 min-w-0 pt-20 px-4 pb-6 sm:px-6 lg:p-8">{children}</main>
+      <main className="flex-1 min-w-0 pt-20 px-4 pb-6 sm:px-6 lg:p-8">
+        {/* 데스크탑 알림 벨: 팝오버가 이 줄(relative) 기준 오른쪽에 붙는다. 모바일은 상단바에 있다 */}
+        <div className="relative hidden lg:flex justify-end -mt-4 mb-2">
+          <NotificationBell pollInterval={ADMIN_NOTIFICATION_POLL_MS} />
+        </div>
+        {children}
+      </main>
     </div>
   )
 }
