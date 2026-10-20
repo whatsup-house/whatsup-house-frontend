@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory, fetchDiningRecommendations } from '@/lib/api/application'
-import type { ApplicationCreateRequest, ApplicationStatus, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
+import type { ApplicationCreateRequest, ApplicationStatus, DiningCancelRequest, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
 
@@ -97,7 +97,7 @@ export function useCancelDiningApplication() {
   const queryClient = useQueryClient()
   const onError = useDiningActionErrorToast()
   return useMutation({
-    mutationFn: (id: string) => cancelDiningApplication(id),
+    mutationFn: ({ id, data }: { id: string; data?: DiningCancelRequest }) => cancelDiningApplication(id, data),
     onSuccess: () => invalidateDiningApplications(queryClient),
     onError,
   })
