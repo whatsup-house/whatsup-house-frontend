@@ -318,15 +318,9 @@ function DiningApplySteps({
   const validatePolicyConfirmed = (): boolean => {
     if (policyConfirmed) return true
     showToast(tPolicy('confirmRequired'), 'error')
-    const element = document.getElementById(POLICY_CONFIRM_ID)
-    if (element) {
-      const rect = element.getBoundingClientRect()
-      // 하단 고정 바(약 5.5rem) 뒤에 가려지면 보이게 끌어온다
-      if (rect.top < 64 || rect.bottom > window.innerHeight - 96) {
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        element.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
-      }
-    }
+    // lg 프레임은 main 이 내부 스크롤이라 window 기준으로 가려짐을 판단할 수 없다 → 항상 가운데로 끌어온다
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    document.getElementById(POLICY_CONFIRM_ID)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
     clearTimeout(highlightTimer.current)
     setPolicyHighlighted(true)
     highlightTimer.current = setTimeout(() => setPolicyHighlighted(false), 500)

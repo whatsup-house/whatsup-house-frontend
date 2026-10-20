@@ -98,7 +98,9 @@ function PaymentContent() {
     || data?.gatheringId
     || diningApplications.data?.find((item) => item.id === displayPass?.applicationId)?.gathering.id
     || diningApplications.data?.find((item) => item.status === 'PAYMENT_PENDING')?.gathering.id
-  const backHref = returnUrl ? safeReturnUrl(returnUrl) : backGatheringId ? `/gatherings/${backGatheringId}` : '/gatherings'
+  // 내부 경로가 아닌 returnUrl 은 버리고 다음 후보로 넘어간다 (safeReturnUrl 은 거절 시 '/' 를 돌려준다)
+  const validReturnUrl = returnUrl && safeReturnUrl(returnUrl) === returnUrl ? returnUrl : null
+  const backHref = validReturnUrl ?? (backGatheringId ? `/gatherings/${backGatheringId}` : '/gatherings')
   const goBack = () => router.push(backHref)
   // purchaseAmount 는 이용권 가격뿐이다. 보증금은 별도 레코드라 입금 대기(PENDING)일 때만 합산한다.
   // deposit 이 없으면 보증금이 없는 신청이다(BE 는 보증금이 있으면 항상 내려준다).
@@ -291,9 +293,9 @@ function PaymentContent() {
         />
       )}
       {/* 입금 완료 화면은 위 '돌아가기'가 같은 곳으로 가므로 겹쳐 그리지 않는다 */}
-      {returnUrl && !(isPaymentComplete && !displayPass?.applicationId) && (
+      {validReturnUrl && !(isPaymentComplete && !displayPass?.applicationId) && (
         <Button variant="outlined" size="lg" className="w-full mt-3" onClick={goBack}>
-          {returnUrl.includes('/apply') ? '신청 화면으로 돌아가기' : t('backToApply')}
+          {validReturnUrl.includes('/apply') ? '신청 화면으로 돌아가기' : t('backToApply')}
         </Button>
       )}
     </div>
