@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
 import { useJobLabel } from '@/lib/hooks/useJobLabel'
 import { useCalendarDots } from '@/lib/hooks/useGatherings'
 import { usePendingDeposits, usePendingDepositCount, useConfirmDeposit } from '@/lib/hooks/useAdminTicket'
+import ApplicantCard, { MemberBadge, StatusBadge } from '@/components/admin/ApplicantCard'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -149,10 +150,13 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
         }
       `}
     >
-      {/* 상태 뱃지 */}
+      {/* 상태 뱃지 (+ 심사용 숨김 회차 표시, KAN-417) */}
       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLE[gathering.status] ?? ''}`}>
         {STATUS_LABEL[gathering.status] ?? gathering.status}
       </span>
+      {gathering.hidden && (
+        <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-tag-bg text-tag-text">심사용</span>
+      )}
 
       {/* 제목 */}
       <p className="font-bold text-[14px] text-[#1A1A1A] mt-2 mb-3 line-clamp-2 leading-snug">
@@ -188,22 +192,6 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
   )
 }
 
-const APP_STATUS_LABEL: Record<string, string> = {
-  PENDING: '대기',
-  PAYMENT_PENDING: '입금확인중',
-  CONFIRMED: '확정',
-  ATTENDED: '출석',
-  REJECTED: '반려',
-  CANCELLED: '취소',
-}
-const APP_STATUS_STYLE: Record<string, string> = {
-  PENDING: 'bg-[#F5F5F5] text-[#767676]',
-  PAYMENT_PENDING: 'bg-[#FFF3E0] text-[#EF6C00]',
-  CONFIRMED: 'bg-[#E3F2FD] text-[#1976D2]',
-  ATTENDED: 'bg-[#E8F5E9] text-[#4CAF50]',
-  REJECTED: 'bg-[#FEF3F3] text-red-500',
-  CANCELLED: 'bg-[#F5F5F5] text-[#767676]',
-}
 const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
   PENDING: 'CONFIRMED',
   CONFIRMED: 'ATTENDED',
@@ -254,18 +242,6 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
     }
     return { label: '확정 후 입금', cls: 'bg-[#F5F5F5] text-[#767676]', toggleable: false }
   }
-
-  const memberBadge = (p: AdminApplicationItem) => (
-    <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs ${p.isGuest ? 'bg-[#FFF3E0] text-[#FF9800]' : 'bg-[#E3F2FD] text-[#1976D2]'}`}>
-      {p.isGuest ? '비회원' : '회원'}
-    </span>
-  )
-
-  const statusBadge = (p: AdminApplicationItem) => (
-    <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${APP_STATUS_STYLE[p.status] ?? ''}`}>
-      {APP_STATUS_LABEL[p.status] ?? p.status}
-    </span>
-  )
 
   // 액션 버튼들: 모바일(md 미만)은 탭 영역 40px 이상, md 이상은 기존처럼 작은 텍스트 링크.
   const statusButton = (p: AdminApplicationItem) => {
@@ -331,34 +307,24 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
       <ul className="md:hidden divide-y divide-[#F0EBE8]">
         {participants.map((p) => {
           const payment = getPayment(p)
-          const info = [genderLabel(p.gender), p.age != null ? `${p.age}세` : null, p.mbti, jobLabel(p.job)].filter(Boolean)
+          const info = [genderLabel(p.gender), p.age != null ? `${p.age}세` : null, p.mbti, jobLabel(p.job)].filter((v): v is string => Boolean(v))
           return (
-            <li key={p.id} className="px-4 py-4 flex flex-col gap-2.5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="font-bold text-[16px] text-[#1A1A1A] break-words">{p.name}</span>
-                  {memberBadge(p)}
-                </div>
-                <div className="flex flex-wrap justify-end gap-1.5">
-                  {statusBadge(p)}
-                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${payment.cls}`}>{payment.label}</span>
-                </div>
-              </div>
-              <p className="text-[14px] text-[#444444] break-words">
-                {info.length > 0 ? info.join(' · ') : '-'}
-              </p>
-              <div className="flex items-center justify-between gap-2 text-[13px] text-[#767676]">
-                {p.phone ? (
-                  <a href={`tel:${p.phone}`} className="inline-flex min-h-10 items-center text-[#1976D2]">{p.phone}</a>
-                ) : <span>연락처 -</span>}
-                <span className="text-[12px] whitespace-nowrap">{dayjs(p.createdAt).format('M/D HH:mm')} 신청</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 pt-2.5 border-t border-[#F0EBE8]">
+            <ApplicantCard
+              key={p.id}
+              name={p.name}
+              isGuest={p.isGuest}
+              status={p.status}
+              paymentLabel={payment.label}
+              paymentClassName={payment.cls}
+              info={info}
+              phone={p.phone}
+              createdAt={p.createdAt}
+              actions={<>
                 {statusButton(p)}
                 {payment.toggleable && paymentToggle(p)}
                 <span className="ml-auto">{rejectControl(p)}</span>
-              </div>
-            </li>
+              </>}
+            />
           )
         })}
       </ul>
@@ -381,7 +347,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                 <td className="px-3 py-3">
                   <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
                     <span className="font-medium text-[14px] break-words">{p.name}</span>
-                    {memberBadge(p)}
+                    <MemberBadge isGuest={p.isGuest} />
                   </div>
                   <p className="mt-0.5 text-[12px] text-[#767676] whitespace-nowrap">{dayjs(p.createdAt).format('M/D HH:mm')}</p>
                 </td>
@@ -397,7 +363,7 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
                 <td className="px-3 py-3 text-[13px] text-[#767676] break-all">{p.phone ?? '-'}</td>
                 <td className="px-3 py-3">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    {statusBadge(p)}
+                    <StatusBadge status={p.status} />
                     {statusButton(p)}
                   </div>
                 </td>
@@ -532,6 +498,7 @@ export default function AdminApplicationsPage() {
   const { data: dayGatherings = [], isLoading: isGatheringsLoading } = useQuery({
     queryKey: ['admin', 'gatherings-by-date', selectedDate],
     queryFn: () => adminGatheringApi.getAll(undefined, selectedDate),
+    refetchInterval: 10_000, // 신청자 수가 새 입금·신청을 따라가게 (KAN-417)
   })
 
   const handleSelectDate = (date: string) => {
@@ -633,6 +600,9 @@ export default function AdminApplicationsPage() {
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
             <h2 className="w-full sm:w-auto font-bold text-[16px] text-foreground">
               {selectedGathering?.title} — 참가자 목록
+              {selectedGathering?.hidden && (
+                <span className="ml-2 align-middle px-2 py-0.5 rounded-full text-xs font-medium bg-tag-bg text-tag-text">심사용</span>
+              )}
             </h2>
             <span className="px-3 py-1 bg-[#F5F0EB] rounded-full text-sm">
               정원 {selectedGathering?.capacity}명

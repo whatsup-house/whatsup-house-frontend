@@ -1221,8 +1221,11 @@ export type NotificationType =
   | 'DINING_REMINDER'
   | 'DINING_FEEDBACK_REQUEST'
   | 'DINING_NEXT_SESSIONS'
-// 알림 클릭 시 이동 대상 (FE가 라우트로 매핑)
-export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION' | 'DINING_FEEDBACK_REQUEST' | 'DINING_HISTORY'
+  // 운영자 입금 알림: 자동 대사 완료 / 예외함 확인 필요 (BE KAN-416)
+  | 'ADMIN_DEPOSIT_MATCHED'
+  | 'ADMIN_DEPOSIT_EXCEPTION'
+// 알림 클릭 시 이동 대상 (FE가 라우트로 매핑). ADMIN_PAYMENTS=관리자 결제 관리 (KAN-416)
+export type NotificationLink = 'APPLICATIONS' | 'MILEAGE' | 'REVIEWS' | 'TICKET_PURCHASE' | 'DINING_TABLE' | 'DINING_RESOLUTION' | 'DINING_FEEDBACK_REQUEST' | 'DINING_HISTORY' | 'ADMIN_PAYMENTS'
 
 export interface NotificationItem {
   id: string

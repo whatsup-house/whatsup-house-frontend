@@ -8,8 +8,8 @@ import {
 import { useAuthStore } from '@/lib/store/authStore'
 
 // 미확인 알림 개수. 헤더 뱃지용으로 로그인 상태에서만 조회한다.
-// 미배포 BE에서도 graceful하도록 retry는 끈다.
-export function useUnreadCount() {
+// 미배포 BE에서도 graceful하도록 retry는 끈다. refetchInterval 을 주면 그 간격으로 다시 읽는다(관리자 입금 알림).
+export function useUnreadCount(refetchInterval?: number) {
   const { isLoggedIn } = useAuthStore()
   return useQuery({
     queryKey: ['notifications', 'unread-count'],
@@ -17,6 +17,7 @@ export function useUnreadCount() {
     enabled: isLoggedIn,
     retry: false,
     staleTime: 1000 * 30,
+    refetchInterval,
   })
 }
 

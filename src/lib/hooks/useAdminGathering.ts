@@ -62,6 +62,7 @@ export function useAdminApplications(gatheringId: string) {
     queryFn: () => adminGatheringApi.getApplicationsByGathering(gatheringId),
     enabled: !!gatheringId,
     staleTime: 1000 * 30,
+    refetchInterval: 10_000, // 새 입금·신청이 새로고침 없이 보이게 (KAN-417)
   })
 }
 

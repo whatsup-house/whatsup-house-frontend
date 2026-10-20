@@ -27,6 +27,7 @@ export interface AdminGatheringListItem {
   applicantCount?: number
   status: string
   thumbnailUrl?: string | null // 목록 응답엔 없음(폼 호환용, 항상 비어옴)
+  hidden: boolean              // 심사용 숨김 회차 (BE KAN-416). 구형 응답엔 없어 false
 }
 
 // 백엔드 관리자 게더링 목록 응답 원본 (AdminGatheringResponse)
@@ -42,6 +43,7 @@ interface RawAdminGathering {
   maxAttendees: number
   status: string
   applicantCount: number
+  hidden?: boolean
 }
 
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
@@ -153,6 +155,7 @@ export const adminGatheringApi = {
       currentApplicants: g.applicantCount ?? 0,
       applicantCount: g.applicantCount,
       status: g.status,
+      hidden: g.hidden ?? false,
     }))
   },
 
