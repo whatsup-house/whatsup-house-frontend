@@ -48,11 +48,14 @@ interface RawAdminGathering {
 
 export type GatheringType = 'REGULAR' | 'RANDOM_TABLE'
 
-// 회차 단위 관리자 목록을 종류 단위로 묶는다. 목록 순서(BE 반환 순)대로 종류가 처음 나온 순서를 유지한다.
+// 회차 단위 관리자 목록을 종류 단위로 묶는다.
+// 정렬: 진행중(다가오는 회차 있음)은 다음 일정 빠른 순 → 나머지는 최근 회차 최신순 → 제목순. (KAN-425)
 // ponytail: 회차가 하나도 없는 종류는 BE 목록에 없어 빠진다. 종류 목록 API가 생기면 교체.
 export function groupAdminGatheringTypes(items: AdminGatheringListItem[], today: string): AdminGatheringTypeRow[] {
   const rows = new Map<string, AdminGatheringTypeRow>()
+  const lastDates = new Map<string, string>()
   for (const item of items) {
+    if ((lastDates.get(item.gatheringId) ?? '') < item.date) lastDates.set(item.gatheringId, item.date)
     const row = rows.get(item.gatheringId) ?? {
       id: item.gatheringId,
       title: item.title,
@@ -69,7 +72,12 @@ export function groupAdminGatheringTypes(items: AdminGatheringListItem[], today:
     }
     rows.set(item.gatheringId, row)
   }
-  return [...rows.values()]
+  // 날짜는 YYYY-MM-DD 문자열이라 사전순 비교 = 날짜순
+  return [...rows.values()].sort((a, b) => {
+    if (a.nextEventDate && b.nextEventDate) return a.nextEventDate.localeCompare(b.nextEventDate) || a.title.localeCompare(b.title)
+    if (a.nextEventDate || b.nextEventDate) return a.nextEventDate ? -1 : 1
+    return (lastDates.get(b.id) ?? '').localeCompare(lastDates.get(a.id) ?? '') || a.title.localeCompare(b.title)
+  })
 }
 
 export interface LocationItem {
