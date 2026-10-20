@@ -2,3 +2,6 @@
 export const PAYMENT_ACCOUNT = {
   accountNumber: '1002-157-849052',
 } as const
+
+// 노쇼 이력 회원의 보증금 (KAN-408)
+export const DEPOSIT_AMOUNT = 50000

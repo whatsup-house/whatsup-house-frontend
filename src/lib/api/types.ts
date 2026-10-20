@@ -151,11 +151,16 @@ export type TicketProduct = 'RANDOM_TABLE_ONE' | 'RANDOM_TABLE_FOUR'
 export type ParticipantAccountStatus = 'ACTIVE' | 'BLOCKED'
 export type RandomTableEligibility = 'UNREVIEWED' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
 
+// 이용권 종류: COUNT 횟수권(1회권), PERIOD 기간제 멤버십. 구형 BE 응답엔 없어서 optional (없으면 COUNT) (KAN-408)
+export type TicketProductKind = 'COUNT' | 'PERIOD'
+
 export interface TicketProductItem {
   id: string
   name: string
   sessionCount: number
   price: number
+  kind?: TicketProductKind
+  periodMonths?: number | null
 }
 
 export interface TicketPass {
@@ -172,6 +177,9 @@ export interface TicketPass {
   purchaseAmount: number
   paymentDeadline: string | null
   paymentConfirmedAt: string | null
+  validUntil?: string | null   // 멤버십 만료일(YYYY-MM-DD). 횟수권은 null (KAN-408)
+  extendedDays?: number
+  refundStatus?: 'REQUESTED' | 'SENT' | null   // 환불 요청한 CANCELLED 멤버십: REQUESTED 송금 대기 / SENT 환불 완료 (KAN-410)
 }
 
 export interface MyTickets {
@@ -625,6 +633,8 @@ export interface UserProfile {
   avatarUrl: string | null
   characterUrl: string | null
   admin?: boolean
+  isDemo?: boolean            // 심사용 데모 회원 — 입금 시뮬레이터 노출 (KAN-409)
+  depositRequired?: boolean   // 노쇼 이력으로 보증금 50,000원이 필요한 회원 (KAN-408)
 }
 
 // 마일리지 타입
@@ -704,10 +714,18 @@ export interface DynamicApplicationRequest {
   answers: AnswerItem[]
 }
 
+// 보증금 반환 계좌 — 보증금 대상 회원의 우연한 식탁 신청 시 필수 (KAN-408)
+export interface DepositReturnAccount {
+  bank: string
+  accountNumber: string
+  holder: string
+}
+
 // 회원 신청 POST /api/applications — 종류 + 희망 회차(일반 모임은 1개) (KAN-338)
 export interface ApplicationCreateRequest extends DynamicApplicationRequest {
   gatheringId: string
   candidateSessionIds: string[]
+  depositReturnAccount?: DepositReturnAccount
 }
 
 // 신청 생성 응답
@@ -754,6 +772,14 @@ export interface DiningSessionInfo {
 export type DiningTableStatus = 'PROPOSED' | 'CONFIRMED' | 'DONE' | 'DISSOLVED'
 
 // 내 우연한 식탁 신청 1건 — GET /api/dining/me/applications 의 applications[]
+// 보증금 상태 — 신청별 보증금 레코드. 보증금 대상이 아니면 deposit 자체가 없다 (KAN-408)
+export type DepositStatus = 'PENDING' | 'PAID' | 'RETURN_PENDING' | 'RETURNED' | 'FORFEITED'
+
+export interface DiningApplicationDeposit {
+  status: DepositStatus
+  amount: number
+}
+
 export interface DiningApplicationItem {
   id: string
   gathering: { id: string; title: string }
@@ -764,6 +790,7 @@ export interface DiningApplicationItem {
   ticketStatus: TicketDeductionStatus | null
   table: { id: string; status: DiningTableStatus; confirmAt: string | null } | null
   resolutionId?: string | null             // 매칭 실패 해결 선택 ID (KAN-347). 없으면 해결 버튼 비활성
+  deposit?: DiningApplicationDeposit | null // 이 신청의 보증금 (KAN-408). 구형 BE 응답엔 없다
 }
 
 export interface DiningApplicationListResponse {
@@ -787,6 +814,23 @@ export interface DiningResolution {
 export interface DiningResolutionChooseRequest {
   choice: DiningResolutionChoice
   sessionId?: string
+  refundAccount?: DepositReturnAccount   // REFUND 면 필수 (KAN-410)
+}
+
+// 취소 미리보기 — GET /api/dining/applications/{id}/cancel-preview. 지금 취소하면 적용되는 결과 (KAN-410)
+export type DiningCancelWindow = 'BEFORE_DEADLINE' | 'AFTER_DEADLINE' | 'SAME_DAY'
+
+export interface DiningCancelPreview {
+  window: DiningCancelWindow
+  ticketRestored: boolean
+  refundable: boolean
+  depositOutcome: 'RETURN' | 'FORFEIT' | 'NONE'
+  sanction: boolean
+}
+
+// 멤버십 환불 POST /api/tickets/{passId}/refund (KAN-410)
+export interface MembershipRefundRequest {
+  refundAccount: DepositReturnAccount
 }
 
 // 신청 폼 프리필 — GET /api/dining/prefill?gatheringId= . 답한 적 없는 표준 질문은 빠진다
@@ -856,6 +900,16 @@ export interface DiningHistoryItem {
   attendanceStatus: DiningAttendanceStatus | null  // 아직 BE 가 항상 null → 표시 생략
 }
 
+// 다음 추천 회차 — BE GET /api/dining/me/recommendations (KAN-413)
+export interface DiningRecommendation {
+  sessionId: string
+  gatheringId: string
+  title: string
+  eventDate: string          // YYYY-MM-DD
+  startTime: string | null   // HH:mm:ss
+  region: string | null
+}
+
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
 export interface AnswerView {
   questionKey: string
@@ -895,6 +949,7 @@ export type ReservedQuestionKey =
   | 'MY_STYLE'
   | 'WANTED_STYLE'
   | 'DIET'
+  | 'PRICE_RANGE'
 
 // 질문 추가/수정 요청 (POST/PUT /api/admin/.../form/questions)
 export interface FormQuestionUpsertRequest {
@@ -1188,7 +1243,7 @@ export interface UnreadCountResponse {
 
 // ===== 우연한 식탁 운영: 예외함·설정 (KAN-353) =====
 // 백엔드 AdminDiningController(KAN-348) 계약. 시각은 LocalDateTime ISO 문자열.
-export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND'
+export type DiningExceptionType = 'PAYMENT' | 'DATA' | 'VENUE' | 'NOTIFICATION' | 'SAFETY' | 'CONFLICT' | 'REFUND' | 'CS'
 export type DiningExceptionStatus = 'OPEN' | 'RESOLVED'
 // WARN=기록만, RESTRICT/BAN=우연한 식탁 참여 자격 RESTRICTED
 export type DiningSafetyAction = 'WARN' | 'RESTRICT' | 'BAN'
@@ -1310,6 +1365,8 @@ export interface ChatMessage {
   unreadCount: number
   edited: boolean
   deleted: boolean
+  // 봇(와썹 AI)이 자동 응답으로 남긴 메시지 (KAN-406)
+  aiGenerated?: boolean
   createdAt: string
 }
 
@@ -1323,6 +1380,8 @@ export interface ChatLastMessage {
   systemKind: ChatSystemKind | null
   systemParams: ChatSystemParams | null
   deleted: boolean
+  // AI 답변은 HTML 이스케이프되어 저장된다. BE 가 내려주면 미리보기에서 복원한다.
+  aiGenerated?: boolean
   createdAt: string
 }
 
@@ -1334,6 +1393,9 @@ export interface ChatRoomSummary {
   memberCount: number
   lastMessage: ChatLastMessage | null
   unreadCount: number
+  // AI 봇 이관 상태 (KAN-406)
+  needsHuman?: boolean
+  botPaused?: boolean
 }
 
 // BE ChatRoomDetailResponse.Member. Lombok boolean isAdmin → JSON "admin"
@@ -1366,6 +1428,10 @@ export interface ChatRoomDetail {
   // 없거나 삭제됐으면 null
   notice: ChatMessage | null
   permissions: ChatRoomPermissions
+  // AI 봇 상태 (KAN-406). handoffReason 은 관리자에게만 내려온다.
+  needsHuman?: boolean
+  botPaused?: boolean
+  handoffReason?: string | null
 }
 
 export interface ChatSendMessageRequest {
@@ -1451,6 +1517,16 @@ export interface AdminChatRoomSummary {
   unanswered: boolean
   // 내가 참여 중인지. 미참여 단체방은 멤버 API 로 먼저 들어가야 방을 볼 수 있다.
   member: boolean
+  // 담당자 필요(봇이 이관) / 봇 일시정지 (KAN-406)
+  needsHuman?: boolean
+  botPaused?: boolean
+}
+
+// GET/PUT /api/admin/bot/settings — AI 자동응답 전역 스위치 (KAN-406)
+export interface AdminBotSettings {
+  enabled: boolean
+  // 실제 동작 여부 — 토글이 켜져도 서버 마스터 스위치·봇 토큰이 없으면 false
+  active: boolean
 }
 
 // POST /api/admin/chat/rooms — 생성한 관리자는 서버가 자동 포함
@@ -1550,4 +1626,81 @@ export interface AdminFeedPostPage {
 export interface AdminFeedFilters {
   visible?: boolean
   page: number
+}
+
+// 심사용 입금 시뮬레이터 (KAN-409) — 보내는 쪽은 결제 대기 건을 가리키는 id 하나면 된다.
+export interface DemoDepositRequest {
+  applicationId?: string
+  passId?: string
+}
+
+export type DemoDepositResult = 'MATCHED' | 'IGNORED' | 'NO_CANDIDATE' | 'MULTIPLE_CANDIDATES' | 'PARSE_FAILED'
+
+export interface DemoDepositResponse {
+  rawText: string
+  parsedName: string | null
+  parsedAmount: number | null
+  linkedApplicationId: string | null
+  result: DemoDepositResult
+}
+
+// ===== 운영자 입금 알림 로그·송금 목록 (KAN-411) =====
+// 백엔드 AdminPaymentController(BE-4 KAN-403, BE-5 KAN-404) 계약. 시각은 LocalDateTime ISO 문자열.
+export type DepositSource = 'MACRODROID' | 'IOS_SHORTCUT' | 'SIMULATOR'
+export type DepositMatchResult = 'MATCHED' | 'IGNORED' | 'NO_CANDIDATE' | 'MULTIPLE_CANDIDATES' | 'PARSE_FAILED'
+export type PaymentTargetType = 'TICKET_PASS' | 'DEPOSIT' | 'REGULAR_APPLICATION'
+
+export interface DepositNotification {
+  id: string
+  rawText: string
+  source: DepositSource
+  receivedAt: string
+  parsedName: string | null
+  parsedAmount: number | null
+  result: DepositMatchResult
+  targetType: PaymentTargetType | null
+  targetId: string | null
+  applicationId: string | null
+  exceptionCaseId: string | null
+  createdAt: string
+}
+
+export interface DepositNotificationPage {
+  content: DepositNotification[]
+  totalElements: number
+  totalPages: number
+  page: number
+  size: number
+}
+
+// POST /api/admin/payments/deposit-notifications/{id}/link — 예외 건 수동 연결
+export interface DepositNotificationLinkRequest {
+  targetType: PaymentTargetType
+  targetId: string
+  // 입금액과 대상 금액이 달라도 연결 (DEPOSIT_AMOUNT_MISMATCH 409 확인 후에만)
+  force?: boolean
+}
+
+// GET /api/admin/payments/pending-targets — 수동 연결 후보(미결제 건)
+export interface PendingPaymentTarget {
+  type: PaymentTargetType
+  targetId: string
+  applicationId: string | null
+  payerName: string
+  amount: number
+}
+
+export type PayoutType = 'REFUND' | 'DEPOSIT_RETURN'
+export type PayoutStatus = 'REQUESTED' | 'SENT'
+
+export interface PayoutItem {
+  id: string
+  type: PayoutType
+  user: string
+  amount: number
+  bank: string
+  accountNumber: string
+  holder: string
+  status: PayoutStatus
+  createdAt: string
 }

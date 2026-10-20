@@ -25,6 +25,7 @@ import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorStatus, resolveApiErrorMessage } from '@/lib/utils/apiError'
 import { getMessagePreview, getSystemMessageText } from '@/lib/utils/chatMessage'
 import { formatLocalizedFullDate } from '@/lib/utils/date'
+import { decodeHtmlEntities } from '@/lib/utils/decodeHtmlEntities'
 import type { ChatMember, ChatMessage } from '@/lib/api/types'
 import ChatActionSheet from './ChatActionSheet'
 import type { ChatSheetAction } from './ChatActionSheet'
@@ -48,6 +49,8 @@ interface ChatRoomProps {
   // 관리자 화면이 멤버 드로어에 붙이는 액션 (멤버 행 오른쪽, 목록 아래)
   memberActions?: (member: ChatMember) => ReactNode
   drawerFooter?: ReactNode
+  // 헤더 바로 아래에 붙는 관리자용 띠 (봇 상태 등)
+  headerExtra?: ReactNode
 }
 
 interface DialogState {
@@ -105,7 +108,7 @@ function CenterPill({ children }: { children: ReactNode }) {
   )
 }
 
-export default function ChatRoom({ roomId, listHref = '/chat', memberActions, drawerFooter }: ChatRoomProps) {
+export default function ChatRoom({ roomId, listHref = '/chat', memberActions, drawerFooter, headerExtra }: ChatRoomProps) {
   const t = useTranslations('chat')
   const tCommon = useTranslations('common')
   const locale = useLocale()
@@ -168,6 +171,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
       unreadCount: 0,
       edited: false,
       deleted: false,
+      aiGenerated: false,
       createdAt: item.createdAt,
     })),
   ]
@@ -257,7 +261,8 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
     const isMine = message.sender?.id === userId
     const actions: ChatSheetAction[] = []
     const text = message.type === 'TEXT' ? message.content : null
-    if (text) actions.push({ key: 'copy', label: t('actions.copy'), onSelect: () => copyText(text) })
+    const copyable = text && message.aiGenerated ? decodeHtmlEntities(text) : text
+    if (copyable) actions.push({ key: 'copy', label: t('actions.copy'), onSelect: () => copyText(copyable) })
     if (isMine && text !== null) {
       actions.push({ key: 'edit', label: t('actions.edit'), onSelect: () => setDialog({ kind: 'edit', message }) })
     }
@@ -335,6 +340,7 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
         showProfile={!isSameRun(prev, message)}
         senderName={memberName ?? message.sender?.nickname ?? t('withdrawn')}
         isHouseSender={isHouseSender}
+        isAiGenerated={!!message.aiGenerated}
         type={message.type === 'IMAGE' ? 'IMAGE' : 'TEXT'}
         content={message.type === 'IMAGE' ? message.imageUrl : message.content}
         isDeleted={isDeleted}
@@ -413,6 +419,8 @@ export default function ChatRoom({ roomId, listHref = '/chat', memberActions, dr
           <Menu size={20} />
         </button>
       </header>
+
+      {headerExtra}
 
       {room?.notice && (
         <div className="shrink-0 bg-card px-3 pt-2">

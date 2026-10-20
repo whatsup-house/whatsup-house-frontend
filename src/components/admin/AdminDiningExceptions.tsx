@@ -17,7 +17,11 @@ const TYPE_LABEL: Record<DiningExceptionType, string> = {
   SAFETY: '신고',
   CONFLICT: '충돌',
   REFUND: '환불',
+  CS: '문의',
 }
+
+// CS 예외의 reason은 "문의방 {roomId}: …"로 시작한다 (BE-7).
+const csRoomId = (reason: string) => /^문의방 (\S+?):/.exec(reason)?.[1]
 const TYPES = Object.keys(TYPE_LABEL) as DiningExceptionType[]
 
 const STATUS_TABS: { status: DiningExceptionStatus; label: string }[] = [
@@ -192,6 +196,16 @@ export default function AdminDiningExceptions() {
             {c.type === 'CONFLICT' && c.sessionId && (
               <Link href={`/admin/dining/sessions/${c.sessionId}`} className="self-start text-xs text-primary hover:underline">
                 회차 콘솔에서 조정하기
+              </Link>
+            )}
+            {c.type === 'PAYMENT' && c.status === 'OPEN' && (
+              <Link href={`/admin/payments?case=${c.id}`} className="self-start text-xs text-primary hover:underline">
+                신청에 연결
+              </Link>
+            )}
+            {c.type === 'CS' && csRoomId(c.reason) && (
+              <Link href={`/admin/chat/${csRoomId(c.reason)}`} className="self-start text-xs text-primary hover:underline">
+                문의방 열기
               </Link>
             )}
             {c.status === 'OPEN' ? (

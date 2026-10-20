@@ -7,7 +7,7 @@ import { CheckCircle2, MapPin, Utensils } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import dayjs from 'dayjs'
 import { ApiErrorMessage, EmptyState, LoadingSpinner } from '@/components/ui'
-import { useMyDiningHistory } from '@/lib/hooks/useApplications'
+import { useDiningRecommendations, useMyDiningHistory } from '@/lib/hooks/useApplications'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { formatLocalizedShortDate } from '@/lib/utils/date'
 
@@ -21,6 +21,7 @@ export default function DiningHistoryList() {
   const router = useRouter()
   const { isLoggedIn, isInitialized } = useRequireAuth()
   const historyQuery = useMyDiningHistory(isLoggedIn)
+  const recommendations = useDiningRecommendations(isLoggedIn).data?.slice(0, 3) ?? []
 
   // 회원 전용. 비로그인은 로그인 후 이 화면으로 돌아오게 한다.
   useEffect(() => {
@@ -40,6 +41,36 @@ export default function DiningHistoryList() {
   return (
     <div className="min-h-screen bg-background px-4 py-5">
       <h1 className="mb-4 text-lg font-bold text-foreground">{t('title')}</h1>
+      {recommendations.length > 0 && (
+        <section className="mb-5">
+          <h2 className="mb-2 text-sm font-bold text-foreground">{t('recommendTitle')}</h2>
+          <ul className="space-y-2">
+            {recommendations.map((rec) => (
+              <li key={rec.sessionId} className="flex items-center justify-between gap-3 rounded-card bg-card p-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-foreground">
+                    {formatLocalizedShortDate(rec.eventDate, locale)}
+                    {rec.startTime && ` ${rec.startTime.slice(0, 5)}`}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-tag-text">{rec.title}</p>
+                  {rec.region && (
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-tag-text">
+                      <MapPin size={14} className="shrink-0" />
+                      {rec.region}
+                    </p>
+                  )}
+                </div>
+                <Link
+                  href={`/gatherings/${rec.gatheringId}?session=${rec.sessionId}`}
+                  className="flex min-h-[44px] shrink-0 items-center rounded-button bg-primary px-4 text-sm font-bold text-white"
+                >
+                  {t('recommendApply')}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {historyQuery.isError ? (
         <ApiErrorMessage message={t('loadFailed')} onRetry={() => { historyQuery.refetch() }} />
       ) : historyQuery.data.length === 0 ? (

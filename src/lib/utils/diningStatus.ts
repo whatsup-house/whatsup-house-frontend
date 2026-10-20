@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import type { ApplicationStatus, DiningSessionInfo, DiningTableDetail, DiningTableStatus, MatchStatus } from '@/lib/api/types'
+import type { ApplicationStatus, DiningApplicationItem, DiningSessionInfo, DiningTableDetail, DiningTableStatus, MatchStatus } from '@/lib/api/types'
 
 // 알림(DINING_RESOLUTION)이 이 앵커로 들어오면 상태 카드의 해결 영역으로 스크롤한다.
 export const DINING_RESOLUTION_ANCHOR = 'dining-resolution'
@@ -7,6 +7,11 @@ export const DINING_RESOLUTION_ANCHOR = 'dining-resolution'
 // 참가자 상태 카드의 단계 (KAN-354). 진행 막대는 앞 6개 순서대로 채운다.
 export const DINING_STEPS = ['payment', 'waiting', 'matching', 'reallocating', 'confirmed', 'attended'] as const
 export type DiningPhase = typeof DINING_STEPS[number] | 'alternative' | 'noMatch' | 'exception'
+
+// 쓸 이용권은 이미 있어(차감 기록 있음) 보증금 입금만 남은 결제 대기 (KAN-408)
+export function isDepositOnlyPending(item: Pick<DiningApplicationItem, 'status' | 'ticketStatus' | 'deposit'>): boolean {
+  return item.status === 'PAYMENT_PENDING' && item.deposit?.status === 'PENDING' && item.ticketStatus === 'DEDUCTED'
+}
 
 export function getDiningPhase(
   status: ApplicationStatus,
@@ -43,7 +48,8 @@ export function getDiningStepIndex(phase: DiningPhase): number {
 
 const sessionStartAt = (session: DiningSessionInfo) => dayjs(`${session.eventDate}T${session.startTime ?? '00:00:00'}`)
 
-// BE 사전 취소 기준과 같다: 배정 회차, 배정 전이면 아직 시작 안 한 희망 회차 중 가장 이른 회차의 시작 2일 전까지.
+// BE 취소 기준과 같다: 배정 회차, 배정 전이면 아직 시작 안 한 희망 회차 중 가장 이른 회차의 시작 전까지.
+// 마감 전·후·당일에 따른 결과는 취소 미리보기가 알려준다. (KAN-410)
 // ponytail: 브라우저 시각 기준이라 시계가 틀어지면 버튼만 어긋난다. 최종 판단은 BE(CANCEL_WINDOW_CLOSED).
 export function isDiningCancelOpen(
   assignedSession: DiningSessionInfo | null,
@@ -53,7 +59,7 @@ export function isDiningCancelOpen(
   const base = assignedSession
     ? sessionStartAt(assignedSession)
     : candidateSessions.map(sessionStartAt).filter((startAt) => startAt.isAfter(now)).sort((a, b) => a.valueOf() - b.valueOf())[0]
-  return !!base && !now.isAfter(base.subtract(2, 'day'))
+  return !!base && !now.isAfter(base)
 }
 
 // 희망 회차 중 가장 먼저 돌아올 매칭 실행 시각. 응답에 없으면 null → 표시 생략

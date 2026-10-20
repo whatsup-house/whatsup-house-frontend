@@ -64,6 +64,10 @@
       "credentialError": "Por favor revisa tu correo electrónico o contraseña.",
       "submit": "Iniciar sesión",
       "submitting": "Iniciando sesión...",
+      "demoStart": "심사용 체험 시작",
+      "demoStarting": "체험 계정 만드는 중...",
+      "demoRateLimited": "잠시 후 다시 시도해 주세요",
+      "demoError": "체험을 시작하지 못했어요. 다시 시도해 주세요.",
       "noAccount": "¿Aún no tienes cuenta?",
       "validation": {
         "email": "Por favor introduce una dirección de correo electrónico válida",
@@ -609,7 +613,8 @@
       "purchase": "Solicitar prepago de pase de 4 usos",
       "depositAccount": "Cuenta de depósito (pago después de la solicitud)",
       "accountHolder": "Titular de la cuenta {holder}",
-      "loginRequired": "Inicia sesión para comprar un pase."
+      "loginRequired": "Inicia sesión para comprar un pase.",
+      "select": "이용권 선택하기"
     },
     "diningApply": {
       "steps": {
@@ -630,7 +635,8 @@
       "paymentPendingTitle": "Pago pendiente",
       "paymentPendingDescription": "Recibimos tu solicitud, pero no tienes pases suficientes. Compra un pase para confirmarla y esperar el emparejamiento.",
       "buyTicket": "Comprar un pase",
-      "viewMyApplications": "Ver mis solicitudes"
+      "viewMyApplications": "Ver mis solicitudes",
+      "refundMissing": "보증금 반환 계좌를 모두 입력해주세요."
     },
     "diningTable": {
       "label": "Mesa al azar",
@@ -844,20 +850,38 @@
           "attended": "Gracias por acompañarnos.",
           "alternative": "No pudimos formar una mesa para esta fecha. Elige una opción abajo.",
           "noMatch": "Lo sentimos, esta vez no hubo emparejamiento.",
-          "exception": "Nuestro equipo está revisando tu solicitud. Espera un momento."
+          "exception": "Nuestro equipo está revisando tu solicitud. Espera un momento.",
+          "paymentDeposit": "보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요."
         },
         "buyTicket": "Comprar pase",
         "viewTable": "Ver mesa",
         "goResolve": "Elegir una opción",
         "viewAll": "Ver todas mis solicitudes",
         "cancel": {
-          "policy": "Puedes cancelar hasta 2 días antes de que empiece la sesión y te devolveremos el pase usado. Después ya no es posible cancelar.",
+          "policy": "회차 시작 전까지 취소할 수 있어요. 취소 버튼을 누르면 지금 적용되는 결과를 먼저 알려드려요.",
           "button": "Cancelar solicitud",
-          "closed": "Faltan menos de 2 días para la sesión, así que ya no puedes cancelar.",
+          "closed": "회차가 시작돼 취소할 수 없어요.",
           "confirmTitle": "¿Cancelar esta solicitud?",
-          "confirmDescription": "No se puede deshacer. Te devolveremos el pase usado.",
           "confirm": "Cancelar solicitud",
-          "done": "Tu solicitud fue cancelada."
+          "done": "Tu solicitud fue cancelada.",
+          "preview": {
+            "loading": "취소 결과를 확인하고 있어요.",
+            "failed": "취소 결과를 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
+            "window": {
+              "BEFORE_DEADLINE": "매칭 마감 전 취소예요.",
+              "AFTER_DEADLINE": "매칭 마감 후 취소예요.",
+              "SAME_DAY": "회차 당일 취소예요."
+            },
+            "ticketRestored": "사용한 이용권이 돌아와요.",
+            "ticketKept": "사용한 이용권은 돌아오지 않아요.",
+            "deposit": {
+              "RETURN": "보증금은 돌려드려요.",
+              "FORFEIT": "보증금은 돌려받을 수 없어요."
+            },
+            "sanction": "노쇼와 같게 처리돼 이후 신청할 때마다 보증금이 필요해져요.",
+            "irreversible": "취소한 신청은 되돌릴 수 없어요.",
+            "retry": "다시 불러오기"
+          }
         },
         "resolution": {
           "title": "¿Qué quieres hacer?",
@@ -878,12 +902,29 @@
             "TRANSFER": "¿Cambiar tu solicitud a la fecha seleccionada?",
             "KEEP_TICKET": "¿Cancelar esta solicitud y guardar tu pase? Podrás usarlo en tu próxima solicitud.",
             "REFUND": "¿Cancelar esta solicitud y pedir el reembolso del pase?"
-          }
+          },
+          "refundAccountReason": "환불받을 계좌를 알려주세요. 운영팀이 확인 후 송금하면 환불이 완료돼요."
         },
         "errors": {
           "alreadyProcessed": "Esta solicitud ya fue procesada. Cargamos el estado más reciente.",
-          "cancelWindowClosed": "Solo puedes cancelar hasta 2 días antes de que empiece la sesión.",
-          "failed": "No se pudo completar la solicitud. Inténtalo de nuevo en un momento."
+          "cancelWindowClosed": "회차가 시작돼 취소할 수 없어요.",
+          "failed": "No se pudo completar la solicitud. Inténtalo de nuevo en un momento.",
+          "refundAccountRequired": "환불받을 계좌를 입력해주세요."
+        },
+        "payDeposit": "보증금 입금하기",
+        "deposit": {
+          "label": "보증금 {status}",
+          "status": {
+            "PENDING": "입금 대기",
+            "PAID": "보관 중",
+            "RETURN_PENDING": "반환 대기",
+            "RETURNED": "반환 완료",
+            "FORFEITED": "몰수"
+          }
+        },
+        "refundStatus": {
+          "REFUND_PROCESSING": "송금 대기",
+          "REFUNDED": "환불 완료"
         }
       },
       "emptyFiltered": "No hay solicitudes con este estado.",
@@ -1054,6 +1095,8 @@
     "diningHistory": {
       "title": "Historial de Mesa al azar",
       "loadFailed": "No se pudo cargar tu historial.",
+      "recommendTitle": "다음 추천 회차",
+      "recommendApply": "신청하기",
       "empty": "Aún no has participado en ninguna mesa.",
       "tableStatus": {
         "PROPOSED": "Pendiente",
@@ -1194,6 +1237,102 @@
     "account": {
       "bankName": "Woori Bank",
       "accountHolder": "Whatsup House"
+    },
+    "pass": {
+      "selectLabel": "이용권 선택",
+      "useMembership": "멤버십으로 신청",
+      "membershipRemaining": "{date}까지 · {days}일 남음",
+      "membershipNoPayment": "추가 결제 없이 바로 신청돼요.",
+      "membershipDepositOnly": "이용권 결제는 필요 없어요. 보증금 {amount}원만 입금하면 돼요.",
+      "applyWithMembership": "멤버십으로 신청하기",
+      "periodDescription": "기간 동안 매주 1회 참여해요",
+      "perMonth": "월 {amount}원 꼴",
+      "deposit": "보증금",
+      "validUntil": "멤버십 이용 기한",
+      "backToApply": "돌아가기",
+      "depositNote": "보증금 {amount}원이 이용권 가격과 별도로 함께 입금돼요.",
+      "depositOnlyTitle": "보증금 입금이 필요해요",
+      "depositOnlyDescription": "이용권은 준비돼 있어요. 보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요.",
+      "depositConfirmed": "보증금 입금이 확인됐어요",
+      "viewMyApplications": "내 신청 보기",
+      "restricted": {
+        "REJECTED": "현재 우연한 식탁 참여 자격이 승인되지 않았어요.",
+        "SUSPENDED": "현재 우연한 식탁 참여 자격이 정지되어 있어요.",
+        "BLOCKED": "차단된 계정은 이용권을 구매할 수 없어요."
+      }
+    },
+    "pending": {
+      "account": "입금 계좌",
+      "holder": "예금주 {holder}",
+      "won": "{amount}원",
+      "total": "입금하실 금액",
+      "payerNameLabel": "입금자명은 반드시 실명으로",
+      "payerNameFallback": "신청서에 적은 실명",
+      "payerNameHint": "다른 이름으로 입금하면 자동으로 확인되지 않아요.",
+      "deadline": "입금 기한 {at}",
+      "autoConfirm": "입금되면 자동으로 확인돼요."
+    },
+    "simulator": {
+      "title": "심사용 입금 시뮬레이터",
+      "description": "실제로는 운영자 폰에 은행 알림이 오고, 와썹이 자동으로 확인합니다",
+      "button": "{amount} 입금하기",
+      "retry": "다시 입금해 보기",
+      "error": "시뮬레이션에 실패했어요. 잠시 후 다시 시도해 주세요.",
+      "phoneLabel": "운영자 폰",
+      "phoneCaption": "운영자 폰에 도착한 은행 알림이에요. 내 폰에는 오지 않아요.",
+      "pushApp": "은행 앱 · 지금",
+      "steps": {
+        "received": "알림 수신",
+        "verified": "이름·금액 확인",
+        "linked": "신청 연결",
+        "completed": "결제 완료"
+      },
+      "exception": "예외함으로 넘어갔어요",
+      "status": {
+        "done": "완료",
+        "failed": "실패",
+        "pending": "대기"
+      },
+      "settledNotice": "결제 완료로 바뀌었어요"
+    },
+    "policy": {
+      "title": "마감·취소·노쇼 안내",
+      "deadline": "신청 마감은 매칭 전날 0시예요. 목요일 회차는 화요일 24:00까지 신청할 수 있어요.",
+      "cancelBefore": "마감 전 취소: 1회권은 복원 또는 환불되고, 보증금은 돌려드려요.",
+      "cancelAfter": "마감 후~회차 전날 취소: 환불 없이 이용권이 사용돼요. 보증금은 돌려드려요.",
+      "sameDayNoShow": "당일 취소·노쇼: 보증금 50,000원은 돌려받을 수 없고, 이후 신청 때마다 보증금이 필요해요."
+    },
+    "refundAccount": {
+      "title": "보증금 반환 계좌",
+      "reason": "이전 노쇼 이력으로 보증금 {amount}원이 필요해요. 참석 체크인 후 돌려드려요.",
+      "bank": "은행",
+      "bankPlaceholder": "예: 우리은행",
+      "accountNumber": "계좌번호",
+      "accountNumberPlaceholder": "숫자만 입력해 주세요",
+      "holder": "예금주",
+      "holderPlaceholder": "예금주 이름",
+      "refundTitle": "환불 계좌",
+      "required": "필수 입력이에요"
+    },
+    "membershipRefund": {
+      "button": "멤버십 환불",
+      "validUntil": "{date}까지 이용",
+      "policy": "첫 참석 전까지만 전액 환불돼요. 진행 중인 신청이 있으면 함께 취소돼요.",
+      "confirmTitle": "멤버십을 환불받을까요?",
+      "reason": "결제한 {amount}원을 환불해 드려요. 운영팀이 확인 후 송금하면 환불이 완료돼요.",
+      "confirm": "환불 요청",
+      "done": "환불을 요청했어요. 송금 대기 중이에요.",
+      "errors": {
+        "MEMBERSHIP_REFUND_AFTER_ATTENDANCE": "이미 참석한 멤버십은 환불할 수 없어요.",
+        "MEMBERSHIP_REFUND_ACTIVE_TABLE": "확정된 테이블이 있어 환불할 수 없어요. 신청을 먼저 정리해주세요.",
+        "REFUND_ACCOUNT_REQUIRED": "환불받을 계좌를 입력해주세요.",
+        "failed": "환불을 요청하지 못했어요. 잠시 후 다시 시도해주세요."
+      },
+      "statusLabel": "{name} 환불",
+      "status": {
+        "REQUESTED": "송금 대기",
+        "SENT": "환불 완료"
+      }
     }
   },
   "errors": {
@@ -1385,7 +1524,8 @@
       "retry": "Reenviar",
       "discard": "Cancelar",
       "failed": "Error al enviar",
-      "unread": "{count} sin leer"
+      "unread": "{count} sin leer",
+      "aiLabel": "AI 자동응답"
     },
     "system": {
       "JOINED": "{nicknames} {count, plural, one {se unió} other {se unieron}}",

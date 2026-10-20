@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ChatDialog from '@/components/chat/ChatDialog'
 import ChatRoom from '@/components/chat/ChatRoom'
+import AdminChatBotBar from './AdminChatBotBar'
 import AdminUserSearch from './AdminUserSearch'
 import {
   useAddChatMembers,
@@ -160,6 +161,7 @@ export default function AdminChatRoom({ roomId }: AdminChatRoomProps) {
         listHref={LIST_HREF}
         memberActions={renderMemberActions}
         drawerFooter={drawerFooter}
+        headerExtra={room?.type === 'INQUIRY' ? <AdminChatBotBar roomId={roomId} room={room} /> : null}
       />
       {dialog && dialogProps && (
         <ChatDialog

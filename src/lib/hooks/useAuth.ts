@@ -6,6 +6,7 @@ import {
   checkNickname,
   checkEmail,
   confirmPasswordReset,
+  demoLogin,
   changeMyPassword,
   fetchMyProfile,
   findEmail,
@@ -16,6 +17,7 @@ import {
   updateMyProfile,
   withdrawMyAccount,
 } from '@/lib/api/auth'
+import { fetchGatheringsAll } from '@/lib/api/gathering'
 import { unsubscribeChatPush } from '@/lib/hooks/useChatPush'
 import { useAuthStore } from '@/lib/store/authStore'
 import { markWelcomeSeen } from '@/lib/utils/welcomeCookie'
@@ -70,6 +72,27 @@ export function useLogin(returnUrl: string = '/') {
       // proxy.ts는 인증 쿠키를 볼 수 없어 이 쿠키로 로그인 사용자의 /welcome 리다이렉트를 막는다. (KAN-323)
       markWelcomeSeen()
       router.push(returnUrl)
+    },
+  })
+}
+
+// 심사용 체험 로그인 (KAN-413). 로그인 뒤 사용자에게 보이는 첫 우연한 식탁(체험 계정에는 숨김 종류만 보인다)으로 이동한다.
+export function useDemoLogin() {
+  const { login: storeLogin } = useAuthStore()
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  return useMutation({
+    mutationFn: async () => {
+      const data = await demoLogin()
+      const gatherings = await fetchGatheringsAll().catch(() => [])
+      return { data, gatheringId: gatherings.find((g) => g.gatheringType === 'RANDOM_TABLE')?.id }
+    },
+    onSuccess: ({ data, gatheringId }) => {
+      queryClient.clear()
+      storeLogin(data.user.id, data.user.nickname, data.user.admin)
+      markWelcomeSeen()
+      router.push(gatheringId ? `/gatherings/${gatheringId}` : '/gatherings')
     },
   })
 }
