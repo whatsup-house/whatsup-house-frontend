@@ -9,6 +9,7 @@ import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
 import AdminBotToggle from './AdminBotToggle'
 import AdminChatNav from './AdminChatNav'
 import ChatGroupRoomFormPanel from './ChatGroupRoomFormPanel'
+import { decodeHtmlEntities } from '@/lib/utils/decodeHtmlEntities'
 import { useAddChatMembers, useAdminChatRooms, useChatSourceGatherings } from '@/lib/hooks/useAdminChat'
 import { useAuthStore } from '@/lib/store/authStore'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
@@ -27,7 +28,8 @@ function getPreview(message: ChatLastMessage | null): string {
   if (message.type === 'IMAGE') return '사진'
   if (message.systemKind === 'SYSTEM_NOTICE') return message.systemParams?.text ?? ''
   if (message.type === 'SYSTEM') return message.systemKind ? SYSTEM_PREVIEW[message.systemKind] : ''
-  return message.content ?? ''
+  const content = message.content ?? ''
+  return message.aiGenerated ? decodeHtmlEntities(content) : content
 }
 
 function formatTime(iso: string | undefined): string {

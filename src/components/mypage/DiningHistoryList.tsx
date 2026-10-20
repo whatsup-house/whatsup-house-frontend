@@ -48,7 +48,11 @@ export default function DiningHistoryList() {
             {recommendations.map((rec) => (
               <li key={rec.sessionId} className="flex items-center justify-between gap-3 rounded-card bg-card p-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-foreground">{formatLocalizedShortDate(rec.date, locale)}</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {formatLocalizedShortDate(rec.eventDate, locale)}
+                    {rec.startTime && ` ${rec.startTime.slice(0, 5)}`}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-tag-text">{rec.title}</p>
                   {rec.region && (
                     <p className="mt-1 flex items-center gap-1.5 text-xs text-tag-text">
                       <MapPin size={14} className="shrink-0" />

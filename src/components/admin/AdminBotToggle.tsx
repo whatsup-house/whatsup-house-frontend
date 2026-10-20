@@ -20,7 +20,7 @@ export default function AdminBotToggle() {
     <div className="mb-3 flex items-center justify-between gap-3 rounded-card bg-card px-4 py-3 shadow-sm">
       <div>
         <p className="text-sm font-semibold text-foreground">AI 자동응답 전체</p>
-        <p className="text-xs text-tag-text">{data.enabled ? '켜짐 — 대상 고객 문의에 봇이 먼저 답해요' : '꺼짐 — 모든 문의는 사람이 답해요'}</p>
+        <p className="text-xs text-tag-text">{!data.enabled ? '꺼짐 — 모든 문의는 사람이 답해요' : data.active ? '켜짐 — 대상 고객 문의에 봇이 먼저 답해요' : '서버 설정 꺼짐 — 토글은 켜졌지만 서버에서 봇이 꺼져 있어 답하지 않아요'}</p>
       </div>
       <button
         type="button"

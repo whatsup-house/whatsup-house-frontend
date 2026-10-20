@@ -5,11 +5,15 @@ import {
   fetchGatheringsAll, fetchGatheringDetail, fetchGatheringSession,
   filterGatheringsByDate, deriveCalendarDots, buildGatheringTypeCards,
 } from '@/lib/api/gathering'
+import { useAuthStore } from '@/lib/store/authStore'
 import type { GatheringTypeFilter, GatheringTypeSort } from '@/lib/api/types'
+
+// 목록은 보는 사람(체험 계정 등)마다 달라서 userId 를 키에 넣는다. SSR 프리페치는 비로그인('anon') 키로 들어간다.
+const useGatheringsKey = () => ['gatherings', 'all', useAuthStore((s) => s.userId) ?? 'anon']
 
 export function useGatheringsAll() {
   return useQuery({
-    queryKey: ['gatherings', 'all'],
+    queryKey: useGatheringsKey(),
     queryFn: fetchGatheringsAll,
     staleTime: 1000 * 60 * 5,
   })
@@ -18,7 +22,7 @@ export function useGatheringsAll() {
 // 날짜별 목록·달력 dot은 전체 목록 캐시에서 파생 — 날짜 선택·월 이동 시 네트워크 요청 없음 (KAN-327)
 export function useGatherings(date: string) {
   return useQuery({
-    queryKey: ['gatherings', 'all'],
+    queryKey: useGatheringsKey(),
     queryFn: fetchGatheringsAll,
     staleTime: 1000 * 60 * 5,
     select: (data) => filterGatheringsByDate(data, date),
@@ -27,7 +31,7 @@ export function useGatherings(date: string) {
 
 export function useCalendarDots(year: number, month: number) {
   return useQuery({
-    queryKey: ['gatherings', 'all'],
+    queryKey: useGatheringsKey(),
     queryFn: fetchGatheringsAll,
     staleTime: 1000 * 60 * 5,
     select: (data) => deriveCalendarDots(data, year, month),
@@ -37,7 +41,7 @@ export function useCalendarDots(year: number, month: number) {
 // 모아보기 카드 — 전체 목록 캐시에서 종류별 대표 회차를 파생한다. curatedIds: 홈 큐레이션 항목 ID 순서(인기순)
 export function useGatheringTypeCards(filter: GatheringTypeFilter, sort: GatheringTypeSort, curatedIds: string[]) {
   return useQuery({
-    queryKey: ['gatherings', 'all'],
+    queryKey: useGatheringsKey(),
     queryFn: fetchGatheringsAll,
     staleTime: 1000 * 60 * 5,
     select: (data) => buildGatheringTypeCards(data, { today: dayjs().format('YYYY-MM-DD'), filter, sort, curatedIds }),
@@ -65,7 +69,7 @@ export function useGatheringSession(sessionId: string) {
 // 전체 목록 1회만 프리페치 — 날짜별 목록·달력 dot은 클라이언트에서 파생한다. prefetchQuery는 실패해도 throw하지 않는다.
 export async function prefetchGatheringsQueries(queryClient: QueryClient) {
   await queryClient.prefetchQuery({
-    queryKey: ['gatherings', 'all'],
+    queryKey: ['gatherings', 'all', 'anon'],
     queryFn: fetchGatheringsAll,
   })
 }

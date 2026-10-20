@@ -14,7 +14,6 @@ import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { useGuestTickets, useMyTickets, usePurchaseGuestTicketPass, usePurchaseTicketPass, useTicketProducts } from '@/lib/hooks/useTickets'
 import { useRequireAuth } from '@/lib/hooks/useRequireAuth'
 import { useToastStore } from '@/lib/store/toastStore'
-import { DEPOSIT_AMOUNT } from '@/lib/constants/payment'
 import { formatLocalizedShortDate } from '@/lib/utils/date'
 import { daysUntil, findActiveMembership, getTicketRestriction, isMembershipProduct } from '@/lib/utils/membership'
 import { safeReturnUrl } from '@/lib/utils/url'
@@ -95,12 +94,9 @@ function PaymentContent() {
   const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt && (isApplicationConfirmed || !displayPass.applicationId))
   const goBack = () => router.push(returnUrl ? safeReturnUrl(returnUrl) : '/gatherings')
   // purchaseAmount 는 이용권 가격뿐이다. 보증금은 별도 레코드라 입금 대기(PENDING)일 때만 합산한다.
-  // 신청의 deposit 정보가 없으면(구형 BE) 보증금 대상 회원이 신청과 함께 산 경우로 보고 기본 보증금을 더한다.
+  // deposit 이 없으면 보증금이 없는 신청이다(BE 는 보증금이 있으면 항상 내려준다).
   const deposit = diningApplication?.deposit
-  const hasLinkedApplication = Boolean(displayPass?.applicationId ?? applicationId)
-  const depositDue = deposit
-    ? (deposit.status === 'PENDING' ? deposit.amount : 0)
-    : (profile?.depositRequired && hasLinkedApplication ? DEPOSIT_AMOUNT : 0)
+  const depositDue = deposit?.status === 'PENDING' ? deposit.amount : 0
   // 이용권은 이미 쓰였고(차감 기록) 보증금만 남은 신청 → 이용권 선택 없이 보증금 입금 화면
   const isDepositFlow = !displayPass && deposit != null && diningApplication?.ticketStatus === 'DEDUCTED'
   // 요청 id는 이용권 구매면 passId만(BE가 신청의 PENDING 보증금을 합산), 보증금 단독이면 applicationId만 보낸다.

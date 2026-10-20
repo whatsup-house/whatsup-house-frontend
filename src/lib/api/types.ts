@@ -904,10 +904,10 @@ export interface DiningHistoryItem {
 export interface DiningRecommendation {
   sessionId: string
   gatheringId: string
-  date: string               // YYYY-MM-DD
+  title: string
+  eventDate: string          // YYYY-MM-DD
   startTime: string | null   // HH:mm:ss
   region: string | null
-  deadlineAt: string | null  // ISO datetime
 }
 
 // 답변 조회 (questionKey/label/value). value는 저장된 원시값이 펼쳐져 옴
@@ -1380,6 +1380,8 @@ export interface ChatLastMessage {
   systemKind: ChatSystemKind | null
   systemParams: ChatSystemParams | null
   deleted: boolean
+  // AI 답변은 HTML 이스케이프되어 저장된다. BE 가 내려주면 미리보기에서 복원한다.
+  aiGenerated?: boolean
   createdAt: string
 }
 
@@ -1523,6 +1525,8 @@ export interface AdminChatRoomSummary {
 // GET/PUT /api/admin/bot/settings — AI 자동응답 전역 스위치 (KAN-406)
 export interface AdminBotSettings {
   enabled: boolean
+  // 실제 동작 여부 — 토글이 켜져도 서버 마스터 스위치·봇 토큰이 없으면 false
+  active: boolean
 }
 
 // POST /api/admin/chat/rooms — 생성한 관리자는 서버가 자동 포함
@@ -1665,7 +1669,7 @@ export interface DepositNotificationPage {
   content: DepositNotification[]
   totalElements: number
   totalPages: number
-  number: number
+  page: number
   size: number
 }
 

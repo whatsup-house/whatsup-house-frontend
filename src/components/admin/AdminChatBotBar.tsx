@@ -1,6 +1,6 @@
 'use client'
 
-import { useResumeChatBot } from '@/lib/hooks/useAdminChat'
+import { useBotSettings, useResumeChatBot } from '@/lib/hooks/useAdminChat'
 import { useToastStore } from '@/lib/store/toastStore'
 import type { ChatRoomDetail } from '@/lib/api/types'
 
@@ -13,6 +13,8 @@ interface AdminChatBotBarProps {
 export default function AdminChatBotBar({ roomId, room }: AdminChatBotBarProps) {
   const showToast = useToastStore((s) => s.show)
   const resume = useResumeChatBot()
+  const { data: settings } = useBotSettings()
+  const serverOff = !!settings && settings.enabled && !settings.active
   const paused = !!room.botPaused
   const needsHuman = !!room.needsHuman
 
@@ -21,7 +23,7 @@ export default function AdminChatBotBar({ roomId, room }: AdminChatBotBarProps) 
       <div className="min-w-0 flex-1">
         <p className="text-foreground">
           <span className="font-semibold">AI 자동응답</span>{' '}
-          <span className={paused ? 'text-tag-text' : 'text-primary'}>{paused ? '일시정지' : '동작 중'}</span>
+          <span className={paused || serverOff ? 'text-tag-text' : 'text-primary'}>{serverOff ? '서버 설정 꺼짐' : paused ? '일시정지' : '동작 중'}</span>
           {needsHuman && (
             <span className="ml-1.5 rounded-full bg-primary-light px-2 py-0.5 text-[11px] font-medium text-primary">담당자 필요</span>
           )}
