@@ -1676,6 +1676,8 @@ export interface DepositNotification {
   applicationId: string | null
   exceptionCaseId: string | null
   createdAt: string
+  // 구매 대상 이름 — 이용권이면 상품명(1회권 등), 보증금·일반 신청이면 게더링 제목 (KAN-426)
+  targetName?: string | null
 }
 
 export interface DepositNotificationPage {
@@ -1701,6 +1703,7 @@ export interface PendingPaymentTarget {
   applicationId: string | null
   payerName: string
   amount: number
+  targetName?: string | null    // KAN-426
 }
 
 export type PayoutType = 'REFUND' | 'DEPOSIT_RETURN'

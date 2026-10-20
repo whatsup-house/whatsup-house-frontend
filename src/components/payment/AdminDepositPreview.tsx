@@ -3,34 +3,24 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslations } from 'next-intl'
-import dayjs from 'dayjs'
-import { Bell, Menu, X } from 'lucide-react'
-import ApplicantCard from '@/components/admin/ApplicantCard'
-import type { DemoDepositResponse } from '@/lib/api/types'
+import { Bell, ChevronDown, Menu, X } from 'lucide-react'
+import DepositSummary from '@/components/admin/DepositSummary'
+import type { DemoDepositResponse, DepositMatchResult, PaymentTargetType } from '@/lib/api/types'
 
 const FRAME_WIDTH = 375
 const FRAME_HEIGHT = 760
-// 폰이 뜨고 1.5초 뒤 입금 알림, 그 1초 뒤 참가자 목록 맨 위에 본인 카드가 쌓인다 (KAN-421)
+// 폰이 뜨고 1.5초 뒤 입금 알림, 그 1초 뒤 입금 알림 로그 맨 위에 본인 입금 카드가 쌓인다 (KAN-421·423)
 const PUSH_DELAY_MS = 1500
 const SETTLE_DELAY_MS = 1000
 // lg↑ 오른쪽 고정 패널 폭. 열려 있는 동안 앱 셸이 이만큼 비켜 준다 (globals.css html[data-admin-preview] 와 같은 값)
 const SIDE_PANEL_WIDTH = 420
 
-export interface AdminPreviewApplicant {
-  name: string
-  info: string[]      // 성별·나이·MBTI·직업 (본인 프로필에서만)
-  appliedAt: string
-}
-
-export interface AdminPreviewSession {
-  eventDate: string | null
-  region: string | null
-}
-
 interface AdminDepositPreviewProps {
   response: DemoDepositResponse
-  applicant: AdminPreviewApplicant
-  session: AdminPreviewSession
+  payerName: string                 // 본인 이름 (다른 회원 정보는 쓰지 않는다)
+  amount: number
+  targetType: PaymentTargetType
+  targetName: string | null
   onSettled: () => void
   onClose: () => void
 }
@@ -46,30 +36,19 @@ function measureLayout(): Layout {
   return { mode: 'sheet', scale: Math.min(1, (vw - 32) / FRAME_WIDTH, (vh - 170) / FRAME_HEIGHT) }
 }
 
-// 목록처럼 보이게 하는 가짜 참가자. 다른 회원 정보는 절대 쓰지 않는다.
-const PLACEHOLDERS = [
-  { name: '참가자 A', info: ['여', '29세', 'ENFP', '디자이너'], hoursAgo: 26 },
-  { name: '참가자 B', info: ['남', '31세', 'ISTJ', '개발자'], hoursAgo: 20 },
-  { name: '참가자 C', info: ['여', '27세', 'INFJ', '마케터'], hoursAgo: 9 },
+// 목록처럼 보이게 하는 가짜 입금 알림. 다른 회원 정보는 절대 쓰지 않는다.
+const PLACEHOLDERS: { name: string; amount: number; targetType: PaymentTargetType | null; targetName: string | null; result: DepositMatchResult; isManual?: boolean }[] = [
+  { name: '김하늘', amount: 9900, targetType: 'TICKET_PASS', targetName: '1회권', result: 'MATCHED' },
+  { name: '이도윤', amount: 50000, targetType: 'DEPOSIT', targetName: '우연한 식탁', result: 'MATCHED', isManual: true },
+  { name: '박서연', amount: 30000, targetType: null, targetName: null, result: 'NO_CANDIDATE' },
+  { name: '정민준', amount: 9900, targetType: 'TICKET_PASS', targetName: '1회권', result: 'MATCHED' },
 ]
 
-const PAID = { label: '이용권 처리', cls: 'bg-[#E8F5E9] text-[#4CAF50]' }
-const PAYMENT_BADGE = {
-  waiting: { label: '입금 대기', cls: 'bg-[#FFF3E0] text-[#EF6C00]' },
-  matched: { label: '입금 완료', cls: 'bg-[#E8F5E9] text-[#4CAF50]' },
-  exception: { label: '예외함 확인 필요', cls: 'bg-[#FEF3F3] text-red-500' },
-}
+// 은행 푸시는 이름 뒤 공백 덩어리에서 한 줄 내려 보여준다 (표시만, 원문은 그대로)
+const pushBody = (rawText: string) => rawText.replace(/ {2,}/, '\n')
 
-// 실제 관리자 카드의 모바일 액션 버튼과 같은 모양 (미리보기라 동작하지 않는다)
-const actionsFor = (status: string) => (
-  <>
-    {status === 'CONFIRMED' && <span className="inline-flex min-h-10 items-center px-4 rounded-full bg-[#FDECEA] text-[#C8392B] text-[13px] font-medium">출석</span>}
-    <span className="ml-auto inline-flex min-h-10 items-center px-4 rounded-full bg-[#FEF3F3] text-red-500 text-[13px] font-medium">반려</span>
-  </>
-)
-
-// 심사용: 운영자 폰의 "참가자 관리" 모바일 화면에 은행 입금 알림이 오고 결제 상태가 바뀌는 모습을 보여준다. (KAN-417)
-export default function AdminDepositPreview({ response, applicant, session, onSettled, onClose }: AdminDepositPreviewProps) {
+// 심사용: 운영자 폰의 "결제 관리" 모바일 화면에 은행 입금 알림이 오고 입금 카드가 자동 완료로 쌓이는 모습을 보여준다. (KAN-417·423)
+export default function AdminDepositPreview({ response, payerName, amount, targetType, targetName, onSettled, onClose }: AdminDepositPreviewProps) {
   const t = useTranslations('payment.simulator')
   const [layout, setLayout] = useState(measureLayout)
   // 0 폰만 · 1 입금 알림 · 2 목록에 반영. 모션 줄이기면 마지막 단계를 바로 보여준다
@@ -109,29 +88,6 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
   }, [onClose])
 
   const isMatched = response.result === 'MATCHED'
-  const payment = isMatched ? PAYMENT_BADGE.matched : PAYMENT_BADGE.exception
-  const status = isMatched ? 'CONFIRMED' : 'PAYMENT_PENDING'
-  const highlight = isMatched ? 'bg-primary-light' : 'bg-red-50'
-  const totalCount = PLACEHOLDERS.length + (isSettled ? 1 : 0)
-  const confirmedCount = 1 + (isSettled && isMatched ? 1 : 0)
-  const placeholder = (index: number) => {
-    const item = PLACEHOLDERS[index]
-    return (
-      <ApplicantCard
-        key={item.name}
-        name={item.name}
-        isGuest={false}
-        status={index === 0 ? 'CONFIRMED' : 'PAYMENT_PENDING'}
-        paymentLabel={index === 0 ? PAID.label : PAYMENT_BADGE.waiting.label}
-        paymentClassName={index === 0 ? PAID.cls : PAYMENT_BADGE.waiting.cls}
-        info={item.info}
-        phone={null}
-        createdAt={dayjs(applicant.appliedAt).subtract(item.hoursAgo, 'hour').toISOString()}
-        actions={actionsFor(index === 0 ? 'CONFIRMED' : 'PAYMENT_PENDING')}
-        className="opacity-45 blur-[1.5px] select-none"
-      />
-    )
-  }
 
   const screen = (
     <div className="relative flex h-full flex-col overflow-hidden rounded-[36px] bg-background">
@@ -144,10 +100,7 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
 
       {/* 관리자 모바일 상단바 (admin/layout 과 같은 모양) */}
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-tag-bg bg-card px-4">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-tag-text">The Curator&apos;s</p>
-          <p className="text-sm font-bold text-primary leading-tight">House Admin</p>
-        </div>
+        <p className="text-base font-bold text-foreground">관리자 페이지</p>
         <div className="flex items-center gap-2">
           <span className="relative p-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-foreground">
             <Bell size={20} />
@@ -160,38 +113,31 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-5 pb-6">
-        <h1 className="mb-5 font-bold text-[22px] text-foreground">참가자 관리</h1>
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <h2 className="w-full font-bold text-[16px] text-foreground">우연한 식탁 (심사용) — 참가자 목록</h2>
-          {session.eventDate && <span className="px-3 py-1 bg-[#F5F0EB] rounded-full text-sm">{dayjs(session.eventDate).format('M월 D일')}</span>}
-          {session.region && <span className="px-3 py-1 bg-[#F5F0EB] rounded-full text-sm">{session.region}</span>}
-          <span className="px-3 py-1 bg-[#FDECEA] text-[#C8392B] rounded-full text-sm">신청 {totalCount}명</span>
+        <h1 className="mb-4 text-[22px] font-bold text-foreground">결제 관리</h1>
+        <div className="mb-4 flex gap-1 border-b border-tag-bg">
+          <span className="-mb-px border-b-2 border-primary px-3 py-2 text-sm font-semibold text-primary">입금 알림 로그</span>
+          <span className="-mb-px border-b-2 border-transparent px-3 py-2 text-sm text-tag-text">송금 목록</span>
         </div>
-        <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
-          <div className="px-4 py-3 border-b border-tag-bg flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <span className="text-sm font-bold text-[#1A1A1A]">총 {totalCount}명 신청</span>
-            <span className="px-2 py-0.5 bg-[#E3F2FD] text-[#1976D2] rounded-full text-xs font-medium">확정 {confirmedCount}명</span>
-          </div>
-          <ul className="divide-y divide-[#F0EBE8]">
-            {isSettled && (
-              <ApplicantCard
-                name={applicant.name}
-                isGuest={false}
-                status={status}
-                paymentLabel={payment.label}
-                paymentClassName={payment.cls}
-                info={applicant.info}
-                phone={null}
-                createdAt={applicant.appliedAt}
-                actions={actionsFor(status)}
-                className={`animate-field-reveal ${highlight}`}
+        <ul className="flex flex-col gap-3">
+          {isSettled && (
+            <li className="flex animate-field-reveal items-center gap-3 rounded-card bg-card p-4 shadow-sm ring-2 ring-primary">
+              <DepositSummary
+                name={payerName}
+                amount={response.parsedAmount ?? amount}
+                targetType={isMatched ? targetType : null}
+                targetName={isMatched ? targetName : null}
+                result={response.result}
               />
-            )}
-            {placeholder(0)}
-            {placeholder(1)}
-            {placeholder(2)}
-          </ul>
-        </div>
+              <ChevronDown size={18} className="shrink-0 text-tag-text" />
+            </li>
+          )}
+          {PLACEHOLDERS.map((item) => (
+            <li key={item.name} className="flex select-none items-center gap-3 rounded-card bg-card p-4 opacity-45 shadow-sm blur-[1.5px]">
+              <DepositSummary {...item} />
+              <ChevronDown size={18} className="shrink-0 text-tag-text" />
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* 운영자 폰에 온 은행 푸시 알림 */}
@@ -202,7 +148,7 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
             <span className="flex-1 truncate text-xs font-semibold text-tag-text">{t('pushApp')}</span>
             <span className="text-xs text-tag-text">{t('now')}</span>
           </div>
-          <p className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-snug text-foreground">{response.rawText}</p>
+          <p className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-snug text-foreground">{pushBody(response.rawText)}</p>
         </div>
       )}
     </div>
@@ -220,7 +166,7 @@ export default function AdminDepositPreview({ response, applicant, session, onSe
       style={isSide ? { width: SIDE_PANEL_WIDTH } : undefined}
     >
       <div className="flex items-center justify-between gap-2" style={{ width: FRAME_WIDTH * scale }}>
-        <span className="text-sm font-bold text-white">{label}</span>
+        <span className="pl-2.5 text-sm font-bold text-white">{label}</span>
         <button
           type="button"
           onClick={onClose}

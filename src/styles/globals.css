@@ -75,24 +75,29 @@ h1, h2, h3 {
   }
 }
 
-/* 심사용 운영자 화면 미리보기(KAN-417): lg↑에서 열리면 앱 셸을 화면 전체 너비로 펴고 오른쪽에 패널 폭만큼 비운다.
-   앱 프레임이 왼쪽으로 밀리고, 비운 자리에 AdminDepositPreview 가 고정 패널로 들어간다. 폭은 그 파일의 SIDE_PANEL_WIDTH 와 같다. */
+/* 심사용 운영자 화면 미리보기(KAN-417·423): lg↑에서 열리면 오른쪽 패널 폭만큼 앱 프레임만 왼쪽으로 비켜 준다.
+   셸·브랜드 패널은 레이아웃을 그대로 두고, 프레임은 position:relative 의 left 로만 옮긴다(형제 배치·fixed 자식 기준에 영향 없음).
+   이동량 = min(0, 패널 왼쪽 끝 - 프레임 오른쪽 끝). 프레임 오른쪽 끝은 1120px 가운데 셸의 오른쪽 끝(min(100vw, 50vw + 560px)).
+   폭은 AdminDepositPreview 의 SIDE_PANEL_WIDTH 와 같다. 1270px 미만에선 프레임이 브랜드 문구를 덮게 되므로 그동안만 브랜드 패널을 흐리게 감춘다. */
 @media (min-width: 1024px) {
-  .app-shell {
-    transition: max-width 0.4s cubic-bezier(0.23, 1, 0.32, 1), padding-right 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  .app-shell > .mobile-layout {
+    left: 0;
+    transition: left 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   }
-  html[data-admin-preview] .app-shell {
-    max-width: 100vw;
-    padding-right: 420px;
+  html[data-admin-preview] .app-shell > .mobile-layout {
+    left: min(0px, calc(100vw - 420px - min(100vw, 50vw + 560px)));
   }
-  /* 좁은 노트북에서 브랜드 문구가 앱 프레임을 밀지 않게 잘라낸다 */
+  .app-shell > aside {
+    transition: opacity 0.3s ease;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1269px) {
   html[data-admin-preview] .app-shell > aside {
-    min-width: 0;
-    overflow: hidden;
+    opacity: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .app-shell {
+  .app-shell > .mobile-layout {
     transition: none;
   }
 }

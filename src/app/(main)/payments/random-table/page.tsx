@@ -114,7 +114,6 @@ function PaymentContent() {
     : isDepositFlow && deposit?.status === 'PENDING' && applicationId
       ? { applicationId, amount: deposit.amount }
       : null
-  const demoSession = diningApplication?.assignedSession ?? diningApplication?.candidateSessions[0]
   if (pendingDemoTarget && (demoTarget?.passId !== pendingDemoTarget.passId || demoTarget?.applicationId !== pendingDemoTarget.applicationId || demoTarget?.amount !== pendingDemoTarget.amount)) {
     setDemoTarget(pendingDemoTarget)
   }
@@ -288,8 +287,7 @@ function PaymentContent() {
           applicationId={demoTarget.applicationId}
           passId={demoTarget.passId}
           isSettled={pendingDemoTarget === null}
-          session={{ eventDate: demoSession?.eventDate ?? memberApplicationDetail.data?.gathering.eventDate ?? null, region: demoSession?.region ?? null }}
-          appliedAt={memberApplicationDetail.data?.createdAt}
+          targetName={(demoTarget.passId ? displayPass?.productLabel : (diningApplication?.gathering.title ?? gatheringDetail.data?.title)) ?? null}
         />
       )}
       {/* 입금 완료 화면은 위 '돌아가기'가 같은 곳으로 가므로 겹쳐 그리지 않는다 */}
