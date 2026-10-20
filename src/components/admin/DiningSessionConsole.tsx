@@ -25,8 +25,8 @@ import DiningAttendanceFeedbackTab from '@/components/admin/DiningAttendanceFeed
 const TABS = [
   { key: 'applicants', label: '신청자' },
   { key: 'tables', label: '테이블' },
-  { key: 'venues', label: '식당·단체방' },
-  { key: 'attendance', label: '참석·피드백' },
+  { key: 'venues', label: '식당과 단체방' },
+  { key: 'attendance', label: '참석과 피드백' },
 ] as const
 type TabKey = (typeof TABS)[number]['key']
 
@@ -44,6 +44,9 @@ const MATCH_STATUS_LABEL: Record<MatchStatus, string> = {
 
 const ACTION_CLASS =
   'shrink-0 px-4 h-10 rounded-input text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none'
+// 지금 눌러야 할 버튼 하나만 채워서 보여준다: 테이블이 없으면 자동매칭, 제안 테이블이 있으면 전체 즉시 확정.
+const PRIMARY_CLASS = 'bg-primary text-white hover:opacity-90'
+const SECONDARY_CLASS = 'border border-tag-bg bg-card text-foreground hover:border-primary'
 const TH_CLASS = 'px-3 py-2 text-left text-xs font-medium text-tag-text whitespace-nowrap'
 const TD_CLASS = 'px-3 py-2 text-sm text-foreground whitespace-nowrap'
 
@@ -73,7 +76,7 @@ const toEditing = (s: GatheringSession, basePrice: number | null) => ({
 
 const formatDateTime = (value: string | null | undefined, empty: string) => (value ? dayjs(value).format('M/D HH:mm') : empty)
 
-// 어드민 우연한 식탁 회차 콘솔: 회차 정보·액션 헤더 + 신청자/테이블/식당·단체방/참석·피드백 탭 (KAN-352)
+// 어드민 우연한 식탁 회차 콘솔: 회차 정보와 액션 헤더 + 신청자/테이블/식당과 단체방/참석과 피드백 탭 (KAN-352)
 export default function DiningSessionConsole({ sessionId }: DiningSessionConsoleProps) {
   const detailQuery = useAdminGatheringDetail(sessionId)
   const tablesQuery = useDiningTables(sessionId)
@@ -96,13 +99,18 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
   }
 
   const isClosed = session.status === 'CANCELLED' || session.status === 'DONE'
-  const hasRun = !!tablesQuery.data?.lastRun
-  const proposedIds = (tablesQuery.data?.tables ?? []).filter((t) => t.status === 'PROPOSED').map((t) => t.id)
-  const runLabel = hasRun ? '다시 실행' : '지금 매칭 실행'
+  // 지금 남아 있는 테이블 기준(해체된 테이블은 목록에 안 온다). 한 번 돌린 뒤 다 해체했으면 처음처럼 '자동매칭'으로 보인다.
+  const tables = tablesQuery.data?.tables ?? []
+  const hasTables = tables.length > 0
+  const proposedIds = tables.filter((t) => t.status === 'PROPOSED').map((t) => t.id)
+  const runLabel = hasTables ? '자동매칭 다시 하기' : '자동매칭'
   const dateLabel = dayjs(session.eventDate).format('M.D (dd)')
 
   const handleRun = () => {
-    if (confirm(`${runLabel}할까요?\n\n수동 조정하지 않은 제안 테이블만 초기화됩니다. 확정·수동 조정(잠금) 테이블은 그대로 둬요.`)) {
+    const message = hasTables
+      ? '자동매칭을 다시 할까요?\n\n확정했거나 직접 고친 테이블은 그대로 두고, 나머지 제안 테이블만 새로 짜요.'
+      : '자동매칭을 할까요?'
+    if (confirm(message)) {
       runMatch.mutate()
     }
   }
@@ -122,8 +130,8 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
     ['지역', session.location?.name ?? '미정'],
     ['정원', `${session.confirmedCount}/${session.maxAttendees}명`],
     ['신청 마감', formatDateTime(session.applyDeadlineAt, '마감 없음')],
-    ['매칭 실행', formatDateTime(session.matchRunAt, '미정')],
-    ['확정 유예', session.autoConfirmGraceMinutes != null ? `${session.autoConfirmGraceMinutes}분` : '기본값'],
+    ['자동매칭 예정', formatDateTime(session.matchRunAt, '미정')],
+    ['자동 확정까지', session.autoConfirmGraceMinutes != null ? `${session.autoConfirmGraceMinutes}분` : '기본값'],
     ['테이블 크기', session.tableSizeMin && session.tableSizeMax ? `${session.tableSizeMin}~${session.tableSizeMax}명` : '기본값'],
   ]
 
@@ -144,24 +152,24 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
         </dl>
         <div className="flex gap-2 overflow-x-auto pb-1">
           <button
-            onClick={() => setIsEditOpen(true)}
-            className={`${ACTION_CLASS} border border-tag-bg bg-card text-foreground hover:border-primary`}
-          >
-            회차 수정
-          </button>
-          <button
             onClick={handleRun}
             disabled={isClosed || runMatch.isPending}
-            className={`${ACTION_CLASS} bg-primary text-white hover:opacity-90`}
+            className={`${ACTION_CLASS} ${hasTables ? SECONDARY_CLASS : PRIMARY_CLASS}`}
           >
-            {runMatch.isPending ? '실행 중…' : runLabel}
+            {runMatch.isPending ? '매칭 중…' : runLabel}
           </button>
           <button
             onClick={handleConfirmAll}
             disabled={isClosed || proposedIds.length === 0 || confirmAll.isPending}
-            className={`${ACTION_CLASS} border border-primary text-primary hover:bg-primary-light`}
+            className={`${ACTION_CLASS} ${proposedIds.length > 0 ? PRIMARY_CLASS : SECONDARY_CLASS}`}
           >
             {confirmAll.isPending ? '확정 중…' : `전체 즉시 확정 (${proposedIds.length})`}
+          </button>
+          <button
+            onClick={() => setIsEditOpen(true)}
+            className={`${ACTION_CLASS} ${SECONDARY_CLASS}`}
+          >
+            회차 수정
           </button>
           <button
             onClick={handleCancel}
@@ -224,8 +232,9 @@ function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-tag-text">
-          신청 {applicants.length}명 · 결제 미완료 {unpaidCount}명
+        <p className="flex gap-3 text-sm text-tag-text">
+          <span>신청 {applicants.length}명</span>
+          <span>결제 미완료 {unpaidCount}명</span>
         </p>
         <button
           onClick={() => download.mutate('applicants')}

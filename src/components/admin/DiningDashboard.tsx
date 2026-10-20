@@ -68,7 +68,10 @@ export default function DiningDashboard() {
                           <p className="font-bold text-foreground">
                             {dayjs(s.eventDate).format('M.D (dd)')} {s.startTime?.slice(0, 5)}
                           </p>
-                          <p className="text-sm text-tag-text truncate">{s.locationName ?? '지역 미정'} · {s.title}</p>
+                          <p className="flex gap-2 text-sm text-tag-text min-w-0">
+                            <span className="shrink-0">{s.locationName ?? '지역 미정'}</span>
+                            <span className="truncate">{s.title}</span>
+                          </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1.5">
                           {s.hidden && (

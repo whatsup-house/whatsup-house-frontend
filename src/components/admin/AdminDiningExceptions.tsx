@@ -37,6 +37,12 @@ const SAFETY_ACTION_LABEL: Record<DiningSafetyAction, string> = {
 }
 const SAFETY_ACTIONS = Object.keys(SAFETY_ACTION_LABEL) as DiningSafetyAction[]
 
+// 직접 처리해야 하는 유형은 메모 칸에서 할 일을 바로 알려준다.
+const NOTE_PLACEHOLDER: Partial<Record<DiningExceptionType, string>> = {
+  NOTIFICATION: '직접 안내한 내용 (필수)',
+  REFUND: '직접 환불한 내용 (필수)',
+}
+
 const CHIP_CLASS = 'shrink-0 rounded-full px-3 py-1 text-xs'
 const ACTION_CLASS =
   'rounded-input border px-3 py-1.5 text-xs font-medium disabled:border-tag-bg disabled:bg-transparent disabled:text-tag-text disabled:opacity-60'
@@ -46,12 +52,12 @@ interface VenueSelectProps {
   onChange: (venueId: string) => void
 }
 
-// 활성 식당만. 회차 식당 풀에 없는 식당이면 서버가 400으로 거절한다.
+// 활성 식당만. 이번 회차 식당에 없는 식당이면 서버가 400으로 거절한다.
 function VenueSelect({ value, onChange }: VenueSelectProps) {
   const { data: venues = [] } = useDiningVenues()
   return (
-    <label className="flex flex-col gap-1 text-xs text-tag-text">
-      배정할 식당 (회차 식당 풀에 있는 식당만)
+    <label className="flex flex-col gap-1 text-sm font-medium text-foreground">
+      배정할 식당
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -109,16 +115,12 @@ function ExceptionCaseActions({ caseId, type, tableId, hasApplication }: Excepti
   return (
     <div className="flex flex-col gap-2">
       {type === 'VENUE' && tableId && <VenueSelect value={venueId} onChange={setVenueId} />}
-      {type === 'NOTIFICATION' && (
-        <p className="text-xs text-tag-text">자동 재발송은 아직 지원되지 않아요. 직접 안내한 뒤 메모를 남겨 처리해주세요.</p>
-      )}
-      {type === 'REFUND' && <p className="text-xs text-tag-text">직접 환불한 뒤 메모를 남겨 처리해주세요.</p>}
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
         maxLength={2000}
         rows={2}
-        placeholder="처리 메모 (필수)"
+        placeholder={NOTE_PLACEHOLDER[type] ?? '처리 메모 (필수)'}
         aria-label="처리 메모"
         className="w-full resize-y rounded-input border border-tag-bg bg-card px-3 py-2 text-sm text-foreground placeholder:text-tag-text focus:outline-none focus:ring-2 focus:ring-primary"
       />
@@ -217,9 +219,9 @@ export default function AdminDiningExceptions() {
               />
             ) : (
               <div className="rounded-input bg-background px-3 py-2 text-sm text-foreground">
-                <p className="text-[11px] text-tag-text">
-                  {c.resolvedAt ? `${dayjs(c.resolvedAt).format('YY.MM.DD HH:mm')} 처리` : '처리됨'}
-                  {c.action && ` · 조치 ${SAFETY_ACTION_LABEL[c.action]}`}
+                <p className="flex flex-wrap gap-2 text-[11px] text-tag-text">
+                  <span>{c.resolvedAt ? `${dayjs(c.resolvedAt).format('YY.MM.DD HH:mm')} 처리` : '처리됨'}</span>
+                  {c.action && <span>{SAFETY_ACTION_LABEL[c.action]}</span>}
                 </p>
                 {c.resolutionNote && <p className="mt-1 whitespace-pre-wrap break-words">{c.resolutionNote}</p>}
               </div>

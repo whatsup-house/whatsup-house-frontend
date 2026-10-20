@@ -117,7 +117,7 @@ interface DiningTableBoardProps {
   sessionId: string
 }
 
-// 테이블 탭: 카드(상태·카운트다운·점수·잠금·멤버), 드래그/드롭다운 이동, 분리·병합·즉시 확정·해체, 미배정 목록 (KAN-352)
+// 테이블 탭: 카드(상태, 카운트다운, 점수, 잠금, 멤버), 드래그/드롭다운 이동, 분리/병합/즉시 확정/해체, 미배정 목록 (KAN-352)
 export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
   const { data, isLoading, isError, error, refetch, isFetching } = useDiningTables(sessionId)
   const adjust = useAdjustDiningTables(sessionId)
@@ -141,7 +141,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
     return <ApiErrorMessage message={getAdminApiErrorMessage(error, '테이블을 불러오지 못했어요.')} onRetry={() => refetch()} />
   }
 
-  const { tables, unassigned, lastRun } = data
+  const { tables, unassigned } = data
   const findTable = (id: string) => tables.find((t) => t.id === id)
 
   // 직전 조정 결과의 위반(200 validation 또는 400 TABLE_RULE_VIOLATION). 다음 조정 때 갱신된다.
@@ -258,9 +258,9 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
                 />
               )}
               <span className="font-semibold text-foreground">{m.nickname}</span>
-              <span>
-                {m.birthYear ? `${dayjs(now).year() - m.birthYear}세` : '-'}·{genderShort(m.gender)}·{m.mbti ?? '-'}
-              </span>
+              <span>{m.birthYear ? `${dayjs(now).year() - m.birthYear}세` : '-'}</span>
+              <span>{genderShort(m.gender)}</span>
+              <span>{m.mbti ?? '-'}</span>
               {m.isManual && <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-white">수동</span>}
               {adjustable && !isSplitting && moveTargets.length > 0 && (
                 <select
@@ -342,16 +342,10 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-sm text-tag-text">
-          <p>
-            테이블 {tables.length}개 · 미배정 {unassigned.length}명
-            {isFetching && <span className="ml-2 text-xs">갱신 중…</span>}
-          </p>
-          {lastRun && (
-            <p className="text-xs">
-              마지막 실행 {dayjs(lastRun.startedAt).format('M/D HH:mm')} · 후보 {lastRun.candidateCount}명 → 테이블 {lastRun.tableCount}개
-            </p>
-          )}
+        <div className="flex flex-wrap items-center gap-3 text-sm text-tag-text">
+          <span>테이블 {tables.length}개</span>
+          <span>미배정 {unassigned.length}명</span>
+          {isFetching && <LoadingSpinner size="sm" />}
         </div>
         <button
           onClick={() => download.mutate('tables')}
@@ -364,13 +358,10 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
 
       {tables.length === 0 ? (
         <div className="bg-card rounded-card shadow-sm py-12 text-center text-sm text-tag-text">
-          아직 테이블이 없어요. 위의 &apos;지금 매칭 실행&apos;으로 테이블을 만들어보세요.
+          아직 테이블이 없어요. 위의 &apos;자동매칭&apos;을 눌러 테이블을 만들어보세요.
         </div>
       ) : (
-        <>
-          <p className="text-xs text-tag-text">멤버를 다른 카드로 끌어다 놓거나, 칩의 &apos;이동&apos;에서 테이블을 골라 옮겨요.</p>
-          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{tables.map(renderCard)}</ul>
-        </>
+        <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{tables.map(renderCard)}</ul>
       )}
 
       {unassigned.length > 0 && (
@@ -378,8 +369,9 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
           <h3 className="mb-2 text-sm font-bold text-foreground">미배정 {unassigned.length}명</h3>
           <ul className="flex flex-wrap gap-1.5">
             {unassigned.map((u) => (
-              <li key={u.applicationId} className="rounded-full bg-tag-bg px-2.5 py-1 text-xs text-tag-text">
-                <span className="font-semibold text-foreground">{u.nickname}</span> · {UNASSIGNED_REASON_LABEL[u.reason] ?? u.reason}
+              <li key={u.applicationId} className="flex items-center gap-1.5 rounded-full bg-tag-bg px-2.5 py-1 text-xs text-tag-text">
+                <span className="font-semibold text-foreground">{u.nickname}</span>
+                <span>{UNASSIGNED_REASON_LABEL[u.reason] ?? u.reason}</span>
               </li>
             ))}
           </ul>

@@ -90,7 +90,7 @@ function VenueFormModal({ editing, regions, onClose }: VenueFormModalProps) {
             <Input label="지도 링크" placeholder="https://naver.me/..." error={errors.mapUrl?.message} {...register('mapUrl')} />
             <label className="flex items-center gap-2 text-sm font-medium text-foreground">
               <input type="checkbox" className="h-4 w-4 accent-primary" {...register('isActive')} />
-              활성 (비활성 식당은 새로 배정할 수 없어요)
+              사용 중
             </label>
           </div>
 
@@ -112,7 +112,7 @@ type ModalState = { venueId: string; values: DiningVenueRequest } | 'new' | null
 
 const toEditing = ({ id, ...values }: DiningVenue) => ({ venueId: id, values })
 
-// 식당 풀 CRUD + 지역 필터 (KAN-353)
+// 우연한 식탁 식당 CRUD + 지역 필터. 장소 관리의 식당 탭에 있다 (KAN-353, KAN-429)
 export default function DiningVenuePool() {
   const venuesQuery = useDiningVenues()
   const deleteVenue = useDeleteDiningVenue()
@@ -127,7 +127,7 @@ export default function DiningVenuePool() {
   const filtered = activeRegion ? venues.filter((v) => v.region === activeRegion) : venues
 
   const handleDelete = (venue: DiningVenue) => {
-    if (confirm(`"${venue.name}" 식당을 삭제할까요? 이미 배정된 회차·테이블은 그대로 두고 새 배정만 막아요.`)) {
+    if (confirm(`"${venue.name}" 식당을 삭제할까요?\n이미 배정된 테이블은 그대로 두고 새로 고를 수만 없게 돼요.`)) {
       deleteVenue.mutate(venue.id)
     }
   }
@@ -147,7 +147,7 @@ export default function DiningVenuePool() {
       />
     )
   } else if (filtered.length === 0) {
-    content = <p className="p-10 text-center text-sm text-tag-text">등록된 식당이 없어요.</p>
+    content = <p className="p-10 text-center text-sm text-tag-text">등록된 식당이 없어요</p>
   } else {
     content = (
       <ul className="divide-y divide-tag-bg">
@@ -156,25 +156,20 @@ export default function DiningVenuePool() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="break-all text-sm font-semibold text-foreground">{v.name}</p>
-                <span className="rounded-full bg-tag-bg px-2 py-0.5 text-[11px] text-tag-text">{v.region}</span>
+                <span className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">{v.region}</span>
+                {v.priceRange && <span className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">{v.priceRange}</span>}
                 {!v.isActive && (
-                  <span className="rounded-full border border-tag-bg px-2 py-0.5 text-[11px] text-tag-text">비활성</span>
+                  <span className="rounded-full border border-tag-bg px-2 py-0.5 text-xs text-tag-text">사용 안 함</span>
                 )}
               </div>
-              <p className="mt-1 break-words text-xs text-tag-text">
-                {v.address}
-                {v.priceRange && ` · ${v.priceRange}`}
-              </p>
-              {v.mapUrl && (
-                <a
-                  href={v.mapUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 inline-block text-xs text-primary hover:underline"
-                >
-                  지도 보기
-                </a>
-              )}
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                <span className="break-words text-tag-text">{v.address}</span>
+                {v.mapUrl && (
+                  <a href={v.mapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    지도
+                  </a>
+                )}
+              </div>
             </div>
             <div className="flex shrink-0 gap-3 text-sm">
               <button type="button" onClick={() => setModal(toEditing(v))} className="text-primary hover:underline">
@@ -198,7 +193,7 @@ export default function DiningVenuePool() {
   return (
     <section className="rounded-card bg-card p-4 shadow-sm sm:p-5">
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-base font-bold text-foreground">식당 풀 {venues.length > 0 && `${venues.length}곳`}</h2>
+        <h2 className="text-base font-bold text-foreground">식당 {venues.length > 0 && `${venues.length}곳`}</h2>
         <div className="flex gap-2">
           <select
             value={activeRegion}

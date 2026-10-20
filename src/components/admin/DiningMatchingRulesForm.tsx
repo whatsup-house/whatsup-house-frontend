@@ -82,22 +82,18 @@ function MatchingRulesFields({ defaultValues }: MatchingRulesFieldsProps) {
           error={errors.tableSizeMax?.message}
           {...register('tableSizeMax', { valueAsNumber: true })}
         />
-        <div>
-          <Input
-            label="자동 확정 유예 (분)"
-            type="number"
-            min={0}
-            max={10080}
-            error={errors.autoConfirmGraceMinutes?.message}
-            {...register('autoConfirmGraceMinutes', { valueAsNumber: true })}
-          />
-          <p className="mt-1 text-xs text-tag-text">0이면 제안 즉시 확정해요.</p>
-        </div>
+        <Input
+          label="자동 확정까지 (분)"
+          type="number"
+          min={0}
+          max={10080}
+          error={errors.autoConfirmGraceMinutes?.message}
+          {...register('autoConfirmGraceMinutes', { valueAsNumber: true })}
+        />
       </div>
 
       <fieldset className="rounded-input border border-tag-bg p-3">
         <legend className="px-1 text-sm font-medium text-foreground">항목별 가중치 (0~10)</legend>
-        <p className="mb-2 px-1 text-xs text-tag-text">점수는 더 잘 맞는 조합을 고를 때만 쓰여요. 점수가 낮아도 테이블은 해체되지 않아요.</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {WEIGHT_FIELDS.map(({ key, label }) => (
             <Input
@@ -146,8 +142,7 @@ export default function DiningMatchingRulesForm() {
 
   return (
     <section className="rounded-card bg-card p-4 shadow-sm sm:p-5">
-      <h2 className="text-base font-bold text-foreground">매칭 규칙 기본값</h2>
-      <p className="mb-4 mt-1 text-xs text-tag-text">회차에 따로 정한 값이 없을 때 이 값으로 매칭해요.</p>
+      <h2 className="mb-4 text-base font-bold text-foreground">매칭 규칙 기본값</h2>
       {content}
     </section>
   )

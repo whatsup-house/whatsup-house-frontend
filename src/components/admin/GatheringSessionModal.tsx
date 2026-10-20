@@ -268,30 +268,21 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
             />
           </div>
 
-          <div>
-            <Input label="신청 마감" type="datetime-local" {...register('applyDeadlineAt')} />
-            <p className="text-xs text-tag-text mt-1">비우면 마감 없이 받아요.</p>
-          </div>
+          <Input label="신청 마감" type="datetime-local" {...register('applyDeadlineAt')} />
 
           {isDining && (
             <div className="rounded-input border border-tag-bg p-3 flex flex-col gap-3">
               <p className="text-sm font-bold text-foreground">매칭</p>
-              <div>
-                <Input label="매칭 실행 시각 *" type="datetime-local" error={errors.matchRunAt?.message} {...register('matchRunAt')} />
-                <p className="text-xs text-tag-text mt-1">이 시각에 모집을 마감하고 테이블을 자동으로 짜요.</p>
-              </div>
-              <div>
-                <Input
-                  label="자동 확정 유예 (분)"
-                  type="number"
-                  min={0}
-                  max={10080}
-                  placeholder="비우면 기본값"
-                  error={errors.autoConfirmGraceMinutes?.message}
-                  {...register('autoConfirmGraceMinutes', { setValueAs: toNullableNumber })}
-                />
-                <p className="text-xs text-tag-text mt-1">테이블을 제안하고 이 시간이 지나면 자동 확정해요. 0이면 바로 확정해요.</p>
-              </div>
+              <Input label="자동매칭 시각 *" type="datetime-local" error={errors.matchRunAt?.message} {...register('matchRunAt')} />
+              <Input
+                label="자동 확정까지 (분)"
+                type="number"
+                min={0}
+                max={10080}
+                placeholder="비우면 기본값"
+                error={errors.autoConfirmGraceMinutes?.message}
+                {...register('autoConfirmGraceMinutes', { setValueAs: toNullableNumber })}
+              />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
                   label="테이블 최소 인원 *"
@@ -322,14 +313,10 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
             </div>
           )}
 
-          {isDining && (
+          {/* 수정할 때는 회차 콘솔의 '식당과 단체방' 탭에서 지금 고른 식당을 보며 바꾼다. */}
+          {isDining && !editing && (
             <div className="rounded-input border border-tag-bg p-3 flex flex-col gap-2">
-              <p className="text-sm font-bold text-foreground">식당 풀</p>
-              <p className="text-xs text-tag-text">
-                {editing
-                  ? '고르면 기존 식당 풀을 이 목록으로 바꿔요. 아무것도 고르지 않으면 그대로 둬요.'
-                  : '확정된 테이블에 고른 식당을 수용 테이블 수만큼 차례로 배정해요.'}
-              </p>
+              <p className="text-sm font-bold text-foreground">이번 회차 식당</p>
               <DiningVenuePoolPicker pool={pool} onChange={setPool} />
             </div>
           )}
@@ -349,12 +336,7 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
                     error={errors.until?.message}
                     {...register('until')}
                   />
-                  {repeatCount > 0 && (
-                    <p className="text-xs text-tag-text">
-                      같은 요일·시간으로 {repeatCount}개 회차를 만들어요. 신청 마감{isDining && '·매칭 실행 시각'}도 한 주씩 밀려요.
-                      {isDining && ' 식당 풀은 모든 회차에 똑같이 들어가요.'}
-                    </p>
-                  )}
+                  {repeatCount > 0 && <p className="text-sm text-foreground">회차 {repeatCount}개가 만들어져요</p>}
                 </>
               )}
             </div>

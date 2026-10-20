@@ -53,7 +53,7 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
     await expect(tileValue(page, '결제 완료')).toHaveText('12명')
     await expect(tileValue(page, '열린 예외')).toHaveText('1건')
     await expect(page.getByRole('heading', { name: '다가오는 회차 2개' })).toBeVisible()
-    const sessionCard = page.getByRole('link', { name: new RegExp(`성수 · ${DINING_TITLE}`) })
+    const sessionCard = page.getByRole('link', { name: new RegExp(`성수\\s*${DINING_TITLE}`) })
     await expect(sessionCard).toContainText('12/12명')
     await expect(sessionCard).toContainText('실행 예정')
     await captureFullPage(page, 'e2e/screenshots/admin/dining-01-dashboard.png')
@@ -62,19 +62,20 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
     await sessionCard.click()
     await expect(page).toHaveURL(CONSOLE_PATH)
     await expect(page.getByRole('heading', { name: DINING_TITLE })).toBeVisible()
-    await expect(page.getByText('신청 12명 · 결제 미완료 0명')).toBeVisible()
+    await expect(page.getByText('신청 12명')).toBeVisible()
+    await expect(page.getByText('결제 미완료 0명')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/admin/dining-02-console-applicants.png')
 
-    // 3. 지금 매칭 실행 (confirm 수락) → 결과 토스트
+    // 3. 자동매칭 (confirm 수락) → 결과 토스트
     const runRequest = waitForApi(page, 'POST', `/api/admin/dining/sessions/${DINING_SESSION_ID}/match-runs`)
-    await page.getByRole('button', { name: '지금 매칭 실행' }).click()
+    await page.getByRole('button', { name: '자동매칭', exact: true }).click()
     await runRequest
     await expect(page.getByText('매칭 완료: 후보 12명 → 테이블 2개, 미배정 1명')).toBeVisible()
-    await expect(page.getByRole('button', { name: '다시 실행' })).toBeVisible()
+    await expect(page.getByRole('button', { name: '자동매칭 다시 하기' })).toBeVisible()
 
     // 4. 테이블 탭 — 제안 카드 2개 + 미배정 1명(사유)
     await page.getByRole('button', { name: '테이블', exact: true }).click()
-    await expect(page.getByText('테이블 2개 · 미배정 1명')).toBeVisible()
+    await expect(page.getByText('테이블 2개', { exact: true })).toBeVisible()
     const cardA = tableCard(page, LABEL_A)
     const cardB = tableCard(page, LABEL_B)
     await expect(cardA.getByText('제안', { exact: true })).toBeVisible()
@@ -82,7 +83,7 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
     await expect(cardA).toContainText('분 후 확정')
     await expect(cardA).toContainText('78%')
     await expect(page.getByRole('heading', { name: '미배정 1명' })).toBeVisible()
-    await expect(page.getByText(`${UNASSIGNED_PARTICIPANT.nickname} · 나이 차 초과`)).toBeVisible()
+    await expect(page.getByRole('listitem').filter({ hasText: UNASSIGNED_PARTICIPANT.nickname })).toContainText('나이 차 초과')
     await captureFullPage(page, 'e2e/screenshots/admin/dining-03-tables-proposed.png')
 
     // 5. 멤버 이동 셀렉트 → move 요청 (A → B)
@@ -110,11 +111,14 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
     expect(confirmedIds).toHaveLength(2)
     await captureFullPage(page, 'e2e/screenshots/admin/dining-05-tables-confirmed.png')
 
-    // 7. 식당·단체방 탭 — 테이블 A 에 식당 배정
-    await page.getByRole('button', { name: '식당·단체방' }).click()
+    // 7. 식당과 단체방 탭 — 저장된 이번 회차 식당이 체크돼 있고, 테이블 A 에 식당 배정
+    await page.getByRole('button', { name: '식당과 단체방' }).click()
+    await expect(page.getByRole('checkbox', { name: new RegExp(VENUE_SOBAN.name) })).toBeChecked()
+    await expect(page.getByLabel(`${VENUE_SOBAN.name} 테이블 수`)).toHaveValue('2')
+    await expect(page.getByRole('button', { name: '식당 저장' })).toBeDisabled()
     const venueSelect = page.getByLabel(`${LABEL_A} 배정 식당`)
     await expect(venueSelect).toHaveValue('')
-    await expect(page.getByText('채팅방 생성됨')).toHaveCount(2)
+    await expect(page.getByRole('link', { name: '단체방 열기' })).toHaveCount(2)
     const venueRequest = waitForApi(page, 'PUT', `/api/admin/dining/tables/${DINING_TABLE_A_ID}/venue`)
     await venueSelect.selectOption(VENUE_SOBAN.id)
     expect((await venueRequest).postDataJSON()).toEqual({ venueId: VENUE_SOBAN.id })
@@ -122,12 +126,12 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
     await expect(venueSelect).toHaveValue(VENUE_SOBAN.id)
     await captureFullPage(page, 'e2e/screenshots/admin/dining-06-venue-assigned.png')
 
-    // 8. 참석·피드백 탭 — 체크인 현황 · 피드백 요약
-    await page.getByRole('button', { name: '참석·피드백' }).click()
+    // 8. 참석과 피드백 탭 — 체크인 현황, 피드백 요약
+    await page.getByRole('button', { name: '참석과 피드백' }).click()
     await expect(page.getByText('체크인 10/11명')).toBeVisible()
     await expect(page.getByRole('button', { name: '노쇼 확정' })).toHaveCount(1)
     await expect(page.getByText('82% (9/11)')).toBeVisible()
-    await expect(page.getByText('예 6 · 글쎄 2 · 아니오 1')).toBeVisible()
+    await expect(page.getByText('예 6, 글쎄 2, 아니오 1')).toBeVisible()
     await expect(page.getByText('1건', { exact: true })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/admin/dining-07-attendance-feedback.png')
   })
@@ -153,5 +157,18 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
     await expect(cardA).toContainText(haeun.nickname)
     await expect(cardB).not.toContainText(haeun.nickname)
     await captureFullPage(page, 'e2e/screenshots/admin/dining-08-move-violation.png')
+  })
+
+  test('테이블을 모두 해체하면 버튼이 다시 자동매칭으로 보인다', async ({ page }) => {
+    await setup(page, true)
+    await page.goto(CONSOLE_PATH)
+    await expect(page.getByRole('button', { name: '자동매칭 다시 하기' })).toBeVisible()
+
+    await page.getByRole('button', { name: '테이블', exact: true }).click()
+    await tableCard(page, LABEL_A).getByRole('button', { name: '해체' }).click()
+    await tableCard(page, LABEL_B).getByRole('button', { name: '해체' }).click()
+
+    await expect(page.getByRole('button', { name: '자동매칭', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: '자동매칭 다시 하기' })).toHaveCount(0)
   })
 })
