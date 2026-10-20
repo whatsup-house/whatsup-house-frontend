@@ -16,6 +16,7 @@ export function usePendingDeposits() {
     queryKey: ['admin', 'deposits', 'pending'],
     queryFn: fetchPendingDeposits,
     staleTime: 1000 * 15,
+    refetchInterval: 10_000, // 자동 대사로 입금이 확인되면 새로고침 없이 반영 (KAN-417)
   })
 }
 
@@ -25,6 +26,7 @@ export function usePendingDepositCount() {
     queryKey: ['admin', 'deposits', 'count'],
     queryFn: fetchPendingDepositCount,
     staleTime: 1000 * 15,
+    refetchInterval: 10_000,
   })
 }
 

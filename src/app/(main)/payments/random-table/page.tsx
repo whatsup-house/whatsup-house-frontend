@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Check, Ticket } from 'lucide-react'
 import { Button, Card, LoadingSpinner } from '@/components/ui'
 import PaymentPendingPanel from '@/components/payment/PaymentPendingPanel'
-import DepositSimulatorCard from '@/components/payment/DepositSimulatorCard'
+import DemoDepositButton from '@/components/payment/DemoDepositButton'
 import PaymentPolicyNotice from '@/components/payment/PaymentPolicyNotice'
 import { useMyProfile } from '@/lib/hooks/useAuth'
 import { useMyApplicationDetail, useMyDiningApplications } from '@/lib/hooks/useApplications'
@@ -49,7 +49,7 @@ function PaymentContent() {
   const showToast = useToastStore((state) => state.show)
   const [selected, setSelected] = useState<string | null>(null)
   const [requestedPass, setRequestedPass] = useState<TicketPass | null>(null)
-  // 심사용 입금 시뮬레이터가 가리킬 결제 대기 건. 폴링으로 완료 화면으로 바뀌어도 카드가 끝까지 보이도록 한 번 잡으면 유지한다. (KAN-409)
+  // 심사용 모의 입금이 가리킬 결제 대기 건. 폴링으로 완료 화면으로 바뀌어도 운영자 화면 미리보기가 닫힐 때까지 보이도록 한 번 잡으면 유지한다. (KAN-409·417)
   const [demoTarget, setDemoTarget] = useState<{ applicationId?: string; passId?: string; amount: number } | null>(null)
 
   useEffect(() => {
@@ -105,6 +105,7 @@ function PaymentContent() {
     : isDepositFlow && deposit?.status === 'PENDING' && applicationId
       ? { applicationId, amount: deposit.amount }
       : null
+  const demoSession = diningApplication?.assignedSession ?? diningApplication?.candidateSessions[0]
   if (pendingDemoTarget && (demoTarget?.passId !== pendingDemoTarget.passId || demoTarget?.applicationId !== pendingDemoTarget.applicationId || demoTarget?.amount !== pendingDemoTarget.amount)) {
     setDemoTarget(pendingDemoTarget)
   }
@@ -273,9 +274,14 @@ function PaymentContent() {
         </>
       )}
       {profile?.isDemo && demoTarget && (
-        <div className="mt-4">
-          <DepositSimulatorCard amount={demoTarget.amount} applicationId={demoTarget.applicationId} passId={demoTarget.passId} isSettled={pendingDemoTarget === null} />
-        </div>
+        <DemoDepositButton
+          amount={demoTarget.amount}
+          applicationId={demoTarget.applicationId}
+          passId={demoTarget.passId}
+          isSettled={pendingDemoTarget === null}
+          session={{ eventDate: demoSession?.eventDate ?? memberApplicationDetail.data?.gathering.eventDate ?? null, region: demoSession?.region ?? null }}
+          appliedAt={memberApplicationDetail.data?.createdAt}
+        />
       )}
       {returnUrl && (
         <Button variant="outlined" size="lg" className="w-full mt-3" onClick={() => router.push(safeReturnUrl(returnUrl))}>

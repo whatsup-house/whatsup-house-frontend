@@ -2,13 +2,15 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { adminGatheringApi, AdminGatheringListItem, ApplicationStatus } from '@/lib/api/adminGathering'
+import { adminGatheringApi, AdminGatheringListItem, AdminApplicationItem, ApplicationStatus } from '@/lib/api/adminGathering'
 import { useAdminApplications, useUpdateApplicationStatus, useUpdatePaymentStatus, useDeleteApplication } from '@/lib/hooks/useAdminGathering'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight, Users, MapPin, Clock } from 'lucide-react'
+import { useJobLabel } from '@/lib/hooks/useJobLabel'
 import { useCalendarDots } from '@/lib/hooks/useGatherings'
 import { usePendingDeposits, usePendingDepositCount, useConfirmDeposit } from '@/lib/hooks/useAdminTicket'
+import ApplicantCard, { MemberBadge, StatusBadge } from '@/components/admin/ApplicantCard'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -148,10 +150,13 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
         }
       `}
     >
-      {/* 상태 뱃지 */}
+      {/* 상태 뱃지 (+ 심사용 숨김 회차 표시, KAN-417) */}
       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLE[gathering.status] ?? ''}`}>
         {STATUS_LABEL[gathering.status] ?? gathering.status}
       </span>
+      {gathering.hidden && (
+        <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-tag-bg text-tag-text">심사용</span>
+      )}
 
       {/* 제목 */}
       <p className="font-bold text-[14px] text-[#1A1A1A] mt-2 mb-3 line-clamp-2 leading-snug">
@@ -187,22 +192,6 @@ function GatheringCard({ gathering, isSelected, onClick }: GatheringCardProps) {
   )
 }
 
-const APP_STATUS_LABEL: Record<string, string> = {
-  PENDING: '대기',
-  PAYMENT_PENDING: '입금확인중',
-  CONFIRMED: '확정',
-  ATTENDED: '출석',
-  REJECTED: '반려',
-  CANCELLED: '취소',
-}
-const APP_STATUS_STYLE: Record<string, string> = {
-  PENDING: 'bg-[#F5F5F5] text-[#767676]',
-  PAYMENT_PENDING: 'bg-[#FFF3E0] text-[#EF6C00]',
-  CONFIRMED: 'bg-[#E3F2FD] text-[#1976D2]',
-  ATTENDED: 'bg-[#E8F5E9] text-[#4CAF50]',
-  REJECTED: 'bg-[#FEF3F3] text-red-500',
-  CANCELLED: 'bg-[#F5F5F5] text-[#767676]',
-}
 const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
   PENDING: 'CONFIRMED',
   CONFIRMED: 'ATTENDED',
@@ -211,6 +200,7 @@ const NEXT_APP_STATUS: Record<string, ApplicationStatus | undefined> = {
 // ─── 참가자 테이블 ──────────────────────────────────────────────────────
 function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   const { data: participants = [], isLoading } = useAdminApplications(gatheringId)
+  const jobLabel = useJobLabel()
   const { mutate: changeStatus } = useUpdateApplicationStatus(gatheringId)
   const { mutate: changePayment } = useUpdatePaymentStatus(gatheringId)
   const { mutate: deleteApplication, isPending: isDeleting, variables: deletingId } = useDeleteApplication(gatheringId)
@@ -231,9 +221,75 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
   const confirmedCount = participants.filter((p) => p.status === 'CONFIRMED').length
   const attendedCount = participants.filter((p) => p.status === 'ATTENDED').length
 
+  const genderLabel = (g: string | null) => (g === 'MALE' ? '남' : g === 'FEMALE' ? '여' : null)
+
+  // 입금 상태: 라벨/색 + 체크박스(선확정 후입금) 노출 여부. 카드와 테이블이 같이 쓴다.
+  const getPayment = (p: AdminApplicationItem) => {
+    const confirmed = p.status === 'CONFIRMED' || p.status === 'ATTENDED'
+    if (p.free || (p.gatheringType !== 'RANDOM_TABLE' && !p.paid)) {
+      return { label: '무료', cls: 'bg-[#F5F5F5] text-[#767676]', toggleable: false }
+    }
+    if (p.gatheringType === 'RANDOM_TABLE') {
+      return confirmed
+        ? { label: '이용권 처리', cls: 'bg-[#E8F5E9] text-[#4CAF50]', toggleable: false }
+        : { label: '이용권 확인중', cls: 'bg-[#FDECEA] text-[#C8392B]', toggleable: false }
+    }
+    // 선확정 후입금: 확정(또는 출석)된 신청만 입금을 받으므로 그때만 체크박스를 노출한다. (KAN-243)
+    if (confirmed) {
+      return p.paymentConfirmed
+        ? { label: '입금 완료', cls: 'bg-[#E8F5E9] text-[#4CAF50]', toggleable: true }
+        : { label: '입금 확인 중', cls: 'bg-[#FFF3E0] text-[#EF6C00]', toggleable: true }
+    }
+    return { label: '확정 후 입금', cls: 'bg-[#F5F5F5] text-[#767676]', toggleable: false }
+  }
+
+  // 액션 버튼들: 모바일(md 미만)은 탭 영역 40px 이상, md 이상은 기존처럼 작은 텍스트 링크.
+  const statusButton = (p: AdminApplicationItem) => {
+    const nextStatus = NEXT_APP_STATUS[p.status]
+    if (!nextStatus) return null
+    return (
+      <button
+        onClick={() => changeStatus({ id: p.id, status: nextStatus })}
+        className="min-h-10 px-4 rounded-full bg-[#FDECEA] text-[#C8392B] text-[13px] font-medium md:min-h-0 md:px-0 md:bg-transparent md:text-xs md:text-primary md:hover:underline"
+      >
+        {nextStatus === 'CONFIRMED' ? '확정' : '출석'}
+      </button>
+    )
+  }
+
+  const paymentToggle = (p: AdminApplicationItem) => (
+    <label className="inline-flex min-h-10 items-center gap-2 px-3 rounded-full bg-[#F5F0EB] cursor-pointer select-none md:min-h-0 md:px-0 md:bg-transparent md:gap-1.5">
+      <input
+        type="checkbox"
+        checked={p.paymentConfirmed}
+        onChange={(e) => changePayment({ id: p.id, confirmed: e.target.checked })}
+        className="w-5 h-5 md:w-4 md:h-4 accent-[#C8392B] cursor-pointer"
+      />
+      <span className={`text-[13px] md:text-xs font-medium ${p.paymentConfirmed ? 'text-[#4CAF50]' : 'text-[#767676]'}`}>
+        {p.paymentConfirmed ? '입금 완료' : '입금 확인'}
+      </span>
+    </label>
+  )
+
+  const rejectControl = (p: AdminApplicationItem) => {
+    if (p.status === 'ATTENDED') return <span className="text-[12px] text-[#BBBBBB]">반려 불가</span>
+    if (isDeleting && deletingId === p.id) return <span className="text-[12px] text-[#767676]">삭제 중…</span>
+    return (
+      <button
+        onClick={() => {
+          if (confirm('이 신청을 반려하시겠습니까?')) deleteApplication(p.id)
+        }}
+        disabled={isDeleting}
+        className="min-h-10 px-4 rounded-full bg-[#FEF3F3] text-red-500 text-[13px] font-medium md:min-h-0 md:px-0 md:bg-transparent md:hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        반려
+      </button>
+    )
+  }
+
   return (
-    <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-x-auto">
-      <div className="min-w-[1080px] px-4 py-3 border-b border-tag-bg flex items-center gap-3">
+    <div className="bg-white rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.08)] overflow-hidden">
+      <div className="px-4 py-3 border-b border-tag-bg flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <span className="text-sm font-bold text-[#1A1A1A]">총 {participants.length}명 신청</span>
         {confirmedCount > 0 && (
           <span className="px-2 py-0.5 bg-[#E3F2FD] text-[#1976D2] rounded-full text-xs font-medium">
@@ -246,102 +302,77 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
           </span>
         )}
       </div>
-      <table className="w-full min-w-[1080px]">
+
+      {/* 모바일: 카드 */}
+      <ul className="md:hidden divide-y divide-[#F0EBE8]">
+        {participants.map((p) => {
+          const payment = getPayment(p)
+          const info = [genderLabel(p.gender), p.age != null ? `${p.age}세` : null, p.mbti, jobLabel(p.job)].filter((v): v is string => Boolean(v))
+          return (
+            <ApplicantCard
+              key={p.id}
+              name={p.name}
+              isGuest={p.isGuest}
+              status={p.status}
+              paymentLabel={payment.label}
+              paymentClassName={payment.cls}
+              info={info}
+              phone={p.phone}
+              createdAt={p.createdAt}
+              actions={<>
+                {statusButton(p)}
+                {payment.toggleable && paymentToggle(p)}
+                <span className="ml-auto">{rejectControl(p)}</span>
+              </>}
+            />
+          )
+        })}
+      </ul>
+
+      {/* md 이상: 테이블 (가로 스크롤 없이 줄바꿈으로 맞춘다) */}
+      <table className="hidden md:table w-full">
         <thead>
-          <tr className="bg-[#F5F5F5] text-xs text-[#767676] uppercase">
-            {['예약번호', '이름', '구분', '성별', '나이', '직업', 'MBTI', '연락처', '신청일시', '상태', '입금', '삭제'].map((col) => (
-              <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
+          <tr className="bg-[#F5F5F5] text-xs text-[#767676]">
+            {['이름', '성별/나이', '직업', 'MBTI', '연락처', '상태', '입금', '반려'].map((col) => (
+              <th key={col} className="px-3 py-3 text-left font-medium">{col}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {participants.map((p) => {
-            const nextStatus = NEXT_APP_STATUS[p.status]
+            const payment = getPayment(p)
+            const gender = genderLabel(p.gender)
             return (
-              <tr key={p.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors">
-                <td className="px-4 py-3 text-[12px] text-[#767676] whitespace-nowrap">{p.bookingNumber ?? '-'}</td>
-                <td className="px-4 py-3 font-medium text-[14px]">{p.name}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${p.isGuest ? 'bg-[#FFF3E0] text-[#FF9800]' : 'bg-[#E3F2FD] text-[#1976D2]'}`}>
-                    {p.isGuest ? '비회원' : '회원'}
-                  </span>
+              <tr key={p.id} className="border-t border-[#F0EBE8] hover:bg-[#F5F0EB] transition-colors align-top">
+                <td className="px-3 py-3">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    <span className="font-medium text-[14px] break-words">{p.name}</span>
+                    <MemberBadge isGuest={p.isGuest} />
+                  </div>
+                  <p className="mt-0.5 text-[12px] text-[#767676] whitespace-nowrap">{dayjs(p.createdAt).format('M/D HH:mm')}</p>
                 </td>
-                <td className="px-4 py-3 text-[13px] text-[#767676]">
-                  {p.gender === 'MALE' ? '남' : p.gender === 'FEMALE' ? '여' : '-'}
+                <td className="px-3 py-3 text-[13px] text-[#767676] whitespace-nowrap">
+                  {gender || p.age != null ? `${gender ?? '-'} / ${p.age ?? '-'}` : '-'}
                 </td>
-                <td className="px-4 py-3 text-[13px] text-[#767676]">{p.age ?? '-'}</td>
-                <td className="px-4 py-3 text-[13px] text-[#767676]">{p.job ?? '-'}</td>
-                <td className="px-4 py-3">
+                <td className="px-3 py-3 text-[13px] text-[#767676] break-words">{jobLabel(p.job) ?? '-'}</td>
+                <td className="px-3 py-3">
                   {p.mbti ? (
                     <span className="px-2 py-0.5 bg-[#F0EBE8] text-[#5C4033] rounded-full text-xs">{p.mbti}</span>
                   ) : <span className="text-[13px] text-[#767676]">-</span>}
                 </td>
-                <td className="px-4 py-3 text-[13px] text-[#767676]">{p.phone ?? '-'}</td>
-                <td className="px-4 py-3 text-[12px] text-[#767676] whitespace-nowrap">
-                  {dayjs(p.createdAt).format('M/D HH:mm')}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${APP_STATUS_STYLE[p.status] ?? ''}`}>
-                      {APP_STATUS_LABEL[p.status] ?? p.status}
-                    </span>
-                    {nextStatus && (
-                      <button
-                        onClick={() => changeStatus({ id: p.id, status: nextStatus })}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        {nextStatus === 'CONFIRMED' ? '확정' : '출석'}
-                      </button>
-                    )}
+                <td className="px-3 py-3 text-[13px] text-[#767676] break-all">{p.phone ?? '-'}</td>
+                <td className="px-3 py-3">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <StatusBadge status={p.status} />
+                    {statusButton(p)}
                   </div>
                 </td>
-                <td className="px-4 py-3">
-                  {p.free ? (
-                    <span className="text-[12px] text-[#BBBBBB]">무료</span>
-                  ) : p.gatheringType === 'RANDOM_TABLE' ? (
-                    <span className={`text-xs font-medium ${
-                      p.status === 'CONFIRMED' || p.status === 'ATTENDED'
-                        ? 'text-[#4CAF50]'
-                        : 'text-[#C8392B]'
-                    }`}>
-                      {p.status === 'CONFIRMED' || p.status === 'ATTENDED' ? '이용권 처리' : '이용권 확인중'}
-                    </span>
-                  ) : !p.paid ? (
-                    <span className="text-[12px] text-[#BBBBBB]">무료</span>
-                  ) : p.status === 'CONFIRMED' || p.status === 'ATTENDED' ? (
-                    // 선확정 후입금: 확정(또는 출석)된 신청만 입금을 받으므로 그때만 체크박스를 노출한다. (KAN-243)
-                    <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={p.paymentConfirmed}
-                        onChange={(e) => changePayment({ id: p.id, confirmed: e.target.checked })}
-                        className="w-4 h-4 accent-[#C8392B] cursor-pointer"
-                      />
-                      <span className={`text-xs font-medium ${p.paymentConfirmed ? 'text-[#4CAF50]' : 'text-[#767676]'}`}>
-                        {p.paymentConfirmed ? '완료' : '확인 중'}
-                      </span>
-                    </label>
-                  ) : (
-                    <span className="text-[12px] text-[#BBBBBB]">확정 후</span>
+                <td className="px-3 py-3">
+                  {payment.toggleable ? paymentToggle(p) : (
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${payment.cls}`}>{payment.label}</span>
                   )}
                 </td>
-                <td className="px-4 py-3">
-                  {p.status === 'ATTENDED' ? (
-                    <span className="text-[12px] text-[#BBBBBB]">반려 불가</span>
-                  ) : isDeleting && deletingId === p.id ? (
-                    <span className="text-[12px] text-[#767676]">삭제 중…</span>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        if (confirm('이 신청을 반려하시겠습니까?')) deleteApplication(p.id)
-                      }}
-                      disabled={isDeleting}
-                      className="text-red-500 text-[13px] hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      반려
-                    </button>
-                  )}
-                </td>
+                <td className="px-3 py-3">{rejectControl(p)}</td>
               </tr>
             )
           })}
@@ -373,38 +404,70 @@ function DepositQueue() {
     )
   }
 
+  const handleConfirm = (ticketPassId: string, applicantName: string) => {
+    if (confirm(`${applicantName}님의 입금을 확인하고 이용권을 발급할까요?`)) {
+      confirmDeposit(ticketPassId)
+    }
+  }
+
   return (
-    <div className="bg-white rounded-[12px] overflow-x-auto shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
-      <table className="w-full text-sm">
+    <div className="bg-white rounded-[12px] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+      {/* 모바일: 카드 */}
+      <ul className="md:hidden divide-y divide-[#F0EDE8]">
+        {deposits.map((d) => (
+          <li key={d.ticketPassId} className="px-4 py-4 flex flex-col gap-2">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="font-bold text-[16px] text-[#1A1A1A] break-words">{d.applicantName}</span>
+                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full ${d.member ? 'bg-[#E8F5E9] text-[#4CAF50]' : 'bg-[#F5F0EB] text-[#767676]'}`}>
+                  {d.member ? '회원' : '비회원'}
+                </span>
+              </div>
+              <span className="shrink-0 text-[16px] font-bold text-[#C8392B]">{d.amount.toLocaleString()}원</span>
+            </div>
+            <p className="text-[14px] text-[#444444] break-words">
+              {d.productLabel}{d.gatheringTitle ? ` · ${d.gatheringTitle}` : ''}
+            </p>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[12px] text-[#767676]">{dayjs(d.requestedAt).format('M/D HH:mm')} 요청</span>
+              <button
+                disabled={isPending}
+                onClick={() => handleConfirm(d.ticketPassId, d.applicantName)}
+                className="min-h-10 px-5 rounded-full bg-[#C8392B] text-white text-[13px] font-medium disabled:opacity-50"
+              >
+                입금확인
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* md 이상: 테이블 */}
+      <table className="hidden md:table w-full text-sm">
         <thead>
           <tr className="bg-[#F5F0EB] text-[#767676] text-left">
-            {['신청자', '구분', '게더링', '예약번호', '상품', '금액', '요청 시각', '입금확인'].map((col) => (
-              <th key={col} className="px-4 py-3 font-medium whitespace-nowrap">{col}</th>
+            {['신청자', '구분', '게더링', '상품', '금액', '요청 시각', '입금확인'].map((col) => (
+              <th key={col} className="px-3 py-3 font-medium">{col}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {deposits.map((d) => (
-            <tr key={d.ticketPassId} className="border-t border-[#F0EDE8]">
-              <td className="px-4 py-3 font-medium text-[#1A1A1A] whitespace-nowrap">{d.applicantName}</td>
-              <td className="px-4 py-3 whitespace-nowrap">
+            <tr key={d.ticketPassId} className="border-t border-[#F0EDE8] align-top">
+              <td className="px-3 py-3 font-medium text-[#1A1A1A] break-words">{d.applicantName}</td>
+              <td className="px-3 py-3 whitespace-nowrap">
                 <span className={`text-xs px-2 py-0.5 rounded-full ${d.member ? 'bg-[#E8F5E9] text-[#4CAF50]' : 'bg-[#F5F0EB] text-[#767676]'}`}>
                   {d.member ? '회원' : '비회원'}
                 </span>
               </td>
-              <td className="px-4 py-3 whitespace-nowrap">{d.gatheringTitle ?? '-'}</td>
-              <td className="px-4 py-3 whitespace-nowrap text-[#767676]">{d.bookingNumber ?? '-'}</td>
-              <td className="px-4 py-3 whitespace-nowrap">{d.productLabel}</td>
-              <td className="px-4 py-3 whitespace-nowrap">{d.amount.toLocaleString()}원</td>
-              <td className="px-4 py-3 whitespace-nowrap text-[#767676]">{dayjs(d.requestedAt).format('M/D HH:mm')}</td>
-              <td className="px-4 py-3 whitespace-nowrap">
+              <td className="px-3 py-3 break-words">{d.gatheringTitle ?? '-'}</td>
+              <td className="px-3 py-3 break-words">{d.productLabel}</td>
+              <td className="px-3 py-3 whitespace-nowrap">{d.amount.toLocaleString()}원</td>
+              <td className="px-3 py-3 whitespace-nowrap text-[#767676]">{dayjs(d.requestedAt).format('M/D HH:mm')}</td>
+              <td className="px-3 py-3 whitespace-nowrap">
                 <button
                   disabled={isPending}
-                  onClick={() => {
-                    if (confirm(`${d.applicantName}님의 입금을 확인하고 이용권을 발급할까요?`)) {
-                      confirmDeposit(d.ticketPassId)
-                    }
-                  }}
+                  onClick={() => handleConfirm(d.ticketPassId, d.applicantName)}
                   className="px-3 py-1.5 rounded-full bg-[#C8392B] text-white text-xs font-medium disabled:opacity-50"
                 >
                   입금확인
@@ -435,6 +498,7 @@ export default function AdminApplicationsPage() {
   const { data: dayGatherings = [], isLoading: isGatheringsLoading } = useQuery({
     queryKey: ['admin', 'gatherings-by-date', selectedDate],
     queryFn: () => adminGatheringApi.getAll(undefined, selectedDate),
+    refetchInterval: 10_000, // 신청자 수가 새 입금·신청을 따라가게 (KAN-417)
   })
 
   const handleSelectDate = (date: string) => {
@@ -536,6 +600,9 @@ export default function AdminApplicationsPage() {
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
             <h2 className="w-full sm:w-auto font-bold text-[16px] text-foreground">
               {selectedGathering?.title} — 참가자 목록
+              {selectedGathering?.hidden && (
+                <span className="ml-2 align-middle px-2 py-0.5 rounded-full text-xs font-medium bg-tag-bg text-tag-text">심사용</span>
+              )}
             </h2>
             <span className="px-3 py-1 bg-[#F5F0EB] rounded-full text-sm">
               정원 {selectedGathering?.capacity}명
