@@ -22,6 +22,12 @@ export const fetchDiningDashboard = async (): Promise<DiningDashboard> => {
   return response.data.data
 }
 
+// 회차 식당 목록. 삭제·비활성 식당도 남아 있으면 포함
+export const fetchSessionVenues = async (sessionId: string): Promise<SessionVenue[]> => {
+  const response = await apiClient.get<ApiResponse<SessionVenue[]>>(`/api/admin/dining/sessions/${sessionId}/venues`)
+  return response.data.data ?? []
+}
+
 // 회차 식당 풀을 목록으로 통째로 교체. 배정된 테이블보다 줄이면 409, 비활성 식당을 새로 넣으면 400
 export const updateSessionVenues = async (sessionId: string, venues: SessionVenueRequest[]): Promise<SessionVenue[]> => {
   const response = await apiClient.put<ApiResponse<SessionVenue[]>>(`/api/admin/dining/sessions/${sessionId}/venues`, venues)

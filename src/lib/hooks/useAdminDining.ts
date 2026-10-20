@@ -6,6 +6,7 @@ import {
   fetchDiningApplicantsCsv,
   fetchDiningAttendance,
   fetchDiningDashboard,
+  fetchSessionVenues,
   fetchDiningFeedbackSummary,
   fetchDiningTables,
   fetchDiningTablesCsv,
@@ -45,7 +46,7 @@ export function useUpdateSessionVenues() {
     mutationFn: ({ sessionIds, venues }: { sessionIds: string[]; venues: SessionVenueRequest[] }) =>
       Promise.all(sessionIds.map((id) => updateSessionVenues(id, venues))),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'dining'] }),
-    onError: (err: unknown) => showToast(getAdminApiErrorMessage(err, '식당 풀을 저장하지 못했어요.'), 'error'),
+    onError: (err: unknown) => showToast(getAdminApiErrorMessage(err, '식당을 저장하지 못했어요.'), 'error'),
   })
 }
 
@@ -60,6 +61,13 @@ function useInvalidateSession(sessionId: string) {
     queryClient.invalidateQueries({ queryKey: sessionKey(sessionId) })
     queryClient.invalidateQueries({ queryKey: ['admin', 'dining', 'dashboard'] })
   }
+}
+
+export function useSessionVenues(sessionId: string) {
+  return useQuery({
+    queryKey: [...sessionKey(sessionId), 'venues'],
+    queryFn: () => fetchSessionVenues(sessionId),
+  })
 }
 
 export function useDiningApplicants(sessionId: string) {
@@ -113,7 +121,7 @@ export function useRunDiningMatch(sessionId: string) {
         run.splitCount > 0 && `분리 ${run.splitCount}`,
         run.mergeCount > 0 && `병합 ${run.mergeCount}`,
         run.reallocatedCount > 0 && `재배치 ${run.reallocatedCount}명`,
-      ].filter(Boolean).join(' · ')
+      ].filter(Boolean).join(', ')
       showToast(
         `매칭 완료: 후보 ${run.candidateCount}명 → 테이블 ${run.tableCount}개, 미배정 ${run.unassignedCount}명${extras ? ` (${extras})` : ''}`,
       )
@@ -150,7 +158,7 @@ export function useConfirmDiningTablesNow(sessionId: string) {
       const parts = [`확정 ${confirmed}개`]
       if (held > 0) parts.push(`보류 ${held}개(규칙 위반, 예외함 확인)`)
       if (failed > 0) parts.push(`실패 ${failed}개`)
-      showToast(parts.join(' · '), held > 0 || failed > 0 ? 'error' : 'default')
+      showToast(parts.join(', '), held > 0 || failed > 0 ? 'error' : 'default')
     },
     onSettled: invalidate,
   })

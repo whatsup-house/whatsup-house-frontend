@@ -24,6 +24,8 @@ import type {
   GatheringForm,
   GatheringSession,
   MyTickets,
+  SessionVenue,
+  SessionVenueRequest,
 } from '@/lib/api/types'
 import { apiRes, mockAdminProfile, mockUserProfile } from './mocks'
 
@@ -500,6 +502,8 @@ export async function mockAdminDiningApis(page: Page, { matched = false }: Admin
   let tableList: DiningTableList = matched ? matchedTableList() : { tables: [], unassigned: [], lastRun: null }
   let exceptions: DiningExceptionCase[] = [mockVenueException]
   let rules = mockMatchingRules
+  // 이번 회차 식당: 성수 소반 2테이블로 시작
+  let sessionVenues: SessionVenue[] = [{ venue: VENUE_SOBAN, capacityTables: 2, usedTables: 0 }]
   const sessionPath = `/api/admin/dining/sessions/${DINING_SESSION_ID}`
   const updateTable = (id: string, update: (table: DiningAdminTable) => DiningAdminTable) => {
     tableList = { ...tableList, tables: tableList.tables.map((t) => (t.id === id ? update(t) : t)) }
@@ -525,6 +529,17 @@ export async function mockAdminDiningApis(page: Page, { matched = false }: Admin
     return route.fulfill({ json: apiRes(tableList.lastRun) })
   })
   await onApi(page, `${sessionPath}/tables`, (route) => route.fulfill({ json: apiRes(tableList) }))
+  await onApi(page, `${sessionPath}/venues`, (route) => {
+    if (route.request().method() === 'PUT') {
+      const body = route.request().postDataJSON() as SessionVenueRequest[]
+      sessionVenues = body.map(({ venueId, capacityTables }) => ({
+        venue: mockDiningVenues.find((v) => v.id === venueId)!,
+        capacityTables,
+        usedTables: tableList.tables.filter((t) => t.venueId === venueId).length,
+      }))
+    }
+    return route.fulfill({ json: apiRes(sessionVenues) })
+  })
   await onApi(page, `${sessionPath}/attendance`, (route) => route.fulfill({ json: apiRes(mockDiningAttendance) }))
   await onApi(page, `${sessionPath}/feedback-summary`, (route) => route.fulfill({ json: apiRes(mockDiningFeedbackSummary) }))
 
@@ -538,6 +553,12 @@ export async function mockAdminDiningApis(page: Page, { matched = false }: Admin
     const from = updateTable(fromId, (t) => ({ ...t, locked: true, members: t.members.filter((m) => m.memberId !== memberId) }))
     const to = updateTable(targetTableId, (t) => ({ ...t, locked: true, members: [...t.members, { ...member, assignReason: 'MANUAL', isManual: true }] }))
     return route.fulfill({ json: apiRes({ tables: [from, to], validation: { valid: true, violations: [] } }) })
+  })
+  // 해체된 테이블은 BE 목록에서 빠진다
+  await onApi(page, /^\/api\/admin\/dining\/tables\/[^/]+\/dissolve$/, (route) => {
+    const tableId = new URL(route.request().url()).pathname.split('/')[5]
+    tableList = { ...tableList, tables: tableList.tables.filter((t) => t.id !== tableId) }
+    return route.fulfill({ json: apiRes({ tables: [], validation: { valid: true, violations: [] } }) })
   })
   await onApi(page, /^\/api\/admin\/dining\/tables\/[^/]+\/confirm-now$/, (route) => {
     const tableId = new URL(route.request().url()).pathname.split('/')[5]

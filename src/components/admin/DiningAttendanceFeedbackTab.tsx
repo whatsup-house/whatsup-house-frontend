@@ -128,9 +128,9 @@ export default function DiningAttendanceFeedbackTab({ sessionId }: DiningAttenda
           <StatTile label="테이블 만족도" value={average(s.avgTable)} />
           <StatTile label="대화 만족도" value={average(s.avgTalk)} />
           <StatTile label="식당 만족도" value={average(s.avgVenue)} />
-          <StatTile label="재참여 의향" value={`예 ${s.rejoinYes} · 글쎄 ${s.rejoinMaybe} · 아니오 ${s.rejoinNo}`} />
+          <StatTile label="재참여 의향" value={`예 ${s.rejoinYes}, 글쎄 ${s.rejoinMaybe}, 아니오 ${s.rejoinNo}`} />
           <Link href="/admin/dining/exceptions" className="block hover:opacity-80">
-            <StatTile label="신고 (예외함에서 처리)" value={`${s.reportCount}건`} />
+            <StatTile label="신고" value={`${s.reportCount}건`} />
           </Link>
         </div>
         {s.byTable.length > 0 && (
