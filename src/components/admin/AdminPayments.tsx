@@ -6,13 +6,14 @@ import Link from 'next/link'
 import dayjs from 'dayjs'
 import { ApiErrorMessage, LoadingSpinner, Pagination } from '@/components/ui'
 import {
+  DEPOSIT_AMOUNT_MISMATCH,
   useDepositNotifications,
   useLinkDepositNotification,
   useMarkPayoutsSent,
   usePayouts,
   usePendingTargets,
 } from '@/lib/hooks/useAdminPayment'
-import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
+import { getAdminApiErrorMessage, getApiErrorCode } from '@/lib/utils/apiError'
 import type {
   DepositMatchResult,
   DepositNotification,
@@ -82,7 +83,7 @@ const targetKey = (t: PendingPaymentTarget) => `${t.type}:${t.targetId}`
 // 금액·이름이 입금 알림과 맞는 후보일수록 앞으로 (이름은 은행 표기가 잘리므로 접두 일치까지 인정)
 function matchScore(t: PendingPaymentTarget, item: DepositNotification) {
   const name = item.parsedName?.trim()
-  const nameMatch = !!name && (t.payerName.startsWith(name) || name.startsWith(t.payerName))
+  const nameMatch = !!name && !!t.payerName && (t.payerName.startsWith(name) || name.startsWith(t.payerName))
   return (item.parsedAmount === t.amount ? 1 : 0) + (nameMatch ? 1 : 0)
 }
 
@@ -134,7 +135,19 @@ function LinkForm({ item }: LinkFormProps) {
         disabled={!selected || link.isPending}
         onClick={() => {
           if (selected && confirm('이 입금을 해당 대상의 결제 완료로 처리할까요?')) {
-            link.mutate({ id: item.id, targetType: selected.type, targetId: selected.targetId })
+            const vars = { id: item.id, targetType: selected.type, targetId: selected.targetId }
+            link.mutate(vars, {
+              onError: (error) => {
+                if (
+                  getApiErrorCode(error) === DEPOSIT_AMOUNT_MISMATCH &&
+                  confirm(
+                    `입금액(${won(item.parsedAmount ?? 0)})과 선택한 결제 금액(${won(selected.amount)})이 달라요. 그래도 연결할까요?`,
+                  )
+                ) {
+                  link.mutate({ ...vars, force: true })
+                }
+              },
+            })
           }
         }}
         className="h-9 rounded-input border border-foreground bg-foreground px-3 text-xs font-medium text-white disabled:opacity-50"

@@ -1673,6 +1673,8 @@ export interface DepositNotificationPage {
 export interface DepositNotificationLinkRequest {
   targetType: PaymentTargetType
   targetId: string
+  // 입금액과 대상 금액이 달라도 연결 (DEPOSIT_AMOUNT_MISMATCH 409 확인 후에만)
+  force?: boolean
 }
 
 // GET /api/admin/payments/pending-targets — 수동 연결 후보(미결제 건)
