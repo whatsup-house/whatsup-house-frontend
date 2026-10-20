@@ -103,8 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="hidden lg:flex w-60 bg-foreground flex-col min-h-screen shrink-0">
         {/* 로고 */}
         <div className="px-5 py-6 border-b border-white/10">
-          <h1 className="text-sm font-bold text-white/60 uppercase tracking-widest">The Curator&apos;s</h1>
-          <h2 className="text-lg font-bold text-primary">House</h2>
+          <p className="text-lg font-bold text-white">관리자 페이지</p>
         </div>
 
         {/* 네비게이션 */}
@@ -116,10 +115,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* 모바일 상단바 + 드로어 */}
       <div className="lg:hidden fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-tag-bg bg-card px-4">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-tag-text">The Curator&apos;s</p>
-          <p className="text-sm font-bold text-primary leading-tight">House Admin</p>
-        </div>
+        <p className="text-base font-bold text-foreground">관리자 페이지</p>
         <div className="flex items-center gap-2">
           <NotificationBell pollInterval={ADMIN_NOTIFICATION_POLL_MS} />
           <button
@@ -138,10 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="absolute inset-0 bg-black/40" onClick={() => setIsDrawerOpen(false)} />
           <aside className="relative flex h-full w-[min(82vw,320px)] flex-col bg-foreground shadow-2xl">
             <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
-              <div>
-                <h1 className="text-sm font-bold text-white/60 uppercase tracking-widest">The Curator&apos;s</h1>
-                <h2 className="text-lg font-bold text-primary">House</h2>
-              </div>
+              <p className="text-lg font-bold text-white">관리자 페이지</p>
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(false)}

@@ -6,7 +6,7 @@ import ToastHost from '@/components/ui/ToastHost'
  * lg↑에서 풀블리드 배경 사진 + 좌측 브랜드 패널 + 둥근 모바일 카드(390:844 비율 고정, 최대 높이 932px(Pro Max 크기), 내부 스크롤)를 구성한다.
  * lg 미만(모바일/태블릿)에서는 기존 .mobile-layout 풀블리드 레이아웃 그대로다.
  *
- * 심사용 운영자 화면 미리보기가 열리면(html[data-admin-preview]) app-shell 이 왼쪽으로 비켜 준다. (KAN-417, globals.css)
+ * 심사용 운영자 화면 미리보기가 열리면(html[data-admin-preview]) 앱 프레임만 왼쪽으로 비켜 준다. 브랜드 패널은 그대로. (KAN-417·423, globals.css)
  * (main)·(auth) 그룹 레이아웃이 공통으로 사용한다. admin은 그룹 밖이라 셸이 적용되지 않는다.
  */
 export default function AppShell({ children }: { children: React.ReactNode }) {
