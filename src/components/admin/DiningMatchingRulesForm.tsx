@@ -23,7 +23,6 @@ const schema = z
     maxAgeGap: integer(0, 100),
     tableSizeMin: integer(2, 8),
     tableSizeMax: integer(2, 8),
-    minGroupScore: z.number({ error: '숫자를 입력해주세요' }).min(0, '0 이상이어야 합니다').max(1, '1 이하여야 합니다'),
     autoConfirmGraceMinutes: integer(0, 10080),
     weights: z.object({ gender: weight, mbti: weight, interests: weight, wantedStyle: weight, custom: weight }),
   })
@@ -53,8 +52,8 @@ function MatchingRulesFields({ defaultValues }: MatchingRulesFieldsProps) {
     defaultValues,
   })
 
-  // BE는 소수 4자리까지 받는다(Digits fraction=4).
-  const onSubmit = (v: FormValues) => mutate({ ...v, minGroupScore: Math.round(v.minGroupScore * 10000) / 10000 })
+  // 최소 그룹 점수는 BE가 더 이상 쓰지 않는다(KAN-420). 요청 형식만 맞추려고 불러온 값을 그대로 보낸다.
+  const onSubmit = (v: FormValues) => mutate({ ...v, minGroupScore: defaultValues.minGroupScore ?? 0 })
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -66,15 +65,6 @@ function MatchingRulesFields({ defaultValues }: MatchingRulesFieldsProps) {
           max={100}
           error={errors.maxAgeGap?.message}
           {...register('maxAgeGap', { valueAsNumber: true })}
-        />
-        <Input
-          label="최소 그룹 점수 (0~1)"
-          type="number"
-          min={0}
-          max={1}
-          step={0.01}
-          error={errors.minGroupScore?.message}
-          {...register('minGroupScore', { valueAsNumber: true })}
         />
         <Input
           label="테이블 최소 인원"
@@ -107,6 +97,7 @@ function MatchingRulesFields({ defaultValues }: MatchingRulesFieldsProps) {
 
       <fieldset className="rounded-input border border-tag-bg p-3">
         <legend className="px-1 text-sm font-medium text-foreground">항목별 가중치 (0~10)</legend>
+        <p className="mb-2 px-1 text-xs text-tag-text">점수는 더 잘 맞는 조합을 고를 때만 쓰여요. 점수가 낮아도 테이블은 해체되지 않아요.</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {WEIGHT_FIELDS.map(({ key, label }) => (
             <Input
