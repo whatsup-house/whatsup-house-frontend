@@ -1035,6 +1035,7 @@ export interface DiningDashboardSession {
   isMatchRunDone: boolean        // 테이블이 하나라도 만들어졌으면 true
   tableCount: number             // 제안 중 + 확정
   openExceptionCount: number
+  hidden?: boolean               // 심사용 숨김 회차 (BE KAN-416). 요약 타일 집계엔 빠진다
 }
 
 // GET /api/admin/dining/dashboard

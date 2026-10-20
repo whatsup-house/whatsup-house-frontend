@@ -70,7 +70,12 @@ export default function DiningDashboard() {
                           </p>
                           <p className="text-sm text-tag-text truncate">{s.locationName ?? '지역 미정'} · {s.title}</p>
                         </div>
-                        <Badge variant={toBadgeStatus(s.status)} />
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          {s.hidden && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-tag-bg text-tag-text">심사용</span>
+                          )}
+                          <Badge variant={toBadgeStatus(s.status)} />
+                        </div>
                       </div>
                       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
                         <dt className="text-tag-text">결제 완료</dt>
