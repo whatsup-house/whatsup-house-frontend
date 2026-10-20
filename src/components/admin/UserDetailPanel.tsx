@@ -4,6 +4,7 @@ import { useAdminUserDetail, useUpdateUserStatus } from '@/lib/hooks/useAdminUse
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Button from '@/components/ui/Button'
 import dayjs from 'dayjs'
+import { useJobLabel } from '@/lib/hooks/useJobLabel'
 
 const GENDER_LABEL: Record<string, string> = { MALE: '남성', FEMALE: '여성', NONE: '선택 안함' }
 const STATUS_STYLE: Record<string, string> = {
@@ -20,6 +21,7 @@ interface UserDetailPanelProps {
 export function UserDetailPanel({ userId, onClose }: UserDetailPanelProps) {
   const { data: detail, isLoading } = useAdminUserDetail(userId)
   const { mutate: updateStatus, isPending } = useUpdateUserStatus(userId)
+  const jobLabel = useJobLabel()
 
   const accountStatus = detail?.accountStatus ?? 'ACTIVE'
   const isSuspended = accountStatus === 'SUSPENDED'
@@ -61,7 +63,7 @@ export function UserDetailPanel({ userId, onClose }: UserDetailPanelProps) {
                     ['연락처', detail.phone ?? '미입력'],
                     ['성별', GENDER_LABEL[detail.gender ?? ''] ?? detail.gender ?? '미입력'],
                     ['나이', detail.age ? `${detail.age}세` : '미입력'],
-                    ['직업', detail.job ?? '미입력'],
+                    ['직업', jobLabel(detail.job) ?? '미입력'],
                     ['MBTI', detail.mbti ?? '미입력'],
                     ['마일리지', `${detail.mileage.toLocaleString()}M`],
                     ['신청/출석', `${detail.totalApplications}건 / ${detail.attendedCount}`],
