@@ -42,7 +42,8 @@ function PaymentContent() {
   const locale = useLocale()
   const { data: profile } = useMyProfile()
   // 보증금 상태는 내 우연한 식탁 신청 목록의 신청별 deposit 에서 읽는다 (입금 대기 중엔 10초마다 갱신). (KAN-408)
-  const diningApplications = useMyDiningApplications(Boolean(applicationId && isLoggedIn))
+  // 신청 id 없이 들어와도 '돌아가기'가 돌아갈 우연한 식탁 상세를 찾으려고 회원이면 읽는다. (KAN-419)
+  const diningApplications = useMyDiningApplications(isLoggedIn && !bookingNumber)
   const diningApplication = diningApplications.data?.find((item) => item.id === applicationId)
   const memberPurchase = usePurchaseTicketPass()
   const guestPurchase = usePurchaseGuestTicketPass()
@@ -92,7 +93,13 @@ function PaymentContent() {
   const isApplicationConfirmed = data?.applicationStatus === 'CONFIRMED' || data?.applicationStatus === 'ATTENDED'
   // 신청 없이 산 이용권은 입금 확인만으로 끝이다.
   const isPaymentComplete = Boolean(displayPass?.paymentConfirmedAt && (isApplicationConfirmed || !displayPass.applicationId))
-  const goBack = () => router.push(returnUrl ? safeReturnUrl(returnUrl) : '/gatherings')
+  // 돌아갈 곳: 넘겨받은 returnUrl → 신청·이용권이 가리키는 우연한 식탁 상세 → 결제 대기 신청의 상세 → 목록 (KAN-419)
+  const backGatheringId = gatheringId
+    || data?.gatheringId
+    || diningApplications.data?.find((item) => item.id === displayPass?.applicationId)?.gathering.id
+    || diningApplications.data?.find((item) => item.status === 'PAYMENT_PENDING')?.gathering.id
+  const backHref = returnUrl ? safeReturnUrl(returnUrl) : backGatheringId ? `/gatherings/${backGatheringId}` : '/gatherings'
+  const goBack = () => router.push(backHref)
   // purchaseAmount 는 이용권 가격뿐이다. 보증금은 별도 레코드라 입금 대기(PENDING)일 때만 합산한다.
   // deposit 이 없으면 보증금이 없는 신청이다(BE 는 보증금이 있으면 항상 내려준다).
   const deposit = diningApplication?.deposit
@@ -283,9 +290,10 @@ function PaymentContent() {
           appliedAt={memberApplicationDetail.data?.createdAt}
         />
       )}
-      {returnUrl && (
-        <Button variant="outlined" size="lg" className="w-full mt-3" onClick={() => router.push(safeReturnUrl(returnUrl))}>
-          신청 화면으로 돌아가기
+      {/* 입금 완료 화면은 위 '돌아가기'가 같은 곳으로 가므로 겹쳐 그리지 않는다 */}
+      {returnUrl && !(isPaymentComplete && !displayPass?.applicationId) && (
+        <Button variant="outlined" size="lg" className="w-full mt-3" onClick={goBack}>
+          {returnUrl.includes('/apply') ? '신청 화면으로 돌아가기' : t('backToApply')}
         </Button>
       )}
     </div>

@@ -269,7 +269,8 @@ export default function GatheringDetail({
         </Card>
 
         {/* 우연한 식탁 이용권 선결제 (KAN-260) */}
-        {isRandomTable && !isFreeGathering && <TicketPassSection />}
+        {/* 구매 화면의 '돌아가기'가 이 상세로 돌아오게 한다 (KAN-419) */}
+        {isRandomTable && !isFreeGathering && <TicketPassSection returnUrl={`/gatherings/${gathering.id}${session ? `?session=${session.id}` : ''}`} />}
 
         {/* 게더링 설명 */}
         <div className="mb-6">
