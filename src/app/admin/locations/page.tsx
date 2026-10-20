@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { use, useState } from 'react'
+import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminGatheringApi, LocationItem } from '@/lib/api/adminGathering'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
@@ -8,6 +9,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { useForm } from 'react-hook-form'
 import { useToastStore } from '@/lib/store/toastStore'
+import DiningVenuePool from '@/components/admin/DiningVenuePool'
 
 const CONTRACT_LABEL: Record<string, string> = {
   ACTIVE: '계약중',
@@ -116,7 +118,37 @@ function LocationModal({
   )
 }
 
-export default function AdminLocationsPage() {
+const TABS = [
+  { key: 'places', label: '게더링 장소', href: '/admin/locations' },
+  { key: 'restaurants', label: '식당', href: '/admin/locations?tab=restaurants' },
+] as const
+
+// 장소 관리 — 게더링 장소와 우연한 식탁 식당을 탭으로 나눠 관리한다. ?tab=restaurants 로 식당 탭을 바로 연다. (KAN-429)
+export default function AdminLocationsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const tab = use(searchParams).tab === 'restaurants' ? 'restaurants' : 'places'
+  return (
+    <div>
+      <h1 className="font-bold text-[22px] text-foreground mb-4">장소 관리</h1>
+      <nav className="flex gap-1 border-b border-tag-bg mb-5" aria-label="장소 종류">
+        {TABS.map((t) => (
+          <Link
+            key={t.key}
+            href={t.href}
+            aria-current={tab === t.key ? 'page' : undefined}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm ${
+              tab === t.key ? 'border-primary font-semibold text-primary' : 'border-transparent text-tag-text'
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </nav>
+      {tab === 'restaurants' ? <DiningVenuePool /> : <GatheringPlaces />}
+    </div>
+  )
+}
+
+function GatheringPlaces() {
   const queryClient = useQueryClient()
   const [modalLocation, setModalLocation] = useState<LocationItem | null | undefined>(undefined)
 
@@ -136,12 +168,11 @@ export default function AdminLocationsPage() {
 
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
-        <h1 className="font-bold text-[22px] text-foreground">장소 관리</h1>
+      <div className="flex justify-end mb-3">
         <button
           id="btn-location-add"
           onClick={() => setModalLocation(null)}
-          className="self-start sm:self-auto px-5 h-11 bg-primary text-white rounded-[12px] font-medium text-sm hover:opacity-90 transition-opacity"
+          className="px-5 h-11 bg-primary text-white rounded-[12px] font-medium text-sm hover:opacity-90 transition-opacity"
         >
           + 장소 추가
         </button>

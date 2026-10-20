@@ -1,9 +1,8 @@
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import DiningMatchingRulesForm from '@/components/admin/DiningMatchingRulesForm'
-import DiningVenuePool from '@/components/admin/DiningVenuePool'
 
-// 우연한 식탁 설정 — 매칭 규칙 기본값, 식당 풀 (KAN-353)
+// 우연한 식탁 설정 — 매칭 규칙 기본값 (KAN-353). 식당은 장소 관리 > 식당 탭으로 옮겼다 (KAN-429)
 export default function AdminDiningSettingsPage() {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -14,7 +13,6 @@ export default function AdminDiningSettingsPage() {
         <h1 className="text-[22px] font-bold text-foreground">우연한 식탁 설정</h1>
       </div>
       <DiningMatchingRulesForm />
-      <DiningVenuePool />
     </div>
   )
 }

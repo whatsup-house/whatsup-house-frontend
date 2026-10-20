@@ -62,7 +62,6 @@ test.describe('관리자 - 우연한 식탁 예외함·설정', () => {
     await expect(page.getByRole('heading', { name: '매칭 규칙 기본값' })).toBeVisible()
     const maxAgeGap = page.locator('input[name="maxAgeGap"]')
     await expect(maxAgeGap).toHaveValue(String(mockMatchingRules.maxAgeGap))
-    await expect(page.getByText(VENUE_OVEN.name)).toBeVisible()
 
     await maxAgeGap.fill('6')
     await page.locator('input[name="tableSizeMax"]').fill('5')
@@ -80,5 +79,13 @@ test.describe('관리자 - 우연한 식탁 예외함·설정', () => {
       weights: { ...mockMatchingRules.weights, mbti: 1.5 },
     })
     await expect(page.getByText('매칭 규칙을 저장했어요.')).toBeVisible()
+  })
+
+  test('식당은 장소 관리의 식당 탭에서 관리한다', async ({ page }) => {
+    await page.goto('/admin/locations?tab=restaurants')
+    await expect(page.getByRole('link', { name: '식당', exact: true })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByText(VENUE_OVEN.name)).toBeVisible()
+    await expect(page.getByRole('button', { name: '+ 식당 추가' })).toBeVisible()
+    await captureFullPage(page, 'e2e/screenshots/admin/locations-restaurants.png')
   })
 })
