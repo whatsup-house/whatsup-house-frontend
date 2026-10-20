@@ -48,7 +48,7 @@ const buildSchema = (isDining: boolean) => z.object({
   autoConfirmGraceMinutes: z.number().int('분 단위 정수로 입력해주세요').min(0, '유예는 0분 이상이어야 합니다').max(10080, '유예는 최대 10080분(7일)입니다').nullable(),
   tableSizeMin: z.number({ error: '최소 인원을 입력해주세요' }).int().min(2, '테이블은 2명 이상이어야 합니다').max(8, '테이블은 최대 8명입니다'),
   tableSizeMax: z.number({ error: '최대 인원을 입력해주세요' }).int().min(2, '테이블은 2명 이상이어야 합니다').max(8, '테이블은 최대 8명입니다'),
-  minGroupScore: z.number().min(0, '0~1 사이로 입력해주세요').max(1, '0~1 사이로 입력해주세요').nullable(),
+  minGroupScore: z.number().nullable(), // KAN-420: 입력은 숨기고 기존 값만 그대로 보낸다
   maxAgeGap: z.number().int('정수로 입력해주세요').min(0, '0 이상이어야 합니다').max(100, '최대 100입니다').nullable(),
 }).superRefine((val, ctx) => {
   if (val.eventDate && val.eventDate < dayjs().format('YYYY-MM-DD')) {
@@ -308,16 +308,6 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
                   max={8}
                   error={errors.tableSizeMax?.message}
                   {...register('tableSizeMax', { valueAsNumber: true })}
-                />
-                <Input
-                  label="최소 그룹 점수 (0~1)"
-                  type="number"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  placeholder="비우면 기본값"
-                  error={errors.minGroupScore?.message}
-                  {...register('minGroupScore', { setValueAs: toNullableNumber })}
                 />
                 <Input
                   label="최대 나이 차"
