@@ -5,12 +5,15 @@ import {
   createAdminChatRoom,
   deleteAdminChatRoom,
   fetchAdminChatRooms,
+  fetchBotSettings,
   fetchChatReports,
   fetchChatSourceMembers,
   fetchDiningTableGroups,
   kickChatMember,
   muteChatUser,
+  resumeChatBot,
   unmuteChatUser,
+  updateBotSettings,
   updateChatReportStatus,
 } from '@/lib/api/adminChat'
 import { adminGatheringApi } from '@/lib/api/adminGathering'
@@ -152,5 +155,29 @@ export function useDeleteReportedMessage() {
       queryClient.invalidateQueries({ queryKey: adminRoomsKey })
     },
     onError: alertError('메시지를 삭제하지 못했어요.'),
+  })
+}
+
+const botSettingsKey = ['admin', 'bot', 'settings'] as const
+
+export function useBotSettings() {
+  return useQuery({ queryKey: botSettingsKey, queryFn: fetchBotSettings, retry: false })
+}
+
+export function useUpdateBotSettings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: updateBotSettings,
+    onSuccess: (data) => queryClient.setQueryData(botSettingsKey, data),
+    onError: alertError('AI 자동응답 설정을 바꾸지 못했어요.'),
+  })
+}
+
+export function useResumeChatBot() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (roomId: string) => resumeChatBot(roomId),
+    onSuccess: (_data, roomId) => invalidateRoom(queryClient, roomId),
+    onError: alertError('봇을 재개하지 못했어요.'),
   })
 }

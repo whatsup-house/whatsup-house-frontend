@@ -9,7 +9,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useLogin } from '@/lib/hooks/useAuth'
+import { useDemoLogin, useLogin } from '@/lib/hooks/useAuth'
+import { getApiErrorStatus } from '@/lib/utils/apiError'
 import { safeReturnUrl } from '@/lib/utils/url'
 import AuthOnlyRedirect from './AuthOnlyRedirect'
 
@@ -24,6 +25,7 @@ export default function LoginPageClient() {
   const returnUrl = safeReturnUrl(rawReturnUrl)
   const isWithdrawn = searchParams.get('withdrawn') === '1'
   const loginMutation = useLogin(returnUrl)
+  const demoMutation = useDemoLogin()
 
   const loginSchema = useMemo(
     () =>
@@ -146,6 +148,20 @@ export default function LoginPageClient() {
             {loginMutation.isPending ? t('submitting') : t('submit')}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={() => demoMutation.mutate()}
+          disabled={demoMutation.isPending}
+          className="mt-3 flex min-h-[52px] w-full items-center justify-center rounded-button border border-primary px-5 py-4 text-[15px] font-bold text-primary disabled:opacity-60"
+        >
+          {demoMutation.isPending ? t('demoStarting') : t('demoStart')}
+        </button>
+        {demoMutation.isError && (
+          <p role="alert" className="mt-2 text-center text-[12.5px] font-medium text-primary">
+            {getApiErrorStatus(demoMutation.error) === 429 ? t('demoRateLimited') : t('demoError')}
+          </p>
+        )}
 
         <Link
           href="/register"

@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs'
 import { Plus } from 'lucide-react'
 import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
+import AdminBotToggle from './AdminBotToggle'
 import AdminChatNav from './AdminChatNav'
 import ChatGroupRoomFormPanel from './ChatGroupRoomFormPanel'
+import { decodeHtmlEntities } from '@/lib/utils/decodeHtmlEntities'
 import { useAddChatMembers, useAdminChatRooms, useChatSourceGatherings } from '@/lib/hooks/useAdminChat'
 import { useAuthStore } from '@/lib/store/authStore'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
@@ -26,7 +28,8 @@ function getPreview(message: ChatLastMessage | null): string {
   if (message.type === 'IMAGE') return '사진'
   if (message.systemKind === 'SYSTEM_NOTICE') return message.systemParams?.text ?? ''
   if (message.type === 'SYSTEM') return message.systemKind ? SYSTEM_PREVIEW[message.systemKind] : ''
-  return message.content ?? ''
+  const content = message.content ?? ''
+  return message.aiGenerated ? decodeHtmlEntities(content) : content
 }
 
 function formatTime(iso: string | undefined): string {
@@ -37,10 +40,13 @@ function formatTime(iso: string | undefined): string {
 
 const lastTime = (room: AdminChatRoomSummary) => room.lastMessage?.createdAt ?? ''
 
-// 미답변 먼저, 그 안에서는 최근 메시지 순
+// 담당자 필요 먼저, 다음 미답변, 그 안에서는 최근 메시지 순
 function sortInquiries(rooms: AdminChatRoomSummary[]): AdminChatRoomSummary[] {
   return [...rooms].sort(
-    (a, b) => Number(b.unanswered) - Number(a.unanswered) || lastTime(b).localeCompare(lastTime(a)),
+    (a, b) =>
+      Number(!!b.needsHuman) - Number(!!a.needsHuman) ||
+      Number(b.unanswered) - Number(a.unanswered) ||
+      lastTime(b).localeCompare(lastTime(a)),
   )
 }
 
@@ -139,7 +145,7 @@ export default function AdminChatRoomList() {
             <RoomRow
               key={room.id}
               title={room.name ?? '(탈퇴한 회원)'}
-              badges={room.unanswered ? ['미답변'] : []}
+              badges={[...(room.needsHuman ? ['담당자 필요'] : []), ...(room.unanswered ? ['미답변'] : [])]}
               subtitle={getPreview(room.lastMessage)}
               time={formatTime(room.lastMessage?.createdAt)}
               unreadCount={room.unreadCount}
@@ -172,6 +178,7 @@ export default function AdminChatRoomList() {
   return (
     <div className="max-w-3xl">
       <AdminChatNav title="채팅 관리" />
+      <AdminBotToggle />
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {TABS.map(({ type, label }) => (

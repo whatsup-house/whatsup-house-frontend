@@ -1,5 +1,6 @@
 import apiClient from './client'
 import type {
+  AdminBotSettings,
   AdminChatReport,
   AdminChatRoomCreateRequest,
   AdminChatRoomSummary,
@@ -67,4 +68,19 @@ export const fetchChatReports = async (status?: ChatReportStatus): Promise<Admin
 
 export const updateChatReportStatus = async (reportId: string, status: ChatReportStatus): Promise<void> => {
   await apiClient.patch<ApiResponse<void>>(`/api/admin/chat/reports/${reportId}`, { status })
+}
+
+// 봇 일시정지·담당자 필요 해제 (KAN-406)
+export const resumeChatBot = async (roomId: string): Promise<void> => {
+  await apiClient.post<ApiResponse<void>>(`/api/admin/chat/rooms/${roomId}/bot/resume`)
+}
+
+export const fetchBotSettings = async (): Promise<AdminBotSettings> => {
+  const response = await apiClient.get<ApiResponse<AdminBotSettings>>('/api/admin/bot/settings')
+  return response.data.data
+}
+
+export const updateBotSettings = async (enabled: boolean): Promise<AdminBotSettings> => {
+  const response = await apiClient.put<ApiResponse<AdminBotSettings>>('/api/admin/bot/settings', { enabled })
+  return response.data.data
 }

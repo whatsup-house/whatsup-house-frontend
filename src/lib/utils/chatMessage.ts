@@ -1,3 +1,4 @@
+import { decodeHtmlEntities } from '@/lib/utils/decodeHtmlEntities'
 import type { ChatLastMessage, ChatMessage } from '@/lib/api/types'
 
 // useTranslations('chat') 의 t
@@ -19,5 +20,6 @@ export function getMessagePreview(message: ChatMessageLike, t: ChatTranslate): s
   if (message.deleted) return t('message.deleted')
   if (message.type === 'SYSTEM') return getSystemMessageText(message, t)
   if (message.type === 'IMAGE') return t('photo')
-  return message.content ?? ''
+  const content = message.content ?? ''
+  return message.aiGenerated ? decodeHtmlEntities(content) : content
 }
