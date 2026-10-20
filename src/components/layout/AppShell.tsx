@@ -1,4 +1,5 @@
 import DesktopBrandPanel from '@/components/layout/DesktopBrandPanel'
+import ToastHost from '@/components/ui/ToastHost'
 
 /**
  * 데스크탑 앱 셸.
@@ -14,6 +15,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <DesktopBrandPanel />
       <div className="mobile-layout relative flex flex-col min-h-screen bg-background lg:mx-0 lg:aspect-[390/844] lg:h-[min(932px,calc(100dvh-32px))] lg:w-auto! lg:shrink-0 lg:min-h-0 lg:overflow-hidden lg:rounded-[15px] lg:shadow-2xl">
         {children}
+        <ToastHost inFrame />
       </div>
     </div>
   )

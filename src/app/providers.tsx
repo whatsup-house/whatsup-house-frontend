@@ -11,7 +11,6 @@ import 'dayjs/locale/zh-cn'
 import { useLocale } from 'next-intl'
 import { useInitAuth } from '@/lib/hooks/useAuth'
 import NavigationTracker from '@/components/layout/NavigationTracker'
-import ToastHost from '@/components/ui/ToastHost'
 
 function AuthInitializer() {
   useInitAuth()
@@ -49,7 +48,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthInitializer />
       <NavigationTracker />
       {children}
-      <ToastHost />
     </QueryClientProvider>
   )
 }
