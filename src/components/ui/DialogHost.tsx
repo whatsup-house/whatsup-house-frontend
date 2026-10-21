@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useDialogStore } from '@/lib/store/dialogStore'
@@ -18,21 +18,30 @@ export default function DialogHost({ inFrame = false }: DialogHostProps) {
   const current = useDialogStore((s) => s.queue[0])
   const close = useDialogStore((s) => s.close)
   const dialogRef = useRef<HTMLDivElement>(null)
+  const [input, setInput] = useState('')
+  const [inputFor, setInputFor] = useState(current)
+  if (inputFor !== current) {
+    // 새 창이 뜨면 입력칸을 그 창의 처음 값으로
+    setInputFor(current)
+    setInput(current?.defaultValue ?? '')
+  }
+  const isPrompt = current?.kind === 'prompt'
+  const dismiss = () => close(isPrompt ? null : false)
 
   useEffect(() => {
     if (!current) return
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    dialogRef.current?.querySelector<HTMLButtonElement>('[data-initial-focus]')?.focus()
+    dialogRef.current?.querySelector<HTMLElement>('[data-initial-focus]')?.focus()
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         // 뒤에 깔린 모달의 Esc 처리까지 닿지 않게 여기서 끊는다
         e.preventDefault()
         e.stopPropagation()
-        close(false)
+        close(current.kind === 'prompt' ? null : false)
         return
       }
       if (e.key !== 'Tab') return
-      const buttons = Array.from(dialogRef.current?.querySelectorAll<HTMLButtonElement>('button') ?? [])
+      const buttons = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button, input') ?? [])
       if (buttons.length === 0) return
       const first = buttons[0]
       const last = buttons[buttons.length - 1]
@@ -54,7 +63,7 @@ export default function DialogHost({ inFrame = false }: DialogHostProps) {
 
   if (!current) return null
 
-  const isConfirm = current.kind === 'confirm'
+  const isConfirm = current.kind !== 'alert'
   const [heading, ...bodyLines] = current.title
     ? [current.title, ...current.message.split('\n')]
     : current.message.split('\n')
@@ -82,23 +91,33 @@ export default function DialogHost({ inFrame = false }: DialogHostProps) {
             ))}
           </div>
         )}
+        {isPrompt && (
+          <input
+            data-initial-focus
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') close(input) }}
+            aria-label={heading}
+            className="mt-4 w-full rounded-input border border-tag-bg bg-card px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
+          />
+        )}
         <div className="mt-6 flex gap-2">
           {isConfirm && (
             <Button
-              data-initial-focus={current.destructive || undefined}
+              data-initial-focus={(current.destructive && !isPrompt) || undefined}
               variant="secondary"
               size="sm"
               className="flex-1"
-              onClick={() => close(false)}
+              onClick={dismiss}
             >
               {t('cancel')}
             </Button>
           )}
           <Button
-            data-initial-focus={!(current.destructive && isConfirm) || undefined}
+            data-initial-focus={(!(current.destructive && isConfirm) && !isPrompt) || undefined}
             size="sm"
             className="flex-1"
-            onClick={() => close(true)}
+            onClick={() => close(isPrompt ? input : true)}
           >
             {current.confirmLabel ?? t('confirm')}
           </Button>

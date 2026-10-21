@@ -1,3 +1,4 @@
+import { showAlert } from '@/lib/store/dialogStore'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchGatheringForm,
@@ -19,7 +20,7 @@ const onQuestionError = (fallback: string) => (err: unknown) => {
     )
     return
   }
-  alert(getApiErrorMessage(err, fallback))
+  void showAlert(getApiErrorMessage(err, fallback))
 }
 
 // 게더링 신청폼 조회 (질문 동적 목록)

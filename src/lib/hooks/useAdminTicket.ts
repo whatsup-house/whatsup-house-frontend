@@ -1,3 +1,4 @@
+import { showAlert } from '@/lib/store/dialogStore'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   confirmTicketDeposit,
@@ -40,7 +41,7 @@ export function useConfirmDeposit() {
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '입금 확인 중 오류가 발생했어요.')
+      void showAlert(msg || '입금 확인 중 오류가 발생했어요.')
     },
   })
 }

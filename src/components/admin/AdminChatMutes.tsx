@@ -4,7 +4,7 @@ import AdminChatNav from './AdminChatNav'
 import AdminUserSearch from './AdminUserSearch'
 import { useMuteChatUser, useUnmuteChatUser } from '@/lib/hooks/useAdminChat'
 import { useToastStore } from '@/lib/store/toastStore'
-import { showConfirm } from '@/lib/store/dialogStore'
+import { showConfirm, showPrompt } from '@/lib/store/dialogStore'
 
 // ponytail: 백엔드에 채팅 금지 목록 조회 API(GET /api/admin/chat/mutes)가 없어 회원 검색 → 금지/해제만 한다.
 // 목록 API 가 생기면 이 화면 상단에 목록(사유·해제)을 붙인다.
@@ -13,8 +13,8 @@ export default function AdminChatMutes() {
   const unmuteUser = useUnmuteChatUser()
   const showToast = useToastStore((s) => s.show)
 
-  const handleMute = (userId: string, nickname: string) => {
-    const reason = prompt(`${nickname}님을 채팅 금지할까요? 사유를 입력해주세요.`)
+  const handleMute = async (userId: string, nickname: string) => {
+    const reason = await showPrompt(`${nickname}님을 채팅 금지할까요?`, { title: '채팅 금지', confirmLabel: '채팅 금지', destructive: true })
     if (!reason?.trim()) return
     muteUser.mutate(
       { userId, reason: reason.trim().slice(0, 1000) },
