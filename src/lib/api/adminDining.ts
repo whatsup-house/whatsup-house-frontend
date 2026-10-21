@@ -3,11 +3,14 @@ import type {
   ApiResponse,
   ChatRoomIdResponse,
   DiningApplicant,
+  DiningApplicantFilter,
   DiningAttendanceRow,
   DiningAttendanceStatus,
   DiningDashboard,
   DiningFeedbackSummary,
   DiningMatchRun,
+  DiningNoticeLog,
+  DiningStatusLog,
   DiningTableAdjustRequest,
   DiningTableAdjustResponse,
   DiningTableConfirmResult,
@@ -37,8 +40,23 @@ export const updateSessionVenues = async (sessionId: string, venues: SessionVenu
 
 // ===== 회차 콘솔 (KAN-352) =====
 
-export const fetchDiningApplicants = async (sessionId: string): Promise<DiningApplicant[]> => {
-  const response = await apiClient.get<ApiResponse<DiningApplicant[]>>(`/api/admin/dining/sessions/${sessionId}/applicants`)
+// 필터 쿼리(paymentStatus·matchStatus·region)는 KAN-437. 빈 값은 axios 가 빼고 보낸다
+export const fetchDiningApplicants = async (sessionId: string, filter: DiningApplicantFilter = {}): Promise<DiningApplicant[]> => {
+  const response = await apiClient.get<ApiResponse<DiningApplicant[]>>(`/api/admin/dining/sessions/${sessionId}/applicants`, {
+    params: filter,
+  })
+  return response.data.data ?? []
+}
+
+// 신청 상태 변경 이력 (KAN-437). 최신순
+export const fetchDiningApplicationHistory = async (applicationId: string): Promise<DiningStatusLog[]> => {
+  const response = await apiClient.get<ApiResponse<DiningStatusLog[]>>(`/api/admin/dining/applications/${applicationId}/history`)
+  return response.data.data ?? []
+}
+
+// 회차 안내 발송 이력 (KAN-437). 최신순
+export const fetchDiningSessionNotices = async (sessionId: string): Promise<DiningNoticeLog[]> => {
+  const response = await apiClient.get<ApiResponse<DiningNoticeLog[]>>(`/api/admin/dining/sessions/${sessionId}/notices`)
   return response.data.data ?? []
 }
 

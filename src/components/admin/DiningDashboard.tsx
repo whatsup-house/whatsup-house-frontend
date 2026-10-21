@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import dayjs from 'dayjs'
+import type { DiningDashboard as DiningDashboardData, DiningExceptionType } from '@/lib/api/types'
 import { useDiningDashboard } from '@/lib/hooks/useAdminDining'
 import { toBadgeStatus } from '@/lib/utils/gatheringStatus'
 import { ApiErrorMessage, Badge, LoadingSpinner } from '@/components/ui'
@@ -22,6 +23,26 @@ function Tile({ label, value, isAlert }: TileProps) {
     </div>
   )
 }
+
+// 운영 지표 (KAN-437). 구형 BE 응답엔 값이 없어 그 타일은 숨긴다.
+const METRICS: { key: keyof DiningDashboardData; label: string; unit: string }[] = [
+  { key: 'totalApplicantCount', label: '전체 신청자', unit: '명' },
+  { key: 'matchRunCount', label: '매칭 실행', unit: '회' },
+  { key: 'matchedApplicantCount', label: '매칭된 인원', unit: '명' },
+  { key: 'reallocatedApplicantCount', label: '재배치 인원', unit: '명' },
+  { key: 'confirmedApplicantCount', label: '확정 인원', unit: '명' },
+]
+
+// 문제 지표: 0이 아니면 강조하고, 볼 화면이 있으면 그 화면(예외함 유형 필터)으로 보낸다.
+const ISSUES: { key: keyof DiningDashboardData; label: string; unit: string; exceptionType?: DiningExceptionType }[] = [
+  { key: 'resolutionPendingCount', label: '선택 대기', unit: '명' },
+  { key: 'conflictCount', label: '충돌', unit: '건', exceptionType: 'CONFLICT' },
+  { key: 'noVenueTableCount', label: '식당 없는 테이블', unit: '개', exceptionType: 'VENUE' },
+  { key: 'notificationFailureCount', label: '발송 실패', unit: '건', exceptionType: 'NOTIFICATION' },
+  { key: 'refundFailureCount', label: '환불 실패', unit: '건', exceptionType: 'REFUND' },
+  { key: 'noShowCandidateCount', label: '노쇼 후보', unit: '명' },
+  { key: 'openReportCount', label: '미처리 신고', unit: '건', exceptionType: 'SAFETY' },
+]
 
 // 우연한 식탁 운영 대시보드: 타일·다가오는 회차 카드·예외함 링크·회차 만들기 (KAN-351)
 export default function DiningDashboard() {
@@ -43,13 +64,35 @@ export default function DiningDashboard() {
           <Link href="/admin/dining/exceptions" className="block hover:opacity-80 transition-opacity">
             <Tile label="열린 예외" value={`${data.openExceptionCount}건`} isAlert={data.openExceptionCount > 0} />
           </Link>
+          {METRICS.map(({ key, label, unit }) => {
+            const value = data[key]
+            return typeof value === 'number' ? <Tile key={key} label={label} value={`${value}${unit}`} /> : null
+          })}
+          {typeof data.matchSuccessRate === 'number' && (
+            <Tile label="매칭 성공률" value={`${Math.round(data.matchSuccessRate * 100)}%`} />
+          )}
         </div>
+
+        {ISSUES.some(({ key }) => typeof data[key] === 'number') && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3 mb-6">
+            {ISSUES.map(({ key, label, unit, exceptionType }) => {
+              const value = data[key]
+              if (typeof value !== 'number') return null
+              const tile = <Tile key={key} label={label} value={`${value}${unit}`} isAlert={value > 0} />
+              return value > 0 && exceptionType ? (
+                <Link key={key} href={`/admin/dining/exceptions?type=${exceptionType}`} className="block hover:opacity-80 transition-opacity">
+                  {tile}
+                </Link>
+              ) : tile
+            })}
+          </div>
+        )}
 
         <section>
           <h2 className="font-bold text-base text-foreground mb-3">다가오는 회차 {data.sessions.length}개</h2>
           {data.sessions.length === 0 ? (
             <div className="bg-card rounded-card shadow-sm py-12 text-center text-sm text-tag-text">
-              다가오는 회차가 없어요. 회차를 만들어보세요.
+              다가오는 회차가 없어요.
             </div>
           ) : (
             <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

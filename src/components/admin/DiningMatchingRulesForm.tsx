@@ -25,7 +25,7 @@ const schema = z
     tableSizeMax: integer(2, 8),
     autoConfirmGraceMinutes: integer(0, 10080),
     minTablesPerRegion: integer(1, 5),
-    weights: z.object({ gender: weight, mbti: weight, interests: weight, wantedStyle: weight, custom: weight }),
+    weights: z.object({ ageBand: weight, gender: weight, mbti: weight, interests: weight, wantedStyle: weight, custom: weight }),
   })
   .refine((v) => v.tableSizeMin <= v.tableSizeMax, {
     path: ['tableSizeMax'],
@@ -34,7 +34,9 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>
 
+// 매칭 우선순위 순 (KAN-435)
 const WEIGHT_FIELDS: { key: keyof DiningMatchingWeights; label: string }[] = [
+  { key: 'ageBand', label: '연령대' },
   { key: 'gender', label: '성별 다양성' },
   { key: 'mbti', label: 'MBTI 궁합' },
   { key: 'interests', label: '관심사 겹침' },
@@ -50,8 +52,12 @@ function MatchingRulesFields({ defaultValues }: MatchingRulesFieldsProps) {
   const { mutate, isPending } = useUpdateDiningMatchingRules()
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    // 구형 BE 응답엔 minTablesPerRegion 이 없다 → BE 기본값 2로 채운다 (KAN-431)
-    defaultValues: { ...defaultValues, minTablesPerRegion: defaultValues.minTablesPerRegion ?? 2 },
+    // 구형 BE 응답엔 minTablesPerRegion(KAN-431)·weights.ageBand(KAN-435)가 없다 → BE 기본값 2·5로 채운다
+    defaultValues: {
+      ...defaultValues,
+      minTablesPerRegion: defaultValues.minTablesPerRegion ?? 2,
+      weights: { ...defaultValues.weights, ageBand: defaultValues.weights.ageBand ?? 5 },
+    },
   })
 
   // 최소 그룹 점수는 BE가 더 이상 쓰지 않는다(KAN-420). 요청 형식만 맞추려고 불러온 값을 그대로 보낸다.
@@ -101,9 +107,6 @@ function MatchingRulesFields({ defaultValues }: MatchingRulesFieldsProps) {
           {...register('minTablesPerRegion', { valueAsNumber: true })}
         />
       </div>
-      <p className="-mt-2 text-xs text-tag-text break-keep">
-        한 회차·지역에서 테이블이 이 수보다 적게 나오면 그 지역은 열지 않고, 신청자는 다른 희망 지역이나 다음 희망 날짜로 넘어가요.
-      </p>
 
       <fieldset className="rounded-input border border-tag-bg p-3">
         <legend className="px-1 text-sm font-medium text-foreground">항목별 가중치 (0~10)</legend>

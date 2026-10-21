@@ -156,9 +156,16 @@ function ExceptionCaseActions({ caseId, type, tableId, hasApplication }: Excepti
   )
 }
 
+interface AdminDiningExceptionsProps {
+  initialType?: string
+}
+
+const isExceptionType = (value: string | undefined): value is DiningExceptionType =>
+  !!value && (TYPES as string[]).includes(value)
+
 // 우연한 식탁 예외함 — 전체 회차 횡단, 유형 필터, 열림/해결 탭 (KAN-353)
-export default function AdminDiningExceptions() {
-  const [type, setType] = useState<DiningExceptionType | undefined>(undefined)
+export default function AdminDiningExceptions({ initialType }: AdminDiningExceptionsProps) {
+  const [type, setType] = useState<DiningExceptionType | undefined>(isExceptionType(initialType) ? initialType : undefined)
   const [status, setStatus] = useState<DiningExceptionStatus>('OPEN')
   const casesQuery = useDiningExceptions(type, status)
   const cases = casesQuery.data ?? []
