@@ -157,10 +157,8 @@ function PaymentContent() {
 
   return (
     <div className="min-h-screen bg-background px-5 py-6">
-      <div className="flex items-center gap-2 mb-2"><Ticket size={22} className="text-primary" /><h1 className="text-xl font-bold">우연한 식탁 이용권</h1></div>
-      <p className="text-sm text-tag-text mb-6">
-        {isPaymentComplete ? '참가 확정 정보를 확인해 주세요.' : displayPass || isDepositFlow ? '입금 정보를 확인해 주세요.' : '원하는 이용권을 선택해 주세요.'}
-      </p>
+      <div className={`flex items-center gap-2 ${displayPass || isDepositFlow ? 'mb-5' : 'mb-2'}`}><Ticket size={22} className="text-primary" /><h1 className="text-xl font-bold">우연한 식탁 이용권</h1></div>
+      {!(displayPass || isDepositFlow) && <p className="text-sm text-tag-text mb-6">원하는 이용권을 선택해 주세요.</p>}
       {displayPass ? (
         isPaymentComplete ? (
           <>
