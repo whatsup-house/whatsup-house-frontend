@@ -21,7 +21,7 @@ export default function ToastHost({ inFrame = false }: ToastHostProps) {
 
   useEffect(() => {
     if (!message || isPaused) return
-    const timer = setTimeout(clear, 3000)
+    const timer = setTimeout(clear, 2500)
     return () => clearTimeout(timer)
   }, [message, variant, clear, isPaused])
 
@@ -56,7 +56,7 @@ export default function ToastHost({ inFrame = false }: ToastHostProps) {
   const bgClass = variant === 'error' ? 'bg-primary' : 'bg-foreground/90'
 
   return (
-    <div className={`${position} inset-x-0 bottom-8 z-[100] flex justify-center px-6 pointer-events-none`}>
+    <div className={`${position} inset-x-0 bottom-24 z-[100] flex justify-center px-6 pointer-events-none`}>
       <div
         className={`max-w-[430px] w-full rounded-input ${bgClass} text-white text-sm font-medium px-4 py-3 shadow-lg pointer-events-auto flex items-center gap-2`}
         onMouseEnter={() => setIsPaused(true)}

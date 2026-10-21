@@ -30,6 +30,9 @@ export default function TicketPassSection({ returnUrl }: TicketPassSectionProps)
   const restriction = getTicketRestriction(data)
   // 보유 멤버십이 있으면 신청은 멤버십으로 처리된다 (추가 결제 없음)
   const membership = findActiveMembership(data?.passes)
+  const hasCountPass = data?.passes?.some((p) => p.status === 'ACTIVE' && !p.validUntil && p.remainingCount > 0) ?? false
+  // 멤버십·횟수권 중 하나만 있으면 그걸로 신청되니 고를 게 없다. 둘 다 있거나(골라 쓰기) 둘 다 없을 때(구매)만 버튼을 띄운다
+  const showSelect = Boolean(membership) === hasCountPass
 
   return (
     <Card className="p-4 mb-6 border border-primary/20">
@@ -69,7 +72,7 @@ export default function TicketPassSection({ returnUrl }: TicketPassSectionProps)
 
           {restriction ? (
             <div className="rounded-input bg-tag-bg px-4 py-3 text-sm text-tag-text">{tPass(`restricted.${restriction}`)}</div>
-          ) : (
+          ) : showSelect && (
             <Button variant="primary" size="lg" className="w-full"
               onClick={() => router.push(`/payments/random-table${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`)}>
               {t('select')}
