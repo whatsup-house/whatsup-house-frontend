@@ -867,7 +867,6 @@
         "goResolve": "Elegir una opción",
         "viewAll": "Ver todas mis solicitudes",
         "cancel": {
-          "policy": "회차 시작 전까지 취소할 수 있어요. 취소 버튼을 누르면 지금 적용되는 결과를 먼저 알려드려요.",
           "button": "Cancelar solicitud",
           "closed": "회차가 시작돼 취소할 수 없어요.",
           "confirmTitle": "¿Cancelar esta solicitud?",

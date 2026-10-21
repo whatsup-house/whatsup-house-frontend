@@ -150,12 +150,11 @@ export default function DiningStatusCard({
 
       {showCancel && (
         <div className="mt-3 pt-3 border-t border-tag-bg/50">
-          <p className="text-xs text-tag-text leading-relaxed break-keep">{t('cancel.policy')}</p>
           <button
             type="button"
             onClick={() => setConfirmingCancel(true)}
             disabled={!cancelOpen}
-            className="mt-2 min-h-[36px] text-xs text-tag-text underline disabled:no-underline disabled:opacity-50"
+            className="min-h-[36px] text-xs text-tag-text underline disabled:no-underline disabled:opacity-50"
           >
             {t('cancel.button')}
           </button>
