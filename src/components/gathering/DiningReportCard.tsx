@@ -14,11 +14,10 @@ const REASON_MAX = 2000
 interface DiningReportCardProps {
   tableId: string
   peers: { userId: string; nickname: string }[]
-  hasUnselectable: boolean
 }
 
 // 같은 테이블 멤버 신고: 대상 선택 → 확인 모달에서 사유 입력 → 접수 토스트 (KAN-356)
-export default function DiningReportCard({ tableId, peers, hasUnselectable }: DiningReportCardProps) {
+export default function DiningReportCard({ tableId, peers }: DiningReportCardProps) {
   const t = useTranslations('gathering.diningReport')
   const showToast = useToastStore((s) => s.show)
   const report = useReportDiningMember(tableId)
@@ -47,7 +46,6 @@ export default function DiningReportCard({ tableId, peers, hasUnselectable }: Di
         <ShieldAlert size={18} className="text-primary" />
         {t('title')}
       </h2>
-      <p className="text-xs leading-relaxed text-tag-text break-keep">{t('description')}</p>
       {peers.length > 0 ? (
         <div className="mt-3 flex gap-2">
           <select
@@ -68,7 +66,6 @@ export default function DiningReportCard({ tableId, peers, hasUnselectable }: Di
       ) : (
         <p className="mt-3 text-xs text-tag-text">{t('noTargets')}</p>
       )}
-      {hasUnselectable && peers.length > 0 && <p className="mt-2 text-xs text-tag-text break-keep">{t('unselectableNotice')}</p>}
 
       {confirming && target && (
         <ChatDialog

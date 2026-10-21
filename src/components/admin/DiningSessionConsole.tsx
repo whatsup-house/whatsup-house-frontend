@@ -2,12 +2,20 @@
 
 import { useState } from 'react'
 import dayjs from 'dayjs'
-import { Download } from 'lucide-react'
-import type { GatheringSession, MatchStatus } from '@/lib/api/types'
+import { Download, X } from 'lucide-react'
+import type {
+  ApplicationStatus,
+  DiningApplicantFilter,
+  DiningPaymentStatus,
+  DiningStatusLog,
+  GatheringSession,
+  MatchStatus,
+} from '@/lib/api/types'
 import { useAdminGatheringDetail, useUpdateGatheringStatus } from '@/lib/hooks/useAdminGathering'
 import {
   useConfirmDiningTablesNow,
   useDiningApplicants,
+  useDiningApplicationHistory,
   useDiningTables,
   useDownloadDiningCsv,
   useRunDiningMatch,
@@ -16,17 +24,20 @@ import { toBadgeStatus } from '@/lib/utils/gatheringStatus'
 import { formatTimeRange } from '@/lib/utils/date'
 import { genderShort } from '@/lib/utils/diningStatus'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
+import { useDiningRegions } from '@/lib/hooks/useApplications'
 import { ApiErrorMessage, Badge, LoadingSpinner } from '@/components/ui'
 import GatheringSessionModal from '@/components/admin/GatheringSessionModal'
 import DiningTableBoard from '@/components/admin/DiningTableBoard'
 import DiningVenueChatTab from '@/components/admin/DiningVenueChatTab'
 import DiningAttendanceFeedbackTab from '@/components/admin/DiningAttendanceFeedbackTab'
+import DiningNoticeLogTab from '@/components/admin/DiningNoticeLogTab'
 
 const TABS = [
   { key: 'applicants', label: '신청자' },
   { key: 'tables', label: '테이블' },
   { key: 'venues', label: '식당과 단체방' },
   { key: 'attendance', label: '참석과 피드백' },
+  { key: 'notices', label: '안내 이력' },
 ] as const
 type TabKey = (typeof TABS)[number]['key']
 
@@ -42,6 +53,40 @@ const MATCH_STATUS_LABEL: Record<MatchStatus, string> = {
   EXCEPTION: '예외',
 }
 
+// 통합 결제 상태 (KAN-437)
+const PAYMENT_STATUS_LABEL: Record<DiningPaymentStatus, string> = {
+  PENDING: '결제 대기',
+  PAID: '결제 완료',
+  FAILED: '결제 실패',
+  REFUND_AVAILABLE: '환불 가능',
+  REFUND_REQUESTED: '환불 요청',
+  REFUND_PROCESSING: '환불 처리 중',
+  REFUNDED: '환불 완료',
+  REFUND_FAILED: '환불 실패',
+}
+const PAYMENT_ALERT: DiningPaymentStatus[] = ['PENDING', 'FAILED', 'REFUND_FAILED']
+
+const APPLICATION_STATUS_LABEL: Record<ApplicationStatus, string> = {
+  PENDING: '심사중',
+  PAYMENT_PENDING: '입금 대기',
+  CONFIRMED: '확정',
+  REJECTED: '거절',
+  CANCELLED: '취소',
+  ATTENDED: '참석',
+}
+
+const LOG_FIELD_LABEL: Record<DiningStatusLog['field'], string> = {
+  STATUS: '신청 상태',
+  MATCH_STATUS: '매칭 상태',
+  PAYMENT: '결제',
+}
+const LOG_VALUE_LABEL: Record<DiningStatusLog['field'], Record<string, string>> = {
+  STATUS: APPLICATION_STATUS_LABEL,
+  MATCH_STATUS: MATCH_STATUS_LABEL,
+  PAYMENT: PAYMENT_STATUS_LABEL,
+}
+const logValue = (field: DiningStatusLog['field'], value: string | null) => (value ? LOG_VALUE_LABEL[field][value] ?? value : '-')
+
 const ACTION_CLASS =
   'shrink-0 px-4 h-10 rounded-input text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none'
 // 지금 눌러야 할 버튼 하나만 채워서 보여준다: 테이블이 없으면 자동매칭, 제안 테이블이 있으면 전체 즉시 확정.
@@ -49,6 +94,7 @@ const PRIMARY_CLASS = 'bg-primary text-white hover:opacity-90'
 const SECONDARY_CLASS = 'border border-tag-bg bg-card text-foreground hover:border-primary'
 const TH_CLASS = 'px-3 py-2 text-left text-xs font-medium text-tag-text whitespace-nowrap'
 const TD_CLASS = 'px-3 py-2 text-sm text-foreground whitespace-nowrap'
+const SELECT_CLASS = 'h-9 rounded-input border border-tag-bg bg-card px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
 
 interface DiningSessionConsoleProps {
   sessionId: string
@@ -217,6 +263,7 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
       {tab === 'tables' && <DiningTableBoard sessionId={sessionId} />}
       {tab === 'venues' && <DiningVenueChatTab sessionId={sessionId} />}
       {tab === 'attendance' && <DiningAttendanceFeedbackTab sessionId={sessionId} />}
+      {tab === 'notices' && <DiningNoticeLogTab sessionId={sessionId} />}
 
       {isEditOpen && (
         <GatheringSessionModal
@@ -234,9 +281,12 @@ interface ApplicantsTabProps {
   sessionId: string
 }
 
-// 신청자 표. 결제 미완료·제외 관계 행은 강조한다.
+// 신청자 표. 결제 미완료·제외 관계 행은 강조한다. 결제·매칭·지역 필터, 행을 누르면 상태 이력 (KAN-440)
 function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
-  const { data: applicants, isLoading, isError, error, refetch } = useDiningApplicants(sessionId)
+  const [filter, setFilter] = useState<DiningApplicantFilter>({})
+  const [historyOf, setHistoryOf] = useState<{ applicationId: string; name: string } | null>(null)
+  const { data: applicants, isLoading, isError, error, refetch } = useDiningApplicants(sessionId, filter)
+  const { data: regions = [] } = useDiningRegions()
   const download = useDownloadDiningCsv(sessionId)
 
   if (isLoading) return <div className="flex justify-center py-16"><LoadingSpinner /></div>
@@ -245,14 +295,52 @@ function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
   }
 
   const unpaidCount = applicants.filter((a) => !a.isPaid).length
+  const hasReportCount = applicants.some((a) => a.reportCount !== undefined)
+  const isFiltered = !!(filter.paymentStatus || filter.matchStatus || filter.region)
+  const headers = ['이름', '나이', '성별', 'MBTI', '결제', '매칭 상태', '희망 회차', '희망 지역', '참가', '제외 관계', ...(hasReportCount ? ['신고'] : [])]
 
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex gap-3 text-sm text-tag-text">
-          <span>신청 {applicants.length}명</span>
-          <span>결제 미완료 {unpaidCount}명</span>
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="flex gap-3 text-sm text-tag-text">
+            <span>신청 {applicants.length}명</span>
+            <span>결제 미완료 {unpaidCount}명</span>
+          </p>
+          <select
+            value={filter.paymentStatus ?? ''}
+            onChange={(e) => setFilter((f) => ({ ...f, paymentStatus: (e.target.value || undefined) as DiningPaymentStatus | undefined }))}
+            aria-label="결제 상태"
+            className={SELECT_CLASS}
+          >
+            <option value="">결제 전체</option>
+            {(Object.keys(PAYMENT_STATUS_LABEL) as DiningPaymentStatus[]).map((s) => (
+              <option key={s} value={s}>{PAYMENT_STATUS_LABEL[s]}</option>
+            ))}
+          </select>
+          <select
+            value={filter.matchStatus ?? ''}
+            onChange={(e) => setFilter((f) => ({ ...f, matchStatus: (e.target.value || undefined) as MatchStatus | undefined }))}
+            aria-label="매칭 상태"
+            className={SELECT_CLASS}
+          >
+            <option value="">매칭 전체</option>
+            {(Object.keys(MATCH_STATUS_LABEL) as MatchStatus[]).map((s) => (
+              <option key={s} value={s}>{MATCH_STATUS_LABEL[s]}</option>
+            ))}
+          </select>
+          {regions.length > 0 && (
+            <select
+              value={filter.region ?? ''}
+              onChange={(e) => setFilter((f) => ({ ...f, region: e.target.value || undefined }))}
+              aria-label="지역"
+              className={SELECT_CLASS}
+            >
+              <option value="">지역 전체</option>
+              {regions.map((region) => <option key={region} value={region}>{region}</option>)}
+            </select>
+          )}
+        </div>
         <button
           onClick={() => download.mutate('applicants')}
           disabled={download.isPending}
@@ -262,25 +350,40 @@ function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
         </button>
       </div>
       {applicants.length === 0 ? (
-        <div className="bg-card rounded-card shadow-sm py-12 text-center text-sm text-tag-text">아직 신청자가 없어요.</div>
+        <div className="bg-card rounded-card shadow-sm py-12 text-center text-sm text-tag-text">
+          {isFiltered ? '조건에 맞는 신청자가 없어요.' : '아직 신청자가 없어요.'}
+        </div>
       ) : (
         <div className="bg-card rounded-card shadow-sm overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-tag-bg">
               <tr>
-                {['이름', '나이', '성별', 'MBTI', '결제', '매칭 상태', '희망 회차', '희망 지역', '참가', '제외 관계'].map((h) => (
+                {headers.map((h) => (
                   <th key={h} className={TH_CLASS}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-tag-bg">
               {applicants.map((a) => (
-                <tr key={a.applicationId} className={!a.isPaid || a.hasExcludedRelation ? 'bg-primary-light' : undefined}>
-                  <td className={`${TD_CLASS} font-medium`}>{a.name}</td>
+                <tr
+                  key={a.applicationId}
+                  onClick={() => setHistoryOf({ applicationId: a.applicationId, name: a.name })}
+                  className={`cursor-pointer hover:bg-background ${!a.isPaid || a.hasExcludedRelation ? 'bg-primary-light' : ''}`}
+                >
+                  <td className={`${TD_CLASS} font-medium`}>
+                    {/* 키보드 접근용. 클릭은 행으로 올라간다 */}
+                    <button type="button" className="font-medium hover:underline">{a.name}</button>
+                  </td>
                   <td className={TD_CLASS}>{a.age ?? '-'}</td>
                   <td className={TD_CLASS}>{genderShort(a.gender)}</td>
                   <td className={TD_CLASS}>{a.mbti ?? '-'}</td>
-                  <td className={`${TD_CLASS} ${a.isPaid ? '' : 'font-bold text-primary'}`}>{a.isPaid ? '완료' : '미완료'}</td>
+                  {a.paymentStatus ? (
+                    <td className={`${TD_CLASS} ${PAYMENT_ALERT.includes(a.paymentStatus) ? 'font-bold text-primary' : ''}`}>
+                      {PAYMENT_STATUS_LABEL[a.paymentStatus] ?? a.paymentStatus}
+                    </td>
+                  ) : (
+                    <td className={`${TD_CLASS} ${a.isPaid ? '' : 'font-bold text-primary'}`}>{a.isPaid ? '완료' : '미완료'}</td>
+                  )}
                   <td className={TD_CLASS}>{a.matchStatus ? MATCH_STATUS_LABEL[a.matchStatus] : '-'}</td>
                   <td className={TD_CLASS}>
                     {a.candidateSessions.map((c) => (
@@ -294,12 +397,82 @@ function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
                   <td className={`${TD_CLASS} ${a.hasExcludedRelation ? 'font-bold text-primary' : 'text-tag-text'}`}>
                     {a.hasExcludedRelation ? '있음' : '없음'}
                   </td>
+                  {hasReportCount && (
+                    <td className={`${TD_CLASS} ${a.reportCount ? 'font-bold text-primary' : 'text-tag-text'}`}>{a.reportCount ?? 0}건</td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+      {historyOf && (
+        <ApplicationHistoryDrawer
+          sessionId={sessionId}
+          applicationId={historyOf.applicationId}
+          name={historyOf.name}
+          onClose={() => setHistoryOf(null)}
+        />
+      )}
     </section>
+  )
+}
+
+interface ApplicationHistoryDrawerProps {
+  sessionId: string
+  applicationId: string
+  name: string
+  onClose: () => void
+}
+
+// 신청 상태·매칭 상태·결제 변경 이력 드로어, 최신순 (KAN-440)
+function ApplicationHistoryDrawer({ sessionId, applicationId, name, onClose }: ApplicationHistoryDrawerProps) {
+  const { data: logs, isLoading, isError, error, refetch } = useDiningApplicationHistory(sessionId, applicationId)
+
+  const renderBody = () => {
+    if (isLoading) return <div className="flex justify-center py-16"><LoadingSpinner /></div>
+    if (isError || !logs) {
+      return <ApiErrorMessage message={getAdminApiErrorMessage(error, '상태 이력을 불러오지 못했어요.')} onRetry={() => refetch()} />
+    }
+    if (logs.length === 0) return <p className="py-12 text-center text-sm text-tag-text">상태 이력이 없어요.</p>
+    return (
+      <ul className="divide-y divide-tag-bg">
+        {logs.map((log, i) => (
+          <li key={`${log.at}-${i}`} className="flex flex-col gap-1 py-3">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="font-semibold text-foreground">{LOG_FIELD_LABEL[log.field] ?? log.field}</span>
+              <span className="shrink-0 text-tag-text">{dayjs(log.at).format('YY.MM.DD HH:mm')}</span>
+            </div>
+            <p className="text-sm text-foreground">
+              {logValue(log.field, log.from)} → <span className="font-semibold">{logValue(log.field, log.to)}</span>
+            </p>
+            <p className="flex flex-wrap gap-2 text-sm text-tag-text">
+              <span>{log.actorName ?? '시스템'}</span>
+              {log.reason && <span className="break-all">{log.reason}</span>}
+            </p>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dining-history-title"
+        className="fixed inset-y-0 right-0 z-50 flex h-full w-full flex-col bg-card shadow-2xl sm:w-[480px]"
+      >
+        <div className="flex items-center justify-between border-b border-tag-bg px-6 py-4">
+          <h2 id="dining-history-title" className="text-[18px] font-bold text-foreground">{name} 상태 이력</h2>
+          <button type="button" onClick={onClose} className="text-tag-text" aria-label="닫기">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-2">{renderBody()}</div>
+      </div>
+    </>
   )
 }

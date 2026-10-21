@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchDiningRegions, fetchMyDiningApplications, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory, fetchDiningRecommendations } from '@/lib/api/application'
-import type { ApplicationCreateRequest, ApplicationStatus, DiningCancelRequest, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchDiningRegions, fetchMyDiningApplications, updateDiningWishes, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory, fetchDiningRecommendations } from '@/lib/api/application'
+import type { ApplicationCreateRequest, ApplicationStatus, DiningCancelRequest, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DiningWishesRequest, DynamicApplicationRequest } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
 
@@ -118,6 +118,17 @@ export function useChooseDiningResolution() {
   const onError = useDiningActionErrorToast()
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: DiningResolutionChooseRequest }) => chooseDiningResolution(id, data),
+    onSuccess: () => invalidateDiningApplications(queryClient),
+    onError,
+  })
+}
+
+// 대기 중 일정·지역 바꾸기 (KAN-436). 409(이미 매칭 시작 등)는 최신 상태로 다시 불러온다
+export function useUpdateDiningWishes() {
+  const queryClient = useQueryClient()
+  const onError = useDiningActionErrorToast()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: DiningWishesRequest }) => updateDiningWishes(id, data),
     onSuccess: () => invalidateDiningApplications(queryClient),
     onError,
   })

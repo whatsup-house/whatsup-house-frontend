@@ -66,7 +66,7 @@ test.describe('회원 - 우연한 식탁 테이블', () => {
     await page.goto(TABLE_PATH)
 
     await expect(page.getByRole('button', { name: '체크인하기' })).toBeDisabled()
-    await expect(page.getByText('체크인은 17:00 ~ 21:00 사이에 할 수 있어요.')).toBeVisible()
+    await expect(page.getByText('17:00~21:00')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/dining-table-03-checkin-closed.png')
   })
 

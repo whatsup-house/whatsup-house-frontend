@@ -83,7 +83,7 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
     await expect(cardA).toContainText('분 후 확정')
     await expect(cardA).toContainText('78%')
     await expect(page.getByRole('heading', { name: '미배정 1명' })).toBeVisible()
-    await expect(page.getByRole('listitem').filter({ hasText: UNASSIGNED_PARTICIPANT.nickname })).toContainText('나이 차 초과')
+    await expect(page.getByRole('row').filter({ hasText: UNASSIGNED_PARTICIPANT.nickname })).toContainText('나이 차 초과')
     await captureFullPage(page, 'e2e/screenshots/admin/dining-03-tables-proposed.png')
 
     // 5. 멤버 이동 셀렉트 → move 요청 (A → B)

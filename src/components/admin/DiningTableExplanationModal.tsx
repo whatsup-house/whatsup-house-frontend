@@ -14,6 +14,7 @@ import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
 const FALLBACK_CHARACTER = '/assets/job/DEFAULT_SUIT.png'
 
 const CRITERION_LABEL: Record<DiningCriterion, string> = {
+  ageBand: '연령대',
   gender: '성별',
   mbti: 'MBTI',
   interests: '관심사',
@@ -191,9 +192,9 @@ export default function DiningTableExplanationModal({ sessionId, tableId, onClos
 
         <MatchGraph members={members} pairs={pairs} selectedKey={selectedKey} onSelect={setSelectedKey} />
 
-        <div aria-live="polite" className="rounded-input bg-tag-bg px-4 py-3 text-sm">
+        <div aria-live="polite" className={`rounded-input bg-tag-bg px-4 py-3 text-sm ${selected ? '' : 'hidden'}`}>
           {!selected ? (
-            <p className="text-tag-text">선이나 %를 누르거나 아래 표에서 고르면 두 사람의 항목별 근거를 볼 수 있어요.</p>
+            null
           ) : (
             <>
               <p className="font-bold text-foreground">
