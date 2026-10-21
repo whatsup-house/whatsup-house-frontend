@@ -3,15 +3,12 @@
 import { useState } from 'react'
 import dayjs from 'dayjs'
 import { X } from 'lucide-react'
-import type { DiningCriterion, DiningExplanationMember, DiningPairScore } from '@/lib/api/types'
+import type { DiningCriterion, DiningPairScore } from '@/lib/api/types'
 import { useDiningTableExplanation } from '@/lib/hooks/useAdminDining'
 import { genderShort, tableLabel } from '@/lib/utils/diningStatus'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
-import { GRAPH_SIZE, LABEL_H, LABEL_W, NICKNAME_DY, NODE_H, NODE_W, circleLayout, placePairLabels } from '@/lib/utils/diningGraph'
 import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
-
-// characterUrl 이 없거나 이미지 로드에 실패하면 기본 캐릭터 (MyProfile 과 같은 폴백, KAN-285)
-const FALLBACK_CHARACTER = '/assets/job/DEFAULT_SUIT.png'
+import DiningMatchGraph, { pairKey } from './DiningMatchGraph'
 
 const CRITERION_LABEL: Record<DiningCriterion, string> = {
   ageBand: '연령대',
@@ -24,124 +21,6 @@ const CRITERION_LABEL: Record<DiningCriterion, string> = {
 const CRITERIA = Object.keys(CRITERION_LABEL) as DiningCriterion[]
 
 const percent = (value: number) => `${Math.round(value * 100)}%`
-const pairKey = (pair: Pick<DiningPairScore, 'a' | 'b'>) => `${pair.a}:${pair.b}`
-
-interface GraphNodeProps {
-  x: number
-  y: number
-  nickname: string
-  characterUrl: string | null
-}
-
-function GraphNode({ x, y, nickname, characterUrl }: GraphNodeProps) {
-  const [src, setSrc] = useState(characterUrl || FALLBACK_CHARACTER)
-  return (
-    <g>
-      {/* 선 끝을 가리는 배경 */}
-      <rect x={x - NODE_W / 2 - 2} y={y - NODE_H / 2 - 2} width={NODE_W + 4} height={NODE_H + 4} rx={12} className="fill-card stroke-tag-bg" />
-      <image
-        href={src}
-        x={x - NODE_W / 2}
-        y={y - NODE_H / 2}
-        width={NODE_W}
-        height={NODE_H}
-        preserveAspectRatio="xMidYMid meet"
-        onError={() => {
-          if (src !== FALLBACK_CHARACTER) setSrc(FALLBACK_CHARACTER)
-        }}
-      />
-      <text
-        x={x}
-        y={y + NICKNAME_DY}
-        textAnchor="middle"
-        fontSize={12}
-        fontWeight={600}
-        strokeWidth={4}
-        paintOrder="stroke"
-        className="fill-foreground stroke-card"
-      >
-        {nickname}
-      </text>
-    </g>
-  )
-}
-
-interface MatchGraphProps {
-  members: Pick<DiningExplanationMember, 'applicationId' | 'nickname' | 'characterUrl'>[]
-  pairs: DiningPairScore[]
-  selectedKey: string | null
-  onSelect: (key: string) => void
-}
-
-// 멤버를 원형으로 놓고 모든 쌍을 잇는다. 선 굵기·진하기 = 쌍 점수, 선 위 라벨 = %.
-// 마우스 전용이라 스크린리더에서는 숨기고, 같은 선택을 아래 쌍 목록 표에서 키보드로 한다.
-function MatchGraph({ members, pairs, selectedKey, onSelect }: MatchGraphProps) {
-  const nodes = circleLayout(members.length)
-  const indexOf = new Map(members.map((m, i) => [m.applicationId, i]))
-  const edges = pairs.flatMap((pair) => {
-    const a = indexOf.get(pair.a)
-    const b = indexOf.get(pair.b)
-    return a === undefined || b === undefined ? [] : [{ pair, key: pairKey(pair), ends: [a, b] as [number, number] }]
-  })
-  const labels = placePairLabels(nodes, edges.map((e) => e.ends))
-
-  return (
-    <svg viewBox={`0 0 ${GRAPH_SIZE} ${GRAPH_SIZE}`} className="mx-auto w-full max-w-sm" aria-hidden="true" focusable="false">
-      {edges.map(({ pair, key, ends: [a, b] }) => {
-        const selected = key === selectedKey
-        const line = { x1: nodes[a].x, y1: nodes[a].y, x2: nodes[b].x, y2: nodes[b].y }
-        return (
-          <g key={key} onClick={() => onSelect(key)} className="cursor-pointer">
-            <line
-              {...line}
-              strokeLinecap="round"
-              strokeWidth={1 + pair.score * 5}
-              strokeOpacity={selected ? 1 : 0.2 + pair.score * 0.8}
-              className={selected ? 'stroke-foreground' : 'stroke-primary'}
-            />
-            {/* 얇은 선도 누르기 쉽게 넓은 투명 히트 영역 */}
-            <line {...line} strokeWidth={14} className="stroke-transparent" />
-          </g>
-        )
-      })}
-      {members.map((m, i) => (
-        <GraphNode
-          key={`${m.applicationId}:${m.characterUrl ?? ''}`}
-          x={nodes[i].x}
-          y={nodes[i].y}
-          nickname={m.nickname}
-          characterUrl={m.characterUrl}
-        />
-      ))}
-      {edges.map(({ pair, key }, i) => {
-        const selected = key === selectedKey
-        return (
-          <g key={`label-${key}`} onClick={() => onSelect(key)} className="cursor-pointer">
-            <rect
-              x={labels[i].x - LABEL_W / 2}
-              y={labels[i].y - LABEL_H / 2}
-              width={LABEL_W}
-              height={LABEL_H}
-              rx={LABEL_H / 2}
-              className={selected ? 'fill-foreground stroke-foreground' : 'fill-card stroke-primary'}
-            />
-            <text
-              x={labels[i].x}
-              y={labels[i].y}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize={11}
-              fontWeight={700}
-              className={selected ? 'fill-card' : 'fill-foreground'}
-            >
-              {percent(pair.score)}
-            </text>
-          </g>
-        )
-      })}
-    </svg>
-  )
-}
 
 interface DiningTableExplanationModalProps {
   sessionId: string
@@ -190,7 +69,7 @@ export default function DiningTableExplanationModal({ sessionId, tableId, onClos
           </p>
         </section>
 
-        <MatchGraph members={members} pairs={pairs} selectedKey={selectedKey} onSelect={setSelectedKey} />
+        <DiningMatchGraph members={members} pairs={pairs} selectedKey={selectedKey} onSelect={setSelectedKey} />
 
         <div aria-live="polite" className={`rounded-input bg-tag-bg px-4 py-3 text-sm ${selected ? '' : 'hidden'}`}>
           {!selected ? (

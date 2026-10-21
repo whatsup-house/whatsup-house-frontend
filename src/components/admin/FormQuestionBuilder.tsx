@@ -16,6 +16,7 @@ import type {
   MatchingStrategy,
 } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const TYPE_LABEL: Record<QuestionType, string> = {
   SHORT_TEXT: '텍스트 답변',
@@ -207,9 +208,9 @@ export default function FormQuestionBuilder({ gatheringId, gatheringTitle }: For
                   <Pencil size={15} />
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (q.systemReserved) { showToast('기본 질문(이름/연락처)은 삭제할 수 없어요.', 'error'); return }
-                    if (confirm(`'${q.label}' 질문을 삭제할까요?`)) deleteQuestion.mutate(q.questionId)
+                    if (await showConfirm(`'${q.label}' 질문을 삭제할까요?`, { confirmLabel: '삭제', destructive: true })) deleteQuestion.mutate(q.questionId)
                   }}
                   disabled={!!q.reservedKey}
                   className={`p-1.5 ${q.systemReserved || q.reservedKey ? 'text-[#DDD] cursor-not-allowed' : 'text-[#C8392B] hover:bg-[#FDECEA] rounded'}`}

@@ -8,6 +8,7 @@ import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
 import { useDiningExceptions, useDiningVenues, useResolveDiningException } from '@/lib/hooks/useAdminDiningOps'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import type { DiningExceptionStatus, DiningExceptionType, DiningSafetyAction } from '@/lib/api/types'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const TYPE_LABEL: Record<DiningExceptionType, string> = {
   PAYMENT: '결제',
@@ -100,9 +101,16 @@ function ExceptionCaseActions({ caseId, type, tableId, hasApplication }: Excepti
     })
   }
 
-  const handleSafety = (action: DiningSafetyAction) => {
+  const handleSafety = async (action: DiningSafetyAction) => {
     const label = SAFETY_ACTION_LABEL[action]
-    if (action !== 'WARN' && !confirm(`'${label}' 조치하면 이 회원은 우연한 식탁에 참여할 수 없어요. 진행할까요?`)) return
+    if (action !== 'WARN') {
+      const ok = await showConfirm('이 회원은 우연한 식탁에 참여할 수 없어요.', {
+        title: `'${label}' 조치를 진행할까요?`,
+        confirmLabel: label,
+        destructive: true,
+      })
+      if (!ok) return
+    }
     submit(action)
   }
 
