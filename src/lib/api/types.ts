@@ -801,17 +801,6 @@ export interface DiningApplicationItem {
 // 참가자에게 보이는 미배정 사유 — 관리자 사유에서 점수(LOW_SCORE)를 뺀 것 (MAT-12)
 export type DiningParticipantUnassignedReason = Exclude<DiningUnassignedReason, 'LOW_SCORE'>
 
-// 신청 결제·이용권·보증금 상태에서 BE 가 계산한 통합 결제 상태 (KAN-437)
-export type DiningPaymentStatus =
-  | 'PENDING'
-  | 'PAID'
-  | 'FAILED'
-  | 'REFUND_AVAILABLE'
-  | 'REFUND_REQUESTED'
-  | 'REFUND_PROCESSING'
-  | 'REFUNDED'
-  | 'REFUND_FAILED'
-
 // PUT /api/dining/me/applications/{id}/wishes — WAITING·REALLOCATING 만. 409 WISH_CHANGE_NOT_ALLOWED (KAN-436)
 export interface DiningWishesRequest {
   candidateSessionIds: string[]   // 우선순위 순
