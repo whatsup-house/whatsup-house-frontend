@@ -524,7 +524,7 @@
       "date": "Fecha",
       "time": "tiempo",
       "location": "Ubicación",
-      "diningRegions": "Se celebra en tu zona preferida entre 4 zonas de Seúl",
+      "diningRegions": "4 zonas de Seúl",
       "capacityLabel": "Capacidad",
       "capacity": "Hasta {count} personas",
       "priceLabel": "Tarifa",
@@ -615,7 +615,8 @@
       "depositAccount": "Cuenta de depósito (pago después de la solicitud)",
       "accountHolder": "Titular de la cuenta {holder}",
       "loginRequired": "Inicia sesión para comprar un pase.",
-      "select": "이용권 선택하기"
+      "select": "이용권 선택하기",
+      "buy": "Comprar un pase"
     },
     "diningApply": {
       "steps": {
