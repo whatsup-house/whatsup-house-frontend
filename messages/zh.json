@@ -524,7 +524,7 @@
       "date": "日期",
       "time": "时间",
       "location": "地点",
-      "diningRegions": "在首尔4个区域中的意向区域举行",
+      "diningRegions": "首尔4个区域",
       "capacityLabel": "容量",
       "capacity": "最多 {count} 人",
       "priceLabel": "费用",
@@ -615,7 +615,8 @@
       "depositAccount": "存款账号（请求后付款）",
       "accountHolder": "账户持有人 {holder}",
       "loginRequired": "登录购买通行证。",
-      "select": "이용권 선택하기"
+      "select": "이용권 선택하기",
+      "buy": "购买使用券"
     },
     "diningApply": {
       "steps": {

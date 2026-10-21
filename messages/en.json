@@ -524,7 +524,7 @@
       "date": "Date",
       "time": "Time",
       "location": "Location",
-      "diningRegions": "Held in your preferred area among 4 Seoul areas",
+      "diningRegions": "4 areas in Seoul",
       "capacityLabel": "Capacity",
       "capacity": "Up to {count} people",
       "priceLabel": "Fee",
@@ -615,7 +615,8 @@
       "depositAccount": "Deposit account (pay after request)",
       "accountHolder": "Account holder {holder}",
       "loginRequired": "Log in to purchase a pass.",
-      "select": "이용권 선택하기"
+      "select": "이용권 선택하기",
+      "buy": "Buy a pass"
     },
     "diningApply": {
       "steps": {

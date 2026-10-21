@@ -124,6 +124,7 @@ export const buildGatheringTypeCards = (
     return [{
       id: g.id,
       title: g.title,
+      gatheringType: g.gatheringType,
       thumbnailUrl: g.thumbnailUrl,
       tags: g.tags,
       totalCount: g.sessions.length,

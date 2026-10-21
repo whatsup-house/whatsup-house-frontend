@@ -283,7 +283,7 @@ export default function GatheringTypeCardView() {
                     src={card.thumbnailUrl}
                     alt={card.title}
                     className="object-cover"
-                    style={card.title === '우연한 식탁' ? { objectPosition: 'center 32%' } : undefined}
+                    style={card.gatheringType === 'RANDOM_TABLE' ? { objectPosition: 'center 32%' } : undefined}
                     sizes="(max-width: 390px) 50vw, 195px"
                   />
                 ) : (

@@ -524,7 +524,7 @@
       "date": "날짜",
       "time": "시간",
       "location": "장소",
-      "diningRegions": "서울 내 지역 4곳 중 희망 지역에서 열려요",
+      "diningRegions": "서울 내 지역 4곳",
       "capacityLabel": "모집인원",
       "capacity": "최대 {count}명",
       "priceLabel": "참가비",
@@ -615,7 +615,8 @@
       "depositAccount": "입금 계좌 (신청 후 입금)",
       "accountHolder": "예금주 {holder}",
       "loginRequired": "로그인 후 이용권을 구매할 수 있어요.",
-      "select": "이용권 선택하기"
+      "select": "이용권 선택하기",
+      "buy": "이용권 구매하기"
     },
     "diningApply": {
       "steps": {
