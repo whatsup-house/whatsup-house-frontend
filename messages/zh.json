@@ -645,6 +645,7 @@
     },
     "diningTable": {
       "label": "偶遇餐桌",
+      "gatherAt": "集合",
       "strengthsTitle": "这张餐桌",
       "loadFailed": "无法加载餐桌信息。",
       "notMemberTitle": "你不是这张餐桌的成员",
@@ -659,22 +660,20 @@
       "venueTitle": "餐厅",
       "venuePending": "正在安排餐厅",
       "priceRange": "价格区间 {price}",
+      "reservationName": "预订名",
       "membersTitle": "同桌成员 {count}人",
       "topicsTitle": "聊天话题",
-      "topicsGuide": "聊天话题和破冰内容会发布在群聊中。",
+      "icebreakerTitle": "破冰",
       "enterChat": "进入群聊",
       "chatPreparing": "群聊准备中",
       "cancelPolicyTitle": "取消政策",
       "checkInTitle": "签到",
       "checkIn": "签到",
       "checkedIn": "已签到",
-      "checkInWindow": "可在 {from} ~ {to} 之间签到。",
-      "checkInUnavailable": "现在无法签到。",
       "checkInWindowClosed": "现在不是签到时间。",
       "checkInSuccess": "签到成功，祝你用餐愉快！",
       "checkInFailed": "签到失败，请稍后重试。",
       "feedbackTitle": "活动后反馈",
-      "feedbackGuide": "今天的餐桌怎么样？你的意见会用于下一次匹配。",
       "feedbackButton": "填写反馈"
     },
     "diningFeedback": {
@@ -846,27 +845,21 @@
         },
         "moreSessions": "另有{count}个日期",
         "candidateRegions": "意向区域 {regions}",
-        "detail": {
-          "payment": "购买使用券后，报名即可确定并进入匹配等待。",
-          "waiting": "正在等待匹配。",
-          "waitingAt": "将于{at}开始匹配。",
-          "matching": "正在为你寻找同桌伙伴。",
-          "matchingUntil": "餐桌预计于{at}确定。",
-          "reallocating": "餐桌人数有变动，正在重新分配。",
-          "confirmed": "餐桌已确定，快来看看同桌伙伴和餐厅吧。",
-          "attended": "感谢你的参加。",
-          "alternative": "这个日期未能组成餐桌，请在下方选择处理方式。",
-          "noMatch": "很遗憾，这次没有匹配成功。",
-          "exception": "运营团队正在确认你的报名，请稍候。",
-          "paymentDeposit": "보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요."
-        },
+        "matchRunAt": "匹配",
+        "confirmAt": "确定",
         "buyTicket": "购买使用券",
         "viewTable": "查看餐桌",
         "goResolve": "选择处理方式",
+        "otherSessions": "查看其他日程",
+        "inquiry": "咨询",
+        "wishes": {
+          "button": "更改日程",
+          "submit": "保存更改",
+          "done": "日程已更改。"
+        },
         "viewAll": "查看我的全部报名",
         "cancel": {
           "button": "取消报名",
-          "closed": "회차가 시작돼 취소할 수 없어요.",
           "confirmTitle": "要取消报名吗？",
           "confirm": "取消报名",
           "done": "已取消报名。",
@@ -894,13 +887,13 @@
         },
         "resolution": {
           "title": "你想怎么处理？",
-          "respondBy": "请在{at}前选择。逾期将按保留使用券处理。",
+          "deadline": "期限",
           "offeredSessions": "可更换的日期",
-          "noOfferedSessions": "目前没有可更换的日期。",
-          "unavailable": "正在准备选项，请稍后再查看。",
+          "noOfferedSessions": "无可选日期",
+          "unavailable": "准备中",
           "loadFailed": "无法加载选项，请稍后重试。",
-          "resolved": "你已完成选择。",
-          "expired": "已过回复期限，已按保留使用券处理。",
+          "resolved": "已选择",
+          "expired": "已保留票券",
           "chosen": "你的选择已生效。",
           "choices": {
             "TRANSFER": "改到这个日期",
@@ -934,6 +927,23 @@
         "refundStatus": {
           "REFUND_PROCESSING": "송금 대기",
           "REFUNDED": "환불 완료"
+        },
+        "paymentStatus": {
+          "PENDING": "待付款",
+          "PAID": "已付款",
+          "FAILED": "付款失败",
+          "REFUND_AVAILABLE": "可退款",
+          "REFUND_REQUESTED": "已申请退款",
+          "REFUND_PROCESSING": "退款处理中",
+          "REFUNDED": "已退款",
+          "REFUND_FAILED": "退款失败"
+        },
+        "unassignedReason": {
+          "REGION_TOO_SMALL": "区域人数不足",
+          "NOT_ENOUGH_PEOPLE": "人数不足",
+          "AGE_GAP": "年龄条件",
+          "BLOCKED_PAIR": "组合条件",
+          "NEXT_SESSION_WAITING": "等待下一场"
         }
       },
       "emptyFiltered": "没有具有此状态的应用程序。",

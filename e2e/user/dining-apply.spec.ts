@@ -119,7 +119,7 @@ test.describe('회원 - 우연한 식탁 신청', () => {
     // 6. 마이페이지 신청 내역 — 상태 카드 "매칭 대기" + 실행 예정 시각
     await expect(page).toHaveURL('/mypage?tab=applications')
     await expect(page.getByText('매칭 대기', { exact: true })).toBeVisible()
-    await expect(page.getByText(/에 매칭을 시작해요\./)).toBeVisible()
+    await expect(page.getByText('매칭', { exact: true })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/dining-apply-05-mypage-waiting.png')
   })
 })

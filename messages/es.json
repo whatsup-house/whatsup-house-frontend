@@ -645,6 +645,7 @@
     },
     "diningTable": {
       "label": "Mesa al azar",
+      "gatherAt": "Encuentro",
       "strengthsTitle": "Sobre esta mesa",
       "loadFailed": "No se pudo cargar la información de la mesa.",
       "notMemberTitle": "No eres miembro de esta mesa",
@@ -659,22 +660,20 @@
       "venueTitle": "Restaurante",
       "venuePending": "Asignando restaurante",
       "priceRange": "Rango de precios {price}",
+      "reservationName": "Nombre de la reserva",
       "membersTitle": "{count} miembros en tu mesa",
       "topicsTitle": "Temas de conversación",
-      "topicsGuide": "Los temas de conversación y las dinámicas para romper el hielo se publican en el chat grupal.",
+      "icebreakerTitle": "Rompehielos",
       "enterChat": "Abrir chat grupal",
       "chatPreparing": "Chat grupal en preparación",
       "cancelPolicyTitle": "Política de cancelación",
       "checkInTitle": "Check-in",
       "checkIn": "Hacer check-in",
       "checkedIn": "Check-in completado",
-      "checkInWindow": "Puedes hacer check-in entre las {from} y las {to}.",
-      "checkInUnavailable": "Ahora no puedes hacer check-in.",
       "checkInWindowClosed": "No es hora de hacer check-in.",
       "checkInSuccess": "¡Check-in hecho! Disfruta la comida.",
       "checkInFailed": "No se pudo hacer check-in. Inténtalo de nuevo en un momento.",
       "feedbackTitle": "Opinión después del evento",
-      "feedbackGuide": "¿Qué tal tu mesa? Tu opinión nos ayuda con el próximo emparejamiento.",
       "feedbackButton": "Dejar opinión"
     },
     "diningFeedback": {
@@ -846,27 +845,21 @@
         },
         "moreSessions": "+{count} fechas más",
         "candidateRegions": "Zonas: {regions}",
-        "detail": {
-          "payment": "Compra un pase para confirmar tu solicitud y entrar en la cola de emparejamiento.",
-          "waiting": "Esperando el emparejamiento.",
-          "waitingAt": "El emparejamiento empieza el {at}.",
-          "matching": "Estamos buscando una mesa para ti.",
-          "matchingUntil": "Tu mesa se confirmará el {at}.",
-          "reallocating": "La mesa cambió, así que te estamos reasignando.",
-          "confirmed": "Tu mesa está confirmada. Mira con quién cenarás y dónde.",
-          "attended": "Gracias por acompañarnos.",
-          "alternative": "No pudimos formar una mesa para esta fecha. Elige una opción abajo.",
-          "noMatch": "Lo sentimos, esta vez no hubo emparejamiento.",
-          "exception": "Nuestro equipo está revisando tu solicitud. Espera un momento.",
-          "paymentDeposit": "보증금을 입금하면 신청이 확정되고 매칭을 기다리게 돼요."
-        },
+        "matchRunAt": "Emparejamiento",
+        "confirmAt": "Confirmación",
         "buyTicket": "Comprar pase",
         "viewTable": "Ver mesa",
         "goResolve": "Elegir una opción",
+        "otherSessions": "Ver otras fechas",
+        "inquiry": "Contactar",
+        "wishes": {
+          "button": "Cambiar fechas",
+          "submit": "Guardar cambios",
+          "done": "Se cambiaron tus fechas."
+        },
         "viewAll": "Ver todas mis solicitudes",
         "cancel": {
           "button": "Cancelar solicitud",
-          "closed": "회차가 시작돼 취소할 수 없어요.",
           "confirmTitle": "¿Cancelar esta solicitud?",
           "confirm": "Cancelar solicitud",
           "done": "Tu solicitud fue cancelada.",
@@ -894,13 +887,13 @@
         },
         "resolution": {
           "title": "¿Qué quieres hacer?",
-          "respondBy": "Elige antes del {at}. Después, guardaremos tu pase para más adelante.",
+          "deadline": "Plazo",
           "offeredSessions": "Fechas a las que puedes cambiar",
-          "noOfferedSessions": "Ahora no hay fechas disponibles para cambiar.",
-          "unavailable": "Estamos preparando tus opciones. Vuelve a revisar en un momento.",
+          "noOfferedSessions": "Sin fechas disponibles",
+          "unavailable": "En preparación",
           "loadFailed": "No se pudieron cargar tus opciones. Inténtalo de nuevo en un momento.",
-          "resolved": "Ya elegiste una opción.",
-          "expired": "Pasó el plazo, así que guardamos tu pase para más adelante.",
+          "resolved": "Elegido",
+          "expired": "Ticket guardado",
           "chosen": "Tu elección se aplicó.",
           "choices": {
             "TRANSFER": "Cambiar a esta fecha",
@@ -934,6 +927,23 @@
         "refundStatus": {
           "REFUND_PROCESSING": "송금 대기",
           "REFUNDED": "환불 완료"
+        },
+        "paymentStatus": {
+          "PENDING": "Pago pendiente",
+          "PAID": "Pagado",
+          "FAILED": "Pago fallido",
+          "REFUND_AVAILABLE": "Reembolso disponible",
+          "REFUND_REQUESTED": "Reembolso solicitado",
+          "REFUND_PROCESSING": "Reembolso en curso",
+          "REFUNDED": "Reembolsado",
+          "REFUND_FAILED": "Reembolso fallido"
+        },
+        "unassignedReason": {
+          "REGION_TOO_SMALL": "Pocas personas en la zona",
+          "NOT_ENOUGH_PEOPLE": "Pocas personas",
+          "AGE_GAP": "Condición de edad",
+          "BLOCKED_PAIR": "Condición de grupo",
+          "NEXT_SESSION_WAITING": "Esperando la próxima fecha"
         }
       },
       "emptyFiltered": "No hay solicitudes con este estado.",

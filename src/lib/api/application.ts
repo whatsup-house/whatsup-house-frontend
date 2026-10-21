@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningCancelPreview, DiningCancelRequest, DiningPrefillResponse, DiningResolution, DiningResolutionChooseRequest, DiningAttendance, DiningTableDetail, DiningFeedbackRequest, DiningReportRequest, DiningHistoryItem, DiningRecommendation } from './types'
+import type { ApiResponse, ApplicationListItem, ApplicationStatus, GuestApplicationCheckResponse, ApplicationTokenCheckResponse, DynamicApplicationRequest, ApplicationCreateRequest, ApplicationSubmitResponse, ApplicationDetail, DiningApplicationItem, DiningApplicationListResponse, DiningCancelPreview, DiningCancelRequest, DiningPrefillResponse, DiningResolution, DiningResolutionChooseRequest, DiningWishesRequest, DiningAttendance, DiningTableDetail, DiningFeedbackRequest, DiningReportRequest, DiningHistoryItem, DiningRecommendation } from './types'
 
 // 회원 동적 신청 — 종류 ID + 희망 회차 ID (KAN-338). JWT 필요
 export const submitDynamicApplication = async (
@@ -68,6 +68,11 @@ export const fetchDiningPrefill = async (gatheringId: string): Promise<DiningPre
 export const fetchMyDiningApplications = async (): Promise<DiningApplicationItem[]> => {
   const response = await apiClient.get<ApiResponse<DiningApplicationListResponse>>('/api/dining/me/applications')
   return response.data.data?.applications ?? []
+}
+
+// 대기 중 희망 일정·지역 바꾸기 — WAITING·REALLOCATING 만, 409 WISH_CHANGE_NOT_ALLOWED (KAN-436)
+export const updateDiningWishes = async (id: string, data: DiningWishesRequest): Promise<void> => {
+  await apiClient.put(`/api/dining/me/applications/${id}/wishes`, data)
 }
 
 // 우연한 식탁 사전 취소 — 회차 시작 2일 전까지 (KAN-342)

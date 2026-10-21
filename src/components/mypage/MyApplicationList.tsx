@@ -110,6 +110,7 @@ export default function MyApplicationList() {
                 <DiningStatusCard
                   key={item.id}
                   applicationId={dining.id}
+                  gatheringId={dining.gathering.id}
                   title={dining.gathering.title}
                   status={dining.status}
                   matchStatus={dining.matchStatus}
@@ -121,6 +122,8 @@ export default function MyApplicationList() {
                   depositOnly={isDepositOnlyPending(dining)}
                   deposit={dining.deposit}
                   ticketStatus={dining.ticketStatus}
+                  paymentStatus={dining.paymentStatus}
+                  unassignedReason={dining.unassignedReason}
                 />
               )
             }
