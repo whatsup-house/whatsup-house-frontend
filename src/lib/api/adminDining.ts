@@ -7,6 +7,7 @@ import type {
   DiningAttendanceRow,
   DiningAttendanceStatus,
   DiningDashboard,
+  DiningDemoResetResult,
   DiningFeedbackSummary,
   DiningMatchRun,
   DiningNoticeLog,
@@ -77,6 +78,12 @@ export const fetchDiningTablesCsv = async (sessionId: string): Promise<Blob> => 
 // 재실행이면 잠기지 않은 제안 테이블만 해체하고 다시 짠다. 취소·종료 회차는 409
 export const runDiningMatch = async (sessionId: string): Promise<DiningMatchRun> => {
   const response = await apiClient.post<ApiResponse<DiningMatchRun>>(`/api/admin/dining/sessions/${sessionId}/match-runs`)
+  return response.data.data
+}
+
+// 심사용 숨김 회차의 신청·테이블을 지우고 심사용 신청자를 다시 넣는다 (KAN-442)
+export const resetDiningDemoSession = async (sessionId: string): Promise<DiningDemoResetResult> => {
+  const response = await apiClient.post<ApiResponse<DiningDemoResetResult>>(`/api/admin/dining/sessions/${sessionId}/demo-reset`)
   return response.data.data
 }
 

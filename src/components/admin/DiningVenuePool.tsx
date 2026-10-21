@@ -144,8 +144,7 @@ export default function DiningVenuePool() {
   const filtered = activeRegion ? venues.filter((v) => v.region === activeRegion) : venues
 
   const handleDelete = async (venue: DiningVenue) => {
-    const ok = await showConfirm('이미 배정된 테이블은 그대로 두고 새로 고를 수만 없게 돼요.', {
-      title: `"${venue.name}" 식당을 삭제할까요?`,
+    const ok = await showConfirm(`"${venue.name}" 식당을 삭제할까요?`, {
       confirmLabel: '삭제',
       destructive: true,
     })

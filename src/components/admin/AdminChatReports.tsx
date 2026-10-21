@@ -42,8 +42,7 @@ export default function AdminChatReports() {
   const reports = reportsQuery.data ?? []
 
   const handleDelete = async (report: AdminChatReport) => {
-    const ok = await showConfirm('모든 멤버에게 "삭제된 메시지입니다"로 보여요.', {
-      title: '이 메시지를 삭제할까요?',
+    const ok = await showConfirm('이 메시지를 삭제할까요?', {
       confirmLabel: '삭제',
       destructive: true,
     })

@@ -221,8 +221,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
       setPendingReason({ title: '테이블 해체', request })
       return
     }
-    const ok = await showConfirm('멤버는 재배치 대기로 돌아가요.', {
-      title: `${tableLabel(table.id)} 테이블을 해체할까요?`,
+    const ok = await showConfirm(`${tableLabel(table.id)} 테이블을 해체할까요?`, {
       confirmLabel: '해체',
       destructive: true,
     })

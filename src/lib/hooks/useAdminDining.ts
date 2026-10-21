@@ -15,6 +15,7 @@ import {
   fetchDiningTablesCsv,
   mergeDiningTables,
   moveDiningTableMember,
+  resetDiningDemoSession,
   retryDiningChatRoom,
   retryDiningNotifications,
   runDiningMatch,
@@ -160,6 +161,21 @@ export function useRunDiningMatch(sessionId: string) {
     },
     onError: (err: unknown) => showToast(getAdminApiErrorMessage(err, '매칭을 실행하지 못했어요.'), 'error'),
     onSettled: invalidate,
+  })
+}
+
+// 심사용 데이터 초기화 (KAN-442). 신청·테이블·예외가 다 바뀌고 회차 정원 수치(종류 상세)도 바뀐다 → 우연한 식탁·종류 상세 캐시를 모두 무효화
+export function useResetDiningDemoSession(sessionId: string) {
+  const queryClient = useQueryClient()
+  const showToast = useToastStore((s) => s.show)
+  return useMutation({
+    mutationFn: () => resetDiningDemoSession(sessionId),
+    onSuccess: (result) => showToast(`초기화했어요 · 신청자 ${result.seededApplicantCount}명`),
+    onError: (err: unknown) => showToast(getAdminApiErrorMessage(err, '초기화하지 못했어요.'), 'error'),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'dining'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'gathering'] })
+    },
   })
 }
 
