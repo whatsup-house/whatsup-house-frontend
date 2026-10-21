@@ -40,7 +40,8 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
             const applicable = isSessionApplicable(session)
             const priority = (priorityIds?.indexOf(session.id) ?? -1) + 1
             const isSelected = priorityIds ? priority > 0 : session.id === selectedSessionId
-            const deadline = applicable && session.applyDeadlineAt
+            // 복수 선택(우연한 식탁)에선 회차별 마감 안내를 보이지 않는다
+            const deadline = !priorityIds && applicable && session.applyDeadlineAt
               ? t('applyDeadline', {
                 date: `${formatLocalizedShortDate(displayDeadline(session.applyDeadlineAt).format('YYYY-MM-DD'), locale)} ${displayDeadline(session.applyDeadlineAt).format('HH:mm')}`,
               })
@@ -69,7 +70,8 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
                     {formatLocalizedShortDate(session.eventDate, locale)} {formatTimeRange(session.startTime, session.endTime)}
                   </p>
                   {applicable ? (
-                    <span className="shrink-0 text-xs font-medium text-primary">
+                    // 우연한 식탁(복수 선택)은 테이블로 나눠 앉아 잔여석이 의미 없다
+                    !priorityIds && <span className="shrink-0 text-xs font-medium text-primary">
                       {t('remainingSeats', { count: session.maxAttendees - session.confirmedCount })}
                     </span>
                   ) : (
