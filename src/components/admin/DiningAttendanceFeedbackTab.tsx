@@ -7,6 +7,7 @@ import { useDiningAttendance, useDiningFeedbackSummary, useUpdateDiningAttendanc
 import { tableLabel } from '@/lib/utils/diningStatus'
 import { getAdminApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
 import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const ATTENDANCE_LABEL: Record<DiningAttendanceStatus, string> = {
   SCHEDULED: '참석 예정',
@@ -86,8 +87,8 @@ export default function DiningAttendanceFeedbackTab({ sessionId }: DiningAttenda
                   <td className={TD_CLASS}>
                     {r.noShowCandidate && r.status !== 'NO_SHOW' ? (
                       <button
-                        onClick={() => {
-                          if (confirm(`${r.nickname}님을 노쇼로 확정할까요?`)) {
+                        onClick={async () => {
+                          if (await showConfirm(`${r.nickname}님을 노쇼로 확정할까요?`, { confirmLabel: '노쇼 확정', destructive: true })) {
                             updateAttendance.mutate({ attendanceId: r.attendanceId, status: 'NO_SHOW' })
                           }
                         }}

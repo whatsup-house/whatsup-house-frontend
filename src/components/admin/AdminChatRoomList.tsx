@@ -14,6 +14,7 @@ import { useAddChatMembers, useAdminChatRooms, useChatSourceGatherings } from '@
 import { useAuthStore } from '@/lib/store/authStore'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import type { AdminChatRoomSummary, ChatLastMessage, ChatRoomType } from '@/lib/api/types'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const TABS: { type: ChatRoomType; label: string }[] = [
   { type: 'INQUIRY', label: '문의방' },
@@ -111,13 +112,14 @@ export default function AdminChatRoomList() {
   }
 
   // 다른 관리자가 만든 단체방은 먼저 들어가야 볼 수 있다 (입장 시스템 메시지가 남는다)
-  const openRoom = (room: AdminChatRoomSummary) => {
+  const openRoom = async (room: AdminChatRoomSummary) => {
     const href = `/admin/chat/${room.id}`
     if (room.member || !userId) {
       router.push(href)
       return
     }
-    if (!confirm('참여하지 않은 단체방이에요. 참여하고 들어갈까요? 방에 입장 메시지가 남아요.')) return
+    const ok = await showConfirm('방에 입장 메시지가 남아요.', { title: '참여하지 않은 단체방이에요. 참여하고 들어갈까요?', confirmLabel: '참여' })
+    if (!ok) return
     addMembers.mutate({ roomId: room.id, userIds: [userId] }, { onSuccess: () => router.push(href) })
   }
 

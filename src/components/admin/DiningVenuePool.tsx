@@ -11,6 +11,7 @@ import { useDeleteDiningVenue, useDiningVenues, useSaveDiningVenue } from '@/lib
 import { useDiningRegions } from '@/lib/hooks/useApplications'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import { ApiErrorMessage, Button, Input, LoadingSpinner } from '@/components/ui'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 // 길이·형식은 BE VenueRequest 검증과 같다. 지도 링크는 화면에서 링크로 열리므로 http(s)만.
 const schema = z.object({
@@ -142,8 +143,13 @@ export default function DiningVenuePool() {
   const activeRegion = regions.includes(region) ? region : ''
   const filtered = activeRegion ? venues.filter((v) => v.region === activeRegion) : venues
 
-  const handleDelete = (venue: DiningVenue) => {
-    if (confirm(`"${venue.name}" 식당을 삭제할까요?\n이미 배정된 테이블은 그대로 두고 새로 고를 수만 없게 돼요.`)) {
+  const handleDelete = async (venue: DiningVenue) => {
+    const ok = await showConfirm('이미 배정된 테이블은 그대로 두고 새로 고를 수만 없게 돼요.', {
+      title: `"${venue.name}" 식당을 삭제할까요?`,
+      confirmLabel: '삭제',
+      destructive: true,
+    })
+    if (ok) {
       deleteVenue.mutate(venue.id)
     }
   }

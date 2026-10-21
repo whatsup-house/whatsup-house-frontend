@@ -25,9 +25,8 @@ const pathOf = (url: string) => new URL(url).pathname
 const waitForApi = (page: Page, method: string, path: string) =>
   page.waitForRequest((req) => req.method() === method && pathOf(req.url()) === path)
 
-// 대시보드 타일 값(라벨 바로 다음 줄)
-const tileValue = (page: Page, label: string) =>
-  page.getByText(label, { exact: true }).first().locator('xpath=following-sibling::p[1]')
+// 매칭 실행·전체 확정·해체 등은 와썹이 알림창으로 한 번 더 묻는다 → 확인(마지막 버튼)을 누른다 (KAN-441)
+const acceptDialog = (page: Page) => page.getByRole('alertdialog').getByRole('button').last().click()
 
 // 테이블 탭의 카드. 카드 제목(굵은 라벨)으로 찾는다 — 다른 카드의 '이동' 옵션에도 라벨이 있어서 텍스트만으로는 못 가른다
 const tableCard = (page: Page, label: string) =>
@@ -37,8 +36,6 @@ async function setup(page: Page, matched = false) {
   await blockUnmockedApis(page)
   await setupAdminContext(page)
   await mockAdminDiningApis(page, { matched })
-  // 매칭 실행·전체 확정·해체 등은 window.confirm 으로 한 번 더 묻는다
-  page.on('dialog', (dialog) => dialog.accept())
 }
 
 // DINING-A-01: 대시보드 → 회차 콘솔 → 지금 매칭 실행 → 테이블 조정 → 전체 즉시 확정 → 식당 배정 → 참석·피드백 (PRD 18장 4~9·12단계)
@@ -46,29 +43,30 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
   test('시드 참가자 12명으로 매칭을 실행하고 조정·확정·식당 배정 후 참석·피드백 요약을 본다', async ({ page }) => {
     await setup(page)
 
-    // 1. 대시보드 타일 · 회차 카드
+    // 1. 대시보드 — 문제 칩 · 가장 임박한 회차 히어로 · 이후 회차 한 줄 목록 (KAN-441)
     await page.goto('/admin/dining')
-    await expect(tileValue(page, '다가오는 회차')).toHaveText('2개')
-    await expect(tileValue(page, '대기 신청자')).toHaveText('12명')
-    await expect(tileValue(page, '결제 완료')).toHaveText('12명')
-    await expect(tileValue(page, '열린 예외')).toHaveText('1건')
-    await expect(page.getByRole('heading', { name: '다가오는 회차 2개' })).toBeVisible()
-    const sessionCard = page.getByRole('link', { name: new RegExp(`성수\\s*${DINING_TITLE}`) })
+    await expect(page.getByRole('link', { name: '열린 예외 1건', exact: true })).toBeVisible()
+    const sessionCard = page.getByRole('link', { name: /다음 회차/ })
+    await expect(sessionCard).toContainText(DINING_TITLE)
     await expect(sessionCard).toContainText('12/12명')
-    await expect(sessionCard).toContainText('실행 예정')
+    await expect(sessionCard).toContainText('매칭 예정')
+    await expect(page.getByRole('heading', { name: '이후 회차 1개' })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/admin/dining-01-dashboard.png')
 
-    // 2. 회차 콘솔 — 신청자 12명
+    // 2. 회차 콘솔 — 한눈에 보기가 첫 탭, 신청자 탭에 12명
     await sessionCard.click()
     await expect(page).toHaveURL(CONSOLE_PATH)
     await expect(page.getByRole('heading', { name: DINING_TITLE })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '신청 퍼널' })).toBeVisible()
+    await page.getByRole('button', { name: '신청자', exact: true }).click()
     await expect(page.getByText('신청 12명')).toBeVisible()
     await expect(page.getByText('결제 미완료 0명')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/admin/dining-02-console-applicants.png')
 
-    // 3. 자동매칭 (confirm 수락) → 결과 토스트
+    // 3. 자동매칭 (확인 수락) → 결과 토스트
     const runRequest = waitForApi(page, 'POST', `/api/admin/dining/sessions/${DINING_SESSION_ID}/match-runs`)
     await page.getByRole('button', { name: '자동매칭', exact: true }).click()
+    await acceptDialog(page)
     await runRequest
     await expect(page.getByText('매칭 완료: 후보 12명 → 테이블 2개, 미배정 1명')).toBeVisible()
     await expect(page.getByRole('button', { name: '자동매칭 다시 하기' })).toBeVisible()
@@ -103,6 +101,7 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
       if (req.method() === 'POST' && match) confirmedIds.push(match[1])
     })
     await page.getByRole('button', { name: '전체 즉시 확정 (2)' }).click()
+    await acceptDialog(page)
     await expect.poll(() => confirmedIds.slice().sort()).toEqual([DINING_TABLE_A_ID, DINING_TABLE_B_ID])
     await expect(page.getByText('확정 2개', { exact: true })).toBeVisible()
     await expect(cardA.getByText('확정', { exact: true })).toBeVisible()
@@ -166,7 +165,9 @@ test.describe('관리자 - 우연한 식탁 회차 콘솔', () => {
 
     await page.getByRole('button', { name: '테이블', exact: true }).click()
     await tableCard(page, LABEL_A).getByRole('button', { name: '해체' }).click()
+    await acceptDialog(page)
     await tableCard(page, LABEL_B).getByRole('button', { name: '해체' }).click()
+    await acceptDialog(page)
 
     await expect(page.getByRole('button', { name: '자동매칭', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: '자동매칭 다시 하기' })).toHaveCount(0)

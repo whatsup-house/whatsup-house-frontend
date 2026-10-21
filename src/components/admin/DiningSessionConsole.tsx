@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import dayjs from 'dayjs'
 import { Download, X } from 'lucide-react'
 import type {
@@ -22,8 +23,9 @@ import {
 } from '@/lib/hooks/useAdminDining'
 import { toBadgeStatus } from '@/lib/utils/gatheringStatus'
 import { formatTimeRange } from '@/lib/utils/date'
-import { genderShort } from '@/lib/utils/diningStatus'
+import { MATCH_STATUS_LABEL, PAYMENT_STATUS_LABEL, genderShort } from '@/lib/utils/diningStatus'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
+import { showConfirm } from '@/lib/store/dialogStore'
 import { useDiningRegions } from '@/lib/hooks/useApplications'
 import { ApiErrorMessage, Badge, LoadingSpinner } from '@/components/ui'
 import GatheringSessionModal from '@/components/admin/GatheringSessionModal'
@@ -32,7 +34,14 @@ import DiningVenueChatTab from '@/components/admin/DiningVenueChatTab'
 import DiningAttendanceFeedbackTab from '@/components/admin/DiningAttendanceFeedbackTab'
 import DiningNoticeLogTab from '@/components/admin/DiningNoticeLogTab'
 
+// chart.js 는 캔버스·CSS 변수를 브라우저에서만 읽는다 → SSR 하지 않는다 (KAN-441)
+const DiningSessionInsights = dynamic(() => import('@/components/admin/DiningSessionInsights'), {
+  ssr: false,
+  loading: () => <div className="flex justify-center py-16"><LoadingSpinner /></div>,
+})
+
 const TABS = [
+  { key: 'overview', label: '한눈에 보기' },
   { key: 'applicants', label: '신청자' },
   { key: 'tables', label: '테이블' },
   { key: 'venues', label: '식당과 단체방' },
@@ -41,29 +50,6 @@ const TABS = [
 ] as const
 type TabKey = (typeof TABS)[number]['key']
 
-const MATCH_STATUS_LABEL: Record<MatchStatus, string> = {
-  WAITING: '대기',
-  MATCHING: '매칭 중',
-  CONFIRM_PENDING: '확정 대기',
-  CONFIRMED: '확정',
-  REALLOCATING: '재배치 중',
-  ALTERNATIVE_OFFERED: '대안 제안',
-  TRANSFERRED: '회차 이동',
-  NO_MATCH: '매칭 실패',
-  EXCEPTION: '예외',
-}
-
-// 통합 결제 상태 (KAN-437)
-const PAYMENT_STATUS_LABEL: Record<DiningPaymentStatus, string> = {
-  PENDING: '결제 대기',
-  PAID: '결제 완료',
-  FAILED: '결제 실패',
-  REFUND_AVAILABLE: '환불 가능',
-  REFUND_REQUESTED: '환불 요청',
-  REFUND_PROCESSING: '환불 처리 중',
-  REFUNDED: '환불 완료',
-  REFUND_FAILED: '환불 실패',
-}
 const PAYMENT_ALERT: DiningPaymentStatus[] = ['PENDING', 'FAILED', 'REFUND_FAILED']
 
 const APPLICATION_STATUS_LABEL: Record<ApplicationStatus, string> = {
@@ -126,7 +112,7 @@ const formatDateTime = (value: string | null | undefined, empty: string) => (val
 export default function DiningSessionConsole({ sessionId }: DiningSessionConsoleProps) {
   const detailQuery = useAdminGatheringDetail(sessionId)
   const tablesQuery = useDiningTables(sessionId)
-  const [tab, setTab] = useState<TabKey>('applicants')
+  const [tab, setTab] = useState<TabKey>('overview')
   const [isEditOpen, setIsEditOpen] = useState(false)
   const runMatch = useRunDiningMatch(sessionId)
   const confirmAll = useConfirmDiningTablesNow(sessionId)
@@ -153,23 +139,23 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
   const runLabel = hasTables ? '자동매칭 다시 하기' : '자동매칭'
   const dateLabel = dayjs(session.eventDate).format('M.D (dd)')
 
-  const handleRun = () => {
-    const message = hasTables
-      ? '자동매칭을 다시 할까요?\n\n확정했거나 직접 고친 테이블은 그대로 두고, 나머지 제안 테이블만 새로 짜요.'
-      : '자동매칭을 할까요?'
-    if (confirm(message)) {
-      runMatch.mutate()
-    }
+  const handleRun = async () => {
+    const ok = hasTables
+      ? await showConfirm('확정했거나 직접 고친 테이블은 그대로 두고, 나머지 제안 테이블만 새로 짜요.', { title: '자동매칭을 다시 할까요?' })
+      : await showConfirm('자동매칭을 할까요?')
+    if (ok) runMatch.mutate()
   }
 
-  const handleConfirmAll = () => {
-    if (confirm(`제안 중인 테이블 ${proposedIds.length}개를 지금 모두 확정할까요?\n규칙을 어기는 테이블은 보류되고 예외함에 남아요.`)) {
-      confirmAll.mutate(proposedIds)
-    }
+  const handleConfirmAll = async () => {
+    const ok = await showConfirm('규칙을 어기는 테이블은 보류되고 예외함에 남아요.', {
+      title: `제안 중인 테이블 ${proposedIds.length}개를 지금 모두 확정할까요?`,
+    })
+    if (ok) confirmAll.mutate(proposedIds)
   }
 
-  const handleCancel = () => {
-    if (confirm(`${dateLabel} 회차를 취소할까요? 되돌릴 수 없어요.`)) changeStatus({ id: sessionId, status: 'CANCELLED' })
+  const handleCancel = async () => {
+    const ok = await showConfirm('되돌릴 수 없어요.', { title: `${dateLabel} 회차를 취소할까요?`, confirmLabel: '회차 취소', destructive: true })
+    if (ok) changeStatus({ id: sessionId, status: 'CANCELLED' })
   }
 
   const info: [string, string][] = [
@@ -243,6 +229,7 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
         ))}
       </nav>
 
+      {tab === 'overview' && <DiningSessionInsights sessionId={sessionId} />}
       {tab === 'applicants' && <ApplicantsTab sessionId={sessionId} />}
       {tab === 'tables' && regionResults.length > 0 && (
         // 마지막 자동매칭의 지역별 결과. 미채택 = 테이블 수가 지역 최소 테이블 수에 못 미쳐 그 지역을 열지 않음 (KAN-431)

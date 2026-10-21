@@ -9,6 +9,7 @@ import { useAdminGatheringTypes, useDeleteGathering, useSetCuration } from '@/li
 import { useCuratedGatherings } from '@/lib/hooks/useHome'
 import { GatheringFormPanel } from '@/components/admin/GatheringFormPanel'
 import { LoadingSpinner, Pagination } from '@/components/ui'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const PAGE_SIZE = 10
 
@@ -30,8 +31,8 @@ export default function AdminGatheringsPage() {
   const totalPages = Math.ceil(rows.length / PAGE_SIZE)
   const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
-  const handleDelete = (id: string, title: string) => {
-    if (confirm(`"${title}" 모임과 모든 회차를 삭제할까요?`)) deleteGathering(id)
+  const handleDelete = async (id: string, title: string) => {
+    if (await showConfirm(`"${title}" 모임과 모든 회차를 삭제할까요?`, { confirmLabel: '삭제', destructive: true })) deleteGathering(id)
   }
 
   return (

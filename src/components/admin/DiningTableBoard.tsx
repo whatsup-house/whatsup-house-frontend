@@ -11,7 +11,6 @@ import type {
   DiningNoticeStatus,
   DiningScoreDetail,
   DiningTableAdjustRequest,
-  DiningUnassignedReason,
 } from '@/lib/api/types'
 import {
   getTableViolations,
@@ -20,19 +19,11 @@ import {
   useDiningTables,
   useDownloadDiningCsv,
 } from '@/lib/hooks/useAdminDining'
-import { TABLE_STATUS_CLASS, TABLE_STATUS_LABEL, genderShort, tableLabel } from '@/lib/utils/diningStatus'
+import { TABLE_STATUS_CLASS, TABLE_STATUS_LABEL, UNASSIGNED_REASON_LABEL, genderShort, tableLabel } from '@/lib/utils/diningStatus'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
 import DiningTableExplanationModal from './DiningTableExplanationModal'
-
-const UNASSIGNED_REASON_LABEL: Record<DiningUnassignedReason, string> = {
-  AGE_GAP: '나이 차 초과',
-  BLOCKED_PAIR: '제외 관계',
-  NOT_ENOUGH_PEOPLE: '인원 부족',
-  LOW_SCORE: '점수 미달',
-  NEXT_SESSION_WAITING: '다음 회차 대기',
-  REGION_TOO_SMALL: '지역 테이블 부족',
-}
+import { showConfirm } from '@/lib/store/dialogStore'
 
 // 처음 배정(INITIAL)은 표시하지 않는다. MANUAL 은 isManual '수동' 칩과 겹치면 생략
 const ASSIGN_REASON_LABEL: Partial<Record<DiningAssignReason, string>> = {
@@ -224,14 +215,22 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
     submit('테이블 병합', { type: 'merge', tableIds: [source.id, target.id] }, [source, target])
   }
 
-  const handleDissolve = (table: DiningAdminTable) => {
+  const handleDissolve = async (table: DiningAdminTable) => {
     const request: DiningTableAdjustRequest = { type: 'dissolve', tableId: table.id }
-    if (table.status === 'CONFIRMED') setPendingReason({ title: '테이블 해체', request })
-    else if (confirm(`${tableLabel(table.id)} 테이블을 해체할까요? 멤버는 재배치 대기로 돌아가요.`)) adjust.mutate(request)
+    if (table.status === 'CONFIRMED') {
+      setPendingReason({ title: '테이블 해체', request })
+      return
+    }
+    const ok = await showConfirm('멤버는 재배치 대기로 돌아가요.', {
+      title: `${tableLabel(table.id)} 테이블을 해체할까요?`,
+      confirmLabel: '해체',
+      destructive: true,
+    })
+    if (ok) adjust.mutate(request)
   }
 
-  const handleConfirmNow = (table: DiningAdminTable) => {
-    if (confirm(`${tableLabel(table.id)} 테이블을 지금 확정할까요?`)) confirmNow.mutate([table.id])
+  const handleConfirmNow = async (table: DiningAdminTable) => {
+    if (await showConfirm(`${tableLabel(table.id)} 테이블을 지금 확정할까요?`)) confirmNow.mutate([table.id])
   }
 
   const toggleSplitMember = (memberId: string, checked: boolean) =>

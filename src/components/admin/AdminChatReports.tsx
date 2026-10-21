@@ -15,6 +15,7 @@ import {
 import { useToastStore } from '@/lib/store/toastStore'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import type { AdminChatReport, ChatReportStatus } from '@/lib/api/types'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const STATUS_TABS: { status: ChatReportStatus; label: string }[] = [
   { status: 'OPEN', label: '미처리' },
@@ -40,8 +41,13 @@ export default function AdminChatReports() {
 
   const reports = reportsQuery.data ?? []
 
-  const handleDelete = (report: AdminChatReport) => {
-    if (!confirm('이 메시지를 삭제할까요? 모든 멤버에게 "삭제된 메시지입니다"로 보여요.')) return
+  const handleDelete = async (report: AdminChatReport) => {
+    const ok = await showConfirm('모든 멤버에게 "삭제된 메시지입니다"로 보여요.', {
+      title: '이 메시지를 삭제할까요?',
+      confirmLabel: '삭제',
+      destructive: true,
+    })
+    if (!ok) return
     deleteMessage.mutate(
       { messageId: report.messageId, roomId: report.roomId },
       { onSuccess: () => showToast('메시지를 삭제했어요') },

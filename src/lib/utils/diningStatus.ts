@@ -1,5 +1,14 @@
 import dayjs from 'dayjs'
-import type { ApplicationStatus, DiningApplicationItem, DiningSessionInfo, DiningTableDetail, DiningTableStatus, MatchStatus } from '@/lib/api/types'
+import type {
+  ApplicationStatus,
+  DiningApplicationItem,
+  DiningPaymentStatus,
+  DiningSessionInfo,
+  DiningTableDetail,
+  DiningTableStatus,
+  DiningUnassignedReason,
+  MatchStatus,
+} from '@/lib/api/types'
 
 // 알림(DINING_RESOLUTION)이 이 앵커로 들어오면 상태 카드의 해결 영역으로 스크롤한다.
 export const DINING_RESOLUTION_ANCHOR = 'dining-resolution'
@@ -87,6 +96,39 @@ export const TABLE_STATUS_CLASS: Record<DiningTableStatus, string> = {
   CONFIRMED: 'bg-green-100 text-green-700',
   DONE: 'bg-blue-100 text-blue-700',
   DISSOLVED: 'bg-gray-100 text-gray-500',
+}
+
+export const MATCH_STATUS_LABEL: Record<MatchStatus, string> = {
+  WAITING: '대기',
+  MATCHING: '매칭 중',
+  CONFIRM_PENDING: '확정 대기',
+  CONFIRMED: '확정',
+  REALLOCATING: '재배치 중',
+  ALTERNATIVE_OFFERED: '대안 제안',
+  TRANSFERRED: '회차 이동',
+  NO_MATCH: '매칭 실패',
+  EXCEPTION: '예외',
+}
+
+// 통합 결제 상태 (KAN-437)
+export const PAYMENT_STATUS_LABEL: Record<DiningPaymentStatus, string> = {
+  PENDING: '결제 대기',
+  PAID: '결제 완료',
+  FAILED: '결제 실패',
+  REFUND_AVAILABLE: '환불 가능',
+  REFUND_REQUESTED: '환불 요청',
+  REFUND_PROCESSING: '환불 처리 중',
+  REFUNDED: '환불 완료',
+  REFUND_FAILED: '환불 실패',
+}
+
+export const UNASSIGNED_REASON_LABEL: Record<DiningUnassignedReason, string> = {
+  AGE_GAP: '나이 차 초과',
+  BLOCKED_PAIR: '제외 관계',
+  NOT_ENOUGH_PEOPLE: '인원 부족',
+  LOW_SCORE: '점수 미달',
+  NEXT_SESSION_WAITING: '다음 회차 대기',
+  REGION_TOO_SMALL: '지역 테이블 부족',
 }
 
 // 성별은 표준 질문 답 원문(MALE/FEMALE)

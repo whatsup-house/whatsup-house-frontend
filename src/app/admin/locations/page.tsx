@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input'
 import { useForm } from 'react-hook-form'
 import { useToastStore } from '@/lib/store/toastStore'
 import DiningVenuePool from '@/components/admin/DiningVenuePool'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const CONTRACT_LABEL: Record<string, string> = {
   ACTIVE: '계약중',
@@ -162,8 +163,8 @@ function GatheringPlaces() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'locations'] }),
   })
 
-  const handleDelete = (id: string, name: string) => {
-    if (confirm(`"${name}" 장소를 삭제할까요?`)) deleteLocation(id)
+  const handleDelete = async (id: string, name: string) => {
+    if (await showConfirm(`"${name}" 장소를 삭제할까요?`, { confirmLabel: '삭제', destructive: true })) deleteLocation(id)
   }
 
   return (

@@ -7,6 +7,7 @@ import { useAdminFeedPosts, useDeleteAdminFeedPost, useSetAdminFeedVisibility } 
 import { FeedPostFormPanel } from '@/components/admin/FeedPostFormPanel'
 import { LoadingSpinner, Pagination } from '@/components/ui'
 import type { AdminFeedPost, FeedMedia } from '@/lib/api/types'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const FILTERS = [
   { label: '전체', value: undefined },
@@ -35,8 +36,9 @@ export function AdminFeedManager() {
     setPage(0)
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('이 피드 게시물을 삭제할까요? (복구 불가)')) remove(id, { onSuccess: stepBackIfPageEmpties })
+  const handleDelete = async (id: string) => {
+    const ok = await showConfirm('복구할 수 없어요.', { title: '이 피드 게시물을 삭제할까요?', confirmLabel: '삭제', destructive: true })
+    if (ok) remove(id, { onSuccess: stepBackIfPageEmpties })
   }
 
   return (

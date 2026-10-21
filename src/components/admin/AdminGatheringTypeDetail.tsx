@@ -19,6 +19,7 @@ import { ApiErrorMessage, Badge, LoadingSpinner } from '@/components/ui'
 import { GatheringFormPanel } from '@/components/admin/GatheringFormPanel'
 import GatheringSessionModal from '@/components/admin/GatheringSessionModal'
 import FormQuestionBuilder from '@/components/admin/FormQuestionBuilder'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const TYPE_LABEL: Record<GatheringType, string> = {
   REGULAR: '일반',
@@ -83,19 +84,21 @@ export default function AdminGatheringTypeDetail({ gatheringId }: AdminGathering
     },
   })
 
-  const handleStatusChange = (s: GatheringSession, next: AdminGatheringStatus) => {
+  const handleStatusChange = async (s: GatheringSession, next: AdminGatheringStatus) => {
     const label = NEXT_STATUSES[s.status].find((o) => o.value === next)?.label ?? next
-    if (confirm(`${dayjs(s.eventDate).format('M/D')} 회차를 '${label}'(으)로 변경할까요?`)) {
+    if (await showConfirm(`${dayjs(s.eventDate).format('M/D')} 회차를 '${label}'(으)로 변경할까요?`)) {
       changeStatus({ id: s.id, status: next })
     }
   }
 
-  const handleDeleteSession = (s: GatheringSession) => {
-    if (confirm(`${dayjs(s.eventDate).format('M/D')} 회차를 삭제할까요?`)) deleteSession(s.id)
+  const handleDeleteSession = async (s: GatheringSession) => {
+    const ok = await showConfirm(`${dayjs(s.eventDate).format('M/D')} 회차를 삭제할까요?`, { confirmLabel: '삭제', destructive: true })
+    if (ok) deleteSession(s.id)
   }
 
-  const handleDeleteGathering = () => {
-    if (confirm(`"${detail.title}" 모임과 모든 회차를 삭제할까요?`)) deleteGathering(detail.id)
+  const handleDeleteGathering = async () => {
+    const ok = await showConfirm(`"${detail.title}" 모임과 모든 회차를 삭제할까요?`, { confirmLabel: '삭제', destructive: true })
+    if (ok) deleteGathering(detail.id)
   }
 
   return (

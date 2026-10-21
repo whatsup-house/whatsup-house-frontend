@@ -29,6 +29,7 @@ import type {
   AdminHomeReviewSort,
   HeroSlideType,
 } from '@/lib/api/types'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const TYPE_LABEL: Record<HeroSlideType, string> = {
   GATHERING: '게더링',
@@ -133,8 +134,8 @@ export default function AdminHomePage() {
       },
     )
   }
-  const handleDelete = (reviewId: string) => {
-    if (confirm('이 리뷰를 삭제할까요? (복구 불가)')) {
+  const handleDelete = async (reviewId: string) => {
+    if (await showConfirm('복구할 수 없어요.', { title: '이 리뷰를 삭제할까요?', confirmLabel: '삭제', destructive: true })) {
       removeReview(reviewId, {
         onSuccess: () => {
           const remainingReviews = sortedReviews.filter((review) => review.reviewId !== reviewId)
