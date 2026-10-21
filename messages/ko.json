@@ -504,7 +504,7 @@
     "card": {
       "price": "{price}원",
       "capacity": "최대 {count}명",
-      "diningRegions": "서울 4개 지역"
+      "diningRegions": "서울 내 지역 4곳"
     },
     "map": {
       "naverLabel": "네이버 지도에서 보기",
@@ -524,7 +524,7 @@
       "date": "날짜",
       "time": "시간",
       "location": "장소",
-      "diningRegions": "서울 4개 지역 중 희망 지역에서 열려요",
+      "diningRegions": "서울 내 지역 4곳 중 희망 지역에서 열려요",
       "capacityLabel": "모집인원",
       "capacity": "최대 {count}명",
       "priceLabel": "참가비",
@@ -534,7 +534,6 @@
       "descriptionTitle": "이런 게더링이에요",
       "howToRunTitle": "이렇게 진행돼요",
       "cautionTitle": "이런 분은 참여가 어려워요",
-      "caution1": "지나친 소란으로 감상을 방해하시는 분",
       "caution2": "본인의 취향만을 강요하며 타인의 의견을 무시하시는 분",
       "caution3": "상업적인 목적이나 홍보를 위해 참석하시는 분",
       "reviewsTitle": "참가자 후기",
@@ -1283,14 +1282,11 @@
       "total": "입금하실 금액",
       "payerNameLabel": "입금자명은 반드시 실명으로",
       "payerNameFallback": "신청서에 적은 실명",
-      "payerNameHint": "다른 이름으로 입금하면 자동으로 확인되지 않아요.",
-      "deadline": "입금 기한 {at}",
-      "autoConfirm": "입금되면 자동으로 확인돼요."
+      "deadline": "입금 기한 {at}"
     },
     "simulator": {
       "button": "{amount} 모의 입금하기 (심사용)",
       "retry": "다시 모의 입금하기 (심사용)",
-      "hint": "실제 돈은 나가지 않아요. 운영자 폰에 입금 알림이 오고 와썹이 자동으로 확인하는 과정을 보여드려요.",
       "error": "시뮬레이션에 실패했어요. 잠시 후 다시 시도해 주세요.",
       "open": "운영자 화면 다시 보기",
       "previewLabel": "운영자 화면",

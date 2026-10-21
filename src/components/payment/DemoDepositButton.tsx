@@ -75,7 +75,6 @@ export default function DemoDepositButton({ amount, applicationId, passId, isSet
           <Button variant="primary" size="lg" className="w-full" isLoading={demoDeposit.isPending} onClick={start}>
             {run ? t('retry') : t('button', { amount: tPending('won', { amount: amount.toLocaleString() }) })}
           </Button>
-          <p className="mt-2 text-center text-xs text-tag-text break-keep">{t('hint')}</p>
         </>
       )}
       {demoDeposit.isError && <p role="alert" className="mt-3 text-center text-sm text-primary">{t('error')}</p>}

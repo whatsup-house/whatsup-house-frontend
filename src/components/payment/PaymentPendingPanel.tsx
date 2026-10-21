@@ -58,13 +58,10 @@ export default function PaymentPendingPanel({ gatheringId, payerName, items, dea
       <div className="mb-4 rounded-card border-2 border-primary bg-primary-light p-4 text-center">
         <p className="text-xs font-bold text-primary">{t('payerNameLabel')}</p>
         <p className="mt-1 break-all text-2xl font-bold text-foreground">{payerName ?? t('payerNameFallback')}</p>
-        <p className="mt-2 text-xs text-tag-text">{t('payerNameHint')}</p>
+        {deadline && (
+          <p className="mt-2 text-sm font-semibold text-primary">{t('deadline', { at: formatLocalizedShortDateTime(deadline, locale) })}</p>
+        )}
       </div>
-
-      {deadline && (
-        <p className="mb-2 text-center text-sm text-tag-text">{t('deadline', { at: formatLocalizedShortDateTime(deadline, locale) })}</p>
-      )}
-      <p role="status" className="mb-4 text-center text-sm font-semibold text-foreground">{t('autoConfirm')}</p>
 
       <PaymentPolicyNotice />
     </>

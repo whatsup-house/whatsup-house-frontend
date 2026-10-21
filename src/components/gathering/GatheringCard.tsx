@@ -5,7 +5,7 @@ import Badge from '@/components/ui/Badge'
 import AppImage from '@/components/ui/AppImage'
 import type { GatheringListItem, GatheringSession } from '@/lib/api/types'
 import { formatLocalizedShortDate, formatTime } from '@/lib/utils/date'
-import { toBadgeStatus } from '@/lib/utils/gatheringStatus'
+import { sessionBadgeStatus } from '@/lib/utils/gatheringStatus'
 
 // 날짜별 목록의 한 줄: 종류 정보 + 그 날의 회차 (KAN-339)
 interface GatheringCardProps {
@@ -20,8 +20,8 @@ export default function GatheringCard({ gathering, session }: GatheringCardProps
   const { eventDate, startTime, maxAttendees, location } = session
   const price = session.price ?? basePrice ?? 0
 
-  // 회차 상태는 BE가 보정(지난 모집중 → DONE)해서 내려준다
-  const effectiveStatus = toBadgeStatus(session.status)
+  // 회차 상태는 BE가 보정(지난 모집중 → DONE)해서 내려준다. 신청 마감이 지난 모집중은 마감으로 보인다
+  const effectiveStatus = sessionBadgeStatus(session)
 
   const hasChips = (tags?.length ?? 0) > 0
   const thumbnailPosition = title === '우연한 식탁' ? 'center 32%' : undefined
@@ -80,8 +80,8 @@ export default function GatheringCard({ gathering, session }: GatheringCardProps
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin size={13} />
-              {/* 우연한 식탁 회차는 장소 없이 서울 4개 지역에서 열린다 (KAN-433) */}
-              <span>{location?.name ?? (gathering.gatheringType === 'RANDOM_TABLE' ? t('diningRegions') : null)}</span>
+              {/* 우연한 식탁은 모든 회차가 서울 4개 지역에서 열린다 — 예전 회차에 남은 장소명 대신 지역 안내 (KAN-433) */}
+              <span>{gathering.gatheringType === 'RANDOM_TABLE' ? t('diningRegions') : location?.name}</span>
             </div>
           </div>
 

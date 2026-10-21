@@ -1,11 +1,10 @@
-import dayjs from 'dayjs'
 import { MapPin } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import Badge from '@/components/ui/Badge'
 import MapLinkButton from './MapLinkButton'
 import type { GatheringSession } from '@/lib/api/types'
 import { formatLocalizedShortDate, formatTimeRange } from '@/lib/utils/date'
-import { isSessionApplicable, toBadgeStatus } from '@/lib/utils/gatheringStatus'
+import { displayDeadline, isSessionApplicable, toBadgeStatus } from '@/lib/utils/gatheringStatus'
 import { getKakaoMapUrl, getNaverMapUrl } from '@/lib/utils/mapUrl'
 
 interface GatheringSessionListProps {
@@ -18,6 +17,8 @@ interface GatheringSessionListProps {
 
 // 종류 상세의 회차 목록: 날짜·시간·지역·잔여 정원·마감을 보여주고 신청할 회차 1개를 고른다. (KAN-339)
 export default function GatheringSessionList({ sessions, selectedSessionId, onSelect, priorityIds }: GatheringSessionListProps) {
+  // 복수 선택은 우연한 식탁 전용이고, 식탁은 지역을 따로 고르므로 예전 회차에 남은 장소명은 보이지 않는다
+  const locationName = (session: GatheringSession) => (priorityIds ? null : session.location?.name)
   const t = useTranslations('gathering.detail')
   const locale = useLocale()
   const selected = sessions.find((session) => session.id === selectedSessionId)
@@ -41,7 +42,7 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
             const isSelected = priorityIds ? priority > 0 : session.id === selectedSessionId
             const deadline = applicable && session.applyDeadlineAt
               ? t('applyDeadline', {
-                date: `${formatLocalizedShortDate(session.applyDeadlineAt, locale)} ${dayjs(session.applyDeadlineAt).format('HH:mm')}`,
+                date: `${formatLocalizedShortDate(displayDeadline(session.applyDeadlineAt).format('YYYY-MM-DD'), locale)} ${displayDeadline(session.applyDeadlineAt).format('HH:mm')}`,
               })
               : null
 
@@ -76,9 +77,9 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
                     <Badge variant={session.status === 'OPEN' ? 'CLOSED' : toBadgeStatus(session.status)} />
                   )}
                 </div>
-                {(session.location || deadline) && (
+                {(locationName(session) || deadline) && (
                   <p className="mt-1 text-xs text-tag-text">
-                    {[session.location?.name, deadline].filter(Boolean).join(' · ')}
+                    {[locationName(session), deadline].filter(Boolean).join(' · ')}
                   </p>
                 )}
               </button>
@@ -87,7 +88,7 @@ export default function GatheringSessionList({ sessions, selectedSessionId, onSe
         </div>
       )}
 
-      {selected?.location && (
+      {selected?.location && !priorityIds && (
         <div className="mt-3 flex items-start gap-3">
           <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
           <div className="flex-1">

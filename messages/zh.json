@@ -534,7 +534,6 @@
       "descriptionTitle": "关于本次聚会",
       "howToRunTitle": "它是如何运作的",
       "cautionTitle": "这可能不适合，如果您",
-      "caution1": "用过大的噪音干扰他人",
       "caution2": "强迫自己的品味并忽略别人的意见",
       "caution3": "参加商业推广",
       "reviewsTitle": "参与者评论",
@@ -1279,14 +1278,11 @@
       "total": "입금하실 금액",
       "payerNameLabel": "입금자명은 반드시 실명으로",
       "payerNameFallback": "신청서에 적은 실명",
-      "payerNameHint": "다른 이름으로 입금하면 자동으로 확인되지 않아요.",
-      "deadline": "입금 기한 {at}",
-      "autoConfirm": "입금되면 자동으로 확인돼요."
+      "deadline": "입금 기한 {at}"
     },
     "simulator": {
       "button": "{amount} 모의 입금하기 (심사용)",
       "retry": "다시 모의 입금하기 (심사용)",
-      "hint": "실제 돈은 나가지 않아요. 운영자 폰에 입금 알림이 오고 와썹이 자동으로 확인하는 과정을 보여드려요.",
       "error": "시뮬레이션에 실패했어요. 잠시 후 다시 시도해 주세요.",
       "open": "운영자 화면 다시 보기",
       "previewLabel": "运营者画面",
