@@ -640,6 +640,7 @@
     },
     "diningTable": {
       "label": "Random Table",
+      "strengthsTitle": "About this table",
       "loadFailed": "Couldn't load the table details.",
       "notMemberTitle": "You're not a member of this table",
       "notMemberDescription": "Only members of a confirmed table can view it.\nCheck your application status on My Page.",

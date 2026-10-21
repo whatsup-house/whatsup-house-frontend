@@ -640,6 +640,7 @@
     },
     "diningTable": {
       "label": "Mesa al azar",
+      "strengthsTitle": "Sobre esta mesa",
       "loadFailed": "No se pudo cargar la información de la mesa.",
       "notMemberTitle": "No eres miembro de esta mesa",
       "notMemberDescription": "Solo los miembros de una mesa confirmada pueden verla.\nConsulta el estado de tu solicitud en Mi página.",

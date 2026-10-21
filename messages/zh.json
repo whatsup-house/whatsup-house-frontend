@@ -640,6 +640,7 @@
     },
     "diningTable": {
       "label": "偶遇餐桌",
+      "strengthsTitle": "这张餐桌",
       "loadFailed": "无法加载餐桌信息。",
       "notMemberTitle": "你不是这张餐桌的成员",
       "notMemberDescription": "只有已确定餐桌的成员才能查看。\n请在“我的”页面查看申请状态。",
