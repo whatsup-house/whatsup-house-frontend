@@ -11,7 +11,7 @@ import type {
   GatheringTypeFilter,
   GatheringTypeSort,
 } from './types'
-import { sessionBadgeStatus } from '@/lib/utils/gatheringStatus'
+import { sessionBadgeStatus, sessionDisplayStatus } from '@/lib/utils/gatheringStatus'
 
 const fetchGatheringList = async (params?: { status: GatheringSessionStatus }): Promise<GatheringListItem[]> => {
   const response = await apiClient.get<ApiResponse<GatheringListItem[]>>('/api/gatherings', { params })
@@ -74,13 +74,14 @@ export const deriveCalendarDots = (gatherings: GatheringListItem[], year: number
   const statusByDate = new Map<string, GatheringSessionStatus>()
   for (const s of gatherings.flatMap((g) => g.sessions)) {
     if (!s.eventDate.startsWith(prefix)) continue
+    const status = sessionDisplayStatus(s)                   // 신청 마감이 지난 모집중은 마감
     const prev = statusByDate.get(s.eventDate)
     if (prev === undefined) {
-      statusByDate.set(s.eventDate, s.status)
-    } else if (s.status === 'OPEN') {
+      statusByDate.set(s.eventDate, status)
+    } else if (status === 'OPEN') {
       statusByDate.set(s.eventDate, 'OPEN')                  // 모집중 최우선
-    } else if (prev === 'CANCELLED' && s.status !== 'CANCELLED') {
-      statusByDate.set(s.eventDate, s.status)                // 비취소가 취소보다 우선
+    } else if (prev === 'CANCELLED' && status !== 'CANCELLED') {
+      statusByDate.set(s.eventDate, status)                // 비취소가 취소보다 우선
     }
   }
 
