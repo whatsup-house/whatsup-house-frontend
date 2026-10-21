@@ -77,6 +77,7 @@ test.describe('관리자 - 우연한 식탁 예외함·설정', () => {
       maxAgeGap: 6,
       tableSizeMax: 5,
       weights: { ...mockMatchingRules.weights, mbti: 1.5 },
+      minTablesPerRegion: 2, // 목(구형 BE 응답)엔 없어 BE 기본값으로 채워 보낸다 (KAN-431)
     })
     await expect(page.getByText('매칭 규칙을 저장했어요.')).toBeVisible()
   })

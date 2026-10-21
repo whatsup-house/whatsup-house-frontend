@@ -41,6 +41,11 @@ test.describe('회원 - 우연한 식탁 신청', () => {
     const first = page.getByRole('checkbox', { name: /19:00/ })
     const second = page.getByRole('checkbox', { name: /12:30/ })
     await expect(first).toHaveAttribute('aria-checked', 'true')
+    // 희망 지역을 하나도 안 고르면 다음으로 못 간다 (KAN-433)
+    await expect(next).toBeDisabled()
+    await page.getByRole('button', { name: '잠실', exact: true }).click()
+    await page.getByRole('button', { name: '을지로/종로', exact: true }).click()
+    await expect(page.getByRole('button', { name: '잠실', exact: true })).toHaveAttribute('aria-pressed', 'true')
     await expect(next).toBeEnabled()
     await second.click()
     await expect(first).toHaveAttribute('aria-checked', 'true')
@@ -82,6 +87,7 @@ test.describe('회원 - 우연한 식탁 신청', () => {
     await expect(ranked).toHaveCount(2)
     await expect(ranked.nth(0)).toContainText('19:00 · 성수')
     await expect(ranked.nth(1)).toContainText('12:30 · 을지로')
+    await expect(page.getByText('잠실, 을지로/종로')).toBeVisible()
     await expect(page.getByText('남은 이용권')).toBeVisible()
     await expect(page.getByText('3회', { exact: true })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/dining-apply-04-ticket.png')
@@ -97,6 +103,7 @@ test.describe('회원 - 우연한 식탁 신청', () => {
     const body = (await submitRequest).postDataJSON() as ApplicationCreateRequest
     expect(body.gatheringId).toBe(DINING_GATHERING_ID)
     expect(body.candidateSessionIds).toEqual([DINING_SESSION_ID, DINING_SESSION_2_ID])
+    expect(body.candidateRegions).toEqual(['잠실', '을지로/종로'])
     const prefilled = Object.fromEntries(mockDiningPrefill.answers.map((a) => [a.questionKey, a.value]))
     expect(body.answers).toEqual(expect.arrayContaining([
       { questionId: 'q-birth-year', value: 1996 },

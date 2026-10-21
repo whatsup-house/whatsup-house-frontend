@@ -29,6 +29,7 @@ export default function DiningStatusSummary() {
         table={active.table}
         assignedSession={active.assignedSession}
         candidateSessions={active.candidateSessions}
+        candidateRegions={active.candidateRegions}
         depositOnly={isDepositOnlyPending(active)}
         deposit={active.deposit}
         ticketStatus={active.ticketStatus}

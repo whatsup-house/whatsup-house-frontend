@@ -22,9 +22,6 @@ import Button from '@/components/ui/Button'
 // 빈 입력은 null(가격 → 종류 기본 가격, 마감 → 마감 없음, 우연한 식탁 규칙 → 매칭 규칙 기본값)
 const toNullableNumber = (v: unknown) => (v === '' || v === null || v === undefined ? null : Number(v))
 
-// 우연한 식탁 회차 지역은 서울 4곳으로 고정한다. 각 지역은 같은 이름의 장소(Location)로 저장한다. (KAN-413)
-const DINING_REGIONS = ['홍대/합정', '잠실', '강남/신논현', '을지로/종로']
-
 // 마감·매칭 실행 기본값: 회차 날짜 전날 00:00 (datetime-local 형식)
 const dayBeforeMidnight = (date: string) => dayjs(date).subtract(1, 'day').format('YYYY-MM-DDT00:00')
 
@@ -34,11 +31,12 @@ const SELECT_CLASS =
 // 날짜는 오늘 이후만 (BE도 같은 검증). 시간 순서는 새벽 종료 케이스 때문에 검증하지 않는다. (KAN-221)
 // 주간 반복 종료일은 BE와 같이 회차 날짜부터 1년 이내. (KAN-338)
 // 우연한 식탁 전용 필드는 RANDOM_TABLE일 때만 검사한다. 범위는 BE 매칭 규칙 설정과 같다. (KAN-351)
+// 장소는 우연한 식탁이 아닐 때만 필수다 — 식탁 회차는 서울 4개 지역 전부에서 열린다. (KAN-433)
 const buildSchema = (isDining: boolean) => z.object({
   eventDate: z.string().min(1, '날짜를 선택해주세요'),
   startTime: z.string().min(1, '시작 시간을 입력해주세요'),
   endTime: z.string().min(1, '종료 시간을 입력해주세요'),
-  locationId: z.string().min(1, '장소를 선택해주세요'),
+  locationId: z.string(),
   maxAttendees: z.number({ error: '정원을 입력해주세요' }).int().min(1, '정원은 1명 이상이어야 합니다').max(30, '정원은 최대 30명입니다'),
   priceOverride: z.number().min(0, '가격은 0원 이상이어야 합니다').nullable(),
   applyDeadlineAt: z.string(),
@@ -53,6 +51,9 @@ const buildSchema = (isDining: boolean) => z.object({
 }).superRefine((val, ctx) => {
   if (val.eventDate && val.eventDate < dayjs().format('YYYY-MM-DD')) {
     ctx.addIssue({ code: 'custom', path: ['eventDate'], message: '날짜는 오늘 이후로 선택해주세요.' })
+  }
+  if (!isDining && !val.locationId) {
+    ctx.addIssue({ code: 'custom', path: ['locationId'], message: '장소를 선택해주세요' })
   }
   if (isDining) {
     // datetime-local(YYYY-MM-DDTHH:mm)과 날짜+시작 시간을 같은 형식으로 맞춰 문자열로 비교한다.
@@ -145,17 +146,6 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
     },
   })
 
-  // 우연한 식탁: 고정 4곳을 항상 보여 주고, 같은 이름의 장소가 없으면 선택 불가로 표시한다.
-  // 수정 중인 회차의 기존 장소가 4곳이 아니어도 값이 비지 않게 남겨 둔다.
-  const regionOptions = isDining
-    ? [
-        ...DINING_REGIONS.map((name) => ({ name, id: locations?.find((l) => l.name === name)?.id })),
-        ...(locations ?? [])
-          .filter((l) => l.id === initial?.locationId && !DINING_REGIONS.includes(l.name))
-          .map((l) => ({ name: l.name, id: l.id })),
-      ]
-    : (locations ?? []).map((l) => ({ name: l.name, id: l.id }))
-
   const [eventDate, repeat, until] = useWatch({ control, name: ['eventDate', 'repeat', 'until'] })
   // BE와 같은 계산: 기준 날짜부터 until까지 7일 간격 (ChronoUnit.WEEKS + 1)
   const repeatCount = repeat && eventDate && until >= eventDate ? dayjs(until).diff(eventDate, 'week') + 1 : 0
@@ -165,7 +155,8 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
       eventDate: v.eventDate,
       startTime: v.startTime,
       endTime: v.endTime,
-      locationId: v.locationId,
+      // 우연한 식탁은 locationId 를 보내지 않는다 (KAN-433)
+      ...(isDining ? {} : { locationId: v.locationId }),
       maxAttendees: v.maxAttendees,
       priceOverride: v.priceOverride,
       applyDeadlineAt: v.applyDeadlineAt || null,
@@ -236,18 +227,18 @@ export default function GatheringSessionModal({ gatheringId, gatheringType, edit
             <Input label="종료 시간 *" type="time" error={errors.endTime?.message} {...register('endTime')} />
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1">{isDining ? '지역' : '장소'} *</label>
-            <select className={SELECT_CLASS} {...register('locationId')}>
-              <option value="">{isDining ? '지역을' : '장소를'} 선택해주세요</option>
-              {regionOptions.map((r) => (
-                <option key={r.name} value={r.id ?? ''} disabled={!r.id}>
-                  {r.id ? r.name : `${r.name} (등록된 장소 없음)`}
-                </option>
-              ))}
-            </select>
-            {errors.locationId && <p className="text-xs text-primary mt-1">{errors.locationId.message}</p>}
-          </div>
+          {!isDining && (
+            <div>
+              <label className="text-sm font-medium text-foreground block mb-1">장소 *</label>
+              <select className={SELECT_CLASS} {...register('locationId')}>
+                <option value="">장소를 선택해주세요</option>
+                {(locations ?? []).map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+              {errors.locationId && <p className="text-xs text-primary mt-1">{errors.locationId.message}</p>}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input

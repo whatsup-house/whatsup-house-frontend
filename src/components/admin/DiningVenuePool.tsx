@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { X } from 'lucide-react'
 import type { DiningVenue, DiningVenueRequest } from '@/lib/api/types'
 import { useDeleteDiningVenue, useDiningVenues, useSaveDiningVenue } from '@/lib/hooks/useAdminDiningOps'
+import { useDiningRegions } from '@/lib/hooks/useApplications'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import { ApiErrorMessage, Button, Input, LoadingSpinner } from '@/components/ui'
 
@@ -21,25 +22,28 @@ const schema = z.object({
     .max(500, '500자 이하로 입력해주세요')
     .refine((v) => !v || /^https?:\/\/\S+$/.test(v), '지도 링크는 http(s) 주소여야 합니다'),
   priceRange: z.string().trim().max(50, '50자 이하로 입력해주세요'),
-  region: z.string().trim().min(1, '지역을 입력해주세요').max(50, '50자 이하로 입력해주세요'),
+  region: z.string().min(1, '지역을 선택해주세요'),
   isActive: z.boolean(),
 })
 
 type FormValues = z.infer<typeof schema>
 
-const REGION_LIST_ID = 'dining-venue-regions'
+const SELECT_CLASS =
+  'w-full h-[52px] px-4 border border-tag-bg rounded-input text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary'
 
 interface VenueFormModalProps {
   // 수정할 식당. null이면 추가
   editing: { venueId: string; values: DiningVenueRequest } | null
-  regions: string[]
   onClose: () => void
 }
 
-function VenueFormModal({ editing, regions, onClose }: VenueFormModalProps) {
+function VenueFormModal({ editing, onClose }: VenueFormModalProps) {
   const { mutate, isPending } = useSaveDiningVenue(onClose)
+  // 지역은 BE 고정 4곳 중에서만 고른다(INVALID_REGION). 자동 배정이 지역 라벨로 식당을 찾는다. (KAN-433)
+  const regionsQuery = useDiningRegions()
+  const regions = regionsQuery.data
   const initial = editing?.values
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: initial?.name ?? '',
@@ -51,9 +55,14 @@ function VenueFormModal({ editing, regions, onClose }: VenueFormModalProps) {
     },
   })
 
-  // 빈 선택 항목은 null로 보낸다.
-  const onSubmit = (v: FormValues) =>
+  // 빈 선택 항목은 null로 보낸다. 예전 자유 입력 지역(4곳 밖)은 select 에 안 보이므로 다시 고르게 한다.
+  const onSubmit = (v: FormValues) => {
+    if (!regions?.includes(v.region)) {
+      setError('region', { message: '지역을 선택해주세요' })
+      return
+    }
     mutate({ id: editing?.venueId, data: { ...v, mapUrl: v.mapUrl || null, priceRange: v.priceRange || null } })
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" onClick={onClose}>
@@ -73,20 +82,27 @@ function VenueFormModal({ editing, regions, onClose }: VenueFormModalProps) {
             <Input label="식당 이름 *" error={errors.name?.message} {...register('name')} />
             <Input label="주소 *" error={errors.address?.message} {...register('address')} />
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Input
-                label="지역 *"
-                list={REGION_LIST_ID}
-                placeholder="을지로"
-                error={errors.region?.message}
-                {...register('region')}
-              />
+              <div>
+                <label htmlFor="dining-venue-region" className="text-sm font-medium text-foreground block mb-1">지역 *</label>
+                {/* 옵션이 그려진 뒤에 select 를 붙여야 수정 시 기존 지역이 선택된 채로 열린다 */}
+                {regions ? (
+                  <select id="dining-venue-region" className={SELECT_CLASS} {...register('region')}>
+                    <option value="">지역을 선택해주세요</option>
+                    {regions.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                ) : regionsQuery.isError ? (
+                  <button type="button" onClick={() => regionsQuery.refetch()} className={`${SELECT_CLASS} text-left text-primary`}>
+                    지역을 불러오지 못했어요. 다시 시도
+                  </button>
+                ) : (
+                  <div className={`${SELECT_CLASS} flex items-center`}><LoadingSpinner size="sm" /></div>
+                )}
+                {errors.region && <p className="text-xs text-primary mt-1">{errors.region.message}</p>}
+              </div>
               <Input label="가격대" placeholder="1~2만원" error={errors.priceRange?.message} {...register('priceRange')} />
             </div>
-            <datalist id={REGION_LIST_ID}>
-              {regions.map((r) => (
-                <option key={r} value={r} />
-              ))}
-            </datalist>
             <Input label="지도 링크" placeholder="https://naver.me/..." error={errors.mapUrl?.message} {...register('mapUrl')} />
             <label className="flex items-center gap-2 text-sm font-medium text-foreground">
               <input type="checkbox" className="h-4 w-4 accent-primary" {...register('isActive')} />
@@ -224,7 +240,6 @@ export default function DiningVenuePool() {
           // 대상이 바뀌면 새로 마운트해 이전 입력이 남지 않게 한다.
           key={modal === 'new' ? 'new' : modal.venueId}
           editing={modal === 'new' ? null : modal}
-          regions={regions}
           onClose={() => setModal(null)}
         />
       )}

@@ -34,6 +34,7 @@ interface DiningStatusCardProps {
   table: { id: string; status: DiningTableStatus; confirmAt: string | null } | null
   assignedSession: DiningSessionInfo | null
   candidateSessions: DiningSessionInfo[]
+  candidateRegions?: string[]   // 희망 지역 (KAN-433). 테이블 지역이 정해지면 일정 줄의 지역으로 대신한다
   resolutionId?: string | null
   depositOnly?: boolean   // 이용권은 준비됐고 보증금 입금만 남은 결제 대기
   deposit?: DiningApplicationDeposit | null        // 보증금 상태 배지 (KAN-410)
@@ -51,6 +52,7 @@ export default function DiningStatusCard({
   table,
   assignedSession,
   candidateSessions,
+  candidateRegions = [],
   resolutionId,
   depositOnly = false,
   deposit,
@@ -91,6 +93,9 @@ export default function DiningStatusCard({
               {sessionLine}
               {moreSessions > 0 && ` ${t('moreSessions', { count: moreSessions })}`}
             </p>
+          )}
+          {!session?.region && candidateRegions.length > 0 && (
+            <p className="text-xs text-tag-text mt-0.5">{t('candidateRegions', { regions: candidateRegions.join(', ') })}</p>
           )}
         </div>
         <span className="shrink-0 text-xs font-medium px-2 py-1 rounded-full bg-primary-light text-primary">

@@ -124,7 +124,7 @@ export interface AdminSessionRequest extends Partial<DiningSessionFields> {
   eventDate: string              // YYYY-MM-DD
   startTime: string | null       // HH:mm
   endTime: string | null
-  locationId: string
+  locationId?: string            // 우연한 식탁은 보내지 않는다 — 모든 회차가 서울 4개 지역에서 열린다 (KAN-433)
   maxAttendees: number
   priceOverride: number | null   // null이면 종류 기본 가격
   applyDeadlineAt: string | null // YYYY-MM-DDTHH:mm, null이면 마감 없음
@@ -725,6 +725,7 @@ export interface DepositReturnAccount {
 export interface ApplicationCreateRequest extends DynamicApplicationRequest {
   gatheringId: string
   candidateSessionIds: string[]
+  candidateRegions?: string[]    // 희망 지역 라벨(GET /api/dining/regions). 우연한 식탁은 1개 이상 필수, 일반 모임은 무시 (KAN-433)
   depositReturnAccount?: DepositReturnAccount
 }
 
@@ -764,7 +765,7 @@ export interface DiningSessionInfo {
   id: string
   eventDate: string          // YYYY-MM-DD
   startTime: string | null   // HH:mm:ss
-  region: string | null      // 회차 장소명
+  region: string | null      // 테이블 지역. 테이블이 없으면 null (KAN-433)
   matchRunAt?: string | null // 매칭 실행 예정 시각(ISO). BE 가 아직 안 내려주면 표시 생략
 }
 
@@ -791,6 +792,7 @@ export interface DiningApplicationItem {
   table: { id: string; status: DiningTableStatus; confirmAt: string | null } | null
   resolutionId?: string | null             // 매칭 실패 해결 선택 ID (KAN-347). 없으면 해결 버튼 비활성
   deposit?: DiningApplicationDeposit | null // 이 신청의 보증금 (KAN-408). 구형 BE 응답엔 없다
+  candidateRegions?: string[]              // 희망 지역 (KAN-433). 구형 BE 응답엔 없다
 }
 
 export interface DiningApplicationListResponse {
@@ -1090,6 +1092,7 @@ export interface DiningApplicant {
   candidateSessions: { sessionId: string; eventDate: string; priority: number }[] // 1순위부터
   participationCount: number
   hasExcludedRelation: boolean     // 같은 회차 신청자와 피하고 싶음·신고 관계
+  candidateRegions?: string[]      // 희망 지역 (KAN-433). 구형 BE 응답엔 없다
 }
 
 // BE ScoreDetail. penalties는 감점 항목명 → 감점 값
@@ -1135,7 +1138,8 @@ export interface DiningTableExplanation {
 }
 
 export type DiningAssignReason = 'INITIAL' | 'REALLOCATED' | 'MANUAL' | 'SPLIT' | 'MERGED'
-export type DiningUnassignedReason = 'AGE_GAP' | 'BLOCKED_PAIR' | 'NOT_ENOUGH_PEOPLE' | 'LOW_SCORE' | 'NEXT_SESSION_WAITING'
+// REGION_TOO_SMALL: 희망 지역의 테이블이 지역 최소 테이블 수에 못 미쳐 그 지역 결과를 버렸다 (KAN-431)
+export type DiningUnassignedReason = 'AGE_GAP' | 'BLOCKED_PAIR' | 'NOT_ENOUGH_PEOPLE' | 'LOW_SCORE' | 'NEXT_SESSION_WAITING' | 'REGION_TOO_SMALL'
 
 // BE DiningTableListResponse.MemberView (좌석 순)
 export interface DiningTableMember {
@@ -1161,6 +1165,15 @@ export interface DiningAdminTable {
   venueId: string | null
   members: DiningTableMember[]
   chatRoomId?: string | null       // BE 목록 응답에 아직 없다. 내려오면 채팅방 상태를 표시한다
+  region?: string | null           // 테이블 지역 라벨 (KAN-431). 구형 BE 응답엔 없다
+}
+
+// 지역별 매칭 결과 — adopted=false 면 테이블 수가 지역 최소 테이블 수에 못 미쳐 버린 지역 (KAN-431)
+export interface DiningRegionResult {
+  region: string
+  candidateCount: number
+  tableCount: number
+  adopted: boolean
 }
 
 // BE MatchRunResponse
@@ -1183,6 +1196,7 @@ export interface DiningTableList {
   tables: DiningAdminTable[]
   unassigned: { applicationId: string; nickname: string; reason: DiningUnassignedReason }[]
   lastRun: DiningMatchRun | null   // 실행 이력이 없으면 null
+  regionResults?: DiningRegionResult[] // 마지막 실행의 지역별 결과 (KAN-431). 구형 BE 응답엔 없다
 }
 
 // POST /api/admin/dining/tables/{id}/confirm-now — 하드 조건 위반으로 보류되면 status가 PROPOSED 그대로
@@ -1338,6 +1352,7 @@ export interface DiningMatchingRules {
   minGroupScore: number
   autoConfirmGraceMinutes: number
   weights: DiningMatchingWeights
+  minTablesPerRegion?: number      // 1~5. 한 회차·지역에서 이 수 이상 테이블이 나와야 그 지역을 연다 (KAN-431). 구형 BE 응답엔 없다
 }
 
 // GET /api/admin/dining/venues — 삭제되지 않은 식당, 지역·이름 순

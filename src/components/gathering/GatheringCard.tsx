@@ -80,7 +80,8 @@ export default function GatheringCard({ gathering, session }: GatheringCardProps
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin size={13} />
-              <span>{location?.name}</span>
+              {/* 우연한 식탁 회차는 장소 없이 서울 4개 지역에서 열린다 (KAN-433) */}
+              <span>{location?.name ?? (gathering.gatheringType === 'RANDOM_TABLE' ? t('diningRegions') : null)}</span>
             </div>
           </div>
 

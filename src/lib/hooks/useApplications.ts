@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchMyDiningApplications, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory, fetchDiningRecommendations } from '@/lib/api/application'
+import { fetchMyApplications, fetchApplicationsMe, cancelApplication, checkGuestApplication, fetchApplicationByToken, submitDynamicApplication, submitDynamicGuestApplication, fetchMyApplicationDetail, fetchGuestApplicationDetail, fetchDiningPrefill, fetchDiningRegions, fetchMyDiningApplications, cancelDiningApplication, fetchDiningCancelPreview, fetchDiningResolution, chooseDiningResolution, fetchDiningTableDetail, submitDiningCheckIn, submitDiningFeedback, submitDiningReport, fetchMyDiningHistory, fetchDiningRecommendations } from '@/lib/api/application'
 import type { ApplicationCreateRequest, ApplicationStatus, DiningCancelRequest, DiningFeedbackRequest, DiningReportRequest, DiningResolutionChooseRequest, DynamicApplicationRequest } from '@/lib/api/types'
 import { useToastStore } from '@/lib/store/toastStore'
 import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from '@/lib/utils/apiError'
@@ -141,6 +141,15 @@ export function useCancelApplication() {
       queryClient.invalidateQueries({ queryKey: ['applications', 'me'] })
       queryClient.invalidateQueries({ queryKey: ['dining', 'me', 'applications'] })
     },
+  })
+}
+
+// 우연한 식탁 지역 라벨 (KAN-433). 고정 목록이라 오래 캐시한다. ['dining'] 일괄 무효화에 휩쓸리지 않게 키를 분리한다.
+export function useDiningRegions() {
+  return useQuery({
+    queryKey: ['dining-regions'],
+    queryFn: fetchDiningRegions,
+    staleTime: 1000 * 60 * 60,
   })
 }
 

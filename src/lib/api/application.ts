@@ -50,6 +50,12 @@ export const fetchApplicationsMe = async (status?: ApplicationStatus): Promise<A
   return status ? applications.filter((application) => application.status === status) : applications
 }
 
+// 우연한 식탁 지역 라벨 — 고정 4곳, BE enum 선언 순서 (KAN-433)
+export const fetchDiningRegions = async (): Promise<string[]> => {
+  const response = await apiClient.get<ApiResponse<string[]>>('/api/dining/regions')
+  return response.data.data
+}
+
 // 우연한 식탁 신청 폼 프리필 — 표준 질문별 내 최근 답변 (KAN-342)
 export const fetchDiningPrefill = async (gatheringId: string): Promise<DiningPrefillResponse> => {
   const response = await apiClient.get<ApiResponse<DiningPrefillResponse>>('/api/dining/prefill', {

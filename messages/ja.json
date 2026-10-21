@@ -503,7 +503,8 @@
     },
     "card": {
       "price": "{price}ウォン",
-      "capacity": "最大{count}名"
+      "capacity": "最大{count}名",
+      "diningRegions": "ソウル4エリア"
     },
     "map": {
       "naverLabel": "Naver地図で見る",
@@ -523,6 +524,7 @@
       "date": "日付",
       "time": "時間",
       "location": "場所",
+      "diningRegions": "ソウル4エリアのうち希望エリアで開催",
       "capacityLabel": "募集人数",
       "capacity": "最大{count}名",
       "priceLabel": "参加費",
@@ -618,17 +620,22 @@
     },
     "diningApply": {
       "steps": {
-        "sessions": "希望日の選択",
+        "sessions": "希望エリア・日程の選択",
         "form": "申請フォーム入力",
         "ticket": "利用券の確認"
       },
       "stepProgress": "{step}/3",
       "sessionsGuide": "参加できる日程をすべて選んでください。先に選んだ日程から優先して割り当てます。",
+      "regionsTitle": "希望エリア",
+      "regionsMulti": "（複数選択可）",
+      "regionsGuide": "会いたいエリアをすべて選んでください。選んだエリアのいずれかでテーブルが開かれます。",
+      "regionsLoadFailed": "エリアを読み込めませんでした。",
       "prev": "戻る",
       "next": "次へ",
       "submit": "申請する",
       "requiredMissing": "必須項目をすべて入力してください。",
       "selectedSessionsTitle": "希望日（優先順）",
+      "selectedRegionsTitle": "希望エリア",
       "noTicketNotice": "利用券をお持ちではありません。今申請すると支払い待ちとして受け付けられ、利用券の準備ができ次第確定します。",
       "submitted": "申請を受け付けました。",
       "submitFailed": "申請に失敗しました。しばらくしてからもう一度お試しください。",
@@ -840,6 +847,7 @@
           "exception": "確認中"
         },
         "moreSessions": "ほか{count}日程",
+        "candidateRegions": "希望エリア {regions}",
         "detail": {
           "payment": "利用券を購入すると申込みが確定し、マッチング待ちになります。",
           "waiting": "マッチングを待っています。",
