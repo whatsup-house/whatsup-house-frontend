@@ -625,10 +625,8 @@
         "ticket": "利用券の確認"
       },
       "stepProgress": "{step}/3",
-      "sessionsGuide": "参加できる日程をすべて選んでください。先に選んだ日程から優先して割り当てます。",
       "regionsTitle": "希望エリア",
       "regionsMulti": "（複数選択可）",
-      "regionsGuide": "会いたいエリアをすべて選んでください。選んだエリアのいずれかでテーブルが開かれます。",
       "regionsLoadFailed": "エリアを読み込めませんでした。",
       "prev": "戻る",
       "next": "次へ",

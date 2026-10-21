@@ -625,10 +625,8 @@
         "ticket": "Check your pass"
       },
       "stepProgress": "{step}/3",
-      "sessionsGuide": "Pick every date that works for you. We'll prioritize the dates you picked first.",
       "regionsTitle": "Preferred areas",
       "regionsMulti": "(Multiple selections allowed)",
-      "regionsGuide": "Choose every area you'd like to meet in. Your table will be in one of them.",
       "regionsLoadFailed": "Couldn't load the areas.",
       "prev": "Back",
       "next": "Next",

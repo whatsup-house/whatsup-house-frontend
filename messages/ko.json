@@ -625,10 +625,8 @@
         "ticket": "이용권 확인"
       },
       "stepProgress": "{step}/3",
-      "sessionsGuide": "참여할 수 있는 날짜를 모두 골라주세요. 먼저 고른 날짜부터 우선 배정돼요.",
       "regionsTitle": "희망 지역",
       "regionsMulti": "(복수 선택 가능)",
-      "regionsGuide": "만나고 싶은 지역을 모두 골라주세요. 고른 지역 중 한 곳에서 테이블이 열려요.",
       "regionsLoadFailed": "지역 목록을 불러오지 못했어요.",
       "prev": "이전",
       "next": "다음",
