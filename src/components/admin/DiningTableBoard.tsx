@@ -50,7 +50,7 @@ const NOTICE_STATUS: Partial<Record<DiningNoticeStatus, { label: string; title: 
 
 const TH_CLASS = 'px-3 py-2 text-left text-xs font-medium text-tag-text whitespace-nowrap'
 const TD_CLASS = 'px-3 py-2 text-sm text-foreground whitespace-nowrap'
-const MEMBER_CHIP = 'rounded-full bg-card px-1.5 text-[10px] font-medium text-tag-text'
+const MEMBER_CHIP = 'rounded-full bg-card px-1.5 text-[10px] font-medium text-tag-text whitespace-nowrap'
 
 const SMALL_BUTTON = 'px-2.5 h-8 rounded-input border text-xs font-medium disabled:opacity-50 disabled:pointer-events-none'
 
@@ -322,7 +322,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
                 setDragItem({ memberId: m.memberId, fromTableId: table.id })
               }}
               onDragEnd={() => setDragItem(null)}
-              className={`flex items-center gap-1 rounded-full bg-tag-bg px-2.5 py-1 text-xs text-tag-text ${
+              className={`flex max-w-full flex-wrap items-center gap-1 rounded-input bg-tag-bg px-2.5 py-1 text-xs text-tag-text ${
                 adjustable && !isSplitting ? 'cursor-grab' : ''
               }`}
             >
