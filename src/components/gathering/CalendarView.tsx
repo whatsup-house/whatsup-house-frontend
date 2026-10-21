@@ -6,12 +6,12 @@ import { useTranslations } from 'next-intl'
 import type { CalendarDot } from '@/lib/api/types'
 
 // 달력 점 색상 분기 (KAN-164, KAN-306)
-// 취소: 날짜 무관 비활성(회색) / 과거: 진행 완료(회색) / 예정·모집중: 초록(calendar-dot)
+// 신청 가능한 모집중만 초록(calendar-dot). 마감(신청 마감 지남 포함)·취소·지난 날짜는 회색.
+// 상태는 deriveCalendarDots 가 카드 배지와 같은 기준(sessionDisplayStatus)으로 정한다.
 function dotColorClass(dot: CalendarDot | undefined, today: string, isSelected: boolean): string {
   if (!dot) return 'bg-transparent'
   if (isSelected) return 'bg-white'
-  if (dot.status === 'CANCELLED') return 'bg-gray-300'
-  if (dot.date < today) return 'bg-gray-300'
+  if (dot.status !== 'OPEN' || dot.date < today) return 'bg-gray-300'
   return 'bg-calendar-dot'
 }
 

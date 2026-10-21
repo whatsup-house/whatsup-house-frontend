@@ -17,12 +17,18 @@ export function toBadgeStatus(status: GatheringSessionStatus): GatheringStatus {
   return status === 'DONE' ? 'COMPLETED' : status
 }
 
-// 목록·카드 배지용 회차 상태. 모집중이어도 신청 마감이 지났으면 마감으로 보인다(상세의 신청 막힘과 일치).
-export function sessionBadgeStatus(session: GatheringSession): GatheringStatus {
+// 화면에 보이는 회차 상태의 단일 기준. 모집중이어도 신청 마감이 지났으면 마감(CLOSED).
+// 카드 배지·모아보기·달력 점이 모두 이 값을 쓴다 — 상세의 신청 막힘(isSessionApplicable)과 어긋나지 않게.
+export function sessionDisplayStatus(session: Pick<GatheringSession, 'status' | 'applyDeadlineAt'>): GatheringSessionStatus {
   if (session.status === 'OPEN' && session.applyDeadlineAt && !dayjs().isBefore(session.applyDeadlineAt)) {
     return 'CLOSED'
   }
-  return toBadgeStatus(session.status)
+  return session.status
+}
+
+// 목록·카드 배지용 (DONE은 기존 배지의 COMPLETED)
+export function sessionBadgeStatus(session: GatheringSession): GatheringStatus {
+  return toBadgeStatus(sessionDisplayStatus(session))
 }
 
 // 신청 마감 표시 시각. 자정(00:00) 마감은 전날 23:59 로 보여 준다 — "28일(수) 00:00" 보다 "27일(화) 23:59" 가 읽기 쉽다.
