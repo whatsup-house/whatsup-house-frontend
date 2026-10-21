@@ -23,6 +23,7 @@ export default function DiningStatusSummary() {
       <DiningStatusCard
         summary
         applicationId={active.id}
+        gatheringId={active.gathering.id}
         title={active.gathering.title}
         status={active.status}
         matchStatus={active.matchStatus}
@@ -33,6 +34,8 @@ export default function DiningStatusSummary() {
         depositOnly={isDepositOnlyPending(active)}
         deposit={active.deposit}
         ticketStatus={active.ticketStatus}
+        paymentStatus={active.paymentStatus}
+        unassignedReason={active.unassignedReason}
       />
     </div>
   )

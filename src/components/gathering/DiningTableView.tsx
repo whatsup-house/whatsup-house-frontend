@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, useRouter } from 'next/navigation'
-import { Calendar, CheckCircle2, Clock, MapPin, MessageCircle, Sparkles, Star, Users, Utensils } from 'lucide-react'
+import { Calendar, CheckCircle2, Clock, Flag, MapPin, MessageCircle, Smile, Sparkles, Star, Users, Utensils } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import dayjs from 'dayjs'
 import { ApiErrorMessage, Button, Card, LoadingSpinner } from '@/components/ui'
@@ -79,6 +79,11 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
   const eventDate = formatLocalizedFullDate(session?.eventDate, locale)
   const timeRange = formatTimeRange(session?.startTime, session?.endTime)
   const isFeedbackOpen = isDiningFeedbackOpen(tableQuery.data.status, session?.eventDate, session?.endTime)
+  const gatherAt = tableQuery.data.gatherAt ? dayjs(tableQuery.data.gatherAt) : null
+  // 단체방 게시 뒤에만 온다 (KAN-438). 없으면 단체방 안내 그대로
+  const contents = tableQuery.data.contents ?? []
+  const topics = contents.filter((content) => content.kind === 'TOPIC')
+  const icebreakers = contents.filter((content) => content.kind === 'ICEBREAKER')
 
   return (
     <div className="min-h-screen bg-background px-5 py-7 space-y-4">
@@ -102,6 +107,13 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
             <p className="flex items-center gap-2 font-medium">
               <Clock size={16} className="shrink-0 text-tag-text" />
               {timeRange}
+            </p>
+          )}
+          {gatherAt?.isValid() && (
+            <p className="flex items-center gap-2 font-medium">
+              <Flag size={16} className="shrink-0 text-tag-text" />
+              <span className="text-tag-text">{t('gatherAt')}</span>
+              {gatherAt.format('HH:mm')}
             </p>
           )}
           {session?.region && (
@@ -155,6 +167,12 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
             <p className="text-sm font-semibold text-foreground">{venue.name}</p>
             {venue.address && <p className="mt-0.5 text-xs text-tag-text break-keep">{venue.address}</p>}
             {venue.priceRange && <p className="mt-1 text-xs text-tag-text">{t('priceRange', { price: venue.priceRange })}</p>}
+            {venue.reservationName && (
+              <p className="mt-2 flex gap-2 text-sm">
+                <span className="text-tag-text">{t('reservationName')}</span>
+                <span className="font-semibold text-foreground">{venue.reservationName}</span>
+              </p>
+            )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {/* 운영자가 등록하는 지도 링크는 네이버(naver.me) 기준. 없으면 이름·주소 검색으로 폴백 */}
               <MapLinkButton provider="naver" href={getNaverMapUrl({ name: venue.name, naverMapUrl: venue.mapUrl }, venue.address)} />
@@ -200,7 +218,20 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
           <MessageCircle size={18} className="text-primary" />
           {t('topicsTitle')}
         </h2>
-        <p className="text-sm leading-relaxed text-tag-text">{t('topicsGuide')}</p>
+        {topics.length > 0 ? (
+          <ol className="flex flex-col gap-2">
+            {topics.map((topic, index) => (
+              <li key={`${index}-${topic.body}`} className="flex items-start gap-2 text-sm leading-relaxed text-foreground break-keep">
+                <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                  {index + 1}
+                </span>
+                {topic.body}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-sm leading-relaxed text-tag-text">{t('topicsGuide')}</p>
+        )}
         <Button
           className="mt-4 w-full"
           variant={chatRoomId ? 'primary' : 'secondary'}
@@ -210,6 +241,22 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
           {chatRoomId ? t('enterChat') : t('chatPreparing')}
         </Button>
       </Card>
+
+      {icebreakers.length > 0 && (
+        <Card className="p-5">
+          <h2 className="mb-2 flex items-center gap-2 font-bold text-foreground">
+            <Smile size={18} className="text-primary" />
+            {t('icebreakerTitle')}
+          </h2>
+          <ul className="space-y-2">
+            {icebreakers.map((icebreaker, index) => (
+              <li key={`${index}-${icebreaker.body}`} className="whitespace-pre-line text-sm leading-relaxed text-foreground break-keep">
+                {icebreaker.body}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {cancelPolicy && (
         <Card className="p-5">

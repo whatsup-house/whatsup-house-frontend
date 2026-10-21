@@ -645,6 +645,7 @@
     },
     "diningTable": {
       "label": "偶然の食卓",
+      "gatherAt": "集合",
       "strengthsTitle": "このテーブルは",
       "loadFailed": "テーブル情報を読み込めませんでした。",
       "notMemberTitle": "このテーブルのメンバーではありません",
@@ -659,9 +660,11 @@
       "venueTitle": "レストラン",
       "venuePending": "レストラン調整中",
       "priceRange": "価格帯 {price}",
+      "reservationName": "予約名",
       "membersTitle": "一緒のメンバー {count}人",
       "topicsTitle": "会話のテーマ",
       "topicsGuide": "会話のテーマとアイスブレイクはグループチャットで確認できます。",
+      "icebreakerTitle": "アイスブレイク",
       "enterChat": "グループチャットへ",
       "chatPreparing": "グループチャット準備中",
       "cancelPolicyTitle": "キャンセルポリシー",
@@ -846,10 +849,10 @@
         },
         "moreSessions": "ほか{count}日程",
         "candidateRegions": "希望エリア {regions}",
+        "matchRunAt": "マッチング",
         "detail": {
           "payment": "利用券を購入すると申込みが確定し、マッチング待ちになります。",
           "waiting": "マッチングを待っています。",
-          "waitingAt": "{at}にマッチングを開始します。",
           "matching": "ご一緒するテーブルを探しています。",
           "matchingUntil": "テーブルは{at}に確定する予定です。",
           "reallocating": "テーブルの人数が変わったため、再配置しています。",
@@ -863,6 +866,13 @@
         "buyTicket": "利用券を購入する",
         "viewTable": "テーブルを見る",
         "goResolve": "対応方法を選ぶ",
+        "otherSessions": "ほかの日程を見る",
+        "inquiry": "お問い合わせ",
+        "wishes": {
+          "button": "日程を変更",
+          "submit": "変更する",
+          "done": "日程を変更しました。"
+        },
         "viewAll": "申込み一覧を見る",
         "cancel": {
           "button": "申込みをキャンセル",
@@ -934,6 +944,23 @@
         "refundStatus": {
           "REFUND_PROCESSING": "송금 대기",
           "REFUNDED": "환불 완료"
+        },
+        "paymentStatus": {
+          "PENDING": "支払い待ち",
+          "PAID": "支払い済み",
+          "FAILED": "支払い失敗",
+          "REFUND_AVAILABLE": "返金可能",
+          "REFUND_REQUESTED": "返金申請",
+          "REFUND_PROCESSING": "返金処理中",
+          "REFUNDED": "返金済み",
+          "REFUND_FAILED": "返金失敗"
+        },
+        "unassignedReason": {
+          "REGION_TOO_SMALL": "エリア人数不足",
+          "NOT_ENOUGH_PEOPLE": "人数不足",
+          "AGE_GAP": "年齢条件",
+          "BLOCKED_PAIR": "組み合わせ条件",
+          "NEXT_SESSION_WAITING": "次の回を待機"
         }
       },
       "emptyFiltered": "該当状態の申請履歴がありません。",

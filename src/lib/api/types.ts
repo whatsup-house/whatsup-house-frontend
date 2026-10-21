@@ -794,6 +794,28 @@ export interface DiningApplicationItem {
   resolutionId?: string | null             // 매칭 실패 해결 선택 ID (KAN-347). 없으면 해결 버튼 비활성
   deposit?: DiningApplicationDeposit | null // 이 신청의 보증금 (KAN-408). 구형 BE 응답엔 없다
   candidateRegions?: string[]              // 희망 지역 (KAN-433). 구형 BE 응답엔 없다
+  unassignedReason?: DiningParticipantUnassignedReason | null // 마지막 매칭 실행에서 받은 사유 (KAN-436). 구형 BE 응답엔 없다
+  paymentStatus?: DiningPaymentStatus | null                  // 통합 결제 상태 (KAN-437). 구형 BE 응답엔 없다
+}
+
+// 참가자에게 보이는 미배정 사유 — 관리자 사유에서 점수(LOW_SCORE)를 뺀 것 (MAT-12)
+export type DiningParticipantUnassignedReason = Exclude<DiningUnassignedReason, 'LOW_SCORE'>
+
+// 신청 결제·이용권·보증금 상태에서 BE 가 계산한 통합 결제 상태 (KAN-437)
+export type DiningPaymentStatus =
+  | 'PENDING'
+  | 'PAID'
+  | 'FAILED'
+  | 'REFUND_AVAILABLE'
+  | 'REFUND_REQUESTED'
+  | 'REFUND_PROCESSING'
+  | 'REFUNDED'
+  | 'REFUND_FAILED'
+
+// PUT /api/dining/me/applications/{id}/wishes — WAITING·REALLOCATING 만. 409 WISH_CHANGE_NOT_ALLOWED (KAN-436)
+export interface DiningWishesRequest {
+  candidateSessionIds: string[]   // 우선순위 순
+  candidateRegions: string[]      // 지망 순, 1개 이상
 }
 
 export interface DiningApplicationListResponse {
@@ -811,6 +833,7 @@ export interface DiningResolution {
   choice?: DiningResolutionChoice | null
   respondBy?: string | null   // ISO datetime. 지나면 KEEP_TICKET 으로 자동 처리
   status?: DiningResolutionStatus
+  offeredRegions?: string[]   // 신청자가 고르지 않은 지역, 선언 순 (KAN-436). 없으면 지역 다시 고르기 숨김
 }
 
 // POST /api/dining/resolutions/{id}/choose. TRANSFER 면 sessionId 필수
@@ -818,6 +841,7 @@ export interface DiningResolutionChooseRequest {
   choice: DiningResolutionChoice
   sessionId?: string
   refundAccount?: DepositReturnAccount   // REFUND 면 필수 (KAN-410)
+  regions?: string[]                     // TRANSFER 희망 지역 지망 순. 생략하면 기존 희망 지역 유지 (KAN-436)
 }
 
 // 취소 미리보기 — GET /api/dining/applications/{id}/cancel-preview. 지금 취소하면 적용되는 결과 (KAN-410)
@@ -872,7 +896,9 @@ export interface DiningTableDetail {
     endTime: string | null
     region: string | null
   }
-  venue: { name: string; address: string | null; mapUrl: string | null; priceRange: string | null } | null  // 배정 전이면 null
+  // 배정 전이면 null. reservationName: 예약명(KAN-438 반영 전엔 없음)
+  venue: { name: string; address: string | null; mapUrl: string | null; priceRange: string | null; reservationName?: string | null } | null
+  gatherAt?: string | null   // 집합 시각(ISO). KAN-438 반영 전엔 없음
   chatRoomId: string | null
   // 구성원 제한 소개(INF-06): 닉네임·MBTI·관심사만 내려온다. userId 는 피드백·신고 대상 지정용(KAN-346 반영 전엔 없음)
   // characterUrl: 직업 캐릭터 이미지(KAN-432 반영 전엔 없음)
@@ -880,6 +906,12 @@ export interface DiningTableDetail {
   cancelPolicy: string | null
   myAttendance: DiningAttendance | null
   strengths?: string[]   // 테이블 장점 문구 최대 2개(KAN-432). 점수·다른 사람 응답은 오지 않는다(MAT-12)
+  contents?: DiningTableContent[]   // 단체방 게시 뒤에만 채워진다(KAN-438). 전엔 빈 배열
+}
+
+export interface DiningTableContent {
+  kind: 'TOPIC' | 'ICEBREAKER'
+  body: string
 }
 
 // 행사 후 피드백 — POST /api/dining/tables/{id}/feedback (KAN-350). 멤버당 1회

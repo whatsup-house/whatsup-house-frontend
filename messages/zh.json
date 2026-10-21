@@ -645,6 +645,7 @@
     },
     "diningTable": {
       "label": "偶遇餐桌",
+      "gatherAt": "集合",
       "strengthsTitle": "这张餐桌",
       "loadFailed": "无法加载餐桌信息。",
       "notMemberTitle": "你不是这张餐桌的成员",
@@ -659,9 +660,11 @@
       "venueTitle": "餐厅",
       "venuePending": "正在安排餐厅",
       "priceRange": "价格区间 {price}",
+      "reservationName": "预订名",
       "membersTitle": "同桌成员 {count}人",
       "topicsTitle": "聊天话题",
       "topicsGuide": "聊天话题和破冰内容会发布在群聊中。",
+      "icebreakerTitle": "破冰",
       "enterChat": "进入群聊",
       "chatPreparing": "群聊准备中",
       "cancelPolicyTitle": "取消政策",
@@ -846,10 +849,10 @@
         },
         "moreSessions": "另有{count}个日期",
         "candidateRegions": "意向区域 {regions}",
+        "matchRunAt": "匹配",
         "detail": {
           "payment": "购买使用券后，报名即可确定并进入匹配等待。",
           "waiting": "正在等待匹配。",
-          "waitingAt": "将于{at}开始匹配。",
           "matching": "正在为你寻找同桌伙伴。",
           "matchingUntil": "餐桌预计于{at}确定。",
           "reallocating": "餐桌人数有变动，正在重新分配。",
@@ -863,6 +866,13 @@
         "buyTicket": "购买使用券",
         "viewTable": "查看餐桌",
         "goResolve": "选择处理方式",
+        "otherSessions": "查看其他日程",
+        "inquiry": "咨询",
+        "wishes": {
+          "button": "更改日程",
+          "submit": "保存更改",
+          "done": "日程已更改。"
+        },
         "viewAll": "查看我的全部报名",
         "cancel": {
           "button": "取消报名",
@@ -934,6 +944,23 @@
         "refundStatus": {
           "REFUND_PROCESSING": "송금 대기",
           "REFUNDED": "환불 완료"
+        },
+        "paymentStatus": {
+          "PENDING": "待付款",
+          "PAID": "已付款",
+          "FAILED": "付款失败",
+          "REFUND_AVAILABLE": "可退款",
+          "REFUND_REQUESTED": "已申请退款",
+          "REFUND_PROCESSING": "退款处理中",
+          "REFUNDED": "已退款",
+          "REFUND_FAILED": "退款失败"
+        },
+        "unassignedReason": {
+          "REGION_TOO_SMALL": "区域人数不足",
+          "NOT_ENOUGH_PEOPLE": "人数不足",
+          "AGE_GAP": "年龄条件",
+          "BLOCKED_PAIR": "组合条件",
+          "NEXT_SESSION_WAITING": "等待下一场"
         }
       },
       "emptyFiltered": "没有具有此状态的应用程序。",

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { ApiErrorMessage, Button, Card, LoadingSpinner } from '@/components/ui'
+import DiningRegionChips, { toggleInOrder } from './DiningRegionChips'
 import DynamicQuestionField from './DynamicQuestionField'
 import GatheringSessionList from './GatheringSessionList'
 import TicketPassSection from './TicketPassSection'
@@ -273,10 +274,7 @@ function DiningApplySteps({
   }
 
   const toggleRegion = (region: string) => {
-    setDraft((prev) => ({
-      ...prev,
-      regions: prev.regions.includes(region) ? prev.regions.filter((r) => r !== region) : [...prev.regions, region],
-    }))
+    setDraft((prev) => ({ ...prev, regions: toggleInOrder(prev.regions, region) }))
   }
 
   const setAnswer = (questionId: string, value: FieldValue) => {
@@ -419,30 +417,7 @@ function DiningApplySteps({
                 </div>
                 <div className="mb-3" />
                 {regionOptions ? (
-                  <div role="group" aria-label={t('regionsTitle')} className="grid grid-cols-2 gap-2">
-                    {regionOptions.map((region) => {
-                      const priority = selectedRegions.indexOf(region) + 1   // 고른 순서 = 지망
-                      const isSelected = priority > 0
-                      return (
-                        <button
-                          key={region}
-                          type="button"
-                          aria-pressed={isSelected}
-                          onClick={() => toggleRegion(region)}
-                          className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
-                            isSelected ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
-                          }`}
-                        >
-                          {isSelected && (
-                            <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-primary">
-                              {priority}
-                            </span>
-                          )}
-                          {region}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <DiningRegionChips regions={regionOptions} selected={selectedRegions} label={t('regionsTitle')} onToggle={toggleRegion} />
                 ) : regionsQuery.isError ? (
                   <ApiErrorMessage message={t('regionsLoadFailed')} onRetry={() => { regionsQuery.refetch() }} />
                 ) : (

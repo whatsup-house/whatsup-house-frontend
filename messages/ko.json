@@ -645,6 +645,7 @@
     },
     "diningTable": {
       "label": "우연한 식탁",
+      "gatherAt": "집합",
       "strengthsTitle": "이 테이블은요",
       "loadFailed": "테이블 정보를 불러오지 못했어요.",
       "notMemberTitle": "이 테이블의 멤버가 아닙니다",
@@ -659,9 +660,11 @@
       "venueTitle": "식당",
       "venuePending": "식당 배정 중",
       "priceRange": "가격대 {price}",
+      "reservationName": "예약명",
       "membersTitle": "함께하는 멤버 {count}명",
       "topicsTitle": "대화 주제",
       "topicsGuide": "대화 주제와 아이스브레이킹은 단체방에서 확인할 수 있어요.",
+      "icebreakerTitle": "아이스브레이킹",
       "enterChat": "단체방 입장",
       "chatPreparing": "단체방 준비 중",
       "cancelPolicyTitle": "취소 정책",
@@ -846,10 +849,10 @@
         },
         "moreSessions": "외 {count}개 날짜",
         "candidateRegions": "희망 지역 {regions}",
+        "matchRunAt": "매칭",
         "detail": {
           "payment": "이용권을 구매하면 신청이 확정되고 매칭을 기다리게 돼요.",
           "waiting": "매칭을 기다리고 있어요.",
-          "waitingAt": "{at}에 매칭을 시작해요.",
           "matching": "함께할 테이블을 찾고 있어요.",
           "matchingUntil": "테이블이 {at}에 확정될 예정이에요.",
           "reallocating": "테이블 인원이 바뀌어 다시 배정하고 있어요.",
@@ -863,6 +866,13 @@
         "buyTicket": "이용권 구매하기",
         "viewTable": "테이블 보기",
         "goResolve": "해결 방법 선택하기",
+        "otherSessions": "다른 일정 보기",
+        "inquiry": "문의하기",
+        "wishes": {
+          "button": "일정 바꾸기",
+          "submit": "변경하기",
+          "done": "일정을 바꿨어요."
+        },
         "viewAll": "내 신청 전체 보기",
         "cancel": {
           "button": "신청 취소",
@@ -934,6 +944,23 @@
         "refundStatus": {
           "REFUND_PROCESSING": "송금 대기",
           "REFUNDED": "환불 완료"
+        },
+        "paymentStatus": {
+          "PENDING": "결제 대기",
+          "PAID": "결제 완료",
+          "FAILED": "결제 실패",
+          "REFUND_AVAILABLE": "환불 가능",
+          "REFUND_REQUESTED": "환불 요청",
+          "REFUND_PROCESSING": "환불 진행 중",
+          "REFUNDED": "환불 완료",
+          "REFUND_FAILED": "환불 실패"
+        },
+        "unassignedReason": {
+          "REGION_TOO_SMALL": "지역 인원 부족",
+          "NOT_ENOUGH_PEOPLE": "인원 부족",
+          "AGE_GAP": "나이 조건",
+          "BLOCKED_PAIR": "조합 조건",
+          "NEXT_SESSION_WAITING": "다음 회차 대기"
         }
       },
       "emptyFiltered": "해당 상태의 신청 내역이 없어요.",

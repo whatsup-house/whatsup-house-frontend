@@ -645,6 +645,7 @@
     },
     "diningTable": {
       "label": "Random Table",
+      "gatherAt": "Meet at",
       "strengthsTitle": "About this table",
       "loadFailed": "Couldn't load the table details.",
       "notMemberTitle": "You're not a member of this table",
@@ -659,9 +660,11 @@
       "venueTitle": "Restaurant",
       "venuePending": "Assigning a restaurant",
       "priceRange": "Price range {price}",
+      "reservationName": "Reservation name",
       "membersTitle": "{count} members at your table",
       "topicsTitle": "Conversation topics",
       "topicsGuide": "Conversation topics and icebreakers are posted in the group chat.",
+      "icebreakerTitle": "Icebreaker",
       "enterChat": "Open group chat",
       "chatPreparing": "Group chat coming soon",
       "cancelPolicyTitle": "Cancellation policy",
@@ -846,10 +849,10 @@
         },
         "moreSessions": "+{count} more dates",
         "candidateRegions": "Areas: {regions}",
+        "matchRunAt": "Matching",
         "detail": {
           "payment": "Buy a pass to confirm your application and join the matching queue.",
           "waiting": "Waiting for matching.",
-          "waitingAt": "Matching starts {at}.",
           "matching": "We're finding a table for you.",
           "matchingUntil": "Your table will be confirmed {at}.",
           "reallocating": "The table changed, so we are reassigning you.",
@@ -863,6 +866,13 @@
         "buyTicket": "Buy a pass",
         "viewTable": "View table",
         "goResolve": "Choose an option",
+        "otherSessions": "See other dates",
+        "inquiry": "Contact us",
+        "wishes": {
+          "button": "Change dates",
+          "submit": "Save changes",
+          "done": "Your dates have been changed."
+        },
         "viewAll": "View all my applications",
         "cancel": {
           "button": "Cancel application",
@@ -934,6 +944,23 @@
         "refundStatus": {
           "REFUND_PROCESSING": "송금 대기",
           "REFUNDED": "환불 완료"
+        },
+        "paymentStatus": {
+          "PENDING": "Payment pending",
+          "PAID": "Paid",
+          "FAILED": "Payment failed",
+          "REFUND_AVAILABLE": "Refund available",
+          "REFUND_REQUESTED": "Refund requested",
+          "REFUND_PROCESSING": "Refund in progress",
+          "REFUNDED": "Refunded",
+          "REFUND_FAILED": "Refund failed"
+        },
+        "unassignedReason": {
+          "REGION_TOO_SMALL": "Too few in area",
+          "NOT_ENOUGH_PEOPLE": "Too few people",
+          "AGE_GAP": "Age condition",
+          "BLOCKED_PAIR": "Group condition",
+          "NEXT_SESSION_WAITING": "Waiting for next date"
         }
       },
       "emptyFiltered": "No applications with this status.",

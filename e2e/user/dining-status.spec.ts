@@ -38,7 +38,7 @@ test.describe('회원 - 우연한 식탁 상태 카드', () => {
     applications = [diningApplication({ matchStatus: 'WAITING' })]
     await page.goto('/mypage?tab=applications')
     await expect(card.getByText('매칭 대기', { exact: true })).toBeVisible()
-    await expect(card.getByText(/에 매칭을 시작해요\./)).toBeVisible()
+    await expect(card.getByText('매칭', { exact: true })).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/dining-status-01-waiting.png')
 
     // 관리자가 매칭 실행 → 제안(확정 유예 중)
