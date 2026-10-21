@@ -77,8 +77,7 @@ export default function AdminTicketsPage() {
   }
 
   const handleDelete = async (product: TicketProductItem) => {
-    const ok = await showConfirm('기존 구매 내역은 그대로 유지돼요.', {
-      title: `${product.name} 상품을 삭제할까요?`,
+    const ok = await showConfirm(`${product.name} 상품을 삭제할까요?`, {
       confirmLabel: '삭제',
       destructive: true,
     })

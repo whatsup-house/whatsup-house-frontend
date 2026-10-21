@@ -118,7 +118,7 @@ export default function AdminChatRoomList() {
       router.push(href)
       return
     }
-    const ok = await showConfirm('방에 입장 메시지가 남아요.', { title: '참여하지 않은 단체방이에요. 참여하고 들어갈까요?', confirmLabel: '참여' })
+    const ok = await showConfirm('참여하지 않은 단체방이에요. 참여하고 들어갈까요?', { confirmLabel: '참여' })
     if (!ok) return
     addMembers.mutate({ roomId: room.id, userIds: [userId] }, { onSuccess: () => router.push(href) })
   }
