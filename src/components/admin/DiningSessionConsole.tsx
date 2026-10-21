@@ -17,8 +17,10 @@ import {
   useConfirmDiningTablesNow,
   useDiningApplicants,
   useDiningApplicationHistory,
+  useDiningDashboard,
   useDiningTables,
   useDownloadDiningCsv,
+  useResetDiningDemoSession,
   useRunDiningMatch,
 } from '@/lib/hooks/useAdminDining'
 import { toBadgeStatus } from '@/lib/utils/gatheringStatus'
@@ -116,6 +118,10 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
   const [isEditOpen, setIsEditOpen] = useState(false)
   const runMatch = useRunDiningMatch(sessionId)
   const confirmAll = useConfirmDiningTablesNow(sessionId)
+  const demoReset = useResetDiningDemoSession(sessionId)
+  // 숨김(심사용) 여부는 회차·종류 상세 응답에 없고 대시보드 회차 카드에만 있다 → 대시보드에 안 뜨는 지난 회차엔 버튼이 없다
+  const { data: dashboard } = useDiningDashboard()
+  const isDemoSession = dashboard?.sessions.some((s) => s.sessionId === sessionId && s.hidden) ?? false
   const { mutate: changeStatus, isPending: isCancelling } = useUpdateGatheringStatus()
 
   if (detailQuery.isLoading) return <div className="flex justify-center py-20"><LoadingSpinner size="lg" /></div>
@@ -141,21 +147,23 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
 
   const handleRun = async () => {
     const ok = hasTables
-      ? await showConfirm('확정했거나 직접 고친 테이블은 그대로 두고, 나머지 제안 테이블만 새로 짜요.', { title: '자동매칭을 다시 할까요?' })
+      ? await showConfirm('자동매칭을 다시 할까요?')
       : await showConfirm('자동매칭을 할까요?')
     if (ok) runMatch.mutate()
   }
 
   const handleConfirmAll = async () => {
-    const ok = await showConfirm('규칙을 어기는 테이블은 보류되고 예외함에 남아요.', {
-      title: `제안 중인 테이블 ${proposedIds.length}개를 지금 모두 확정할까요?`,
-    })
+    const ok = await showConfirm(`제안 중인 테이블 ${proposedIds.length}개를 지금 모두 확정할까요?`)
     if (ok) confirmAll.mutate(proposedIds)
   }
 
   const handleCancel = async () => {
     const ok = await showConfirm('되돌릴 수 없어요.', { title: `${dateLabel} 회차를 취소할까요?`, confirmLabel: '회차 취소', destructive: true })
     if (ok) changeStatus({ id: sessionId, status: 'CANCELLED' })
+  }
+
+  const handleDemoReset = async () => {
+    if (await showConfirm('심사용 데이터를 초기화할까요?', { destructive: true, confirmLabel: '초기화' })) demoReset.mutate()
   }
 
   const info: [string, string][] = [
@@ -211,6 +219,15 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
           >
             회차 취소
           </button>
+          {isDemoSession && (
+            <button
+              onClick={handleDemoReset}
+              disabled={demoReset.isPending}
+              className={`${ACTION_CLASS} border border-tag-bg text-tag-text hover:border-primary hover:text-primary`}
+            >
+              {demoReset.isPending ? '초기화 중…' : '심사용 데이터 초기화'}
+            </button>
+          )}
         </div>
       </header>
 

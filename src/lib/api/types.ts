@@ -1292,6 +1292,13 @@ export interface DiningMatchRun {
   algorithmVersion: string
 }
 
+// POST /api/admin/dining/sessions/{id}/demo-reset (BE KAN-442) — 심사용 숨김 회차만
+export interface DiningDemoResetResult {
+  deletedApplicationCount: number
+  deletedTableCount: number
+  seededApplicantCount: number
+}
+
 // GET /api/admin/dining/sessions/{id}/tables
 export interface DiningTableList {
   tables: DiningAdminTable[]

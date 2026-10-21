@@ -12,8 +12,8 @@ export default function AdminBotToggle() {
   const next = !data.enabled
   const handleToggle = async () => {
     const ok = next
-      ? await showConfirm('대상 고객의 새 문의부터 봇이 먼저 답해요.', { title: 'AI 자동응답을 전체 켤까요?' })
-      : await showConfirm('모든 문의방에서 봇이 답하지 않아요.', { title: 'AI 자동응답을 전체 끌까요?' })
+      ? await showConfirm('AI 자동응답을 전체 켤까요?')
+      : await showConfirm('AI 자동응답을 전체 끌까요?')
     if (ok) update.mutate(next)
   }
 
