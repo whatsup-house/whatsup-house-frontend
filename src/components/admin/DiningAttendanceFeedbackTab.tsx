@@ -26,7 +26,7 @@ interface NotReadyProps {
 }
 
 function NotReady({ label }: NotReadyProps) {
-  return <p className="py-8 text-center text-sm text-tag-text">{label}은(는) 준비 중이에요. 기능이 열리면 여기서 볼 수 있어요.</p>
+  return <p className="py-8 text-center text-sm text-tag-text">{label} 준비 중</p>
 }
 
 interface StatTileProps {

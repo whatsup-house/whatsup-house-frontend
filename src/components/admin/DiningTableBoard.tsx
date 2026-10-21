@@ -3,8 +3,16 @@
 import { useEffect, useState } from 'react'
 import type { DragEvent } from 'react'
 import dayjs from 'dayjs'
-import { Download, Lock, X } from 'lucide-react'
-import type { DiningAdminTable, DiningScoreDetail, DiningTableAdjustRequest, DiningUnassignedReason } from '@/lib/api/types'
+import { Ban, CalendarX, Download, History, Lock, MapPinOff, X } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type {
+  DiningAdminTable,
+  DiningAssignReason,
+  DiningNoticeStatus,
+  DiningScoreDetail,
+  DiningTableAdjustRequest,
+  DiningUnassignedReason,
+} from '@/lib/api/types'
 import {
   getTableViolations,
   useAdjustDiningTables,
@@ -26,12 +34,46 @@ const UNASSIGNED_REASON_LABEL: Record<DiningUnassignedReason, string> = {
   REGION_TOO_SMALL: '지역 테이블 부족',
 }
 
+// 처음 배정(INITIAL)은 표시하지 않는다. MANUAL 은 isManual '수동' 칩과 겹치면 생략
+const ASSIGN_REASON_LABEL: Partial<Record<DiningAssignReason, string>> = {
+  REALLOCATED: '재배치 배정',
+  MANUAL: '수동',
+  SPLIT: '분리 배정',
+  MERGED: '병합 배정',
+}
+
+// 확정 안내(CONFIRM_MESSAGE) 최신 결과. NONE 은 표시하지 않는다 (KAN-437)
+const NOTICE_STATUS: Partial<Record<DiningNoticeStatus, { label: string; title: string; className: string }>> = {
+  SENT: { label: '발송됨', title: '확정 안내 발송됨', className: 'bg-green-100 text-green-700' },
+  FAILED: { label: '발송 실패', title: '확정 안내 발송 실패', className: 'bg-primary-light text-primary' },
+}
+
+const TH_CLASS = 'px-3 py-2 text-left text-xs font-medium text-tag-text whitespace-nowrap'
+const TD_CLASS = 'px-3 py-2 text-sm text-foreground whitespace-nowrap'
+const MEMBER_CHIP = 'rounded-full bg-card px-1.5 text-[10px] font-medium text-tag-text'
+
 const SMALL_BUTTON = 'px-2.5 h-8 rounded-input border text-xs font-medium disabled:opacity-50 disabled:pointer-events-none'
 
 // 제안·확정 테이블만 조정할 수 있다(BE TABLE_NOT_ADJUSTABLE).
 const isAdjustable = (table: DiningAdminTable) => table.status === 'PROPOSED' || table.status === 'CONFIRMED'
 
 const percent = (value: number) => `${Math.round(value * 100)}%`
+const formatAt = (value: string) => dayjs(value).format('M/D HH:mm')
+
+interface MemberFlagProps {
+  icon: LucideIcon
+  label: string
+  isAlert?: boolean
+}
+
+// 멤버 칩 경고 아이콘. 의미는 title·aria-label 로만 전달한다.
+function MemberFlag({ icon: Icon, label, isAlert }: MemberFlagProps) {
+  return (
+    <span role="img" title={label} aria-label={label} className={isAlert ? 'text-primary' : 'text-tag-text'}>
+      <Icon size={12} aria-hidden />
+    </span>
+  )
+}
 
 function countdownLabel(confirmAt: string, now: number) {
   const minutes = Math.ceil(dayjs(confirmAt).diff(now) / 60_000)
@@ -89,7 +131,6 @@ function ReasonModal({ title, onSubmit, onClose }: ReasonModalProps) {
           <h3 className="font-bold text-base text-foreground">{title}</h3>
           <button onClick={onClose} className="text-tag-text hover:text-foreground" aria-label="닫기"><X size={20} /></button>
         </div>
-        <p className="mb-2 text-sm text-tag-text">확정된 테이블이 포함돼 있어요. 멤버에게 안내가 필요할 수 있으니 사유를 남겨주세요.</p>
         <textarea
           value={reason}
           onChange={(e) => setReason(e.target.value)}
@@ -145,6 +186,8 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
   }
 
   const { tables, unassigned } = data
+  const hasReallocationCount = unassigned.some((u) => u.reallocationCount !== undefined)
+  const hasFailedAt = unassigned.some((u) => u.failedAt !== undefined)
   const findTable = (id: string) => tables.find((t) => t.id === id)
 
   // 직전 조정 결과의 위반(200 validation 또는 400 TABLE_RULE_VIOLATION). 다음 조정 때 갱신된다.
@@ -206,6 +249,11 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
     const moveTargets = tables.filter((t) => t.id !== table.id && isAdjustable(t))
     const tableViolations = violationsOf(table.id)
     const splitCount = split?.memberIds.length ?? 0
+    const notice = table.noticeStatus ? NOTICE_STATUS[table.noticeStatus] : undefined
+    const ageRange = table.ageMin != null && table.ageMax != null ? { min: table.ageMin, max: table.ageMax } : null
+    const hasGenderCount = table.maleCount !== undefined && table.femaleCount !== undefined
+    const mbtiList = table.mbtiList ?? []
+    const commonInterests = table.commonInterests ?? []
 
     return (
       <li
@@ -219,9 +267,15 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-bold text-foreground">{tableLabel(table.id)}</span>
+            <span className="text-sm text-tag-text">{table.members.length}명</span>
             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TABLE_STATUS_CLASS[table.status]}`}>
               {TABLE_STATUS_LABEL[table.status]}
             </span>
+            {notice && (
+              <span title={notice.title} className={`rounded-full px-2 py-0.5 text-xs font-medium ${notice.className}`}>
+                {notice.label}
+              </span>
+            )}
             {table.region && <span className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">{table.region}</span>}
             {table.locked && <Lock size={14} className="text-tag-text" aria-label="수동 조정됨(재실행 시 유지)" />}
             {table.status === 'PROPOSED' && table.confirmAt && (
@@ -230,6 +284,26 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
           </div>
           <ScoreTooltip score={table.groupScore} detail={table.scoreDetail} />
         </div>
+
+        {(ageRange || hasGenderCount || mbtiList.length > 0 || commonInterests.length > 0) && (
+          <div className="flex flex-wrap items-center gap-1.5 text-sm text-foreground">
+            {ageRange && <span>{ageRange.min}~{ageRange.max}세 ({ageRange.max - ageRange.min}세 차)</span>}
+            {hasGenderCount && <span>남 {table.maleCount}·여 {table.femaleCount}</span>}
+            {mbtiList.map((mbti, i) => (
+              <span key={`${mbti}-${i}`} className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">{mbti}</span>
+            ))}
+            {commonInterests.map((interest) => (
+              <span key={interest} className="rounded-full bg-primary-light px-2 py-0.5 text-xs text-primary">{interest}</span>
+            ))}
+          </div>
+        )}
+
+        {(table.matchedAt || table.confirmedAt) && (
+          <p className="flex flex-wrap gap-3 text-sm text-tag-text">
+            {table.matchedAt && <span>매칭 {formatAt(table.matchedAt)}</span>}
+            {table.confirmedAt && <span>확정 {formatAt(table.confirmedAt)}</span>}
+          </p>
+        )}
 
         {tableViolations.length > 0 && (
           <ul className="rounded-input bg-primary-light px-3 py-2 text-xs text-primary">
@@ -265,7 +339,15 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
               <span>{m.birthYear ? `${dayjs(now).year() - m.birthYear}세` : '-'}</span>
               <span>{genderShort(m.gender)}</span>
               <span>{m.mbti ?? '-'}</span>
+              {m.wantsSession === false && <MemberFlag icon={CalendarX} label="희망 회차 아님" isAlert />}
+              {m.wantsRegion === false && <MemberFlag icon={MapPinOff} label="희망 지역 아님" isAlert />}
+              {m.conflict && <MemberFlag icon={Ban} label="차단·비선호 관계" isAlert />}
+              {m.metBefore && <MemberFlag icon={History} label="이전에 만난 멤버 있음" />}
               {m.isManual && <span className="rounded-full bg-primary px-1.5 text-[10px] font-medium text-white">수동</span>}
+              {!(m.isManual && m.assignReason === 'MANUAL') && ASSIGN_REASON_LABEL[m.assignReason] && (
+                <span className={MEMBER_CHIP}>{ASSIGN_REASON_LABEL[m.assignReason]}</span>
+              )}
+              {!!m.reallocationCount && <span className={MEMBER_CHIP}>재배치 {m.reallocationCount}</span>}
               {adjustable && !isSplitting && moveTargets.length > 0 && (
                 <select
                   value=""
@@ -302,10 +384,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
                 <button onClick={() => setSplit(null)} className={`${SMALL_BUTTON} border-tag-bg text-tag-text`}>취소</button>
               </>
             ) : isMergeSource ? (
-              <>
-                <span className="self-center text-xs text-primary">합칠 다른 카드를 고르세요</span>
-                <button onClick={() => setMergeSourceId(null)} className={`${SMALL_BUTTON} border-tag-bg text-tag-text`}>취소</button>
-              </>
+              <button onClick={() => setMergeSourceId(null)} className={`${SMALL_BUTTON} border-tag-bg text-tag-text`}>취소</button>
             ) : isMergeTarget ? (
               <button onClick={() => handleMerge(table)} className={`${SMALL_BUTTON} border-primary bg-primary text-white`}>
                 {tableLabel(mergeSourceId ?? '')}와(과) 병합
@@ -369,7 +448,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
 
       {tables.length === 0 ? (
         <div className="bg-card rounded-card shadow-sm py-12 text-center text-sm text-tag-text">
-          아직 테이블이 없어요. 위의 &apos;자동매칭&apos;을 눌러 테이블을 만들어보세요.
+          아직 테이블이 없어요.
         </div>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{tables.map(renderCard)}</ul>
@@ -378,14 +457,28 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
       {unassigned.length > 0 && (
         <div className="bg-card rounded-card shadow-sm p-4">
           <h3 className="mb-2 text-sm font-bold text-foreground">미배정 {unassigned.length}명</h3>
-          <ul className="flex flex-wrap gap-1.5">
-            {unassigned.map((u) => (
-              <li key={u.applicationId} className="flex items-center gap-1.5 rounded-full bg-tag-bg px-2.5 py-1 text-xs text-tag-text">
-                <span className="font-semibold text-foreground">{u.nickname}</span>
-                <span>{UNASSIGNED_REASON_LABEL[u.reason] ?? u.reason}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-tag-bg">
+                <tr>
+                  <th className={TH_CLASS}>닉네임</th>
+                  <th className={TH_CLASS}>사유</th>
+                  {hasReallocationCount && <th className={TH_CLASS}>재배치</th>}
+                  {hasFailedAt && <th className={TH_CLASS}>실패 시각</th>}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-tag-bg">
+                {unassigned.map((u) => (
+                  <tr key={u.applicationId}>
+                    <td className={`${TD_CLASS} font-medium`}>{u.nickname}</td>
+                    <td className={TD_CLASS}>{UNASSIGNED_REASON_LABEL[u.reason] ?? u.reason}</td>
+                    {hasReallocationCount && <td className={TD_CLASS}>{u.reallocationCount ?? 0}회</td>}
+                    {hasFailedAt && <td className={TD_CLASS}>{u.failedAt ? formatAt(u.failedAt) : '-'}</td>}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

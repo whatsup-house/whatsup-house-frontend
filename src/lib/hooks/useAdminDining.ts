@@ -1,9 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   confirmDiningTableNow,
   dissolveDiningTable,
   fetchDiningApplicants,
   fetchDiningApplicantsCsv,
+  fetchDiningApplicationHistory,
+  fetchDiningSessionNotices,
   fetchDiningAttendance,
   fetchDiningDashboard,
   fetchSessionVenues,
@@ -21,6 +23,7 @@ import {
   updateSessionVenues,
 } from '@/lib/api/adminDining'
 import type {
+  DiningApplicantFilter,
   DiningAttendanceStatus,
   DiningTableAdjustRequest,
   DiningTableConfirmResult,
@@ -71,10 +74,30 @@ export function useSessionVenues(sessionId: string) {
   })
 }
 
-export function useDiningApplicants(sessionId: string) {
+// 필터를 바꾸는 동안 이전 목록을 유지해 필터 줄이 깜빡이지 않게 한다.
+export function useDiningApplicants(sessionId: string, filter: DiningApplicantFilter = {}) {
   return useQuery({
-    queryKey: [...sessionKey(sessionId), 'applicants'],
-    queryFn: () => fetchDiningApplicants(sessionId),
+    queryKey: [...sessionKey(sessionId), 'applicants', filter],
+    queryFn: () => fetchDiningApplicants(sessionId, filter),
+    placeholderData: keepPreviousData,
+  })
+}
+
+// 상태 변경 이력 (KAN-437). BE 머지 전이면 404 → 재시도하지 않는다.
+export function useDiningApplicationHistory(sessionId: string, applicationId: string) {
+  return useQuery({
+    queryKey: [...sessionKey(sessionId), 'history', applicationId],
+    queryFn: () => fetchDiningApplicationHistory(applicationId),
+    retry: false,
+  })
+}
+
+// 안내 발송 이력 (KAN-437). BE 머지 전이면 404 → 재시도하지 않는다.
+export function useDiningSessionNotices(sessionId: string) {
+  return useQuery({
+    queryKey: [...sessionKey(sessionId), 'notices'],
+    queryFn: () => fetchDiningSessionNotices(sessionId),
+    retry: false,
   })
 }
 
