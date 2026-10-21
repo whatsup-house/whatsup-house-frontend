@@ -23,6 +23,7 @@ const UNASSIGNED_REASON_LABEL: Record<DiningUnassignedReason, string> = {
   NOT_ENOUGH_PEOPLE: '인원 부족',
   LOW_SCORE: '점수 미달',
   NEXT_SESSION_WAITING: '다음 회차 대기',
+  REGION_TOO_SMALL: '지역 테이블 부족',
 }
 
 const SMALL_BUTTON = 'px-2.5 h-8 rounded-input border text-xs font-medium disabled:opacity-50 disabled:pointer-events-none'
@@ -221,6 +222,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TABLE_STATUS_CLASS[table.status]}`}>
               {TABLE_STATUS_LABEL[table.status]}
             </span>
+            {table.region && <span className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">{table.region}</span>}
             {table.locked && <Lock size={14} className="text-tag-text" aria-label="수동 조정됨(재실행 시 유지)" />}
             {table.status === 'PROPOSED' && table.confirmAt && (
               <span className="text-xs text-tag-text">{countdownLabel(table.confirmAt, now)}</span>

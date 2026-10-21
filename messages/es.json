@@ -503,7 +503,8 @@
     },
     "card": {
       "price": "₩{price}",
-      "capacity": "Hasta {count} personas"
+      "capacity": "Hasta {count} personas",
+      "diningRegions": "4 zonas de Seúl"
     },
     "map": {
       "naverLabel": "Ver en el mapa Naver",
@@ -523,6 +524,7 @@
       "date": "Fecha",
       "time": "tiempo",
       "location": "Ubicación",
+      "diningRegions": "Se celebra en tu zona preferida entre 4 zonas de Seúl",
       "capacityLabel": "Capacidad",
       "capacity": "Hasta {count} personas",
       "priceLabel": "Tarifa",
@@ -618,17 +620,22 @@
     },
     "diningApply": {
       "steps": {
-        "sessions": "Elige tus fechas",
+        "sessions": "Elige tus zonas y fechas",
         "form": "Completa el formulario",
         "ticket": "Revisa tu pase"
       },
       "stepProgress": "{step}/3",
       "sessionsGuide": "Elige todas las fechas que te vengan bien. Daremos prioridad a las que elijas primero.",
+      "regionsTitle": "Zonas preferidas",
+      "regionsMulti": "(Se permiten múltiples selecciones)",
+      "regionsGuide": "Elige todas las zonas donde te gustaría quedar. Tu mesa será en una de ellas.",
+      "regionsLoadFailed": "No se pudieron cargar las zonas.",
       "prev": "Atrás",
       "next": "Siguiente",
       "submit": "Enviar solicitud",
       "requiredMissing": "Completa todos los campos obligatorios.",
       "selectedSessionsTitle": "Tus fechas (por prioridad)",
+      "selectedRegionsTitle": "Zonas preferidas",
       "noTicketNotice": "Aún no tienes un pase. Si solicitas ahora, quedará pendiente de pago y se confirmará cuando tengas un pase.",
       "submitted": "Hemos recibido tu solicitud.",
       "submitFailed": "No se pudo enviar la solicitud. Inténtalo de nuevo en un momento.",
@@ -840,6 +847,7 @@
           "exception": "En revisión"
         },
         "moreSessions": "+{count} fechas más",
+        "candidateRegions": "Zonas: {regions}",
         "detail": {
           "payment": "Compra un pase para confirmar tu solicitud y entrar en la cola de emparejamiento.",
           "waiting": "Esperando el emparejamiento.",

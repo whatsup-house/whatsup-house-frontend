@@ -102,6 +102,7 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
   // 지금 남아 있는 테이블 기준(해체된 테이블은 목록에 안 온다). 한 번 돌린 뒤 다 해체했으면 처음처럼 '자동매칭'으로 보인다.
   const tables = tablesQuery.data?.tables ?? []
   const hasTables = tables.length > 0
+  const regionResults = tablesQuery.data?.regionResults ?? []
   const proposedIds = tables.filter((t) => t.status === 'PROPOSED').map((t) => t.id)
   const runLabel = hasTables ? '자동매칭 다시 하기' : '자동매칭'
   const dateLabel = dayjs(session.eventDate).format('M.D (dd)')
@@ -126,8 +127,8 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
   }
 
   const info: [string, string][] = [
+    // 지역은 회차가 아니라 테이블마다 정해진다 → 테이블 카드·지역별 결과에서 본다 (KAN-433)
     ['일시', `${dateLabel} ${formatTimeRange(session.startTime, session.endTime)}`],
-    ['지역', session.location?.name ?? '미정'],
     ['정원', `${session.confirmedCount}/${session.maxAttendees}명`],
     ['신청 마감', formatDateTime(session.applyDeadlineAt, '마감 없음')],
     ['자동매칭 예정', formatDateTime(session.matchRunAt, '미정')],
@@ -142,7 +143,7 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
           <h1 className="font-bold text-[22px] text-foreground break-all">{detail.title}</h1>
           <Badge variant={toBadgeStatus(session.status)} />
         </div>
-        <dl className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-x-4 gap-y-2">
+        <dl className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-x-4 gap-y-2">
           {info.map(([label, value]) => (
             <div key={label} className="min-w-0">
               <dt className="text-xs text-tag-text">{label}</dt>
@@ -197,6 +198,22 @@ export default function DiningSessionConsole({ sessionId }: DiningSessionConsole
       </nav>
 
       {tab === 'applicants' && <ApplicantsTab sessionId={sessionId} />}
+      {tab === 'tables' && regionResults.length > 0 && (
+        // 마지막 자동매칭의 지역별 결과. 미채택 = 테이블 수가 지역 최소 테이블 수에 못 미쳐 그 지역을 열지 않음 (KAN-431)
+        <section className="bg-card rounded-card shadow-sm p-4">
+          <h3 className="mb-2 text-sm font-bold text-foreground">지역별 매칭 결과</h3>
+          <ul className="flex flex-wrap gap-1.5">
+            {regionResults.map((r) => (
+              <li
+                key={r.region}
+                className={`rounded-full px-2.5 py-1 text-xs ${r.adopted ? 'bg-primary-light text-primary' : 'bg-tag-bg text-tag-text'}`}
+              >
+                <span className="font-semibold">{r.region}</span> 후보 {r.candidateCount}명 · 테이블 {r.tableCount}개 · {r.adopted ? '채택' : '미채택'}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {tab === 'tables' && <DiningTableBoard sessionId={sessionId} />}
       {tab === 'venues' && <DiningVenueChatTab sessionId={sessionId} />}
       {tab === 'attendance' && <DiningAttendanceFeedbackTab sessionId={sessionId} />}
@@ -251,7 +268,7 @@ function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
           <table className="w-full">
             <thead className="border-b border-tag-bg">
               <tr>
-                {['이름', '나이', '성별', 'MBTI', '결제', '매칭 상태', '희망 회차', '참가', '제외 관계'].map((h) => (
+                {['이름', '나이', '성별', 'MBTI', '결제', '매칭 상태', '희망 회차', '희망 지역', '참가', '제외 관계'].map((h) => (
                   <th key={h} className={TH_CLASS}>{h}</th>
                 ))}
               </tr>
@@ -272,6 +289,7 @@ function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
                       </span>
                     ))}
                   </td>
+                  <td className={TD_CLASS}>{a.candidateRegions?.length ? a.candidateRegions.join(', ') : '-'}</td>
                   <td className={TD_CLASS}>{a.participationCount}회</td>
                   <td className={`${TD_CLASS} ${a.hasExcludedRelation ? 'font-bold text-primary' : 'text-tag-text'}`}>
                     {a.hasExcludedRelation ? '있음' : '없음'}

@@ -322,6 +322,7 @@ export async function mockDiningApplyApis(page: Page) {
   await onApi(page, `/api/gatherings/${DINING_GATHERING_ID}`, (route) => route.fulfill({ json: apiRes(mockDiningGathering) }))
   await onApi(page, `/api/gatherings/${DINING_GATHERING_ID}/form`, (route) => route.fulfill({ json: apiRes(mockDiningForm) }))
   await onApi(page, '/api/dining/prefill', (route) => route.fulfill({ json: apiRes(mockDiningPrefill) }))
+  await onApi(page, '/api/dining/regions', (route) => route.fulfill({ json: apiRes(['홍대/합정', '잠실', '강남/신논현', '을지로/종로']) }))
   await onApi(page, '/api/tickets/me', (route) => route.fulfill({ json: apiRes(mockDiningTickets) }))
 }
 
