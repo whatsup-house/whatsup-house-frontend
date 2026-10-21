@@ -69,7 +69,8 @@ export default function DiningDashboard() {
                             {dayjs(s.eventDate).format('M.D (dd)')} {s.startTime?.slice(0, 5)}
                           </p>
                           <p className="flex gap-2 text-sm text-tag-text min-w-0">
-                            <span className="shrink-0">{s.locationName ?? '지역 미정'}</span>
+                            {/* 우연한 식탁 회차는 장소가 없다 — 지역은 테이블마다 정해진다 (KAN-433) */}
+                            {s.locationName && <span className="shrink-0">{s.locationName}</span>}
                             <span className="truncate">{s.title}</span>
                           </p>
                         </div>

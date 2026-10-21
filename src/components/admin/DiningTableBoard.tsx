@@ -15,6 +15,7 @@ import {
 import { TABLE_STATUS_CLASS, TABLE_STATUS_LABEL, genderShort, tableLabel } from '@/lib/utils/diningStatus'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
+import DiningTableExplanationModal from './DiningTableExplanationModal'
 
 const UNASSIGNED_REASON_LABEL: Record<DiningUnassignedReason, string> = {
   AGE_GAP: '나이 차 초과',
@@ -22,6 +23,7 @@ const UNASSIGNED_REASON_LABEL: Record<DiningUnassignedReason, string> = {
   NOT_ENOUGH_PEOPLE: '인원 부족',
   LOW_SCORE: '점수 미달',
   NEXT_SESSION_WAITING: '다음 회차 대기',
+  REGION_TOO_SMALL: '지역 테이블 부족',
 }
 
 const SMALL_BUTTON = 'px-2.5 h-8 rounded-input border text-xs font-medium disabled:opacity-50 disabled:pointer-events-none'
@@ -129,6 +131,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
   const [split, setSplit] = useState<{ tableId: string; memberIds: string[] } | null>(null)
   const [mergeSourceId, setMergeSourceId] = useState<string | null>(null)
   const [pendingReason, setPendingReason] = useState<{ title: string; request: DiningTableAdjustRequest } | null>(null)
+  const [explainTableId, setExplainTableId] = useState<string | null>(null)
 
   // "N분 후 확정" 카운트다운
   useEffect(() => {
@@ -219,6 +222,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TABLE_STATUS_CLASS[table.status]}`}>
               {TABLE_STATUS_LABEL[table.status]}
             </span>
+            {table.region && <span className="rounded-full bg-tag-bg px-2 py-0.5 text-xs text-tag-text">{table.region}</span>}
             {table.locked && <Lock size={14} className="text-tag-text" aria-label="수동 조정됨(재실행 시 유지)" />}
             {table.status === 'PROPOSED' && table.confirmAt && (
               <span className="text-xs text-tag-text">{countdownLabel(table.confirmAt, now)}</span>
@@ -276,6 +280,13 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
             </li>
           ))}
         </ul>
+
+        <button
+          onClick={() => setExplainTableId(table.id)}
+          className={`${SMALL_BUTTON} self-start border-tag-bg text-foreground hover:border-primary`}
+        >
+          매칭 근거
+        </button>
 
         {adjustable && (
           <div className="mt-auto flex flex-wrap gap-1.5 border-t border-tag-bg pt-3">
@@ -387,6 +398,10 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
             setPendingReason(null)
           }}
         />
+      )}
+
+      {explainTableId && (
+        <DiningTableExplanationModal sessionId={sessionId} tableId={explainTableId} onClose={() => setExplainTableId(null)} />
       )}
     </section>
   )

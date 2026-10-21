@@ -503,7 +503,8 @@
     },
     "card": {
       "price": "₩{price}",
-      "capacity": "Up to {count} people"
+      "capacity": "Up to {count} people",
+      "diningRegions": "4 areas in Seoul"
     },
     "map": {
       "naverLabel": "View on Naver Map",
@@ -523,6 +524,7 @@
       "date": "Date",
       "time": "Time",
       "location": "Location",
+      "diningRegions": "Held in your preferred area among 4 Seoul areas",
       "capacityLabel": "Capacity",
       "capacity": "Up to {count} people",
       "priceLabel": "Fee",
@@ -618,17 +620,22 @@
     },
     "diningApply": {
       "steps": {
-        "sessions": "Pick your dates",
+        "sessions": "Pick your areas & dates",
         "form": "Fill in the form",
         "ticket": "Check your pass"
       },
       "stepProgress": "{step}/3",
       "sessionsGuide": "Pick every date that works for you. We'll prioritize the dates you picked first.",
+      "regionsTitle": "Preferred areas",
+      "regionsMulti": "(Multiple selections allowed)",
+      "regionsGuide": "Choose every area you'd like to meet in. Your table will be in one of them.",
+      "regionsLoadFailed": "Couldn't load the areas.",
       "prev": "Back",
       "next": "Next",
       "submit": "Apply",
       "requiredMissing": "Please fill in all required fields.",
       "selectedSessionsTitle": "Your dates (in priority order)",
+      "selectedRegionsTitle": "Preferred areas",
       "noTicketNotice": "You don't have a pass yet. If you apply now, your application will await payment and be confirmed once you have a pass.",
       "submitted": "Your application has been received.",
       "submitFailed": "Couldn't submit your application. Please try again shortly.",
@@ -640,6 +647,7 @@
     },
     "diningTable": {
       "label": "Random Table",
+      "strengthsTitle": "About this table",
       "loadFailed": "Couldn't load the table details.",
       "notMemberTitle": "You're not a member of this table",
       "notMemberDescription": "Only members of a confirmed table can view it.\nCheck your application status on My Page.",
@@ -839,6 +847,7 @@
           "exception": "Under review"
         },
         "moreSessions": "+{count} more dates",
+        "candidateRegions": "Areas: {regions}",
         "detail": {
           "payment": "Buy a pass to confirm your application and join the matching queue.",
           "waiting": "Waiting for matching.",
@@ -858,7 +867,6 @@
         "goResolve": "Choose an option",
         "viewAll": "View all my applications",
         "cancel": {
-          "policy": "회차 시작 전까지 취소할 수 있어요. 취소 버튼을 누르면 지금 적용되는 결과를 먼저 알려드려요.",
           "button": "Cancel application",
           "closed": "회차가 시작돼 취소할 수 없어요.",
           "confirmTitle": "Cancel this application?",

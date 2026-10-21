@@ -116,6 +116,7 @@ export default function MyApplicationList() {
                   table={dining.table}
                   assignedSession={dining.assignedSession}
                   candidateSessions={dining.candidateSessions}
+                  candidateRegions={dining.candidateRegions}
                   resolutionId={dining.resolutionId}
                   depositOnly={isDepositOnlyPending(dining)}
                   deposit={dining.deposit}

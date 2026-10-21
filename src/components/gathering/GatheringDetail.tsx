@@ -207,6 +207,13 @@ export default function GatheringDetail({
                   )}
                 </div>
                 {deadline && <p className="mt-1 text-xs text-tag-text">{deadline}</p>}
+                {/* 우연한 식탁 회차는 장소 없이 서울 4개 지역에서 열린다 (KAN-433) */}
+                {!session.location && isRandomTable && (
+                  <div className="mt-3 flex items-start gap-3">
+                    <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
+                    <p className="text-sm text-foreground break-keep">{t('diningRegions')}</p>
+                  </div>
+                )}
                 {session.location && (
                   <div className="mt-3 flex items-start gap-3">
                     <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />

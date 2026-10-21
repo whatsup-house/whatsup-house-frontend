@@ -503,7 +503,8 @@
     },
     "card": {
       "price": "₩{price}",
-      "capacity": "最多 {count} 人"
+      "capacity": "最多 {count} 人",
+      "diningRegions": "首尔4个区域"
     },
     "map": {
       "naverLabel": "在 Naver 地图上查看",
@@ -523,6 +524,7 @@
       "date": "日期",
       "time": "时间",
       "location": "地点",
+      "diningRegions": "在首尔4个区域中的意向区域举行",
       "capacityLabel": "容量",
       "capacity": "最多 {count} 人",
       "priceLabel": "费用",
@@ -618,17 +620,22 @@
     },
     "diningApply": {
       "steps": {
-        "sessions": "选择意向日期",
+        "sessions": "选择意向区域与日期",
         "form": "填写申请表",
         "ticket": "确认通行证"
       },
       "stepProgress": "{step}/3",
       "sessionsGuide": "请选出所有可以参加的日期。我们会优先安排你先选的日期。",
+      "regionsTitle": "意向区域",
+      "regionsMulti": "（允许多选）",
+      "regionsGuide": "请选择所有想见面的区域，餐桌将在其中一个区域开设。",
+      "regionsLoadFailed": "无法加载区域列表。",
       "prev": "上一步",
       "next": "下一步",
       "submit": "提交申请",
       "requiredMissing": "请填写所有必填项。",
       "selectedSessionsTitle": "意向日期（按优先顺序）",
+      "selectedRegionsTitle": "意向区域",
       "noTicketNotice": "你还没有通行证。现在申请将以待付款状态受理，通行证到位后即可确认。",
       "submitted": "申请已受理。",
       "submitFailed": "申请失败，请稍后再试。",
@@ -640,6 +647,7 @@
     },
     "diningTable": {
       "label": "偶遇餐桌",
+      "strengthsTitle": "这张餐桌",
       "loadFailed": "无法加载餐桌信息。",
       "notMemberTitle": "你不是这张餐桌的成员",
       "notMemberDescription": "只有已确定餐桌的成员才能查看。\n请在“我的”页面查看申请状态。",
@@ -839,6 +847,7 @@
           "exception": "确认中"
         },
         "moreSessions": "另有{count}个日期",
+        "candidateRegions": "意向区域 {regions}",
         "detail": {
           "payment": "购买使用券后，报名即可确定并进入匹配等待。",
           "waiting": "正在等待匹配。",
@@ -858,7 +867,6 @@
         "goResolve": "选择处理方式",
         "viewAll": "查看我的全部报名",
         "cancel": {
-          "policy": "회차 시작 전까지 취소할 수 있어요. 취소 버튼을 누르면 지금 적용되는 결과를 먼저 알려드려요.",
           "button": "取消报名",
           "closed": "회차가 시작돼 취소할 수 없어요.",
           "confirmTitle": "要取消报名吗？",

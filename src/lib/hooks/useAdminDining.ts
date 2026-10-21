@@ -8,6 +8,7 @@ import {
   fetchDiningDashboard,
   fetchSessionVenues,
   fetchDiningFeedbackSummary,
+  fetchDiningTableExplanation,
   fetchDiningTables,
   fetchDiningTablesCsv,
   mergeDiningTables,
@@ -85,6 +86,14 @@ export function useDiningTables(sessionId: string) {
     staleTime: 0,
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
+  })
+}
+
+// 매칭 근거 (KAN-434). 현재 멤버로 계산되므로 회차 키 아래에 둬 조정 뒤 같이 무효화되게 한다.
+export function useDiningTableExplanation(sessionId: string, tableId: string) {
+  return useQuery({
+    queryKey: [...sessionKey(sessionId), 'explanation', tableId],
+    queryFn: () => fetchDiningTableExplanation(tableId),
   })
 }
 

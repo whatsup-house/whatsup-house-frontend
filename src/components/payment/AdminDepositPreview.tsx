@@ -14,6 +14,8 @@ const PUSH_DELAY_MS = 1500
 const SETTLE_DELAY_MS = 1000
 // lg↑ 오른쪽 고정 패널 폭. 열려 있는 동안 앱 셸이 이만큼 비켜 준다 (globals.css html[data-admin-preview] 와 같은 값)
 const SIDE_PANEL_WIDTH = 420
+// 패널은 앱 프레임 오른쪽 끝에 붙인다. 프레임 오른쪽 끝 = min(셸 오른쪽 끝(50vw+560), 비켜 준 자리(100vw-420)) (globals.css 와 같은 식)
+const SIDE_PANEL_LEFT = `min(50vw + 560px, 100vw - ${SIDE_PANEL_WIDTH}px)`
 
 interface AdminDepositPreviewProps {
   response: DemoDepositResponse
@@ -162,8 +164,8 @@ export default function AdminDepositPreview({ response, payerName, amount, targe
       role={isSide ? 'region' : 'dialog'}
       aria-modal={isSide ? undefined : true}
       aria-label={label}
-      className={`fixed z-[110] flex flex-col items-center justify-center gap-3 ${isSide ? 'inset-y-0 right-0 px-6' : 'inset-0 bg-foreground/85 p-4'}`}
-      style={isSide ? { width: SIDE_PANEL_WIDTH } : undefined}
+      className={`fixed z-[110] flex flex-col justify-center gap-3 ${isSide ? 'inset-y-0 items-start pl-6' : 'inset-0 items-center bg-foreground/85 p-4'}`}
+      style={isSide ? { left: SIDE_PANEL_LEFT, width: SIDE_PANEL_WIDTH } : undefined}
     >
       <div className="flex items-center justify-between gap-2" style={{ width: FRAME_WIDTH * scale }}>
         <span className="pl-2.5 text-sm font-bold text-white">{label}</span>

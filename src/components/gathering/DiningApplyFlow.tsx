@@ -11,7 +11,7 @@ import PaymentPolicyNotice, { POLICY_CONFIRM_ID } from '@/components/payment/Pay
 import RefundAccountForm from '@/components/payment/RefundAccountForm'
 import { isEmpty, prefillFromProfile, type FieldValue } from './DynamicApplicationForm'
 import { useMyProfile } from '@/lib/hooks/useAuth'
-import { useDiningPrefill, useSubmitDynamicApplication } from '@/lib/hooks/useApplications'
+import { useDiningPrefill, useDiningRegions, useSubmitDynamicApplication } from '@/lib/hooks/useApplications'
 import { useGatheringForm } from '@/lib/hooks/useForm'
 import { useGatheringDetail } from '@/lib/hooks/useGatherings'
 import { useHorizontalSwipe } from '@/lib/hooks/useHorizontalSwipe'
@@ -27,14 +27,17 @@ import type { AnswerItem, DepositReturnAccount, FormQuestionDetail, GatheringSes
 type Step = 1 | 2 | 3
 const STEP_KEYS = ['sessions', 'form', 'ticket'] as const
 
-// 회차 검증 실패(마감·다른 종류·모집중 아님)는 1단계로, 답변 검증 실패는 2단계로 돌려보낸다.
-const SESSION_ERROR_CODES = new Set(['SESSION_GATHERING_MISMATCH', 'GATHERING_NOT_RECRUITING', 'APPLY_DEADLINE_PASSED', 'SESSION_NOT_FOUND'])
+// 회차·지역 검증 실패(마감·다른 종류·모집중 아님·지역 누락)는 1단계로, 답변 검증 실패는 2단계로 돌려보낸다.
+const SESSION_ERROR_CODES = new Set([
+  'SESSION_GATHERING_MISMATCH', 'GATHERING_NOT_RECRUITING', 'APPLY_DEADLINE_PASSED', 'SESSION_NOT_FOUND', 'REGION_REQUIRED', 'INVALID_REGION',
+])
 const ANSWER_ERROR_CODES = new Set(['REQUIRED_ANSWER_MISSING', 'INVALID_QUESTION'])
 
 // 단계 이동·이용권 구매 화면 왕복에도 입력을 유지하려고 sessionStorage에 둔다. 제출에 성공하면 지운다.
 interface DiningApplyDraft {
   step: Step
   sessionIds: string[]                    // 고른 순서 = 우선순위
+  regions: string[]                       // 희망 지역 라벨 (KAN-433)
   answers: Record<string, FieldValue>     // questionId → 직접 입력한 값 (프리필은 렌더 시 fallback)
   refundAccount: DepositReturnAccount     // 보증금 반환 계좌 입력 (보증금 대상만 쓴다)
 }
@@ -50,11 +53,14 @@ function readDraft(gatheringId: string): DiningApplyDraft | null {
   try {
     const parsed: unknown = JSON.parse(window.sessionStorage.getItem(draftKey(gatheringId)) ?? 'null')
     if (typeof parsed !== 'object' || parsed === null) return null
-    const { step, sessionIds, answers, refundAccount } = parsed as Partial<DiningApplyDraft>
+    const { step, sessionIds, regions, answers, refundAccount } = parsed as Partial<DiningApplyDraft>
     if (!Array.isArray(sessionIds) || typeof answers !== 'object' || answers === null) return null
+    const savedRegions = Array.isArray(regions) ? regions.filter((r): r is string => typeof r === 'string') : []
     return {
-      step: step === 2 || step === 3 ? step : 1,
+      // 지역 도입 전 초안엔 지역이 없다 → 1단계부터 다시 고르게 한다 (첫 칩 선택에 저장된 단계로 튀지 않게)
+      step: savedRegions.length > 0 && (step === 2 || step === 3) ? step : 1,
       sessionIds: sessionIds.filter((id): id is string => typeof id === 'string'),
+      regions: savedRegions,
       answers,
       refundAccount: {
         bank: typeof refundAccount?.bank === 'string' ? refundAccount.bank : '',
@@ -162,17 +168,19 @@ function DiningApplySteps({
   const { data: profile } = useMyProfile()
   const { data: prefill } = useDiningPrefill(gatheringId, true)
   const { data: tickets } = useMyTickets()
+  const regionsQuery = useDiningRegions()
   const submitMutation = useSubmitDynamicApplication()
 
   // 마운트 때 한 번만 정한다 → 이후 1단계에서 바꾼 선택을 ?session= 이 덮어쓰지 않는다. (KAN-389)
   const [draft, setDraft] = useState<DiningApplyDraft>(() => {
     const saved = readDraft(gatheringId)
     // ?session= 없음 = 이용권 구매 후 복귀(TicketPassSection returnUrl) 등 → 저장된 단계를 이어간다.
-    if (!initialSessionId) return saved ?? { step: 1, sessionIds: [], answers: {}, refundAccount: EMPTY_REFUND_ACCOUNT }
+    if (!initialSessionId) return saved ?? { step: 1, sessionIds: [], regions: [], answers: {}, refundAccount: EMPTY_REFUND_ACCOUNT }
     // 상세에서 회차를 골라 들어옴 → 1단계부터, 그 회차를 1지망으로(이미 골랐으면 맨 앞으로). 다른 선택·답변은 유지.
     return {
       step: 1,
       sessionIds: [initialSessionId, ...(saved?.sessionIds ?? []).filter((id) => id !== initialSessionId)],
+      regions: saved?.regions ?? [],
       answers: saved?.answers ?? {},
       refundAccount: saved?.refundAccount ?? EMPTY_REFUND_ACCOUNT,
     }
@@ -215,7 +223,12 @@ function DiningApplySteps({
     .map((id) => upcomingSessions.find((session) => session.id === id))
     .filter((session): session is GatheringSession => !!session && isSessionApplicable(session))
   const selectedIds = selectedSessions.map((session) => session.id)
-  const step: Step = selectedIds.length === 0 ? 1 : draft.step
+  // 지역 목록이 오면 모르는 라벨은 빼고 목록 순서로 맞춘다. 오기 전엔 초안 그대로 둬 저장된 단계가 1단계로 튀지 않게 한다.
+  const regionOptions = regionsQuery.data
+  const selectedRegions = regionOptions ? regionOptions.filter((region) => draft.regions.includes(region)) : draft.regions
+  // 희망 회차·지역을 하나 이상 골라야 다음으로 간다
+  const canProceed = selectedIds.length > 0 && selectedRegions.length > 0
+  const step: Step = canProceed ? draft.step : 1
 
   // 회원은 이름/연락처를 계정값으로 처리하므로 시스템 예약 질문은 숨긴다 (기존 회원 신청과 동일).
   const visibleQuestions = questions
@@ -258,6 +271,13 @@ function DiningApplySteps({
     }))
   }
 
+  const toggleRegion = (region: string) => {
+    setDraft((prev) => ({
+      ...prev,
+      regions: prev.regions.includes(region) ? prev.regions.filter((r) => r !== region) : [...prev.regions, region],
+    }))
+  }
+
   const setAnswer = (questionId: string, value: FieldValue) => {
     setDraft((prev) => ({ ...prev, answers: { ...prev.answers, [questionId]: value } }))
     setErrors((prev) => {
@@ -286,7 +306,7 @@ function DiningApplySteps({
   }
 
   const handleNext = () => {
-    if (selectedIds.length === 0) return   // 다음 버튼 disabled 와 같은 조건 (스와이프도 여기로 온다)
+    if (!canProceed) return   // 다음 버튼 disabled 와 같은 조건 (스와이프도 여기로 온다)
     if (step === 1) moveTo(2)
     else if (validateAnswers()) moveTo(3)
   }
@@ -314,7 +334,7 @@ function DiningApplySteps({
     return false
   }
 
-  // 주의사항 미확인이면 토스트 + 체크박스로 스크롤 + 0.5초 강조. 확인했으면 true.
+  // 주의사항 미확인이면 토스트 + 체크박스로 스크롤 + 0.7초 강조. 확인했으면 true.
   const validatePolicyConfirmed = (): boolean => {
     if (policyConfirmed) return true
     showToast(tPolicy('confirmRequired'), 'error')
@@ -323,7 +343,7 @@ function DiningApplySteps({
     document.getElementById(POLICY_CONFIRM_ID)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
     clearTimeout(highlightTimer.current)
     setPolicyHighlighted(true)
-    highlightTimer.current = setTimeout(() => setPolicyHighlighted(false), 500)
+    highlightTimer.current = setTimeout(() => setPolicyHighlighted(false), 700)
     return false
   }
 
@@ -340,7 +360,7 @@ function DiningApplySteps({
     const depositReturnAccount = depositRequired
       ? { bank: bank.trim(), accountNumber: onlyDigits(accountNumber), holder: holder.trim() }
       : undefined
-    submitMutation.mutate({ gatheringId, candidateSessionIds: selectedIds, answers, depositReturnAccount }, {
+    submitMutation.mutate({ gatheringId, candidateSessionIds: selectedIds, candidateRegions: selectedRegions, answers, depositReturnAccount }, {
       onSuccess: (result) => {
         window.sessionStorage.removeItem(draftKey(gatheringId))
         if (result.status === 'PAYMENT_PENDING') {
@@ -357,6 +377,7 @@ function DiningApplySteps({
         if (code && SESSION_ERROR_CODES.has(code)) {
           moveTo(1)
           onSessionsStale()
+          regionsQuery.refetch()
         } else if (code && ANSWER_ERROR_CODES.has(code)) {
           moveTo(2)
         } else if (code === 'DEPOSIT_ACCOUNT_REQUIRED') {
@@ -388,6 +409,39 @@ function DiningApplySteps({
         <div key={step} className={slide === 'next' ? 'animate-step-next' : slide === 'prev' ? 'animate-step-prev' : undefined}>
           {step === 1 && (
             <>
+              {/* 희망 지역 복수 선택 — 모든 회차가 서울 4개 지역에서 열린다 (KAN-433) */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-1 h-5 bg-primary rounded-full" />
+                  <h2 className="text-base font-bold text-foreground">{t('regionsTitle')}</h2>
+                  <span className="text-xs text-tag-text">{t('regionsMulti')}</span>
+                </div>
+                <p className="mb-3 text-sm text-tag-text">{t('regionsGuide')}</p>
+                {regionOptions ? (
+                  <div role="group" aria-label={t('regionsTitle')} className="grid grid-cols-2 gap-2">
+                    {regionOptions.map((region) => {
+                      const isSelected = selectedRegions.includes(region)
+                      return (
+                        <button
+                          key={region}
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => toggleRegion(region)}
+                          className={`px-4 py-2.5 rounded-input text-sm text-center font-medium transition-colors min-h-[44px] ${
+                            isSelected ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
+                          }`}
+                        >
+                          {region}
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : regionsQuery.isError ? (
+                  <ApiErrorMessage message={t('regionsLoadFailed')} onRetry={() => { regionsQuery.refetch() }} />
+                ) : (
+                  <div className="flex justify-center py-4"><LoadingSpinner /></div>
+                )}
+              </div>
               <p className="mb-4 text-sm text-tag-text">{t('sessionsGuide')}</p>
               <GatheringSessionList
                 sessions={upcomingSessions}
@@ -433,6 +487,8 @@ function DiningApplySteps({
                     </li>
                   ))}
                 </ol>
+                <p className="text-xs text-tag-text mt-4 mb-1">{t('selectedRegionsTitle')}</p>
+                <p className="text-sm text-foreground">{selectedRegions.join(', ')}</p>
               </Card>
               {needsTicket && (
                 <>
@@ -473,14 +529,14 @@ function DiningApplySteps({
           </Button>
         )}
         {step < 3 ? (
-          <Button variant="primary" className="flex-1 border border-transparent" disabled={selectedIds.length === 0} onClick={handleNext}>
+          <Button variant="primary" className="flex-1 border border-transparent" disabled={!canProceed} onClick={handleNext}>
             {t('next')}
           </Button>
         ) : (
           // 미확인이어도 눌러서 안내를 받을 수 있게 disabled 대신 aria-disabled + 흐리게만 한다
           <Button
             variant="primary"
-            className={`flex-1 border border-transparent ${policyConfirmed ? '' : 'opacity-50 hover:opacity-50'}`}
+            className={`flex-1 border border-transparent ${policyConfirmed ? '' : 'opacity-50 hover:opacity-50!'}`}
             aria-disabled={!policyConfirmed}
             isLoading={submitMutation.isPending}
             onClick={handleSubmit}

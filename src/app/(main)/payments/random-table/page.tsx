@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { Check, Ticket } from 'lucide-react'
@@ -44,7 +44,21 @@ function PaymentContent() {
   // 보증금 상태는 내 우연한 식탁 신청 목록의 신청별 deposit 에서 읽는다 (입금 대기 중엔 10초마다 갱신). (KAN-408)
   // 신청 id 없이 들어와도 '돌아가기'가 돌아갈 우연한 식탁 상세를 찾으려고 회원이면 읽는다. (KAN-419)
   const diningApplications = useMyDiningApplications(isLoggedIn && !bookingNumber)
-  const diningApplication = diningApplications.data?.find((item) => item.id === applicationId)
+  // 심사용 시연: 운영자 화면 미리보기가 재생되는 동안엔 입금 전 모습(첫 모의 입금 직전 스냅샷)을 보여 준다.
+  // 운영자 화면에서 입금 확인이 뜬 1초 뒤 풀리고, 미리보기를 다시 열면 다시 입금 전으로 돌아간다.
+  const [preDemo, setPreDemo] = useState<{ tickets: typeof memberTickets.data; dining: typeof diningApplications.data } | null>(null)
+  const [isDemoHolding, setIsDemoHolding] = useState(false)
+  const liveTickets = bookingNumber ? guestTickets.data : memberTickets.data
+  const liveDining = diningApplications.data
+  // 폴링으로 값이 바뀌어도 콜백이 바뀌지 않게 최신 값은 ref 로 읽는다 (미리보기 타이머가 다시 걸리지 않도록)
+  const liveRef = useRef({ tickets: liveTickets, dining: liveDining })
+  useEffect(() => { liveRef.current = { tickets: liveTickets, dining: liveDining } })
+  const handleDemoHold = useCallback((isHolding: boolean) => {
+    if (isHolding) setPreDemo((prev) => prev ?? liveRef.current)
+    setIsDemoHolding(isHolding)
+  }, [])
+  const diningApplicationList = isDemoHolding && preDemo ? preDemo.dining : diningApplications.data
+  const diningApplication = diningApplicationList?.find((item) => item.id === applicationId)
   const memberPurchase = usePurchaseTicketPass()
   const guestPurchase = usePurchaseGuestTicketPass()
   const showToast = useToastStore((state) => state.show)
@@ -61,7 +75,7 @@ function PaymentContent() {
   }, [applicationId, bookingNumber, isInitialized, isLoggedIn, router])
 
   const isGuestPurchase = Boolean(bookingNumber)
-  const data = isGuestPurchase ? guestTickets.data : memberTickets.data
+  const data = isDemoHolding && preDemo ? preDemo.tickets : liveTickets
   const isLoading = productsQuery.isLoading
     || (isGuestPurchase ? guestTickets.isLoading : memberTickets.isLoading)
     || Boolean(applicationId && isLoggedIn && memberApplicationDetail.isLoading)
@@ -96,8 +110,8 @@ function PaymentContent() {
   // 돌아갈 곳: 넘겨받은 returnUrl → 신청·이용권이 가리키는 우연한 식탁 상세 → 결제 대기 신청의 상세 → 목록 (KAN-419)
   const backGatheringId = gatheringId
     || data?.gatheringId
-    || diningApplications.data?.find((item) => item.id === displayPass?.applicationId)?.gathering.id
-    || diningApplications.data?.find((item) => item.status === 'PAYMENT_PENDING')?.gathering.id
+    || diningApplicationList?.find((item) => item.id === displayPass?.applicationId)?.gathering.id
+    || diningApplicationList?.find((item) => item.status === 'PAYMENT_PENDING')?.gathering.id
   // 내부 경로가 아닌 returnUrl 은 버리고 다음 후보로 넘어간다 (safeReturnUrl 은 거절 시 '/' 를 돌려준다)
   const validReturnUrl = returnUrl && safeReturnUrl(returnUrl) === returnUrl ? returnUrl : null
   const backHref = validReturnUrl ?? (backGatheringId ? `/gatherings/${backGatheringId}` : '/gatherings')
@@ -287,6 +301,7 @@ function PaymentContent() {
           applicationId={demoTarget.applicationId}
           passId={demoTarget.passId}
           isSettled={pendingDemoTarget === null}
+          onHoldChange={handleDemoHold}
           targetName={(demoTarget.passId ? displayPass?.productLabel : (diningApplication?.gathering.title ?? gatheringDetail.data?.title)) ?? null}
         />
       )}
