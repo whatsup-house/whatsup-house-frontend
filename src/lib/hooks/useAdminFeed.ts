@@ -1,3 +1,4 @@
+import { showAlert } from '@/lib/store/dialogStore'
 import { useMutation, useQuery, useQueryClient, keepPreviousData, type QueryClient } from '@tanstack/react-query'
 import type { AdminFeedFilters, AdminFeedPostRequest } from '@/lib/api/types'
 import {
@@ -17,7 +18,7 @@ const invalidateFeed = (qc: QueryClient) =>
 
 const alertError = (fallback: string) => (err: unknown) => {
   const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-  alert(msg || fallback)
+  void showAlert(msg || fallback)
 }
 
 export function useAdminFeedPosts(filters: AdminFeedFilters) {

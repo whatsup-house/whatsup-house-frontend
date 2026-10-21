@@ -1,3 +1,4 @@
+import { showAlert } from '@/lib/store/dialogStore'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminMailTemplateApi, type MailTemplatePreviewRequest } from '@/lib/api/adminMailTemplate'
 
@@ -30,7 +31,7 @@ export function useUpdateMailTemplate(onSuccess?: () => void) {
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '저장 중 오류가 발생했어요.')
+      void showAlert(msg || '저장 중 오류가 발생했어요.')
     },
   })
 }
@@ -41,7 +42,7 @@ export function usePreviewMailTemplate() {
       adminMailTemplateApi.preview(templateKey, data),
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '미리보기 중 오류가 발생했어요.')
+      void showAlert(msg || '미리보기 중 오류가 발생했어요.')
     },
   })
 }

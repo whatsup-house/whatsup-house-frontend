@@ -1,3 +1,4 @@
+import { showAlert } from '@/lib/store/dialogStore'
 import { useMutation, useQueries, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import { adminGatheringApi, groupAdminGatheringTypes, ApplicationStatus } from '@/lib/api/adminGathering'
@@ -46,11 +47,11 @@ export function useDeleteApplication(gatheringId: string) {
       const status = axiosErr?.response?.status
       const code = axiosErr?.response?.data?.code
       if (status === 400 && code === 'CANNOT_DELETE') {
-        alert('이 신청은 반려할 수 없습니다.')
+        void showAlert('이 신청은 반려할 수 없습니다.')
       } else if (status === 404) {
-        alert('이미 삭제된 신청입니다.')
+        void showAlert('이미 삭제된 신청입니다.')
       } else {
-        alert('삭제 중 오류가 발생했어요.')
+        void showAlert('삭제 중 오류가 발생했어요.')
       }
     },
   })
@@ -124,7 +125,7 @@ export function useCreateGathering(onSuccess?: (created: GatheringDetail) => voi
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '저장 중 오류가 발생했어요.')
+      void showAlert(msg || '저장 중 오류가 발생했어요.')
     },
   })
 }
@@ -140,7 +141,7 @@ export function useUpdateGathering(onSuccess?: (updated: GatheringDetail) => voi
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '저장 중 오류가 발생했어요.')
+      void showAlert(msg || '저장 중 오류가 발생했어요.')
     },
   })
 }
@@ -208,7 +209,7 @@ export function useUpdateGatheringStatus() {
     onSuccess: () => invalidateGatheringQueries(queryClient),
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '상태 변경 중 오류가 발생했어요.')
+      void showAlert(msg || '상태 변경 중 오류가 발생했어요.')
     },
   })
 }
@@ -222,7 +223,7 @@ export function useUpdateApplicationStatus(gatheringId: string) {
       queryClient.invalidateQueries({ queryKey: ['admin', 'applications', gatheringId] }),
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '상태 변경 중 오류가 발생했어요.')
+      void showAlert(msg || '상태 변경 중 오류가 발생했어요.')
     },
   })
 }
@@ -237,7 +238,7 @@ export function useUpdatePaymentStatus(gatheringId: string) {
       queryClient.invalidateQueries({ queryKey: ['admin', 'applications', gatheringId] }),
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '입금 상태 변경 중 오류가 발생했어요.')
+      void showAlert(msg || '입금 상태 변경 중 오류가 발생했어요.')
     },
   })
 }
@@ -254,7 +255,7 @@ export function useSetCuration() {
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      alert(msg || '큐레이션 변경 중 오류가 발생했어요.')
+      void showAlert(msg || '큐레이션 변경 중 오류가 발생했어요.')
     },
   })
 }

@@ -1,3 +1,4 @@
+import { showAlert } from '@/lib/store/dialogStore'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import {
@@ -25,7 +26,7 @@ import { messagesKey, roomKey, roomsKey } from './useChat'
 const adminRoomsKey = ['admin', 'chat', 'rooms'] as const
 const reportsKey = ['admin', 'chat', 'reports'] as const
 
-const alertError = (fallback: string) => (error: unknown) => alert(getAdminApiErrorMessage(error, fallback))
+const alertError = (fallback: string) => (error: unknown) => void showAlert(getAdminApiErrorMessage(error, fallback))
 
 // 멤버 변경은 JOINED/KICKED 시스템 메시지를 남기므로 방 상세·메시지·목록을 모두 다시 받는다.
 function invalidateRoom(queryClient: QueryClient, roomId: string) {

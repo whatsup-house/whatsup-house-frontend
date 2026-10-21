@@ -15,7 +15,7 @@ import {
 import { useToastStore } from '@/lib/store/toastStore'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import type { AdminChatReport, ChatReportStatus } from '@/lib/api/types'
-import { showConfirm } from '@/lib/store/dialogStore'
+import { showConfirm, showPrompt } from '@/lib/store/dialogStore'
 
 const STATUS_TABS: { status: ChatReportStatus; label: string }[] = [
   { status: 'OPEN', label: '미처리' },
@@ -54,9 +54,9 @@ export default function AdminChatReports() {
     )
   }
 
-  const handleMute = (report: AdminChatReport) => {
+  const handleMute = async (report: AdminChatReport) => {
     if (!report.messageSenderId) return
-    const reason = prompt(`${report.messageSenderNickname ?? '작성자'}님을 채팅 금지할까요? 사유를 입력해주세요.`, `신고: ${report.reason}`)
+    const reason = await showPrompt(`${report.messageSenderNickname ?? '작성자'}님을 채팅 금지할까요?`, { title: '채팅 금지', confirmLabel: '채팅 금지', destructive: true, defaultValue: `신고: ${report.reason}` })
     if (!reason?.trim()) return
     muteUser.mutate(
       { userId: report.messageSenderId, reason: reason.trim().slice(0, 1000) },

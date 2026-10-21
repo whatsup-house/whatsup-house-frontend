@@ -1,3 +1,4 @@
+import { showAlert } from '@/lib/store/dialogStore'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminUserApi, type UserAccountStatus } from '@/lib/api/adminUser'
 
@@ -24,6 +25,6 @@ export function useUpdateUserStatus(userId: string) {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', userId] })
     },
-    onError: () => alert('상태 변경 중 오류가 발생했습니다.'),
+    onError: () => void showAlert('상태 변경 중 오류가 발생했습니다.'),
   })
 }
