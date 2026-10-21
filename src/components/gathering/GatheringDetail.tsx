@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import dayjs from 'dayjs'
 import { Share2, CreditCard, AlertTriangle, ChevronLeft, ChevronRight, X, MapPin, CalendarDays } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Card, Badge } from '@/components/ui'
@@ -11,7 +10,7 @@ import MapLinkButton from './MapLinkButton'
 import TicketPassSection from './TicketPassSection'
 import type { GatheringDetail as GatheringDetailType, GatheringSession } from '@/lib/api/types'
 import { formatLocalizedShortDate, formatTimeRange } from '@/lib/utils/date'
-import { isSessionApplicable, toBadgeStatus } from '@/lib/utils/gatheringStatus'
+import { displayDeadline, isSessionApplicable, toBadgeStatus } from '@/lib/utils/gatheringStatus'
 import { getKakaoMapUrl, getNaverMapUrl } from '@/lib/utils/mapUrl'
 
 const SWIPE_THRESHOLD = 50
@@ -99,7 +98,7 @@ export default function GatheringDetail({
   const isApplicable = !!session && isSessionApplicable(session)
   const deadline = isApplicable && session.applyDeadlineAt
     ? t('applyDeadline', {
-      date: `${formatLocalizedShortDate(session.applyDeadlineAt, locale)} ${dayjs(session.applyDeadlineAt).format('HH:mm')}`,
+      date: `${formatLocalizedShortDate(displayDeadline(session.applyDeadlineAt).format('YYYY-MM-DD'), locale)} ${displayDeadline(session.applyDeadlineAt).format('HH:mm')}`,
     })
     : null
 
@@ -207,14 +206,14 @@ export default function GatheringDetail({
                   )}
                 </div>
                 {deadline && <p className="mt-1 text-xs text-tag-text">{deadline}</p>}
-                {/* 우연한 식탁 회차는 장소 없이 서울 4개 지역에서 열린다 (KAN-433) */}
-                {!session.location && isRandomTable && (
+                {/* 우연한 식탁은 모든 회차가 서울 4개 지역에서 열린다 — 예전 회차에 남은 장소 대신 지역 안내 (KAN-433) */}
+                {isRandomTable && (
                   <div className="mt-3 flex items-start gap-3">
                     <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
                     <p className="text-sm text-foreground break-keep">{t('diningRegions')}</p>
                   </div>
                 )}
-                {session.location && (
+                {session.location && !isRandomTable && (
                   <div className="mt-3 flex items-start gap-3">
                     <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
                     <div className="flex-1">
@@ -316,7 +315,6 @@ export default function GatheringDetail({
               <div>
                 <p className="text-sm font-bold text-foreground mb-2">{t('cautionTitle')}</p>
                 <ul className="text-sm text-tag-text space-y-1.5">
-                  <li>{t('caution1')}</li>
                   <li>{t('caution2')}</li>
                   <li>{t('caution3')}</li>
                 </ul>

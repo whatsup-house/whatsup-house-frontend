@@ -11,7 +11,7 @@ import type {
   GatheringTypeFilter,
   GatheringTypeSort,
 } from './types'
-import { toBadgeStatus } from '@/lib/utils/gatheringStatus'
+import { sessionBadgeStatus } from '@/lib/utils/gatheringStatus'
 
 const fetchGatheringList = async (params?: { status: GatheringSessionStatus }): Promise<GatheringListItem[]> => {
   const response = await apiClient.get<ApiResponse<GatheringListItem[]>>('/api/gatherings', { params })
@@ -113,7 +113,7 @@ export const buildGatheringTypeCards = (
   })
 
   return sorted.flatMap((g) => {
-    const open = g.sessions.find((s) => s.status === 'OPEN')
+    const open = g.sessions.find((s) => sessionBadgeStatus(s) === 'OPEN')
     const representative = filter === 'open'
       ? open
       : filter === 'completed'
@@ -126,7 +126,7 @@ export const buildGatheringTypeCards = (
       thumbnailUrl: g.thumbnailUrl,
       tags: g.tags,
       totalCount: g.sessions.length,
-      representativeStatus: toBadgeStatus(representative.status),
+      representativeStatus: sessionBadgeStatus(representative),
       displayDate: representative.status === 'DONE' ? null : representative.eventDate,
     }]
   })
