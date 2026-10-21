@@ -334,7 +334,7 @@ function DiningApplySteps({
     return false
   }
 
-  // 주의사항 미확인이면 토스트 + 체크박스로 스크롤 + 0.5초 강조. 확인했으면 true.
+  // 주의사항 미확인이면 토스트 + 체크박스로 스크롤 + 0.7초 강조. 확인했으면 true.
   const validatePolicyConfirmed = (): boolean => {
     if (policyConfirmed) return true
     showToast(tPolicy('confirmRequired'), 'error')
@@ -343,7 +343,7 @@ function DiningApplySteps({
     document.getElementById(POLICY_CONFIRM_ID)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
     clearTimeout(highlightTimer.current)
     setPolicyHighlighted(true)
-    highlightTimer.current = setTimeout(() => setPolicyHighlighted(false), 500)
+    highlightTimer.current = setTimeout(() => setPolicyHighlighted(false), 700)
     return false
   }
 
@@ -536,7 +536,7 @@ function DiningApplySteps({
           // 미확인이어도 눌러서 안내를 받을 수 있게 disabled 대신 aria-disabled + 흐리게만 한다
           <Button
             variant="primary"
-            className={`flex-1 border border-transparent ${policyConfirmed ? '' : 'opacity-50 hover:opacity-50'}`}
+            className={`flex-1 border border-transparent ${policyConfirmed ? '' : 'opacity-50 hover:opacity-50!'}`}
             aria-disabled={!policyConfirmed}
             isLoading={submitMutation.isPending}
             onClick={handleSubmit}
