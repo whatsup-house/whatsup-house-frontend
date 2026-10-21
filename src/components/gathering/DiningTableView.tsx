@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, useRouter } from 'next/navigation'
-import { Calendar, CheckCircle2, Clock, MapPin, MessageCircle, Star, Users, Utensils } from 'lucide-react'
+import { Calendar, CheckCircle2, Clock, MapPin, MessageCircle, Sparkles, Star, Users, Utensils } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import dayjs from 'dayjs'
 import { ApiErrorMessage, Button, Card, LoadingSpinner } from '@/components/ui'
@@ -27,6 +28,9 @@ const ATTENDANCE_STYLE: Record<DiningAttendanceStatus, string> = {
   CANCELED_LATE: 'bg-tag-bg text-tag-text',
   NO_SHOW: 'bg-tag-bg text-tag-text',
 }
+
+// characterUrl 이 없거나 이미지 로드에 실패하면 기본 캐릭터 (MyProfile 과 같은 폴백, KAN-285)
+const FALLBACK_CHARACTER = '/assets/job/DEFAULT_SUIT.png'
 
 interface DiningTableViewProps {
   tableId: string
@@ -71,6 +75,7 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
 
   const { session, venue, chatRoomId, cancelPolicy, myAttendance } = tableQuery.data
   const members = tableQuery.data.members ?? []
+  const strengths = (tableQuery.data.strengths ?? []).slice(0, 2)
   const eventDate = formatLocalizedFullDate(session?.eventDate, locale)
   const timeRange = formatTimeRange(session?.startTime, session?.endTime)
   const isFeedbackOpen = isDiningFeedbackOpen(tableQuery.data.status, session?.eventDate, session?.endTime)
@@ -107,6 +112,21 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
           )}
         </div>
       </Card>
+
+      {/* 테이블 장점 (KAN-434). 점수·선은 보여주지 않는다(MAT-12) */}
+      {strengths.length > 0 && (
+        <Card className="p-5">
+          <h2 className="mb-2 flex items-center gap-2 font-bold text-foreground">
+            <Sparkles size={18} className="text-primary" />
+            {t('strengthsTitle')}
+          </h2>
+          <ul className="space-y-1">
+            {strengths.map((strength) => (
+              <li key={strength} className="text-sm leading-relaxed text-foreground break-keep">{strength}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {/* 행사 후 피드백 (KAN-356). 테이블 종료 또는 회차 종료 뒤 노출, 최종 판단은 BE */}
       {isFeedbackOpen && (
@@ -153,20 +173,23 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
         </h2>
         <ul className="divide-y divide-tag-bg">
           {members.map((member, index) => (
-            <li key={`${member.nickname}-${index}`} className="py-3 first:pt-0 last:pb-0">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">{member.nickname}</span>
-                {member.mbti && (
-                  <span className="rounded-full bg-primary-light px-2 py-0.5 text-[11px] font-bold text-primary">{member.mbti}</span>
+            <li key={`${member.nickname}-${index}`} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+              <MemberCharacter key={member.characterUrl ?? ''} url={member.characterUrl} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">{member.nickname}</span>
+                  {member.mbti && (
+                    <span className="rounded-full bg-primary-light px-2 py-0.5 text-[11px] font-bold text-primary">{member.mbti}</span>
+                  )}
+                </div>
+                {member.interests && member.interests.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {member.interests.map((interest) => (
+                      <span key={interest} className="rounded-full bg-tag-bg px-2.5 py-1 text-xs text-tag-text">{interest}</span>
+                    ))}
+                  </div>
                 )}
               </div>
-              {member.interests && member.interests.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {member.interests.map((interest) => (
-                    <span key={interest} className="rounded-full bg-tag-bg px-2.5 py-1 text-xs text-tag-text">{interest}</span>
-                  ))}
-                </div>
-              )}
             </li>
           ))}
         </ul>
@@ -203,6 +226,29 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
       />
 
       <DiningReportCard tableId={tableId} {...getSelectablePeers(members, myUserId)} />
+    </div>
+  )
+}
+
+interface MemberCharacterProps {
+  url: string | null | undefined
+}
+
+// 직업 캐릭터. 닉네임이 바로 옆에 있어 장식 이미지로 둔다(alt 비움)
+function MemberCharacter({ url }: MemberCharacterProps) {
+  const [src, setSrc] = useState(url || FALLBACK_CHARACTER)
+  return (
+    <div className="relative h-12 w-10 shrink-0">
+      <Image
+        src={src}
+        alt=""
+        fill
+        sizes="40px"
+        className="object-contain"
+        onError={() => {
+          if (src !== FALLBACK_CHARACTER) setSrc(FALLBACK_CHARACTER)
+        }}
+      />
     </div>
   )
 }

@@ -872,9 +872,11 @@ export interface DiningTableDetail {
   venue: { name: string; address: string | null; mapUrl: string | null; priceRange: string | null } | null  // 배정 전이면 null
   chatRoomId: string | null
   // 구성원 제한 소개(INF-06): 닉네임·MBTI·관심사만 내려온다. userId 는 피드백·신고 대상 지정용(KAN-346 반영 전엔 없음)
-  members: { userId?: string; nickname: string; mbti: string | null; interests: string[] | null }[] | null
+  // characterUrl: 직업 캐릭터 이미지(KAN-432 반영 전엔 없음)
+  members: { userId?: string; nickname: string; mbti: string | null; interests: string[] | null; characterUrl?: string | null }[] | null
   cancelPolicy: string | null
   myAttendance: DiningAttendance | null
+  strengths?: string[]   // 테이블 장점 문구 최대 2개(KAN-432). 점수·다른 사람 응답은 오지 않는다(MAT-12)
 }
 
 // 행사 후 피드백 — POST /api/dining/tables/{id}/feedback (KAN-350). 멤버당 1회
@@ -1095,6 +1097,41 @@ export interface DiningScoreDetail {
   pairAvg: number
   pairMin: number
   penalties: Record<string, number> | null
+}
+
+// 매칭 근거 항목 — BE PairScore.components 키. 값이 없는 항목은 키 자체가 없다 (KAN-432)
+export type DiningCriterion = 'gender' | 'mbti' | 'interests' | 'wantedStyle' | 'custom'
+
+export interface DiningExplanationMember {
+  applicationId: string
+  userId: string | null
+  nickname: string
+  characterUrl: string | null
+  job: string | null
+  birthYear: number | null
+  gender: string | null
+  mbti: string | null
+  answers: { label: string; value: string }[]   // 신청 폼 질문 라벨·답 원문(시스템 키·전화·이메일 제외)
+}
+
+// a·b = applicationId. score·components 는 0~1
+export interface DiningPairScore {
+  a: string
+  b: string
+  score: number
+  components: Partial<Record<DiningCriterion, number>>
+}
+
+// GET /api/admin/dining/tables/{id}/explanation (KAN-432). 저장값이 아니라 조회 때 현재 멤버로 계산한다
+export interface DiningTableExplanation {
+  tableId: string
+  region: string | null          // 지역 매칭 전 테이블은 null
+  groupScore: number | null      // 0~1
+  scoreDetail: DiningScoreDetail | null
+  criteriaAvg: Partial<Record<DiningCriterion, number>>
+  strengths: string[]
+  members: DiningExplanationMember[]
+  pairs: DiningPairScore[]
 }
 
 export type DiningAssignReason = 'INITIAL' | 'REALLOCATED' | 'MANUAL' | 'SPLIT' | 'MERGED'

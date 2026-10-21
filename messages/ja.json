@@ -640,6 +640,7 @@
     },
     "diningTable": {
       "label": "偶然の食卓",
+      "strengthsTitle": "このテーブルは",
       "loadFailed": "テーブル情報を読み込めませんでした。",
       "notMemberTitle": "このテーブルのメンバーではありません",
       "notMemberDescription": "確定したテーブルのメンバーのみ閲覧できます。\n申請状況はマイページでご確認ください。",

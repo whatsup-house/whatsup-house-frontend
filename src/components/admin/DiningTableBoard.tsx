@@ -15,6 +15,7 @@ import {
 import { TABLE_STATUS_CLASS, TABLE_STATUS_LABEL, genderShort, tableLabel } from '@/lib/utils/diningStatus'
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
+import DiningTableExplanationModal from './DiningTableExplanationModal'
 
 const UNASSIGNED_REASON_LABEL: Record<DiningUnassignedReason, string> = {
   AGE_GAP: '나이 차 초과',
@@ -129,6 +130,7 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
   const [split, setSplit] = useState<{ tableId: string; memberIds: string[] } | null>(null)
   const [mergeSourceId, setMergeSourceId] = useState<string | null>(null)
   const [pendingReason, setPendingReason] = useState<{ title: string; request: DiningTableAdjustRequest } | null>(null)
+  const [explainTableId, setExplainTableId] = useState<string | null>(null)
 
   // "N분 후 확정" 카운트다운
   useEffect(() => {
@@ -277,6 +279,13 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
           ))}
         </ul>
 
+        <button
+          onClick={() => setExplainTableId(table.id)}
+          className={`${SMALL_BUTTON} self-start border-tag-bg text-foreground hover:border-primary`}
+        >
+          매칭 근거
+        </button>
+
         {adjustable && (
           <div className="mt-auto flex flex-wrap gap-1.5 border-t border-tag-bg pt-3">
             {isSplitting ? (
@@ -387,6 +396,10 @@ export default function DiningTableBoard({ sessionId }: DiningTableBoardProps) {
             setPendingReason(null)
           }}
         />
+      )}
+
+      {explainTableId && (
+        <DiningTableExplanationModal sessionId={sessionId} tableId={explainTableId} onClose={() => setExplainTableId(null)} />
       )}
     </section>
   )

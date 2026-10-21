@@ -640,6 +640,7 @@
     },
     "diningTable": {
       "label": "우연한 식탁",
+      "strengthsTitle": "이 테이블은요",
       "loadFailed": "테이블 정보를 불러오지 못했어요.",
       "notMemberTitle": "이 테이블의 멤버가 아닙니다",
       "notMemberDescription": "확정된 테이블의 멤버만 볼 수 있어요.\n내 신청 상태는 마이페이지에서 확인해 주세요.",

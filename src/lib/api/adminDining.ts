@@ -11,6 +11,7 @@ import type {
   DiningTableAdjustRequest,
   DiningTableAdjustResponse,
   DiningTableConfirmResult,
+  DiningTableExplanation,
   DiningTableList,
   SessionVenue,
   SessionVenueRequest,
@@ -69,6 +70,12 @@ export const fetchDiningTables = async (sessionId: string): Promise<DiningTableL
 // 제안 상태가 아니면 409
 export const confirmDiningTableNow = async (tableId: string): Promise<DiningTableConfirmResult> => {
   const response = await apiClient.post<ApiResponse<DiningTableConfirmResult>>(`/api/admin/dining/tables/${tableId}/confirm-now`)
+  return response.data.data
+}
+
+// 매칭 근거 (KAN-432). 조회 때 현재 멤버로 계산한다
+export const fetchDiningTableExplanation = async (tableId: string): Promise<DiningTableExplanation> => {
+  const response = await apiClient.get<ApiResponse<DiningTableExplanation>>(`/api/admin/dining/tables/${tableId}/explanation`)
   return response.data.data
 }
 
