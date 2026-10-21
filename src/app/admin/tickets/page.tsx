@@ -10,6 +10,7 @@ import {
   useUpdateTicketProduct,
 } from '@/lib/hooks/useAdminTicket'
 import type { TicketProductItem } from '@/lib/api/types'
+import { showAlert, showConfirm } from '@/lib/store/dialogStore'
 
 interface ProductForm {
   name: string
@@ -58,7 +59,7 @@ export default function AdminTicketsPage() {
   const handleCreate = async () => {
     const message = validate(newForm)
     if (message) {
-      alert(message)
+      showAlert(message)
       return
     }
     await createMutation.mutateAsync(toPayload(newForm))
@@ -69,14 +70,19 @@ export default function AdminTicketsPage() {
     const form = editing[product.id] ?? toForm(product)
     const message = validate(form)
     if (message) {
-      alert(message)
+      showAlert(message)
       return
     }
     await updateMutation.mutateAsync({ id: product.id, data: toPayload(form) })
   }
 
   const handleDelete = async (product: TicketProductItem) => {
-    if (!confirm(`${product.name} 상품을 삭제할까요? 기존 구매 내역은 그대로 유지돼요.`)) return
+    const ok = await showConfirm('기존 구매 내역은 그대로 유지돼요.', {
+      title: `${product.name} 상품을 삭제할까요?`,
+      confirmLabel: '삭제',
+      destructive: true,
+    })
+    if (!ok) return
     await deleteMutation.mutateAsync(product.id)
   }
 

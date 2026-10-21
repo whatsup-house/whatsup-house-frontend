@@ -11,6 +11,7 @@ import { useAuthStore } from '@/lib/store/authStore'
 import { useLogout } from '@/lib/hooks/useAuth'
 import NotificationBell from '@/components/layout/NotificationBell'
 import ToastHost from '@/components/ui/ToastHost'
+import DialogHost from '@/components/ui/DialogHost'
 
 // 운영자 입금 알림(자동 대사 완료·예외)이 새로고침 없이 뱃지에 뜨도록 미확인 개수를 10초마다 읽는다. (KAN-417)
 const ADMIN_NOTIFICATION_POLL_MS = 10_000
@@ -159,6 +160,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {children}
       </main>
       <ToastHost />
+      <DialogHost />
     </div>
   )
 }

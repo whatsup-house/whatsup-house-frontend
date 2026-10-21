@@ -10,6 +10,7 @@ import {
   usePreviewMailTemplate,
 } from '@/lib/hooks/useAdminMailTemplates'
 import type { MailTemplateDetail } from '@/lib/api/adminMailTemplate'
+import { showAlert } from '@/lib/store/dialogStore'
 
 // ─── 템플릿 편집기 ──────────────────────────────────────────────────────
 // detail이 로드된 뒤 key={templateKey}로 마운트되므로, useState 초기값으로 안전하게 prefill한다.
@@ -17,7 +18,7 @@ function TemplateEditor({ detail }: { detail: MailTemplateDetail }) {
   const [subject, setSubject] = useState(detail.subject)
   const [body, setBody] = useState(detail.body)
 
-  const update = useUpdateMailTemplate(() => alert('저장되었어요.'))
+  const update = useUpdateMailTemplate(() => showAlert('저장되었어요.'))
   const preview = usePreviewMailTemplate()
 
   const dirty = subject !== detail.subject || body !== detail.body

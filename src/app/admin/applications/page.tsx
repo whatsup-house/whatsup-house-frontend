@@ -11,6 +11,7 @@ import { useJobLabel } from '@/lib/hooks/useJobLabel'
 import { useCalendarDots } from '@/lib/hooks/useGatherings'
 import { usePendingDeposits, usePendingDepositCount, useConfirmDeposit } from '@/lib/hooks/useAdminTicket'
 import ApplicantCard, { MemberBadge, StatusBadge } from '@/components/admin/ApplicantCard'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -276,8 +277,8 @@ function ParticipantTable({ gatheringId }: { gatheringId: string }) {
     if (isDeleting && deletingId === p.id) return <span className="text-[12px] text-[#767676]">삭제 중…</span>
     return (
       <button
-        onClick={() => {
-          if (confirm('이 신청을 반려하시겠습니까?')) deleteApplication(p.id)
+        onClick={async () => {
+          if (await showConfirm('이 신청을 반려하시겠습니까?', { confirmLabel: '반려', destructive: true })) deleteApplication(p.id)
         }}
         disabled={isDeleting}
         className="min-h-10 px-4 rounded-full bg-[#FEF3F3] text-red-500 text-[13px] font-medium md:min-h-0 md:px-0 md:bg-transparent md:hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
@@ -404,8 +405,8 @@ function DepositQueue() {
     )
   }
 
-  const handleConfirm = (ticketPassId: string, applicantName: string) => {
-    if (confirm(`${applicantName}님의 입금을 확인하고 이용권을 발급할까요?`)) {
+  const handleConfirm = async (ticketPassId: string, applicantName: string) => {
+    if (await showConfirm(`${applicantName}님의 입금을 확인하고 이용권을 발급할까요?`)) {
       confirmDeposit(ticketPassId)
     }
   }

@@ -24,6 +24,7 @@ import type {
   PayoutType,
   PendingPaymentTarget,
 } from '@/lib/api/types'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const RESULT_LABEL: Record<DepositMatchResult, string> = {
   MATCHED: '자동 완료',
@@ -121,16 +122,17 @@ function LinkForm({ item }: LinkFormProps) {
       <button
         type="button"
         disabled={!selected || link.isPending}
-        onClick={() => {
-          if (selected && confirm('이 입금을 해당 대상의 결제 완료로 처리할까요?')) {
+        onClick={async () => {
+          if (selected && (await showConfirm('이 입금을 해당 대상의 결제 완료로 처리할까요?'))) {
             const vars = { id: item.id, targetType: selected.type, targetId: selected.targetId }
             link.mutate(vars, {
-              onError: (error) => {
+              onError: async (error) => {
                 if (
                   getApiErrorCode(error) === DEPOSIT_AMOUNT_MISMATCH &&
-                  confirm(
-                    `입금액(${won(item.parsedAmount ?? 0)})과 선택한 결제 금액(${won(selected.amount)})이 달라요. 그래도 연결할까요?`,
-                  )
+                  (await showConfirm(`입금액(${won(item.parsedAmount ?? 0)})과 선택한 결제 금액(${won(selected.amount)})이 달라요.`, {
+                    title: '그래도 연결할까요?',
+                    confirmLabel: '연결',
+                  }))
                 ) {
                   link.mutate({ ...vars, force: true }, {})
                 }
@@ -303,8 +305,11 @@ function PayoutTab() {
   const toggle = (id: string) =>
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
 
-  const submit = () => {
-    if (!confirm(`${selected.length}건(${won(selectedTotal)})을 송금 완료로 처리할까요? 실제 이체를 마친 건만 처리하세요.`)) return
+  const submit = async () => {
+    const ok = await showConfirm('실제 이체를 마친 건만 처리하세요.', {
+      title: `${selected.length}건(${won(selectedTotal)})을 송금 완료로 처리할까요?`,
+    })
+    if (!ok) return
     markSent.mutate(selected, { onSuccess: () => setSelected([]) })
   }
 

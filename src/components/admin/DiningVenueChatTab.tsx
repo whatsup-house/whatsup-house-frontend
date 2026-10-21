@@ -16,6 +16,7 @@ import { TABLE_STATUS_CLASS, TABLE_STATUS_LABEL, tableLabel } from '@/lib/utils/
 import { getAdminApiErrorMessage } from '@/lib/utils/apiError'
 import { ApiErrorMessage, LoadingSpinner } from '@/components/ui'
 import DiningVenuePoolPicker from '@/components/admin/DiningVenuePoolPicker'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 const SMALL_BUTTON = 'inline-flex items-center px-3 h-9 rounded-input border text-sm font-medium disabled:opacity-50 disabled:pointer-events-none'
 const SELECT_CLASS = 'h-9 w-full sm:w-56 rounded-input border border-tag-bg bg-card px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
@@ -52,8 +53,8 @@ export default function DiningVenueChatTab({ sessionId }: DiningVenueChatTabProp
     )
   }
 
-  const handleNotify = (table: DiningAdminTable) => {
-    if (confirm(`${tableLabel(table.id)} 멤버 ${table.members.length}명에게 확정 알림을 다시 보낼까요?`)) {
+  const handleNotify = async (table: DiningAdminTable) => {
+    if (await showConfirm(`${tableLabel(table.id)} 멤버 ${table.members.length}명에게 확정 알림을 다시 보낼까요?`)) {
       retryNotifications.mutate(table.id)
     }
   }

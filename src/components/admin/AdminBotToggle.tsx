@@ -1,6 +1,7 @@
 'use client'
 
 import { useBotSettings, useUpdateBotSettings } from '@/lib/hooks/useAdminChat'
+import { showConfirm } from '@/lib/store/dialogStore'
 
 // 채팅 관리 상단 AI 자동응답 전체 ON/OFF (KAN-412). 설정을 못 불러오면 숨긴다.
 export default function AdminBotToggle() {
@@ -9,11 +10,11 @@ export default function AdminBotToggle() {
   if (!data) return null
 
   const next = !data.enabled
-  const handleToggle = () => {
-    const message = next
-      ? 'AI 자동응답을 전체 켤까요? 대상 고객의 새 문의부터 봇이 먼저 답해요.'
-      : 'AI 자동응답을 전체 끌까요? 모든 문의방에서 봇이 답하지 않아요.'
-    if (confirm(message)) update.mutate(next)
+  const handleToggle = async () => {
+    const ok = next
+      ? await showConfirm('대상 고객의 새 문의부터 봇이 먼저 답해요.', { title: 'AI 자동응답을 전체 켤까요?' })
+      : await showConfirm('모든 문의방에서 봇이 답하지 않아요.', { title: 'AI 자동응답을 전체 끌까요?' })
+    if (ok) update.mutate(next)
   }
 
   return (
