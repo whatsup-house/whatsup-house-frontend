@@ -625,10 +625,8 @@
         "ticket": "Revisa tu pase"
       },
       "stepProgress": "{step}/3",
-      "sessionsGuide": "Elige todas las fechas que te vengan bien. Daremos prioridad a las que elijas primero.",
       "regionsTitle": "Zonas preferidas",
       "regionsMulti": "(Se permiten múltiples selecciones)",
-      "regionsGuide": "Elige todas las zonas donde te gustaría quedar. Tu mesa será en una de ellas.",
       "regionsLoadFailed": "No se pudieron cargar las zonas.",
       "prev": "Atrás",
       "next": "Siguiente",

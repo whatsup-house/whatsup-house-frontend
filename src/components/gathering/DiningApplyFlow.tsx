@@ -225,7 +225,8 @@ function DiningApplySteps({
   const selectedIds = selectedSessions.map((session) => session.id)
   // 지역 목록이 오면 모르는 라벨은 빼고 목록 순서로 맞춘다. 오기 전엔 초안 그대로 둬 저장된 단계가 1단계로 튀지 않게 한다.
   const regionOptions = regionsQuery.data
-  const selectedRegions = regionOptions ? regionOptions.filter((region) => draft.regions.includes(region)) : draft.regions
+  // 고른 순서(지망)를 지키고, 지역 목록에 없는 라벨만 뺀다
+  const selectedRegions = regionOptions ? draft.regions.filter((region) => regionOptions.includes(region)) : draft.regions
   // 희망 회차·지역을 하나 이상 골라야 다음으로 간다
   const canProceed = selectedIds.length > 0 && selectedRegions.length > 0
   const step: Step = canProceed ? draft.step : 1
@@ -416,21 +417,27 @@ function DiningApplySteps({
                   <h2 className="text-base font-bold text-foreground">{t('regionsTitle')}</h2>
                   <span className="text-xs text-tag-text">{t('regionsMulti')}</span>
                 </div>
-                <p className="mb-3 text-sm text-tag-text">{t('regionsGuide')}</p>
+                <div className="mb-3" />
                 {regionOptions ? (
                   <div role="group" aria-label={t('regionsTitle')} className="grid grid-cols-2 gap-2">
                     {regionOptions.map((region) => {
-                      const isSelected = selectedRegions.includes(region)
+                      const priority = selectedRegions.indexOf(region) + 1   // 고른 순서 = 지망
+                      const isSelected = priority > 0
                       return (
                         <button
                           key={region}
                           type="button"
                           aria-pressed={isSelected}
                           onClick={() => toggleRegion(region)}
-                          className={`px-4 py-2.5 rounded-input text-sm text-center font-medium transition-colors min-h-[44px] ${
+                          className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-input text-sm font-medium transition-colors min-h-[44px] ${
                             isSelected ? 'bg-primary text-white' : 'bg-tag-bg text-tag-text'
                           }`}
                         >
+                          {isSelected && (
+                            <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-primary">
+                              {priority}
+                            </span>
+                          )}
                           {region}
                         </button>
                       )
@@ -442,7 +449,6 @@ function DiningApplySteps({
                   <div className="flex justify-center py-4"><LoadingSpinner /></div>
                 )}
               </div>
-              <p className="mb-4 text-sm text-tag-text">{t('sessionsGuide')}</p>
               <GatheringSessionList
                 sessions={upcomingSessions}
                 selectedSessionId={null}
@@ -488,7 +494,7 @@ function DiningApplySteps({
                   ))}
                 </ol>
                 <p className="text-xs text-tag-text mt-4 mb-1">{t('selectedRegionsTitle')}</p>
-                <p className="text-sm text-foreground">{selectedRegions.join(', ')}</p>
+                <p className="text-sm text-foreground">{selectedRegions.map((region, index) => `${index + 1}. ${region}`).join('  ')}</p>
               </Card>
               {needsTicket && (
                 <>

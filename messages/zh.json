@@ -625,10 +625,8 @@
         "ticket": "确认通行证"
       },
       "stepProgress": "{step}/3",
-      "sessionsGuide": "请选出所有可以参加的日期。我们会优先安排你先选的日期。",
       "regionsTitle": "意向区域",
       "regionsMulti": "（允许多选）",
-      "regionsGuide": "请选择所有想见面的区域，餐桌将在其中一个区域开设。",
       "regionsLoadFailed": "无法加载区域列表。",
       "prev": "上一步",
       "next": "下一步",

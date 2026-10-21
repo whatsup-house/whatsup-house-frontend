@@ -289,7 +289,7 @@ function ApplicantsTab({ sessionId }: ApplicantsTabProps) {
                       </span>
                     ))}
                   </td>
-                  <td className={TD_CLASS}>{a.candidateRegions?.length ? a.candidateRegions.join(', ') : '-'}</td>
+                  <td className={TD_CLASS}>{a.candidateRegions?.length ? a.candidateRegions.map((region, index) => `${index + 1}. ${region}`).join(' ') : '-'}</td>
                   <td className={TD_CLASS}>{a.participationCount}회</td>
                   <td className={`${TD_CLASS} ${a.hasExcludedRelation ? 'font-bold text-primary' : 'text-tag-text'}`}>
                     {a.hasExcludedRelation ? '있음' : '없음'}

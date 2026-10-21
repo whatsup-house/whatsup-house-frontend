@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Share2, CreditCard, AlertTriangle, ChevronLeft, ChevronRight, X, MapPin, CalendarDays } from 'lucide-react'
+import { Share2, CreditCard, AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, X, MapPin, CalendarDays } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Card, Badge } from '@/components/ui'
 import AppImage from '@/components/ui/AppImage'
@@ -12,6 +12,7 @@ import type { GatheringDetail as GatheringDetailType, GatheringSession } from '@
 import { formatLocalizedShortDate, formatTimeRange } from '@/lib/utils/date'
 import { displayDeadline, isSessionApplicable, toBadgeStatus } from '@/lib/utils/gatheringStatus'
 import { getKakaoMapUrl, getNaverMapUrl } from '@/lib/utils/mapUrl'
+import { useDiningRegions } from '@/lib/hooks/useApplications'
 
 const SWIPE_THRESHOLD = 50
 
@@ -94,6 +95,8 @@ export default function GatheringDetail({
   }, [isViewerOpen, photoCount])
 
   const isRandomTable = gatheringType === 'RANDOM_TABLE'
+  const { data: diningRegions } = useDiningRegions()
+  const [isRegionsOpen, setIsRegionsOpen] = useState(false)
   const isFreeGathering = price === 0
   const isApplicable = !!session && isSessionApplicable(session)
   const deadline = isApplicable && session.applyDeadlineAt
@@ -197,7 +200,8 @@ export default function GatheringDetail({
                     {formatLocalizedShortDate(session.eventDate, locale)} {formatTimeRange(session.startTime, session.endTime)}
                   </p>
                   {isApplicable ? (
-                    <span className="shrink-0 text-xs font-medium text-primary">
+                    // 우연한 식탁은 테이블로 나눠 앉아 잔여석이 의미 없다
+                    !isRandomTable && <span className="shrink-0 text-xs font-medium text-primary">
                       {t('remainingSeats', { count: session.maxAttendees - session.confirmedCount })}
                     </span>
                   ) : (
@@ -208,9 +212,29 @@ export default function GatheringDetail({
                 {deadline && <p className="mt-1 text-xs text-tag-text">{deadline}</p>}
                 {/* 우연한 식탁은 모든 회차가 서울 4개 지역에서 열린다 — 예전 회차에 남은 장소 대신 지역 안내 (KAN-433) */}
                 {isRandomTable && (
-                  <div className="mt-3 flex items-start gap-3">
-                    <MapPin size={18} className="text-tag-text mt-0.5 shrink-0" />
-                    <p className="text-sm text-foreground break-keep">{t('diningRegions')}</p>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      aria-expanded={isRegionsOpen}
+                      aria-controls="dining-region-list"
+                      onClick={() => setIsRegionsOpen((open) => !open)}
+                      className="flex w-full items-center gap-3 text-left"
+                    >
+                      <MapPin size={18} className="text-tag-text shrink-0" />
+                      <span className="flex-1 text-sm text-foreground">{t('diningRegions')}</span>
+                      <ChevronDown size={16} className={`text-tag-text transition-transform duration-200 motion-reduce:transition-none ${isRegionsOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {/* 높이 0 → 내용 높이로 펼친다 (grid-rows 0fr↔1fr) */}
+                    <div
+                      id="dining-region-list"
+                      className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${isRegionsOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                    >
+                      <ul className="overflow-hidden pl-[30px] text-sm text-foreground" aria-hidden={!isRegionsOpen}>
+                        {diningRegions?.map((region, index) => (
+                          <li key={region} className={`list-disc ml-4 ${index === 0 ? 'pt-2' : 'pt-1'}`}>{region}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 )}
                 {session.location && !isRandomTable && (
