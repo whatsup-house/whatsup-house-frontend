@@ -238,7 +238,7 @@ export default function DiningFeedbackForm({ tableId }: DiningFeedbackFormProps)
       </Button>
       {!canSubmit && <p className="text-center text-xs text-tag-text">{t('requiredNotice')}</p>}
 
-      <DiningReportCard tableId={tableId} peers={peers} hasUnselectable={hasUnselectable} />
+      <DiningReportCard tableId={tableId} peers={peers} />
     </div>
   )
 }

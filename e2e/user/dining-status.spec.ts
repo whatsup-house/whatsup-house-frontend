@@ -50,7 +50,7 @@ test.describe('회원 - 우연한 식탁 상태 카드', () => {
     })]
     await page.reload()
     await expect(card.getByText('매칭 중', { exact: true })).toBeVisible()
-    await expect(card.getByText(/에 확정될 예정이에요\./)).toBeVisible()
+    await expect(card.getByText('확정', { exact: true })).toBeVisible()
     await expect(card.getByRole('link', { name: '테이블 보기' })).toHaveCount(0)
     await captureFullPage(page, 'e2e/screenshots/user/dining-status-02-matching.png')
 
@@ -62,7 +62,6 @@ test.describe('회원 - 우연한 식탁 상태 카드', () => {
     })]
     await page.reload()
     await expect(card.getByText('확정', { exact: true })).toBeVisible()
-    await expect(card.getByText('테이블이 확정됐어요. 함께할 사람과 식당을 확인해보세요.')).toBeVisible()
     await captureFullPage(page, 'e2e/screenshots/user/dining-status-03-confirmed.png')
 
     await card.getByRole('link', { name: '테이블 보기' }).click()
@@ -125,7 +124,6 @@ test.describe('회원 - 우연한 식탁 상태 카드', () => {
     await expect(cancelButtons).toHaveCount(2)
     await expect(cancelButtons.nth(0)).toBeEnabled()
     await expect(cancelButtons.nth(1)).toBeDisabled()
-    await expect(page.getByText('회차 시작 2일 전이 지나 취소할 수 없어요.')).toHaveCount(1)
     await captureFullPage(page, 'e2e/screenshots/user/dining-status-07-cancel-window.png')
 
     await cancelButtons.nth(0).click()

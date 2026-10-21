@@ -98,15 +98,17 @@ export default function DiningStatusCard({
     : ''
 
   // 희망 일정·지역은 매칭 전 대기(WAITING)·재배치 대기(REALLOCATING)에서만 바꿀 수 있다 (BE 와 같은 조건)
-  const canChangeWishes = (phase === 'waiting' && matchStatus === 'WAITING') || phase === 'reallocating'
+  const canChangeWishes = status !== 'CANCELLED'
+    && ((phase === 'waiting' && matchStatus === 'WAITING') || phase === 'reallocating')
   const matchRunAt = phase === 'waiting' || phase === 'reallocating'
     ? getNextMatchRunAt(assignedSession ? [assignedSession, ...candidateSessions] : candidateSessions)
     : null
-  const detail = phase === 'payment' && depositOnly
-    ? t('detail.paymentDeposit')
+  // 설명 문장 없이 다음 시각만 라벨+값으로: 대기 중 = 매칭 실행, 매칭 중 = 테이블 확정
+  const nextAt = matchRunAt
+    ? { label: t('matchRunAt'), at: matchRunAt }
     : phase === 'matching' && table?.confirmAt
-      ? t('detail.matchingUntil', { at: formatLocalizedShortDateTime(table.confirmAt, locale) })
-      : t(`detail.${phase}`)
+      ? { label: t('confirmAt'), at: table.confirmAt }
+      : null
 
   const paymentBadgeStyle = paymentStatus ? PAYMENT_BADGE_STYLE[paymentStatus] : undefined
   const showLegacyRefund = !paymentBadgeStyle && (ticketStatus === 'REFUND_PROCESSING' || ticketStatus === 'REFUNDED')
@@ -142,13 +144,11 @@ export default function DiningStatusCard({
           <div key={step} className={`h-1 flex-1 rounded-full ${index <= stepIndex ? 'bg-primary' : 'bg-tag-bg'}`} />
         ))}
       </div>
-      {matchRunAt ? (
+      {nextAt && (
         <p className="mt-2 text-sm">
-          <span className="text-tag-text">{t('matchRunAt')}</span>{' '}
-          <span className="font-semibold text-foreground">{formatLocalizedShortDateTime(matchRunAt, locale)}</span>
+          <span className="text-tag-text">{nextAt.label}</span>{' '}
+          <span className="font-semibold text-foreground">{formatLocalizedShortDateTime(nextAt.at, locale)}</span>
         </p>
-      ) : (
-        <p className="mt-2 text-xs text-tag-text leading-relaxed break-keep">{detail}</p>
       )}
       {(paymentBadgeStyle || deposit || showLegacyRefund || showReason) && (
         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -217,7 +217,6 @@ export default function DiningStatusCard({
           >
             {t('cancel.button')}
           </button>
-          {!cancelOpen && <p className="text-xs text-primary break-keep">{t('cancel.closed')}</p>}
         </div>
       )}
 
@@ -291,15 +290,14 @@ function ResolutionPanel({ resolutionId, allowTransfer, candidateRegions }: Reso
   const regionChoices = offeredRegions ? [...candidateRegions, ...offeredRegions.filter((region) => !candidateRegions.includes(region))] : []
   const selectedRegions = (regions ?? candidateRegions).filter((region) => regionChoices.includes(region))
   const showRegions = allowTransfer && canChoose && !!sessionId && regionChoices.length > 0
-  const notice = !resolutionId
+  // 선택할 수 없는 상태는 짧은 상태 배지로만 보여준다
+  const statusLabel = !resolutionId
     ? t('unavailable')
-    : resolutionQuery.isError
-      ? t('loadFailed')
-      : resolution?.status === 'RESOLVED'
-        ? t('resolved')
-        : resolution?.status === 'EXPIRED'
-          ? t('expired')
-          : null
+    : resolution?.status === 'RESOLVED'
+      ? t('resolved')
+      : resolution?.status === 'EXPIRED'
+        ? t('expired')
+        : null
 
   const handleChoose = (refundAccount?: DepositReturnAccount) => {
     if (!resolutionId || !pendingChoice) return
@@ -327,13 +325,17 @@ function ResolutionPanel({ resolutionId, allowTransfer, candidateRegions }: Reso
 
   return (
     <div ref={panelRef} id={DINING_RESOLUTION_ANCHOR} className="mt-3 rounded-input bg-background p-3">
-      <p className="text-sm font-bold text-foreground">{t('title')}</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-bold text-foreground">{t('title')}</p>
+        {statusLabel && <span className={`shrink-0 ${badgeClass} bg-tag-bg text-tag-text`}>{statusLabel}</span>}
+      </div>
       {canChoose && resolution?.respondBy && (
-        <p className="mt-1 text-xs text-primary break-keep">
-          {t('respondBy', { at: formatLocalizedShortDateTime(resolution?.respondBy, locale) })}
+        <p className="mt-1 text-sm">
+          <span className="text-tag-text">{t('deadline')}</span>{' '}
+          <span className="font-semibold text-primary">{formatLocalizedShortDateTime(resolution.respondBy, locale)}</span>
         </p>
       )}
-      {notice && <p className="mt-1 text-xs text-tag-text break-keep">{notice}</p>}
+      {!!resolutionId && resolutionQuery.isError && <p className="mt-1 text-xs text-tag-text break-keep">{t('loadFailed')}</p>}
 
       {canChoose && allowTransfer && (offeredSessions.length > 0 ? (
         <fieldset className="mt-3 flex flex-col gap-2">
@@ -362,7 +364,7 @@ function ResolutionPanel({ resolutionId, allowTransfer, candidateRegions }: Reso
           ))}
         </fieldset>
       ) : (
-        <p className="mt-2 text-xs text-tag-text">{t('noOfferedSessions')}</p>
+        <p className="mt-2 text-sm text-tag-text">{t('noOfferedSessions')}</p>
       ))}
 
       {showRegions && (

@@ -147,7 +147,6 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
             <Star size={18} className="text-primary" />
             {t('feedbackTitle')}
           </h2>
-          <p className="text-sm leading-relaxed text-tag-text break-keep">{t('feedbackGuide')}</p>
           <Link
             href={`/dining/tables/${encodeURIComponent(tableId)}/feedback`}
             className="mt-4 flex min-h-[44px] w-full items-center justify-center rounded-button bg-primary px-4 text-sm font-bold text-white"
@@ -218,7 +217,7 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
           <MessageCircle size={18} className="text-primary" />
           {t('topicsTitle')}
         </h2>
-        {topics.length > 0 ? (
+        {topics.length > 0 && (
           <ol className="flex flex-col gap-2">
             {topics.map((topic, index) => (
               <li key={`${index}-${topic.body}`} className="flex items-start gap-2 text-sm leading-relaxed text-foreground break-keep">
@@ -229,8 +228,6 @@ export default function DiningTableView({ tableId }: DiningTableViewProps) {
               </li>
             ))}
           </ol>
-        ) : (
-          <p className="text-sm leading-relaxed text-tag-text">{t('topicsGuide')}</p>
         )}
         <Button
           className="mt-4 w-full"
@@ -372,11 +369,10 @@ function CheckInCard({ tableId, eventDate, startTime, attendanceStatus }: CheckI
           >
             {t('checkIn')}
           </Button>
-          {isEligible && !isInWindow && (
-            <p className="mt-2 text-xs text-tag-text">
-              {checkInWindow
-                ? t('checkInWindow', { from: checkInWindow.from.format('HH:mm'), to: checkInWindow.to.format('HH:mm') })
-                : t('checkInUnavailable')}
+          {isEligible && !isInWindow && checkInWindow && (
+            <p className="mt-2 text-sm">
+              <span className="text-tag-text">{t('checkInTitle')}</span>{' '}
+              <span className="font-semibold text-foreground">{checkInWindow.from.format('HH:mm')}~{checkInWindow.to.format('HH:mm')}</span>
             </p>
           )}
         </>

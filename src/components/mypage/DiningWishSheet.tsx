@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { ApiErrorMessage, Button, LoadingSpinner } from '@/components/ui'
@@ -31,6 +31,34 @@ export default function DiningWishSheet({ applicationId, gatheringId, initialSes
   const updateWishes = useUpdateDiningWishes()
   const [sessionIds, setSessionIds] = useState(initialSessionIds)
   const [regions, setRegions] = useState(initialRegions)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+
+  // 포커스: 열리면 닫기 버튼으로, Tab은 시트 안에서만 돌고, 닫히면 연 버튼으로 되돌린다 (GatheringDateSheet 와 같은 방식)
+  useEffect(() => {
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    // preventScroll: 슬라이드 애니메이션 중 포커스로 데스크탑 프레임(overflow-hidden)이 스크롤돼 시트가 밀리지 않게
+    closeButtonRef.current?.focus({ preventScroll: true })
+    const handleTab = (e: KeyboardEvent) => {
+      const dialog = dialogRef.current
+      if (e.key !== 'Tab' || !dialog) return
+      const focusables = [...dialog.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')]
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (!first) return
+      const active = document.activeElement
+      if (!dialog.contains(active) || (e.shiftKey && active === first) || (!e.shiftKey && active === last)) {
+        e.preventDefault()
+        const target = e.shiftKey ? last : first
+        target.focus()
+      }
+    }
+    document.addEventListener('keydown', handleTab)
+    return () => {
+      document.removeEventListener('keydown', handleTab)
+      trigger?.focus({ preventScroll: true })
+    }
+  }, [])
 
   // ESC 닫기, body 스크롤 잠금(닫으면 복원)
   useEffect(() => {
@@ -77,6 +105,7 @@ export default function DiningWishSheet({ applicationId, gatheringId, initialSes
     <div className="fixed lg:absolute inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={t('wishes.button')}
@@ -87,6 +116,7 @@ export default function DiningWishSheet({ applicationId, gatheringId, initialSes
           <div className="h-1 w-10 rounded-full bg-tag-bg" />
         </div>
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={onClose}
           className="absolute top-2 right-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-tag-text"
