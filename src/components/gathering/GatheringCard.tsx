@@ -24,7 +24,7 @@ export default function GatheringCard({ gathering, session }: GatheringCardProps
   const effectiveStatus = sessionBadgeStatus(session)
 
   const hasChips = (tags?.length ?? 0) > 0
-  const thumbnailPosition = title === '우연한 식탁' ? 'center 32%' : undefined
+  const thumbnailPosition = gathering.gatheringType === 'RANDOM_TABLE' ? 'center 32%' : undefined
 
   return (
     <Link

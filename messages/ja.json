@@ -524,7 +524,7 @@
       "date": "日付",
       "time": "時間",
       "location": "場所",
-      "diningRegions": "ソウル4エリアのうち希望エリアで開催",
+      "diningRegions": "ソウル4エリア",
       "capacityLabel": "募集人数",
       "capacity": "最大{count}名",
       "priceLabel": "参加費",
@@ -615,7 +615,8 @@
       "depositAccount": "入金口座（申請後に入金）",
       "accountHolder": "口座名義 {holder}",
       "loginRequired": "ログイン後に利用券を購入できます。",
-      "select": "이용권 선택하기"
+      "select": "이용권 선택하기",
+      "buy": "利用券を購入"
     },
     "diningApply": {
       "steps": {

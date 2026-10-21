@@ -75,7 +75,8 @@ export default function TicketPassSection({ returnUrl }: TicketPassSectionProps)
           ) : showSelect && (
             <Button variant="primary" size="lg" className="w-full"
               onClick={() => router.push(`/payments/random-table${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`)}>
-              {t('select')}
+              {/* 이용권이 하나도 없으면 고를 게 없으니 구매 */}
+              {membership || hasCountPass ? t('select') : t('buy')}
             </Button>
           )}
         </>

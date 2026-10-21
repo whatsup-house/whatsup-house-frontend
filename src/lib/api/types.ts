@@ -85,6 +85,7 @@ export type GatheringTypeSort = 'popular' | 'latest' | 'oldest'
 export interface GatheringTypeCard {
   id: string
   title: string
+  gatheringType: GatheringType | null
   thumbnailUrl: string | null
   tags: string[] | null
   totalCount: number
